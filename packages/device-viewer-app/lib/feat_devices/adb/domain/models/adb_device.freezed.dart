@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdbDevice {
 
- String get serialNumber; String get modelName; String get manufacturer;
+ AdbDeviceIdentity get identity; AdbDeviceConnectionState get state; AdbTransport get transport;
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AdbDeviceCopyWith<AdbDevice> get copyWith => _$AdbDeviceCopyWithImpl<AdbDevice>
 @override
 bool operator ==(Object other) {
   final _this = this as AdbDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDevice&&(identical(other.serialNumber, _this.serialNumber) || other.serialNumber == _this.serialNumber)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDevice&&(identical(other.identity, _this.identity) || other.identity == _this.identity)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.transport, _this.transport) || other.transport == _this.transport));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AdbDevice;
-  return Object.hash(runtimeType,_this.serialNumber,_this.modelName,_this.manufacturer);
+  return Object.hash(runtimeType,_this.identity,_this.state,_this.transport);
 }
 
 @override
 String toString() {
   final _this = this as AdbDevice;
-  return 'AdbDevice(serialNumber: ${_this.serialNumber}, modelName: ${_this.modelName}, manufacturer: ${_this.manufacturer})';
+  return 'AdbDevice(identity: ${_this.identity}, state: ${_this.state}, transport: ${_this.transport})';
 }
 
 
@@ -51,11 +51,11 @@ abstract mixin class $AdbDeviceCopyWith<$Res>  {
   factory $AdbDeviceCopyWith(AdbDevice value, $Res Function(AdbDevice) _then) = _$AdbDeviceCopyWithImpl;
 @useResult
 $Res call({
- String serialNumber, String modelName, String manufacturer
+ AdbDeviceIdentity identity, AdbDeviceConnectionState state, AdbTransport transport
 });
 
 
-
+$AdbDeviceIdentityCopyWith<$Res> get identity;$AdbTransportCopyWith<$Res> get transport;
 
 }
 /// @nodoc
@@ -68,15 +68,33 @@ class _$AdbDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? serialNumber = null,Object? modelName = null,Object? manufacturer = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? identity = null,Object? state = null,Object? transport = null,}) {
   return _then(AdbDevice(
-serialNumber: null == serialNumber ? _self.serialNumber : serialNumber // ignore: cast_nullable_to_non_nullable
-as String,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
-as String,manufacturer: null == manufacturer ? _self.manufacturer : manufacturer // ignore: cast_nullable_to_non_nullable
-as String,
+identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
+as AdbDeviceIdentity,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as AdbDeviceConnectionState,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as AdbTransport,
   ));
 }
-
+/// Create a copy of AdbDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AdbDeviceIdentityCopyWith<$Res> get identity {
+  
+  return $AdbDeviceIdentityCopyWith<$Res>(_self.identity, (value) {
+    return _then(_self.copyWith(identity: value));
+  });
+}/// Create a copy of AdbDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AdbTransportCopyWith<$Res> get transport {
+  
+  return $AdbTransportCopyWith<$Res>(_self.transport, (value) {
+    return _then(_self.copyWith(transport: value));
+  });
+}
 }
 
 
@@ -155,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String serialNumber,  String modelName,  String manufacturer)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdbDevice() when $default != null:
-return $default(_that.serialNumber,_that.modelName,_that.manufacturer);case _:
+return $default(_that.identity,_that.state,_that.transport);case _:
   return orElse();
 
 }
@@ -176,10 +194,10 @@ return $default(_that.serialNumber,_that.modelName,_that.manufacturer);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String serialNumber,  String modelName,  String manufacturer)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)  $default,) {final _that = this;
 switch (_that) {
 case _AdbDevice():
-return $default(_that.serialNumber,_that.modelName,_that.manufacturer);}
+return $default(_that.identity,_that.state,_that.transport);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +211,10 @@ return $default(_that.serialNumber,_that.modelName,_that.manufacturer);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String serialNumber,  String modelName,  String manufacturer)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)?  $default,) {final _that = this;
 switch (_that) {
 case _AdbDevice() when $default != null:
-return $default(_that.serialNumber,_that.modelName,_that.manufacturer);case _:
+return $default(_that.identity,_that.state,_that.transport);case _:
   return null;
 
 }
@@ -208,12 +226,12 @@ return $default(_that.serialNumber,_that.modelName,_that.manufacturer);case _:
 
 
 class _AdbDevice implements AdbDevice {
-  const _AdbDevice({required this.serialNumber, required this.modelName, required this.manufacturer});
+  const _AdbDevice({required this.identity, required this.state, required this.transport});
   
 
-@override final  String serialNumber;
-@override final  String modelName;
-@override final  String manufacturer;
+@override final  AdbDeviceIdentity identity;
+@override final  AdbDeviceConnectionState state;
+@override final  AdbTransport transport;
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -225,18 +243,18 @@ _$AdbDeviceCopyWith<_AdbDevice> get copyWith => __$AdbDeviceCopyWithImpl<_AdbDev
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDevice&&(identical(other.serialNumber, serialNumber) || other.serialNumber == serialNumber)&&(identical(other.modelName, modelName) || other.modelName == modelName)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDevice&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.state, state) || other.state == state)&&(identical(other.transport, transport) || other.transport == transport));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,serialNumber,modelName,manufacturer);
+    return Object.hash(runtimeType,identity,state,transport);
 }
 
 @override
 String toString() {
-    return 'AdbDevice(serialNumber: $serialNumber, modelName: $modelName, manufacturer: $manufacturer)';
+    return 'AdbDevice(identity: $identity, state: $state, transport: $transport)';
 }
 
 
@@ -247,11 +265,11 @@ abstract mixin class _$AdbDeviceCopyWith<$Res> implements $AdbDeviceCopyWith<$Re
   factory _$AdbDeviceCopyWith(_AdbDevice value, $Res Function(_AdbDevice) _then) = __$AdbDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- String serialNumber, String modelName, String manufacturer
+ AdbDeviceIdentity identity, AdbDeviceConnectionState state, AdbTransport transport
 });
 
 
-
+@override $AdbDeviceIdentityCopyWith<$Res> get identity;@override $AdbTransportCopyWith<$Res> get transport;
 
 }
 /// @nodoc
@@ -264,16 +282,34 @@ class __$AdbDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? serialNumber = null,Object? modelName = null,Object? manufacturer = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? identity = null,Object? state = null,Object? transport = null,}) {
   return _then(_AdbDevice(
-serialNumber: null == serialNumber ? _self.serialNumber : serialNumber // ignore: cast_nullable_to_non_nullable
-as String,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
-as String,manufacturer: null == manufacturer ? _self.manufacturer : manufacturer // ignore: cast_nullable_to_non_nullable
-as String,
+identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
+as AdbDeviceIdentity,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as AdbDeviceConnectionState,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
+as AdbTransport,
   ));
 }
 
-
+/// Create a copy of AdbDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AdbDeviceIdentityCopyWith<$Res> get identity {
+  
+  return $AdbDeviceIdentityCopyWith<$Res>(_self.identity, (value) {
+    return _then(_self.copyWith(identity: value));
+  });
+}/// Create a copy of AdbDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AdbTransportCopyWith<$Res> get transport {
+  
+  return $AdbTransportCopyWith<$Res>(_self.transport, (value) {
+    return _then(_self.copyWith(transport: value));
+  });
+}
 }
 
 // dart format on

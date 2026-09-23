@@ -1,5 +1,5 @@
-import 'package:device_viewer/feat_devices/adb/domain/models/adb_device.dart';
+import 'package:device_viewer/feat_devices/adb/domain/models/adb_device_identity.dart';
 
 abstract interface class AdbRepository {
-  Stream<List<AdbDevice>> observeAdbDevices();
+  Stream<List<AdbDeviceIdentity>> observeAdbDevices();
 }
