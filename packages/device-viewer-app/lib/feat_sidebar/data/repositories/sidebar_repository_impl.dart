@@ -2,6 +2,7 @@ import 'package:device_viewer/feat_device_connections/domain/repositories/device
 import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/domain/repositories/sidebar_repository.dart';
+import 'package:rxdart/rxdart.dart';
 
 class const SidebarRepositoryImpl(
   final DeviceConnectionsRepository connectionsRepository,
@@ -9,7 +10,13 @@ class const SidebarRepositoryImpl(
 ) implements SidebarRepository {
   @override
   Stream<List<SidebarDevice>> observeDevices() {
-    return devicesRepository.observeAdbDevices().asyncMap((devices) async {
+    return Rx.combineLatest2(
+      devicesRepository.observeAdbDevices(),
+      connectionsRepository.observeConnectedDeviceIds(),
+      (devices, connections) => (devices, connections),
+    ).asyncMap((pair) async {
+      final (devices, connections) = pair;
+
       final canvasDevices = <SidebarDevice>[];
 
       for (final device in devices) {

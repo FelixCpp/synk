@@ -8,8 +8,8 @@ import 'package:rxdart/rxdart.dart';
 class DeviceConnectionsRepositoryImpl(
   final AdbDevicesRepository devicesRepository,
 ) implements DeviceConnectionsRepository {
-  final _connectedDeviceIds = BehaviorSubject<List<AndroidDeviceId>>.seeded(
-    const [],
+  final _connectedDeviceIds = BehaviorSubject<Set<AndroidDeviceId>>.seeded(
+    const {},
   );
 
   @override
@@ -18,12 +18,21 @@ class DeviceConnectionsRepositoryImpl(
   }
 
   @override
-  Future<void> connect(AndroidDeviceId id) async {
-    _connectedDeviceIds.add([..._connectedDeviceIds.value, id]);
+  Future<void> toggleConnection(AndroidDeviceId id) async {
+    if (await isConnected(id)) {
+      _connectedDeviceIds.add(_connectedDeviceIds.value.difference({id}));
+    } else {
+      _connectedDeviceIds.add({..._connectedDeviceIds.value, id});
+    }
   }
 
   @override
-  Future<bool> isConnected(AndroidDeviceId id) {
-    return _connectedDeviceIds.contains(id);
+  Future<bool> isConnected(AndroidDeviceId id) async {
+    return _connectedDeviceIds.value.contains(id);
+  }
+
+  @override
+  Stream<Set<AndroidDeviceId>> observeConnectedDeviceIds() {
+    return _connectedDeviceIds.stream;
   }
 }

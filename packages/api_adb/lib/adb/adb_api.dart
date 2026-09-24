@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:api_adb/adb/dtos/adb_device_dto.dart';
 import 'package:api_adb/adb/dtos/adb_version_dto.dart';
@@ -43,5 +45,32 @@ class const AdbApi({required final String executablePath}) {
     } finally {
       process.kill();
     }
+  }
+
+  Future<Uint8List> captureScreenshot(String serialNumber) async {
+    final process = await Process.start(
+      executablePath,
+      ['-s', serialNumber, 'exec-out', 'screencap', '-p'],
+      runInShell: true,
+    );
+
+    final bytes = await process.stdout.fold<List<int>>(
+      [],
+      (buffer, data) {
+        buffer.addAll(data);
+        return buffer;
+      },
+    );
+
+    final exitCode = await process.exitCode;
+
+    if (exitCode != 0) {
+      final stderr = await process.stderr.transform(utf8.decoder).join();
+      throw Exception(
+        'Failed to run adb process command ($exitCode): $stderr',
+      );
+    }
+
+    return Uint8List.fromList(bytes);
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:device_viewer/conversions/adb_device_dto.dart';
 import 'package:device_viewer/feat_devices/adb/data/datasources/adb_devices_datasource.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
@@ -10,13 +12,21 @@ class AdbDevicesRepositoryImpl(
 
   @override
   Stream<List<AndroidDevice>> observeAdbDevices() {
-    _devicesStream ??= datasource.observeAdbDevices().map((dtos) {
-      return dtos.map((dto) => dto.toDomain()).toList();
-    }).asBroadcastStream(
-      onListen: (subscription) => subscription.resume(),
-      onCancel: (subscription) => subscription.pause(),
-    );
+    _devicesStream ??= datasource
+        .observeAdbDevices()
+        .map((dtos) {
+          return dtos.map((dto) => dto.toDomain()).toList();
+        })
+        .asBroadcastStream(
+          onListen: (subscription) => subscription.resume(),
+          onCancel: (subscription) => subscription.pause(),
+        );
 
     return _devicesStream!;
+  }
+
+  @override
+  Future<Uint8List> captureScreenshot(AndroidDeviceId id) {
+    return datasource.captureScreenshot(id);
   }
 }

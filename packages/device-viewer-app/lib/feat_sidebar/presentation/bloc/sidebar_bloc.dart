@@ -25,7 +25,7 @@ class SidebarBloc(
     }, transformer: droppable());
 
     on<_OnConnect>((event, emit) async {
-      await connectionsRepository.connect(event.deviceId);
+      await connectionsRepository.toggleConnection(event.deviceId);
     }, transformer: restartable());
 
     add(const SidebarEvent.onSetup());

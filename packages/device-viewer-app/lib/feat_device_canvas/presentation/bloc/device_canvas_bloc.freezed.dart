@@ -320,11 +320,12 @@ extension DeviceCanvasEventPatterns on DeviceCanvasEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup(_that);case _:
+return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+return onCaptureScreenshot(_that);case _:
   return orElse();
 
 }
@@ -342,11 +343,12 @@ return onSetup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
-return onSetup(_that);}
+return onSetup(_that);case _OnCaptureScreenshot():
+return onCaptureScreenshot(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -360,11 +362,12 @@ return onSetup(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup(_that);case _:
+return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+return onCaptureScreenshot(_that);case _:
   return null;
 
 }
@@ -381,10 +384,11 @@ return onSetup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCaptureScreenshot,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup();case _:
+return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+return onCaptureScreenshot(_that.device);case _:
   return orElse();
 
 }
@@ -402,10 +406,11 @@ return onSetup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCaptureScreenshot,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
-return onSetup();}
+return onSetup();case _OnCaptureScreenshot():
+return onCaptureScreenshot(_that.device);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -419,10 +424,11 @@ return onSetup();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCaptureScreenshot,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup();case _:
+return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+return onCaptureScreenshot(_that.device);case _:
   return null;
 
 }
@@ -461,5 +467,82 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _OnCaptureScreenshot implements DeviceCanvasEvent {
+  const _OnCaptureScreenshot(this.device);
+  
+
+ final  CanvasDevice device;
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnCaptureScreenshotCopyWith<_OnCaptureScreenshot> get copyWith => __$OnCaptureScreenshotCopyWithImpl<_OnCaptureScreenshot>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnCaptureScreenshot&&(identical(other.device, device) || other.device == device));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,device);
+}
+
+@override
+String toString() {
+    return 'DeviceCanvasEvent.onCaptureScreenshot(device: $device)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnCaptureScreenshotCopyWith<$Res> implements $DeviceCanvasEventCopyWith<$Res> {
+  factory _$OnCaptureScreenshotCopyWith(_OnCaptureScreenshot value, $Res Function(_OnCaptureScreenshot) _then) = __$OnCaptureScreenshotCopyWithImpl;
+@useResult
+$Res call({
+ CanvasDevice device
+});
+
+
+$CanvasDeviceCopyWith<$Res> get device;
+
+}
+/// @nodoc
+class __$OnCaptureScreenshotCopyWithImpl<$Res>
+    implements _$OnCaptureScreenshotCopyWith<$Res> {
+  __$OnCaptureScreenshotCopyWithImpl(this._self, this._then);
+
+  final _OnCaptureScreenshot _self;
+  final $Res Function(_OnCaptureScreenshot) _then;
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
+  return _then(_OnCaptureScreenshot(
+null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
+as CanvasDevice,
+  ));
+}
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CanvasDeviceCopyWith<$Res> get device {
+  
+  return $CanvasDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}
+}
 
 // dart format on

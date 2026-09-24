@@ -1,9 +1,11 @@
-import 'package:animated_reorderable_list/animated_reorderable_list.dart';
+import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:device_viewer/design/widgets/reflow_grid.dart';
 import 'package:device_viewer/feat_device_canvas/data/repositories/device_canvas_repository_impl.dart';
+import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
+import 'package:device_viewer/feat_device_canvas/presentation/widgets/device_frame.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 class const DeviceCanvasContainer({
   super.key,
@@ -36,22 +38,31 @@ class const _Content({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return AnimatedReorderableGridView(
-      items: state.devices,
-      itemBuilder: (context, index) {
-        final item = state.devices[index];
-        return SizedBox.expand(
-          child: Container(
-            color: MacosColors.systemRedColor,
-            child: Center(child: Text(item.device.id)),
-          ),
-        );
-      },
-      sliverGridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      child: ReflowGrid<CanvasDevice>(
+        scrollController: scrollController,
+        padding: DeviceViewerTheme.pagePadding,
+        mainAxisSpacing: DeviceViewerTheme.verticalComponentSpacingMedium,
+        crossAxisSpacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
+        items: state.devices,
+        crossAxisCount: 4,
+        // Placeholder for an actual per-device value until we read the real
+        // screen resolution via adb (e.g. `wm size`) — a typical portrait
+        // phone ratio reads much better here than a square.
+        childAspectRatio: 9 / 19.5,
+        duration: const Duration(milliseconds: 150),
+        keyOf: (item) => item.device.id,
+        itemBuilder: (context, item) {
+          return DeviceFrame(
+            device: item,
+            onCaptureScreenshot: (device) {
+              BlocProvider.of<DeviceCanvasBloc>(context)
+                  .add(DeviceCanvasEvent.onCaptureScreenshot(device));
+            },
+          );
+        },
       ),
-      onReorder: (oldIndex, newIndex) {},
-      isSameItem: (a, b) => a.device.id == b.device.id,
     );
   }
 }

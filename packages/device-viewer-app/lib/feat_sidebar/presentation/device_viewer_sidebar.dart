@@ -79,12 +79,18 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12.0),
-                  color: MacosColors.systemGreenColor.withAlpha(50),
+                  color: MacosDynamicColor.resolve(
+                    MacosColors.systemGreenColor,
+                    context,
+                  ).withAlpha(50),
                 ),
                 padding: EdgeInsets.all(12.0),
                 child: MacosIcon(
                   CupertinoIcons.device_phone_portrait,
-                  color: MacosColors.systemGreenColor,
+                  color: MacosDynamicColor.resolve(
+                    MacosColors.systemGreenColor,
+                    context,
+                  ),
                 ),
               ),
               Flexible(
@@ -116,14 +122,11 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
         ),
         PushButton(
           controlSize: .large,
-          color: device.isConnected
-              ? MacosColors.systemRedColor
-              : MacosColors.systemGreenColor,
           onPressed: () {
             BlocProvider.of<SidebarBloc>(context)
                 .add(SidebarEvent.onConnect(adbDevice.id));
           },
-          child: Text("Verbinden"),
+          child: Text(device.isConnected ? "Trennen" : "Verbinden"),
         ),
       ],
     );

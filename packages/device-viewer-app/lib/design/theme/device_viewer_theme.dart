@@ -54,4 +54,13 @@ class DeviceViewerTheme {
     vertical: verticalPagePadding,
     horizontal: horizontalPagePadding,
   );
+
+  static const horizontalCardPadding = 12.0;
+  static const verticalCardPadding = 12.0;
+  static const cardPadding = EdgeInsets.symmetric(
+    vertical: verticalCardPadding,
+    horizontal: horizontalCardPadding,
+  );
+
+  static const cornerRadius = 16.0;
 }
