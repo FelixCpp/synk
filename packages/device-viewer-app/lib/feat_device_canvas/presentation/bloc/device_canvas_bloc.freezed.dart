@@ -15,30 +15,66 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceCanvasState {
 
-
+ List<CanvasDevice> get devices;
+/// Create a copy of DeviceCanvasState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DeviceCanvasStateCopyWith<DeviceCanvasState> get copyWith => _$DeviceCanvasStateCopyWithImpl<DeviceCanvasState>(this as DeviceCanvasState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceCanvasState);
+  final _this = this as DeviceCanvasState;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _this.devices));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+  final _this = this as DeviceCanvasState;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.devices));
+}
 
 @override
 String toString() {
-    return 'DeviceCanvasState()';
+  final _this = this as DeviceCanvasState;
+  return 'DeviceCanvasState(devices: ${_this.devices})';
 }
 
 
 }
 
 /// @nodoc
-class $DeviceCanvasStateCopyWith<$Res>  {
-$DeviceCanvasStateCopyWith(DeviceCanvasState _, $Res Function(DeviceCanvasState) __);
+abstract mixin class $DeviceCanvasStateCopyWith<$Res>  {
+  factory $DeviceCanvasStateCopyWith(DeviceCanvasState value, $Res Function(DeviceCanvasState) _then) = _$DeviceCanvasStateCopyWithImpl;
+@useResult
+$Res call({
+ List<CanvasDevice> devices
+});
+
+
+
+
+}
+/// @nodoc
+class _$DeviceCanvasStateCopyWithImpl<$Res>
+    implements $DeviceCanvasStateCopyWith<$Res> {
+  _$DeviceCanvasStateCopyWithImpl(this._self, this._then);
+
+  final DeviceCanvasState _self;
+  final $Res Function(DeviceCanvasState) _then;
+
+/// Create a copy of DeviceCanvasState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? devices = null,}) {
+  return _then(DeviceCanvasState(
+devices: null == devices ? _self.devices : devices // ignore: cast_nullable_to_non_nullable
+as List<CanvasDevice>,
+  ));
+}
+
 }
 
 
@@ -117,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function()?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CanvasDevice> devices)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
-return $default();case _:
+return $default(_that.devices);case _:
   return orElse();
 
 }
@@ -138,10 +174,10 @@ return $default();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function()  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CanvasDevice> devices)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState():
-return $default();}
+return $default(_that.devices);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -155,10 +191,10 @@ return $default();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function()?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CanvasDevice> devices)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
-return $default();case _:
+return $default(_that.devices);case _:
   return null;
 
 }
@@ -170,33 +206,75 @@ return $default();case _:
 
 
 class _DeviceCanvasState implements DeviceCanvasState {
-  const _DeviceCanvasState();
+  const _DeviceCanvasState({required  List<CanvasDevice> devices}): _devices = devices;
   
 
+ final  List<CanvasDevice> _devices;
+@override List<CanvasDevice> get devices {
+  if (_devices is EqualUnmodifiableListView) return _devices;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_devices);
+}
 
 
+/// Create a copy of DeviceCanvasState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeviceCanvasStateCopyWith<_DeviceCanvasState> get copyWith => __$DeviceCanvasStateCopyWithImpl<_DeviceCanvasState>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceCanvasState);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _devices));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_devices));
+}
 
 @override
 String toString() {
-    return 'DeviceCanvasState()';
+    return 'DeviceCanvasState(devices: $devices)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$DeviceCanvasStateCopyWith<$Res> implements $DeviceCanvasStateCopyWith<$Res> {
+  factory _$DeviceCanvasStateCopyWith(_DeviceCanvasState value, $Res Function(_DeviceCanvasState) _then) = __$DeviceCanvasStateCopyWithImpl;
+@override @useResult
+$Res call({
+ List<CanvasDevice> devices
+});
 
 
+
+
+}
+/// @nodoc
+class __$DeviceCanvasStateCopyWithImpl<$Res>
+    implements _$DeviceCanvasStateCopyWith<$Res> {
+  __$DeviceCanvasStateCopyWithImpl(this._self, this._then);
+
+  final _DeviceCanvasState _self;
+  final $Res Function(_DeviceCanvasState) _then;
+
+/// Create a copy of DeviceCanvasState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? devices = null,}) {
+  return _then(_DeviceCanvasState(
+devices: null == devices ? _self._devices : devices // ignore: cast_nullable_to_non_nullable
+as List<CanvasDevice>,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$DeviceCanvasEvent {

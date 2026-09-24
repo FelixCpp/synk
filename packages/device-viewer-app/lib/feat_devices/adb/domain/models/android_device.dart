@@ -3,16 +3,16 @@ import 'package:device_viewer/feat_devices/adb/domain/models/android_device_info
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device_state.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'adb_device.freezed.dart';
+part 'android_device.freezed.dart';
 
 extension type const AndroidDeviceId(String value) implements String {}
 
 @freezed
-sealed class AdbDevice with _$AdbDevice {
-  const factory AdbDevice({
+sealed class AndroidDevice with _$AndroidDevice {
+  const factory AndroidDevice({
     required AndroidDeviceId id,
     required AndroidDeviceState state,
     required AndroidDeviceConnection connection,
     required AndroidDeviceInfo info,
-  }) = _AdbDevice;
+  }) = _AndroidDevice;
 }

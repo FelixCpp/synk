@@ -1,5 +1,7 @@
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
+import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_devices/adb/data/datasources/adb_devices_datasource.dart';
 import 'package:device_viewer/feat_devices/adb/data/repositories/adb_devices_repository_impl.dart';
 import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
@@ -22,9 +24,18 @@ Future<void> main() async {
     MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AdbDevicesRepository>(
-          create: (_) => AdbDevicesRepositoryImpl(
-            AdbDevicesDatasource(api: AdbApi(executablePath: 'adb')),
-          ),
+          create: (_) {
+            return AdbDevicesRepositoryImpl(
+              AdbDevicesDatasource(api: AdbApi(executablePath: 'adb')),
+            );
+          },
+        ),
+        RepositoryProvider<DeviceConnectionsRepository>(
+          create: (context) {
+            return DeviceConnectionsRepositoryImpl(
+              RepositoryProvider.of(context),
+            );
+          },
         ),
       ],
       child: const _DeviceViewerApp(),

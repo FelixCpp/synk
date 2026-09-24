@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdbDeviceConnection {
 
- List<AdbDevice> get connectedDevices;
+ List<AndroidDevice> get connectedDevices;
 /// Create a copy of AdbDeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,7 +51,7 @@ abstract mixin class $AdbDeviceConnectionCopyWith<$Res>  {
   factory $AdbDeviceConnectionCopyWith(AdbDeviceConnection value, $Res Function(AdbDeviceConnection) _then) = _$AdbDeviceConnectionCopyWithImpl;
 @useResult
 $Res call({
- List<AdbDevice> connectedDevices
+ List<AndroidDevice> connectedDevices
 });
 
 
@@ -71,7 +71,7 @@ class _$AdbDeviceConnectionCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? connectedDevices = null,}) {
   return _then(AdbDeviceConnection(
 connectedDevices: null == connectedDevices ? _self.connectedDevices : connectedDevices // ignore: cast_nullable_to_non_nullable
-as List<AdbDevice>,
+as List<AndroidDevice>,
   ));
 }
 
@@ -153,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<AdbDevice> connectedDevices)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<AndroidDevice> connectedDevices)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdbDeviceConnection() when $default != null:
 return $default(_that.connectedDevices);case _:
@@ -174,7 +174,7 @@ return $default(_that.connectedDevices);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<AdbDevice> connectedDevices)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<AndroidDevice> connectedDevices)  $default,) {final _that = this;
 switch (_that) {
 case _AdbDeviceConnection():
 return $default(_that.connectedDevices);}
@@ -191,7 +191,7 @@ return $default(_that.connectedDevices);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<AdbDevice> connectedDevices)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<AndroidDevice> connectedDevices)?  $default,) {final _that = this;
 switch (_that) {
 case _AdbDeviceConnection() when $default != null:
 return $default(_that.connectedDevices);case _:
@@ -206,11 +206,11 @@ return $default(_that.connectedDevices);case _:
 
 
 class _AdbDeviceConnection implements AdbDeviceConnection {
-  const _AdbDeviceConnection({required  List<AdbDevice> connectedDevices}): _connectedDevices = connectedDevices;
+  const _AdbDeviceConnection({required  List<AndroidDevice> connectedDevices}): _connectedDevices = connectedDevices;
   
 
- final  List<AdbDevice> _connectedDevices;
-@override List<AdbDevice> get connectedDevices {
+ final  List<AndroidDevice> _connectedDevices;
+@override List<AndroidDevice> get connectedDevices {
   if (_connectedDevices is EqualUnmodifiableListView) return _connectedDevices;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_connectedDevices);
@@ -249,7 +249,7 @@ abstract mixin class _$AdbDeviceConnectionCopyWith<$Res> implements $AdbDeviceCo
   factory _$AdbDeviceConnectionCopyWith(_AdbDeviceConnection value, $Res Function(_AdbDeviceConnection) _then) = __$AdbDeviceConnectionCopyWithImpl;
 @override @useResult
 $Res call({
- List<AdbDevice> connectedDevices
+ List<AndroidDevice> connectedDevices
 });
 
 
@@ -269,7 +269,7 @@ class __$AdbDeviceConnectionCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? connectedDevices = null,}) {
   return _then(_AdbDeviceConnection(
 connectedDevices: null == connectedDevices ? _self._connectedDevices : connectedDevices // ignore: cast_nullable_to_non_nullable
-as List<AdbDevice>,
+as List<AndroidDevice>,
   ));
 }
 

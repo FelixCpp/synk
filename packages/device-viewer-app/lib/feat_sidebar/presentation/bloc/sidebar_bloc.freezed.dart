@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SidebarState {
 
- List<AdbDevice> get adbDevices;
+ List<SidebarDevice> get devices;
 /// Create a copy of SidebarState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SidebarStateCopyWith<SidebarState> get copyWith => _$SidebarStateCopyWithImpl<S
 @override
 bool operator ==(Object other) {
   final _this = this as SidebarState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarState&&const DeepCollectionEquality().equals(other.adbDevices, _this.adbDevices));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarState&&const DeepCollectionEquality().equals(other.devices, _this.devices));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SidebarState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.adbDevices));
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.devices));
 }
 
 @override
 String toString() {
   final _this = this as SidebarState;
-  return 'SidebarState(adbDevices: ${_this.adbDevices})';
+  return 'SidebarState(devices: ${_this.devices})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $SidebarStateCopyWith<$Res>  {
   factory $SidebarStateCopyWith(SidebarState value, $Res Function(SidebarState) _then) = _$SidebarStateCopyWithImpl;
 @useResult
 $Res call({
- List<AdbDevice> adbDevices
+ List<SidebarDevice> devices
 });
 
 
@@ -68,10 +68,10 @@ class _$SidebarStateCopyWithImpl<$Res>
 
 /// Create a copy of SidebarState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? adbDevices = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? devices = null,}) {
   return _then(SidebarState(
-adbDevices: null == adbDevices ? _self.adbDevices : adbDevices // ignore: cast_nullable_to_non_nullable
-as List<AdbDevice>,
+devices: null == devices ? _self.devices : devices // ignore: cast_nullable_to_non_nullable
+as List<SidebarDevice>,
   ));
 }
 
@@ -153,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<AdbDevice> adbDevices)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<SidebarDevice> devices)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SidebarState() when $default != null:
-return $default(_that.adbDevices);case _:
+return $default(_that.devices);case _:
   return orElse();
 
 }
@@ -174,10 +174,10 @@ return $default(_that.adbDevices);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<AdbDevice> adbDevices)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<SidebarDevice> devices)  $default,) {final _that = this;
 switch (_that) {
 case _SidebarState():
-return $default(_that.adbDevices);}
+return $default(_that.devices);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -191,10 +191,10 @@ return $default(_that.adbDevices);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<AdbDevice> adbDevices)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<SidebarDevice> devices)?  $default,) {final _that = this;
 switch (_that) {
 case _SidebarState() when $default != null:
-return $default(_that.adbDevices);case _:
+return $default(_that.devices);case _:
   return null;
 
 }
@@ -206,14 +206,14 @@ return $default(_that.adbDevices);case _:
 
 
 class _SidebarState implements SidebarState {
-  const _SidebarState({required  List<AdbDevice> adbDevices}): _adbDevices = adbDevices;
+  const _SidebarState({required  List<SidebarDevice> devices}): _devices = devices;
   
 
- final  List<AdbDevice> _adbDevices;
-@override List<AdbDevice> get adbDevices {
-  if (_adbDevices is EqualUnmodifiableListView) return _adbDevices;
+ final  List<SidebarDevice> _devices;
+@override List<SidebarDevice> get devices {
+  if (_devices is EqualUnmodifiableListView) return _devices;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_adbDevices);
+  return EqualUnmodifiableListView(_devices);
 }
 
 
@@ -227,18 +227,18 @@ _$SidebarStateCopyWith<_SidebarState> get copyWith => __$SidebarStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SidebarState&&const DeepCollectionEquality().equals(other.adbDevices, _adbDevices));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SidebarState&&const DeepCollectionEquality().equals(other.devices, _devices));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_adbDevices));
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_devices));
 }
 
 @override
 String toString() {
-    return 'SidebarState(adbDevices: $adbDevices)';
+    return 'SidebarState(devices: $devices)';
 }
 
 
@@ -249,7 +249,7 @@ abstract mixin class _$SidebarStateCopyWith<$Res> implements $SidebarStateCopyWi
   factory _$SidebarStateCopyWith(_SidebarState value, $Res Function(_SidebarState) _then) = __$SidebarStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<AdbDevice> adbDevices
+ List<SidebarDevice> devices
 });
 
 
@@ -266,10 +266,10 @@ class __$SidebarStateCopyWithImpl<$Res>
 
 /// Create a copy of SidebarState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? adbDevices = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? devices = null,}) {
   return _then(_SidebarState(
-adbDevices: null == adbDevices ? _self._adbDevices : adbDevices // ignore: cast_nullable_to_non_nullable
-as List<AdbDevice>,
+devices: null == devices ? _self._devices : devices // ignore: cast_nullable_to_non_nullable
+as List<SidebarDevice>,
   ));
 }
 
@@ -320,11 +320,12 @@ extension SidebarEventPatterns on SidebarEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnConnect value)?  onConnect,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup(_that);case _:
+return onSetup(_that);case _OnConnect() when onConnect != null:
+return onConnect(_that);case _:
   return orElse();
 
 }
@@ -342,11 +343,12 @@ return onSetup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnConnect value)  onConnect,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
-return onSetup(_that);}
+return onSetup(_that);case _OnConnect():
+return onConnect(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -360,11 +362,12 @@ return onSetup(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnConnect value)?  onConnect,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup(_that);case _:
+return onSetup(_that);case _OnConnect() when onConnect != null:
+return onConnect(_that);case _:
   return null;
 
 }
@@ -381,10 +384,11 @@ return onSetup(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( AndroidDeviceId deviceId)?  onConnect,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup();case _:
+return onSetup();case _OnConnect() when onConnect != null:
+return onConnect(_that.deviceId);case _:
   return orElse();
 
 }
@@ -402,10 +406,11 @@ return onSetup();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( AndroidDeviceId deviceId)  onConnect,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
-return onSetup();}
+return onSetup();case _OnConnect():
+return onConnect(_that.deviceId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -419,10 +424,11 @@ return onSetup();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( AndroidDeviceId deviceId)?  onConnect,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
-return onSetup();case _:
+return onSetup();case _OnConnect() when onConnect != null:
+return onConnect(_that.deviceId);case _:
   return null;
 
 }
@@ -461,5 +467,73 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _OnConnect implements SidebarEvent {
+  const _OnConnect(this.deviceId);
+  
+
+ final  AndroidDeviceId deviceId;
+
+/// Create a copy of SidebarEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnConnectCopyWith<_OnConnect> get copyWith => __$OnConnectCopyWithImpl<_OnConnect>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnConnect&&(identical(other.deviceId, deviceId) || other.deviceId == deviceId));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,deviceId);
+}
+
+@override
+String toString() {
+    return 'SidebarEvent.onConnect(deviceId: $deviceId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnConnectCopyWith<$Res> implements $SidebarEventCopyWith<$Res> {
+  factory _$OnConnectCopyWith(_OnConnect value, $Res Function(_OnConnect) _then) = __$OnConnectCopyWithImpl;
+@useResult
+$Res call({
+ AndroidDeviceId deviceId
+});
+
+
+
+
+}
+/// @nodoc
+class __$OnConnectCopyWithImpl<$Res>
+    implements _$OnConnectCopyWith<$Res> {
+  __$OnConnectCopyWithImpl(this._self, this._then);
+
+  final _OnConnect _self;
+  final $Res Function(_OnConnect) _then;
+
+/// Create a copy of SidebarEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? deviceId = null,}) {
+  return _then(_OnConnect(
+null == deviceId ? _self.deviceId : deviceId // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceId,
+  ));
+}
+
+
+}
 
 // dart format on

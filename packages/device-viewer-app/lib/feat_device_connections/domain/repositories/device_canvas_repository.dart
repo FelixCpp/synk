@@ -1,5 +1,7 @@
-import 'package:device_viewer/feat_device_connections/domain/models/adb_device_connection.dart';
+import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 
 abstract interface class DeviceConnectionsRepository {
-  Stream<List<AdbDeviceConnection>> observeConnections();
+  Future<void> dispose();
+  Future<void> connect(AndroidDeviceId id);
+  Future<bool> isConnected(AndroidDeviceId id);
 }

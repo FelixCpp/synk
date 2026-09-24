@@ -1,7 +1,8 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
-import 'package:device_viewer/feat_devices/adb/domain/models/adb_device.dart';
+import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
+import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,10 @@ class const DeviceViewerSidebar({
   Widget build(BuildContext context) {
     return BlocProvider<SidebarBloc>(
       create: (context) => SidebarBloc(
-        SidebarRepositoryImpl(),
+        SidebarRepositoryImpl(
+          RepositoryProvider.of(context),
+          RepositoryProvider.of(context),
+        ),
         RepositoryProvider.of(context),
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
@@ -50,8 +54,7 @@ class const _Content({
               style: context.typo.headline,
             ),
           ),
-          for (final device in state.adbDevices)
-            _AdbDeviceEntry(device: device),
+          for (final device in state.devices) _AdbDeviceEntry(device: device),
           Divider(),
         ],
       ),
@@ -59,8 +62,10 @@ class const _Content({
   }
 }
 
-class const _AdbDeviceEntry({required final AdbDevice device})
+class const _AdbDeviceEntry({required final SidebarDevice device})
     extends StatelessWidget {
+  AndroidDevice get adbDevice => device.device;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -86,20 +91,20 @@ class const _AdbDeviceEntry({required final AdbDevice device})
                 child: Column(
                   crossAxisAlignment: .start,
                   children: [
-                    if (device.info.model case String model) ...[
+                    if (adbDevice.info.model case String model) ...[
                       Text(
                         model,
                         style: context.typo.headline,
                         overflow: .ellipsis,
                       ),
                       Text(
-                        device.id,
+                        adbDevice.id,
                         style: context.typo.subheadline,
                         overflow: .ellipsis,
                       ),
                     ] else ...[
                       Text(
-                        device.id,
+                        adbDevice.id,
                         style: context.typo.headline,
                       ),
                     ],
@@ -111,8 +116,14 @@ class const _AdbDeviceEntry({required final AdbDevice device})
         ),
         PushButton(
           controlSize: .large,
+          color: device.isConnected
+              ? MacosColors.systemRedColor
+              : MacosColors.systemGreenColor,
+          onPressed: () {
+            BlocProvider.of<SidebarBloc>(context)
+                .add(SidebarEvent.onConnect(adbDevice.id));
+          },
           child: Text("Verbinden"),
-          onPressed: () {},
         ),
       ],
     );
