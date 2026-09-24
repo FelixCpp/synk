@@ -1,0 +1,15 @@
+enum AdbDeviceStateDto {
+  any,
+  connecting,
+  authorizing,
+  unauthorized,
+  nopermission,
+  detached,
+  offline,
+  bootloader,
+  device,
+  host,
+  recovery,
+  sideload,
+  rescue,
+}

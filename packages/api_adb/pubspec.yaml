@@ -8,6 +8,9 @@ environment:
 
 dependencies:
   freezed_annotation: ^3.1.0
+  path: ^1.9.1
+  protobuf: ^6.1.0
+  protoc_plugin: ^25.1.0
 
 dev_dependencies:
   build_runner: ^2.16.1

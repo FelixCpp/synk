@@ -1,64 +1,91 @@
-import 'package:flutter/material.dart';
+import 'package:api_adb/adb/adb_api.dart';
+import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
+import 'package:device_viewer/feat_devices/adb/data/datasources/adb_devices_datasource.dart';
+import 'package:device_viewer/feat_devices/adb/data/repositories/adb_devices_repository_impl.dart';
+import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
+import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:macos_ui/macos_ui.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> _configureMacosWindowUtils() async {
+  const config = MacosWindowUtilsConfig(
+    toolbarStyle: .unified,
+  );
+  await config.apply();
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+Future<void> main() async {
+  await _configureMacosWindowUtils();
 
+  runApp(
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<AdbDevicesRepository>(
+          create: (_) => AdbDevicesRepositoryImpl(
+            AdbDevicesDatasource(api: AdbApi(executablePath: 'adb')),
+          ),
+        ),
+      ],
+      child: const _DeviceViewerApp(),
+    ),
+  );
+}
+
+class const _DeviceViewerApp() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.deepPurple)),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return MacosApp(
+      title: 'Device Viewer',
+      themeMode: .light,
+      debugShowCheckedModeBanner: false,
+      home: MacosWindow(
+        sidebar: Sidebar(
+          minWidth: 200,
+          builder: (context, scrollController) {
+            return DeviceViewerSidebar(
+              scrollController: scrollController,
+            );
+          },
+        ),
+        child: _DeviceViewerScreen(),
+      ),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
+class const _DeviceViewerScreen() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+    return MacosScaffold(
+      toolBar: ToolBar(
+        title: const Text("Device Viewer"),
+        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
+        leading: MacosTooltip(
+          message: "Seitenleisten ausblenden/anzeigen",
+          child: MacosIconButton(
+            onPressed: () {
+              MacosWindowScope.of(context).toggleSidebar();
+            },
+            icon: MacosIcon(CupertinoIcons.sidebar_left, size: 20),
+            boxConstraints: const BoxConstraints(
+              minWidth: 20,
+              minHeight: 20,
+              maxWidth: 48,
+              maxHeight: 48,
             ),
-          ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+      children: [
+        ContentArea(
+          builder: ((context, scrollController) {
+            return DeviceCanvasContainer(
+              scrollController: scrollController,
+            );
+          }),
+        ),
+      ],
     );
   }
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdbDeviceDto {
 
- String get serialNumber; AdbDeviceState get state; String? get product; String? get model; String? get device; String? get transportId;
+ String get serialNumber; AdbDeviceStateDto get state; AdbConnectionTypeDto get connectionType; String? get busAddress; String? get product; String? get model; String? get device; int? get negotiatedSpeed; int? get maxSpeed; int? get transportId;
 /// Create a copy of AdbDeviceDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AdbDeviceDtoCopyWith<AdbDeviceDto> get copyWith => _$AdbDeviceDtoCopyWithImpl<A
 @override
 bool operator ==(Object other) {
   final _this = this as AdbDeviceDto;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDeviceDto&&(identical(other.serialNumber, _this.serialNumber) || other.serialNumber == _this.serialNumber)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.product, _this.product) || other.product == _this.product)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.transportId, _this.transportId) || other.transportId == _this.transportId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDeviceDto&&(identical(other.serialNumber, _this.serialNumber) || other.serialNumber == _this.serialNumber)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connectionType, _this.connectionType) || other.connectionType == _this.connectionType)&&(identical(other.busAddress, _this.busAddress) || other.busAddress == _this.busAddress)&&(identical(other.product, _this.product) || other.product == _this.product)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.negotiatedSpeed, _this.negotiatedSpeed) || other.negotiatedSpeed == _this.negotiatedSpeed)&&(identical(other.maxSpeed, _this.maxSpeed) || other.maxSpeed == _this.maxSpeed)&&(identical(other.transportId, _this.transportId) || other.transportId == _this.transportId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AdbDeviceDto;
-  return Object.hash(runtimeType,_this.serialNumber,_this.state,_this.product,_this.model,_this.device,_this.transportId);
+  return Object.hash(runtimeType,_this.serialNumber,_this.state,_this.connectionType,_this.busAddress,_this.product,_this.model,_this.device,_this.negotiatedSpeed,_this.maxSpeed,_this.transportId);
 }
 
 @override
 String toString() {
   final _this = this as AdbDeviceDto;
-  return 'AdbDeviceDto(serialNumber: ${_this.serialNumber}, state: ${_this.state}, product: ${_this.product}, model: ${_this.model}, device: ${_this.device}, transportId: ${_this.transportId})';
+  return 'AdbDeviceDto(serialNumber: ${_this.serialNumber}, state: ${_this.state}, connectionType: ${_this.connectionType}, busAddress: ${_this.busAddress}, product: ${_this.product}, model: ${_this.model}, device: ${_this.device}, negotiatedSpeed: ${_this.negotiatedSpeed}, maxSpeed: ${_this.maxSpeed}, transportId: ${_this.transportId})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AdbDeviceDtoCopyWith<$Res>  {
   factory $AdbDeviceDtoCopyWith(AdbDeviceDto value, $Res Function(AdbDeviceDto) _then) = _$AdbDeviceDtoCopyWithImpl;
 @useResult
 $Res call({
- String serialNumber, AdbDeviceState state, String? product, String? model, String? device, String? transportId
+ String serialNumber, AdbDeviceStateDto state, AdbConnectionTypeDto connectionType, String? busAddress, String? product, String? model, String? device, int? negotiatedSpeed, int? maxSpeed, int? transportId
 });
 
 
@@ -68,15 +68,19 @@ class _$AdbDeviceDtoCopyWithImpl<$Res>
 
 /// Create a copy of AdbDeviceDto
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? serialNumber = null,Object? state = null,Object? product = freezed,Object? model = freezed,Object? device = freezed,Object? transportId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? serialNumber = null,Object? state = null,Object? connectionType = null,Object? busAddress = freezed,Object? product = freezed,Object? model = freezed,Object? device = freezed,Object? negotiatedSpeed = freezed,Object? maxSpeed = freezed,Object? transportId = freezed,}) {
   return _then(AdbDeviceDto(
 serialNumber: null == serialNumber ? _self.serialNumber : serialNumber // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as AdbDeviceState,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
+as AdbDeviceStateDto,connectionType: null == connectionType ? _self.connectionType : connectionType // ignore: cast_nullable_to_non_nullable
+as AdbConnectionTypeDto,busAddress: freezed == busAddress ? _self.busAddress : busAddress // ignore: cast_nullable_to_non_nullable
+as String?,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
 as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String?,device: freezed == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as String?,transportId: freezed == transportId ? _self.transportId : transportId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,negotiatedSpeed: freezed == negotiatedSpeed ? _self.negotiatedSpeed : negotiatedSpeed // ignore: cast_nullable_to_non_nullable
+as int?,maxSpeed: freezed == maxSpeed ? _self.maxSpeed : maxSpeed // ignore: cast_nullable_to_non_nullable
+as int?,transportId: freezed == transportId ? _self.transportId : transportId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -158,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String serialNumber,  AdbDeviceState state,  String? product,  String? model,  String? device,  String? transportId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String serialNumber,  AdbDeviceStateDto state,  AdbConnectionTypeDto connectionType,  String? busAddress,  String? product,  String? model,  String? device,  int? negotiatedSpeed,  int? maxSpeed,  int? transportId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdbDeviceDto() when $default != null:
-return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.device,_that.transportId);case _:
+return $default(_that.serialNumber,_that.state,_that.connectionType,_that.busAddress,_that.product,_that.model,_that.device,_that.negotiatedSpeed,_that.maxSpeed,_that.transportId);case _:
   return orElse();
 
 }
@@ -179,10 +183,10 @@ return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String serialNumber,  AdbDeviceState state,  String? product,  String? model,  String? device,  String? transportId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String serialNumber,  AdbDeviceStateDto state,  AdbConnectionTypeDto connectionType,  String? busAddress,  String? product,  String? model,  String? device,  int? negotiatedSpeed,  int? maxSpeed,  int? transportId)  $default,) {final _that = this;
 switch (_that) {
 case _AdbDeviceDto():
-return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.device,_that.transportId);}
+return $default(_that.serialNumber,_that.state,_that.connectionType,_that.busAddress,_that.product,_that.model,_that.device,_that.negotiatedSpeed,_that.maxSpeed,_that.transportId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -196,10 +200,10 @@ return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.d
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String serialNumber,  AdbDeviceState state,  String? product,  String? model,  String? device,  String? transportId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String serialNumber,  AdbDeviceStateDto state,  AdbConnectionTypeDto connectionType,  String? busAddress,  String? product,  String? model,  String? device,  int? negotiatedSpeed,  int? maxSpeed,  int? transportId)?  $default,) {final _that = this;
 switch (_that) {
 case _AdbDeviceDto() when $default != null:
-return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.device,_that.transportId);case _:
+return $default(_that.serialNumber,_that.state,_that.connectionType,_that.busAddress,_that.product,_that.model,_that.device,_that.negotiatedSpeed,_that.maxSpeed,_that.transportId);case _:
   return null;
 
 }
@@ -211,15 +215,19 @@ return $default(_that.serialNumber,_that.state,_that.product,_that.model,_that.d
 
 
 class _AdbDeviceDto implements AdbDeviceDto {
-  const _AdbDeviceDto({required this.serialNumber, required this.state, required this.product, required this.model, required this.device, required this.transportId});
+  const _AdbDeviceDto({required this.serialNumber, required this.state, required this.connectionType, this.busAddress, this.product, this.model, this.device, this.negotiatedSpeed, this.maxSpeed, this.transportId});
   
 
 @override final  String serialNumber;
-@override final  AdbDeviceState state;
+@override final  AdbDeviceStateDto state;
+@override final  AdbConnectionTypeDto connectionType;
+@override final  String? busAddress;
 @override final  String? product;
 @override final  String? model;
 @override final  String? device;
-@override final  String? transportId;
+@override final  int? negotiatedSpeed;
+@override final  int? maxSpeed;
+@override final  int? transportId;
 
 /// Create a copy of AdbDeviceDto
 /// with the given fields replaced by the non-null parameter values.
@@ -231,18 +239,18 @@ _$AdbDeviceDtoCopyWith<_AdbDeviceDto> get copyWith => __$AdbDeviceDtoCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDeviceDto&&(identical(other.serialNumber, serialNumber) || other.serialNumber == serialNumber)&&(identical(other.state, state) || other.state == state)&&(identical(other.product, product) || other.product == product)&&(identical(other.model, model) || other.model == model)&&(identical(other.device, device) || other.device == device)&&(identical(other.transportId, transportId) || other.transportId == transportId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDeviceDto&&(identical(other.serialNumber, serialNumber) || other.serialNumber == serialNumber)&&(identical(other.state, state) || other.state == state)&&(identical(other.connectionType, connectionType) || other.connectionType == connectionType)&&(identical(other.busAddress, busAddress) || other.busAddress == busAddress)&&(identical(other.product, product) || other.product == product)&&(identical(other.model, model) || other.model == model)&&(identical(other.device, device) || other.device == device)&&(identical(other.negotiatedSpeed, negotiatedSpeed) || other.negotiatedSpeed == negotiatedSpeed)&&(identical(other.maxSpeed, maxSpeed) || other.maxSpeed == maxSpeed)&&(identical(other.transportId, transportId) || other.transportId == transportId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,serialNumber,state,product,model,device,transportId);
+    return Object.hash(runtimeType,serialNumber,state,connectionType,busAddress,product,model,device,negotiatedSpeed,maxSpeed,transportId);
 }
 
 @override
 String toString() {
-    return 'AdbDeviceDto(serialNumber: $serialNumber, state: $state, product: $product, model: $model, device: $device, transportId: $transportId)';
+    return 'AdbDeviceDto(serialNumber: $serialNumber, state: $state, connectionType: $connectionType, busAddress: $busAddress, product: $product, model: $model, device: $device, negotiatedSpeed: $negotiatedSpeed, maxSpeed: $maxSpeed, transportId: $transportId)';
 }
 
 
@@ -253,7 +261,7 @@ abstract mixin class _$AdbDeviceDtoCopyWith<$Res> implements $AdbDeviceDtoCopyWi
   factory _$AdbDeviceDtoCopyWith(_AdbDeviceDto value, $Res Function(_AdbDeviceDto) _then) = __$AdbDeviceDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String serialNumber, AdbDeviceState state, String? product, String? model, String? device, String? transportId
+ String serialNumber, AdbDeviceStateDto state, AdbConnectionTypeDto connectionType, String? busAddress, String? product, String? model, String? device, int? negotiatedSpeed, int? maxSpeed, int? transportId
 });
 
 
@@ -270,15 +278,19 @@ class __$AdbDeviceDtoCopyWithImpl<$Res>
 
 /// Create a copy of AdbDeviceDto
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? serialNumber = null,Object? state = null,Object? product = freezed,Object? model = freezed,Object? device = freezed,Object? transportId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? serialNumber = null,Object? state = null,Object? connectionType = null,Object? busAddress = freezed,Object? product = freezed,Object? model = freezed,Object? device = freezed,Object? negotiatedSpeed = freezed,Object? maxSpeed = freezed,Object? transportId = freezed,}) {
   return _then(_AdbDeviceDto(
 serialNumber: null == serialNumber ? _self.serialNumber : serialNumber // ignore: cast_nullable_to_non_nullable
 as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as AdbDeviceState,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
+as AdbDeviceStateDto,connectionType: null == connectionType ? _self.connectionType : connectionType // ignore: cast_nullable_to_non_nullable
+as AdbConnectionTypeDto,busAddress: freezed == busAddress ? _self.busAddress : busAddress // ignore: cast_nullable_to_non_nullable
+as String?,product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
 as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String?,device: freezed == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as String?,transportId: freezed == transportId ? _self.transportId : transportId // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,negotiatedSpeed: freezed == negotiatedSpeed ? _self.negotiatedSpeed : negotiatedSpeed // ignore: cast_nullable_to_non_nullable
+as int?,maxSpeed: freezed == maxSpeed ? _self.maxSpeed : maxSpeed // ignore: cast_nullable_to_non_nullable
+as int?,transportId: freezed == transportId ? _self.transportId : transportId // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

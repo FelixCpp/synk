@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdbDevice {
 
- AdbDeviceIdentity get identity; AdbDeviceConnectionState get state; AdbTransport get transport;
+ AndroidDeviceId get id; AndroidDeviceState get state; AndroidDeviceConnection get connection; AndroidDeviceInfo get info;
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AdbDeviceCopyWith<AdbDevice> get copyWith => _$AdbDeviceCopyWithImpl<AdbDevice>
 @override
 bool operator ==(Object other) {
   final _this = this as AdbDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDevice&&(identical(other.identity, _this.identity) || other.identity == _this.identity)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.transport, _this.transport) || other.transport == _this.transport));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connection, _this.connection) || other.connection == _this.connection)&&(identical(other.info, _this.info) || other.info == _this.info));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AdbDevice;
-  return Object.hash(runtimeType,_this.identity,_this.state,_this.transport);
+  return Object.hash(runtimeType,_this.id,_this.state,_this.connection,_this.info);
 }
 
 @override
 String toString() {
   final _this = this as AdbDevice;
-  return 'AdbDevice(identity: ${_this.identity}, state: ${_this.state}, transport: ${_this.transport})';
+  return 'AdbDevice(id: ${_this.id}, state: ${_this.state}, connection: ${_this.connection}, info: ${_this.info})';
 }
 
 
@@ -51,11 +51,11 @@ abstract mixin class $AdbDeviceCopyWith<$Res>  {
   factory $AdbDeviceCopyWith(AdbDevice value, $Res Function(AdbDevice) _then) = _$AdbDeviceCopyWithImpl;
 @useResult
 $Res call({
- AdbDeviceIdentity identity, AdbDeviceConnectionState state, AdbTransport transport
+ AndroidDeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection, AndroidDeviceInfo info
 });
 
 
-$AdbDeviceIdentityCopyWith<$Res> get identity;$AdbTransportCopyWith<$Res> get transport;
+$AndroidDeviceInfoCopyWith<$Res> get info;
 
 }
 /// @nodoc
@@ -68,31 +68,23 @@ class _$AdbDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? identity = null,Object? state = null,Object? transport = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? state = null,Object? connection = null,Object? info = null,}) {
   return _then(AdbDevice(
-identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
-as AdbDeviceIdentity,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as AdbDeviceConnectionState,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
-as AdbTransport,
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceConnection,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceInfo,
   ));
 }
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AdbDeviceIdentityCopyWith<$Res> get identity {
+$AndroidDeviceInfoCopyWith<$Res> get info {
   
-  return $AdbDeviceIdentityCopyWith<$Res>(_self.identity, (value) {
-    return _then(_self.copyWith(identity: value));
-  });
-}/// Create a copy of AdbDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AdbTransportCopyWith<$Res> get transport {
-  
-  return $AdbTransportCopyWith<$Res>(_self.transport, (value) {
-    return _then(_self.copyWith(transport: value));
+  return $AndroidDeviceInfoCopyWith<$Res>(_self.info, (value) {
+    return _then(_self.copyWith(info: value));
   });
 }
 }
@@ -173,10 +165,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdbDevice() when $default != null:
-return $default(_that.identity,_that.state,_that.transport);case _:
+return $default(_that.id,_that.state,_that.connection,_that.info);case _:
   return orElse();
 
 }
@@ -194,10 +186,10 @@ return $default(_that.identity,_that.state,_that.transport);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)  $default,) {final _that = this;
 switch (_that) {
 case _AdbDevice():
-return $default(_that.identity,_that.state,_that.transport);}
+return $default(_that.id,_that.state,_that.connection,_that.info);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -211,10 +203,10 @@ return $default(_that.identity,_that.state,_that.transport);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AdbDeviceIdentity identity,  AdbDeviceConnectionState state,  AdbTransport transport)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)?  $default,) {final _that = this;
 switch (_that) {
 case _AdbDevice() when $default != null:
-return $default(_that.identity,_that.state,_that.transport);case _:
+return $default(_that.id,_that.state,_that.connection,_that.info);case _:
   return null;
 
 }
@@ -226,12 +218,13 @@ return $default(_that.identity,_that.state,_that.transport);case _:
 
 
 class _AdbDevice implements AdbDevice {
-  const _AdbDevice({required this.identity, required this.state, required this.transport});
+  const _AdbDevice({required this.id, required this.state, required this.connection, required this.info});
   
 
-@override final  AdbDeviceIdentity identity;
-@override final  AdbDeviceConnectionState state;
-@override final  AdbTransport transport;
+@override final  AndroidDeviceId id;
+@override final  AndroidDeviceState state;
+@override final  AndroidDeviceConnection connection;
+@override final  AndroidDeviceInfo info;
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +236,18 @@ _$AdbDeviceCopyWith<_AdbDevice> get copyWith => __$AdbDeviceCopyWithImpl<_AdbDev
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDevice&&(identical(other.identity, identity) || other.identity == identity)&&(identical(other.state, state) || other.state == state)&&(identical(other.transport, transport) || other.transport == transport));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.state, state) || other.state == state)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.info, info) || other.info == info));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,identity,state,transport);
+    return Object.hash(runtimeType,id,state,connection,info);
 }
 
 @override
 String toString() {
-    return 'AdbDevice(identity: $identity, state: $state, transport: $transport)';
+    return 'AdbDevice(id: $id, state: $state, connection: $connection, info: $info)';
 }
 
 
@@ -265,11 +258,11 @@ abstract mixin class _$AdbDeviceCopyWith<$Res> implements $AdbDeviceCopyWith<$Re
   factory _$AdbDeviceCopyWith(_AdbDevice value, $Res Function(_AdbDevice) _then) = __$AdbDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- AdbDeviceIdentity identity, AdbDeviceConnectionState state, AdbTransport transport
+ AndroidDeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection, AndroidDeviceInfo info
 });
 
 
-@override $AdbDeviceIdentityCopyWith<$Res> get identity;@override $AdbTransportCopyWith<$Res> get transport;
+@override $AndroidDeviceInfoCopyWith<$Res> get info;
 
 }
 /// @nodoc
@@ -282,12 +275,13 @@ class __$AdbDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AdbDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? identity = null,Object? state = null,Object? transport = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? state = null,Object? connection = null,Object? info = null,}) {
   return _then(_AdbDevice(
-identity: null == identity ? _self.identity : identity // ignore: cast_nullable_to_non_nullable
-as AdbDeviceIdentity,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
-as AdbDeviceConnectionState,transport: null == transport ? _self.transport : transport // ignore: cast_nullable_to_non_nullable
-as AdbTransport,
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceConnection,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
+as AndroidDeviceInfo,
   ));
 }
 
@@ -295,19 +289,10 @@ as AdbTransport,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$AdbDeviceIdentityCopyWith<$Res> get identity {
+$AndroidDeviceInfoCopyWith<$Res> get info {
   
-  return $AdbDeviceIdentityCopyWith<$Res>(_self.identity, (value) {
-    return _then(_self.copyWith(identity: value));
-  });
-}/// Create a copy of AdbDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AdbTransportCopyWith<$Res> get transport {
-  
-  return $AdbTransportCopyWith<$Res>(_self.transport, (value) {
-    return _then(_self.copyWith(transport: value));
+  return $AndroidDeviceInfoCopyWith<$Res>(_self.info, (value) {
+    return _then(_self.copyWith(info: value));
   });
 }
 }
