@@ -59,7 +59,6 @@ class DeviceConnectionsRepositoryImpl({
     final connection = api.connect(device.id);
 
     await connection.pushFile(
-      // localFilepath: '../device_agent/agent/build/dex/classes.dex',
       localFilepath: 'assets/bundled_files/classes.dex',
       remoteFilepath: '/data/local/tmp/device_agent.dex',
     );
