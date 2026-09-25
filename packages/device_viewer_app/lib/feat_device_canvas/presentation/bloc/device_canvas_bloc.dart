@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:device_viewer/feat_device_canvas/application/screen_mirror_channel.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_device_canvas/domain/usecases/capture_screenshot_interactor.dart';
+import 'package:device_viewer/feat_device_canvas/domain/usecases/start_screen_mirror_interactor.dart';
+import 'package:device_viewer/feat_device_canvas/domain/usecases/stop_screen_mirror_interactor.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,76 +21,89 @@ class DeviceCanvasBloc(
   final NotificationService notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
   final captureScreenshot = CaptureScreenshotInteractor(repository);
-  final screenMirrorChannel = ScreenMirrorChannel();
-  StreamSubscription<Uint8List>? _mirrorSubscription;
+  final startScreenMirror = StartScreenMirrorInteractor(repository);
+  final stopScreenMirror = StopScreenMirrorInteractor(repository);
 
   this : super(DeviceCanvasState.initial()) {
-    on<_OnSetup>((event, emit) {
-      return emit.onEach(
-        repository.observeDevices(),
-        onData: (devices) async {
-          final previousIds = state.devices.map((d) => d.device.id).toSet();
-          final currentIds = devices.map((d) => d.device.id).toSet();
-          emit(state.copyWith(devices: devices));
-
-          final mirroringId = state.mirroringDeviceId;
-
-          if (mirroringId != null && !currentIds.contains(mirroringId)) {
-            await _mirrorSubscription?.cancel();
-            _mirrorSubscription = null;
-            await screenMirrorChannel.stop();
-            emit(
-              state.copyWith(mirroringDeviceId: null, mirrorTextureId: null),
-            );
-            return;
-          }
-
-          if (mirroringId == null) {
-            for (final canvasDevice in devices) {
-              if (!previousIds.contains(canvasDevice.device.id)) {
-                add(DeviceCanvasEvent.onToggleScreenMirror(canvasDevice));
-                break;
-              }
-            }
-          }
-        },
-      );
-    });
-
-    on<_OnCaptureScreenshot>((event, emit) {
-      return captureScreenshot
-          .intercept(
-            (e) => notifications.notify(
-              .new(message: 'Failed to capture screenshot: $e'),
-            ),
-          )
-          .run(event.device.device);
-    }, transformer: droppable());
-
-    on<_OnToggleScreenMirror>((event, emit) async {
-      final device = event.device.device;
-
-      try {
-        final textureId =
-            state.mirrorTextureId ?? await screenMirrorChannel.createTexture();
-        await screenMirrorChannel.start();
-
-        final stream = await repository.startScreenMirror(device);
-        _mirrorSubscription = stream.listen(screenMirrorChannel.sendChunk);
-
-        emit(
-          state.copyWith(
-            mirroringDeviceId: device.id,
-            mirrorTextureId: textureId,
-          ),
-        );
-      } catch (e) {
-        notifications.notify(
-          .new(message: 'Failed to start screen mirror: $e'),
-        );
-      }
-    }, transformer: droppable());
+    on<_OnSetup>(_onSetup);
+    on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: droppable());
+    on<_OnToggleScreenMirror>(_onToggleScreenMirror, transformer: sequential());
 
     add(DeviceCanvasEvent.onSetup());
+  }
+
+  FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceCanvasState> emit) {
+    return emit.onEach(
+      repository.observeDevices(),
+      onData: (devices) async {
+        final previousIds = state.devices.map((d) => d.device.id).toSet();
+        final currentIds = devices.map((d) => d.device.id).toSet();
+        emit(state.copyWith(devices: devices));
+
+        final disconnectedMirroringIds = state.mirrorTextureIds.keys
+            .where((id) => !currentIds.contains(id))
+            .toList();
+
+        for (final id in disconnectedMirroringIds) {
+          await stopScreenMirror.run(id);
+          emit(
+            state.copyWith(
+              mirrorTextureIds: {...state.mirrorTextureIds}..remove(id),
+            ),
+          );
+        }
+
+        for (final canvasDevice in devices) {
+          if (!previousIds.contains(canvasDevice.device.id)) {
+            add(DeviceCanvasEvent.onToggleScreenMirror(canvasDevice));
+          }
+        }
+      },
+    );
+  }
+
+  FutureOr<void> _onCaptureScreenshot(
+    _OnCaptureScreenshot event,
+    Emitter<DeviceCanvasState> emit,
+  ) {
+    return captureScreenshot
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to capture screenshot: $e'),
+          ),
+        )
+        .run(event.device.device);
+  }
+
+  FutureOr<void> _onToggleScreenMirror(
+    _OnToggleScreenMirror event,
+    Emitter<DeviceCanvasState> emit,
+  ) async {
+    final deviceId = event.device.device.id;
+
+    if (state.mirrorTextureIds.containsKey(deviceId)) {
+      await stopScreenMirror.run(deviceId);
+      return emit(
+        state.copyWith(
+          mirrorTextureIds: {...state.mirrorTextureIds}..remove(deviceId),
+        ),
+      );
+    }
+
+    final textureId = await startScreenMirror
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to start screen mirror: $e'),
+          ),
+        )
+        .getOrNull(deviceId);
+
+    if (textureId != null) {
+      emit(
+        state.copyWith(
+          mirrorTextureIds: {...state.mirrorTextureIds, deviceId: textureId},
+        ),
+      );
+    }
   }
 }

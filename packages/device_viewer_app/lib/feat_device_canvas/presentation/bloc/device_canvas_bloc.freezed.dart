@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceCanvasState {
 
- List<CanvasDevice> get devices; AndroidDeviceId? get mirroringDeviceId; int? get mirrorTextureId;
+ List<CanvasDevice> get devices; Map<AndroidDeviceId, int> get mirrorTextureIds;
 /// Create a copy of DeviceCanvasState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $DeviceCanvasStateCopyWith<DeviceCanvasState> get copyWith => _$DeviceCanvasStat
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceCanvasState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _this.devices)&&(identical(other.mirroringDeviceId, _this.mirroringDeviceId) || other.mirroringDeviceId == _this.mirroringDeviceId)&&(identical(other.mirrorTextureId, _this.mirrorTextureId) || other.mirrorTextureId == _this.mirrorTextureId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _this.devices)&&const DeepCollectionEquality().equals(other.mirrorTextureIds, _this.mirrorTextureIds));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DeviceCanvasState;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.devices),_this.mirroringDeviceId,_this.mirrorTextureId);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.devices),const DeepCollectionEquality().hash(_this.mirrorTextureIds));
 }
 
 @override
 String toString() {
   final _this = this as DeviceCanvasState;
-  return 'DeviceCanvasState(devices: ${_this.devices}, mirroringDeviceId: ${_this.mirroringDeviceId}, mirrorTextureId: ${_this.mirrorTextureId})';
+  return 'DeviceCanvasState(devices: ${_this.devices}, mirrorTextureIds: ${_this.mirrorTextureIds})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $DeviceCanvasStateCopyWith<$Res>  {
   factory $DeviceCanvasStateCopyWith(DeviceCanvasState value, $Res Function(DeviceCanvasState) _then) = _$DeviceCanvasStateCopyWithImpl;
 @useResult
 $Res call({
- List<CanvasDevice> devices, AndroidDeviceId? mirroringDeviceId, int? mirrorTextureId
+ List<CanvasDevice> devices, Map<AndroidDeviceId, int> mirrorTextureIds
 });
 
 
@@ -68,12 +68,11 @@ class _$DeviceCanvasStateCopyWithImpl<$Res>
 
 /// Create a copy of DeviceCanvasState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? devices = null,Object? mirroringDeviceId = freezed,Object? mirrorTextureId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? devices = null,Object? mirrorTextureIds = null,}) {
   return _then(DeviceCanvasState(
 devices: null == devices ? _self.devices : devices // ignore: cast_nullable_to_non_nullable
-as List<CanvasDevice>,mirroringDeviceId: freezed == mirroringDeviceId ? _self.mirroringDeviceId : mirroringDeviceId // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceId?,mirrorTextureId: freezed == mirrorTextureId ? _self.mirrorTextureId : mirrorTextureId // ignore: cast_nullable_to_non_nullable
-as int?,
+as List<CanvasDevice>,mirrorTextureIds: null == mirrorTextureIds ? _self.mirrorTextureIds : mirrorTextureIds // ignore: cast_nullable_to_non_nullable
+as Map<AndroidDeviceId, int>,
   ));
 }
 
@@ -155,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CanvasDevice> devices,  AndroidDeviceId? mirroringDeviceId,  int? mirrorTextureId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CanvasDevice> devices,  Map<AndroidDeviceId, int> mirrorTextureIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
-return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);case _:
+return $default(_that.devices,_that.mirrorTextureIds);case _:
   return orElse();
 
 }
@@ -176,10 +175,10 @@ return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);cas
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CanvasDevice> devices,  AndroidDeviceId? mirroringDeviceId,  int? mirrorTextureId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CanvasDevice> devices,  Map<AndroidDeviceId, int> mirrorTextureIds)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState():
-return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);}
+return $default(_that.devices,_that.mirrorTextureIds);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +192,10 @@ return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CanvasDevice> devices,  AndroidDeviceId? mirroringDeviceId,  int? mirrorTextureId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CanvasDevice> devices,  Map<AndroidDeviceId, int> mirrorTextureIds)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
-return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);case _:
+return $default(_that.devices,_that.mirrorTextureIds);case _:
   return null;
 
 }
@@ -208,7 +207,7 @@ return $default(_that.devices,_that.mirroringDeviceId,_that.mirrorTextureId);cas
 
 
 class _DeviceCanvasState implements DeviceCanvasState {
-  const _DeviceCanvasState({required  List<CanvasDevice> devices, required this.mirroringDeviceId, required this.mirrorTextureId}): _devices = devices;
+  const _DeviceCanvasState({required  List<CanvasDevice> devices, required  Map<AndroidDeviceId, int> mirrorTextureIds}): _devices = devices,_mirrorTextureIds = mirrorTextureIds;
   
 
  final  List<CanvasDevice> _devices;
@@ -218,8 +217,13 @@ class _DeviceCanvasState implements DeviceCanvasState {
   return EqualUnmodifiableListView(_devices);
 }
 
-@override final  AndroidDeviceId? mirroringDeviceId;
-@override final  int? mirrorTextureId;
+ final  Map<AndroidDeviceId, int> _mirrorTextureIds;
+@override Map<AndroidDeviceId, int> get mirrorTextureIds {
+  if (_mirrorTextureIds is EqualUnmodifiableMapView) return _mirrorTextureIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_mirrorTextureIds);
+}
+
 
 /// Create a copy of DeviceCanvasState
 /// with the given fields replaced by the non-null parameter values.
@@ -231,18 +235,18 @@ _$DeviceCanvasStateCopyWith<_DeviceCanvasState> get copyWith => __$DeviceCanvasS
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _devices)&&(identical(other.mirroringDeviceId, mirroringDeviceId) || other.mirroringDeviceId == mirroringDeviceId)&&(identical(other.mirrorTextureId, mirrorTextureId) || other.mirrorTextureId == mirrorTextureId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceCanvasState&&const DeepCollectionEquality().equals(other.devices, _devices)&&const DeepCollectionEquality().equals(other.mirrorTextureIds, _mirrorTextureIds));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_devices),mirroringDeviceId,mirrorTextureId);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_devices),const DeepCollectionEquality().hash(_mirrorTextureIds));
 }
 
 @override
 String toString() {
-    return 'DeviceCanvasState(devices: $devices, mirroringDeviceId: $mirroringDeviceId, mirrorTextureId: $mirrorTextureId)';
+    return 'DeviceCanvasState(devices: $devices, mirrorTextureIds: $mirrorTextureIds)';
 }
 
 
@@ -253,7 +257,7 @@ abstract mixin class _$DeviceCanvasStateCopyWith<$Res> implements $DeviceCanvasS
   factory _$DeviceCanvasStateCopyWith(_DeviceCanvasState value, $Res Function(_DeviceCanvasState) _then) = __$DeviceCanvasStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<CanvasDevice> devices, AndroidDeviceId? mirroringDeviceId, int? mirrorTextureId
+ List<CanvasDevice> devices, Map<AndroidDeviceId, int> mirrorTextureIds
 });
 
 
@@ -270,12 +274,11 @@ class __$DeviceCanvasStateCopyWithImpl<$Res>
 
 /// Create a copy of DeviceCanvasState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? devices = null,Object? mirroringDeviceId = freezed,Object? mirrorTextureId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? devices = null,Object? mirrorTextureIds = null,}) {
   return _then(_DeviceCanvasState(
 devices: null == devices ? _self._devices : devices // ignore: cast_nullable_to_non_nullable
-as List<CanvasDevice>,mirroringDeviceId: freezed == mirroringDeviceId ? _self.mirroringDeviceId : mirroringDeviceId // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceId?,mirrorTextureId: freezed == mirrorTextureId ? _self.mirrorTextureId : mirrorTextureId // ignore: cast_nullable_to_non_nullable
-as int?,
+as List<CanvasDevice>,mirrorTextureIds: null == mirrorTextureIds ? _self._mirrorTextureIds : mirrorTextureIds // ignore: cast_nullable_to_non_nullable
+as Map<AndroidDeviceId, int>,
   ));
 }
 

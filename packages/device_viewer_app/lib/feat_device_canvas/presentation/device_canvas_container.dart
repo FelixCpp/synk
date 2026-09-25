@@ -56,15 +56,13 @@ class const _Content({
         duration: const Duration(milliseconds: 150),
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
-          final isMirroring = state.mirroringDeviceId == item.device.id;
-
           return DeviceFrame(
             device: item,
             onCaptureScreenshot: (device) {
               BlocProvider.of<DeviceCanvasBloc>(context)
                   .add(DeviceCanvasEvent.onCaptureScreenshot(device));
             },
-            mirrorTextureId: isMirroring ? state.mirrorTextureId : null,
+            mirrorTextureId: state.mirrorTextureIds[item.device.id],
           );
         },
       ),

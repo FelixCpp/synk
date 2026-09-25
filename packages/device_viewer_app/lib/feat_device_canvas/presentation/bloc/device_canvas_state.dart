@@ -4,15 +4,13 @@ part of 'device_canvas_bloc.dart';
 sealed class DeviceCanvasState with _$DeviceCanvasState {
   const factory DeviceCanvasState({
     required List<CanvasDevice> devices,
-    required AndroidDeviceId? mirroringDeviceId,
-    required int? mirrorTextureId,
+    required Map<AndroidDeviceId, int> mirrorTextureIds,
   }) = _DeviceCanvasState;
 
   factory DeviceCanvasState.initial() {
     return const DeviceCanvasState(
       devices: [],
-      mirroringDeviceId: null,
-      mirrorTextureId: null,
+      mirrorTextureIds: {},
     );
   }
 }

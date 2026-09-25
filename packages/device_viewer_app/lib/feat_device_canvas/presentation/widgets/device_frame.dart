@@ -122,7 +122,6 @@ class const _ToolBar({
                 ),
               ],
             ),
-            // Text("Buttons..."),
           ],
         ),
       ),

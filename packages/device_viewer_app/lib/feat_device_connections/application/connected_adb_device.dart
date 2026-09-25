@@ -29,9 +29,6 @@ class ConnectedAdbDevice({
     return Uint8List.fromList(response.png);
   }
 
-  /// Starts mirroring the device screen and returns the raw H.264 Annex-B
-  /// elementary byte stream. Calling this again while already mirroring
-  /// restarts the stream.
   Future<Stream<Uint8List>> startScreenMirror() async {
     await stopScreenMirror();
 
