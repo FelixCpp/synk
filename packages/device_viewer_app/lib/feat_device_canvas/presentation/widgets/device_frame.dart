@@ -11,10 +11,12 @@ class DeviceFrame extends StatefulWidget {
     super.key,
     required this.device,
     required this.onCaptureScreenshot,
+    required this.mirrorTextureId,
   });
 
   final CanvasDevice device;
   final DeviceActionCallback onCaptureScreenshot;
+  final int? mirrorTextureId;
 
   @override
   State<DeviceFrame> createState() => _DeviceFrameState();
@@ -57,7 +59,11 @@ class _DeviceFrameState extends State<DeviceFrame>
           canvasDevice: widget.device,
           onCaptureScreenshot: _handleCaptureScreenshot,
         ),
-        _ScreenMirror(canvasDevice: widget.device, flash: _screenshotFlash),
+        _ScreenMirror(
+          canvasDevice: widget.device,
+          flash: _screenshotFlash,
+          textureId: widget.mirrorTextureId,
+        ),
       ],
     );
   }
@@ -95,6 +101,7 @@ class const _ToolBar({
             ),
             Row(
               children: [
+                // TODO(Felix): wire up recording the mirrored stream to a file.
                 MacosIconButton(
                   onPressed: () {},
                   icon: MacosIcon(CupertinoIcons.video_camera),
@@ -126,6 +133,7 @@ class const _ToolBar({
 class const _ScreenMirror({
   required final CanvasDevice canvasDevice,
   required final Animation<double> flash,
+  required final int? textureId,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -141,17 +149,20 @@ class const _ScreenMirror({
           children: [
             DecoratedBox(
               decoration: BoxDecoration(color: MacosColors.black),
-              child: Column(
-                mainAxisAlignment: .center,
-                children: [
-                  Center(
-                    child: MacosIcon(
-                      CupertinoIcons.device_phone_portrait,
-                      size: 42.0,
+              child: switch (textureId) {
+                final id? => Texture(textureId: id),
+                null => Column(
+                  mainAxisAlignment: .center,
+                  children: [
+                    Center(
+                      child: MacosIcon(
+                        CupertinoIcons.device_phone_portrait,
+                        size: 42.0,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              },
             ),
             IgnorePointer(
               child: FadeTransition(

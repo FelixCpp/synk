@@ -7,6 +7,9 @@
 .buildlog/
 .history
 
+# Scratch/spike workspace - throwaway test scripts, fixtures, build artifacts.
+tool/scratch/
+
 
 
 # Flutter repo-specific

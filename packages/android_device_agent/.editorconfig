@@ -1,0 +1,6 @@
+root = true
+
+[*.{kt,kts}]
+max_line_length = off
+ktlint_code_style = android_studio                       # statt Default "ktlint_official"
+ktlint_standard_function-expression-body = disabled      # keine erzwungenen expression-body returns

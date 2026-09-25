@@ -9,6 +9,8 @@ import 'package:device_viewer/feat_devices/adb/data/datasources/adb_devices_data
 import 'package:device_viewer/feat_devices/adb/data/repositories/adb_devices_repository_impl.dart';
 import 'package:device_viewer/feat_devices/adb/data/repositories/dummy_adb_devices_repository.dart';
 import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
+import 'package:device_viewer/feat_notifications/application/notification_service.dart';
+import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,6 +44,11 @@ Future<void> main() async {
   runApp(
     MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<NotificationService>(
+          create: (context) => NotificationService(),
+          lazy: false,
+          dispose: (service) => service.dispose(),
+        ),
         RepositoryProvider.value(value: AdbApi(adbPath: adbPath)),
         RepositoryProvider<AdbDevicesRepository>(
           create: (context) {
@@ -85,16 +92,19 @@ class const _DeviceViewerApp() extends StatelessWidget {
       theme: DeviceViewerMacosTheme.light,
       darkTheme: DeviceViewerMacosTheme.dark,
       debugShowCheckedModeBanner: false,
-      home: MacosWindow(
-        sidebar: Sidebar(
-          minWidth: 200,
-          builder: (context, scrollController) {
-            return DeviceViewerSidebar(
-              scrollController: scrollController,
-            );
-          },
+      home: AppNotificationListener(
+        notifications: RepositoryProvider.of<NotificationService>(context),
+        child: MacosWindow(
+          sidebar: Sidebar(
+            minWidth: 200,
+            builder: (context, scrollController) {
+              return DeviceViewerSidebar(
+                scrollController: scrollController,
+              );
+            },
+          ),
+          child: _DeviceViewerScreen(),
         ),
-        child: _DeviceViewerScreen(),
       ),
     );
   }

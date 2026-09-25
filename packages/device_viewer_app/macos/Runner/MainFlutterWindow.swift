@@ -9,6 +9,9 @@ class MainFlutterWindow: NSWindow {
     self.setFrame(windowFrame, display: true)
 
     RegisterGeneratedPlugins(registry: flutterViewController)
+    ScreenMirrorPlugin.register(
+      with: flutterViewController.registrar(forPlugin: "ScreenMirrorPlugin")
+    )
 
     super.awakeFromNib()
   }

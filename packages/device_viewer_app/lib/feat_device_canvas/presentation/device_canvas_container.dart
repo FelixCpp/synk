@@ -4,6 +4,7 @@ import 'package:device_viewer/feat_device_canvas/data/repositories/device_canvas
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/widgets/device_frame.dart';
+import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -19,6 +20,7 @@ class const DeviceCanvasContainer({
           RepositoryProvider.of(context),
           RepositoryProvider.of(context),
         ),
+        RepositoryProvider.of<NotificationService>(context),
       ),
       child: BlocBuilder<DeviceCanvasBloc, DeviceCanvasState>(
         builder: (context, state) {
@@ -54,12 +56,15 @@ class const _Content({
         duration: const Duration(milliseconds: 150),
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
+          final isMirroring = state.mirroringDeviceId == item.device.id;
+
           return DeviceFrame(
             device: item,
             onCaptureScreenshot: (device) {
               BlocProvider.of<DeviceCanvasBloc>(context)
                   .add(DeviceCanvasEvent.onCaptureScreenshot(device));
             },
+            mirrorTextureId: isMirroring ? state.mirrorTextureId : null,
           );
         },
       ),

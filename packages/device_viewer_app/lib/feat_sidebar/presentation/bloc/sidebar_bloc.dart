@@ -1,10 +1,13 @@
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_notifications/application/notification_service.dart';
+import 'package:device_viewer/feat_notifications/domain/models/app_notification.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/domain/repositories/sidebar_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:use_in_case/use_in_case.dart';
 
 part 'sidebar_bloc.freezed.dart';
 part 'sidebar_state.dart';
@@ -12,7 +15,8 @@ part 'sidebar_event.dart';
 
 class SidebarBloc(
   final SidebarRepository repository,
-  final DeviceConnectionsRepository connectionsRepository,
+  final ToggleConnectionInteractor toggleConnection,
+  final NotificationService notifications,
 ) extends Bloc<SidebarEvent, SidebarState> {
   this : super(SidebarState.initial()) {
     on<_OnSetup>((event, emit) {
@@ -24,8 +28,14 @@ class SidebarBloc(
       );
     }, transformer: droppable());
 
-    on<_OnConnect>((event, emit) async {
-      await connectionsRepository.toggleConnection(event.device);
+    on<_OnConnect>((event, emit) {
+      return toggleConnection
+          .intercept((e) {
+            notifications.notify(
+              AppNotification(message: 'Verbindung fehlgeschlagen: $e'),
+            );
+          })
+          .run(event.device);
     }, transformer: restartable());
 
     add(const SidebarEvent.onSetup());

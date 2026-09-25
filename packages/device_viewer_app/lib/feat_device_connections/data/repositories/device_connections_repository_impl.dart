@@ -1,31 +1,20 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:api_adb/adb/process/adb_device_connection.dart';
 import 'package:api_adb/api_adb.dart';
 import 'package:device_viewer/feat_device_agent/application/device_agent_client.dart';
+import 'package:device_viewer/feat_device_connections/application/connected_adb_device.dart';
 import 'package:device_viewer/feat_device_connections/application/dex_file_provider.dart';
+import 'package:device_viewer/feat_device_connections/application/free_port_provider.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 import 'package:rxdart/rxdart.dart';
-
-class const AdbAgentSession({
-  required final Process agentProcess,
-  required final AdbPortForward portForward,
-  required final DeviceAgentClient agent,
-}) {
-  Future<void> dispose() async {
-    await agent.dispose();
-    await portForward.dispose();
-    agentProcess.kill();
-  }
-}
 
 class DeviceConnectionsRepositoryImpl({
   required final AdbApi api,
 }) implements DeviceConnectionsRepository {
   final dexFilepathProvider = getDexFilepathProvider();
-  final sessions = <AndroidDeviceId, AdbAgentSession>{};
+  final sessions = <AndroidDeviceId, _AdbAgentSession>{};
   final connectedIds = BehaviorSubject.seeded(<AndroidDeviceId>{});
 
   @override
@@ -57,6 +46,11 @@ class DeviceConnectionsRepositoryImpl({
     return connectedIds.stream;
   }
 
+  @override
+  ConnectedAdbDevice? getConnectedAdbDevice(AndroidDeviceId id) {
+    return sessions[id]?.connectedDevice;
+  }
+
   Future<void> connect(AndroidDevice device) async {
     final connection = api.connect(device.id);
     final dexFilepath = await dexFilepathProvider();
@@ -80,8 +74,13 @@ class DeviceConnectionsRepositoryImpl({
     agentProcess.stderr.drain();
 
     await Future.delayed(const .new(seconds: 1));
+
+    // A fixed local port only works for a single device: two connected
+    // devices would both need to forward to the same host-side port, and
+    // the second `adb forward` would silently steal it from the first.
+    final localControlPort = await reserveFreeLocalPort();
     final portForward = await connection.forward(
-      localPort: 27183,
+      localPort: localControlPort,
       remotePort: 27183,
     );
 
@@ -90,11 +89,14 @@ class DeviceConnectionsRepositoryImpl({
       portForward.localPort,
     );
 
+    final agent = DeviceAgentClient(socket: socket);
+
     sessions.putIfAbsent(device.id, () {
-      return AdbAgentSession(
+      return _AdbAgentSession(
         agentProcess: agentProcess,
         portForward: portForward,
-        agent: DeviceAgentClient(socket: socket),
+        agent: agent,
+        connectedDevice: ConnectedAdbDevice(agent: agent, connection: connection),
       );
     });
 
@@ -105,5 +107,19 @@ class DeviceConnectionsRepositoryImpl({
     final session = sessions.remove(device.id);
     await session?.dispose();
     connectedIds.add(sessions.keys.toSet());
+  }
+}
+
+class const _AdbAgentSession({
+  required final Process agentProcess,
+  required final AdbPortForward portForward,
+  required final DeviceAgentClient agent,
+  required final ConnectedAdbDevice connectedDevice,
+}) {
+  Future<void> dispose() async {
+    await connectedDevice.stopScreenMirror();
+    await agent.dispose();
+    await portForward.dispose();
+    agentProcess.kill();
   }
 }

@@ -36,7 +36,7 @@ Future<void> main(List<String> arguments) async {
   );
   final client = DeviceAgentClient(socket: socket);
 
-  final info = await client.getInfo();
+  final info = await client.fetchInfo();
   print(info);
 
   await client.dispose();

@@ -1,6 +1,8 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
@@ -21,7 +23,8 @@ class const DeviceViewerSidebar({
           RepositoryProvider.of(context),
           RepositoryProvider.of(context),
         ),
-        RepositoryProvider.of(context),
+        ToggleConnectionInteractor(RepositoryProvider.of(context)),
+        RepositoryProvider.of<NotificationService>(context),
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
         builder: (context, state) {

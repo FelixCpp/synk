@@ -25,6 +25,8 @@ dependencies:
   intl: ^0.20.3
   async: ^2.13.1
   path_provider: ^2.1.6
+  use_in_case: ^1.4.3
+  dartz: ^0.10.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
