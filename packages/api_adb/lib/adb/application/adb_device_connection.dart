@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:api_adb/adb/application/adb_process_runner.dart';
@@ -44,6 +45,15 @@ class const AdbDeviceConnection({
     );
   }
 
+  Future<Process> startShell(List<String> arguments) {
+    return processRunner.start([
+      '-s',
+      serialNumber,
+      'shell',
+      ...arguments,
+    ]);
+  }
+
   Future<void> pushFile({
     required String localFilepath,
     required String remoteFilepath,
@@ -76,7 +86,7 @@ class const AdbDeviceConnection({
 
     if (process.exitCode != 0) {
       // TODO(Felix): AdbException type
-      throw Exception('adb push failed: ${process.stderr}');
+      throw Exception('adb forward failed: ${process.stderr}');
     }
 
     return AdbPortForward(
