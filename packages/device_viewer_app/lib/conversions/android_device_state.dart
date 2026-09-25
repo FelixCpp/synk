@@ -1,4 +1,4 @@
-import 'package:api_adb/adb/dtos/adb_device_state_dto.dart';
+import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device_state.dart';
 
 extension AdbDeviceStateDtoToDomain on AdbDeviceStateDto {

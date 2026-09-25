@@ -1,12 +1,11 @@
-import 'package:api_adb/adb/application/adb_device_connection.dart';
-import 'package:api_adb/adb/application/adb_process_runner.dart';
-import 'package:api_adb/adb/dtos/adb_device_dto.dart';
-import 'package:api_adb/adb/dtos/adb_version_dto.dart';
-import 'package:api_adb/adb/parsers/adb_version_parser.dart';
+import 'package:api_adb/adb/devices/adb_device_dto.dart';
+import 'package:api_adb/adb/devices/adb_frame_reader.dart';
+import 'package:api_adb/adb/devices/device_conversions.dart';
+import 'package:api_adb/adb/process/adb_device_connection.dart';
+import 'package:api_adb/adb/process/adb_process_runner.dart';
 import 'package:api_adb/adb/proto/generated/lib/adb/proto/devices.pb.dart';
-import 'package:api_adb/adb/readers/adb_frame_reader.dart';
-
-import 'package:api_adb/adb/conversions/device.dart';
+import 'package:api_adb/adb/version/adb_version_dto.dart';
+import 'package:api_adb/adb/version/adb_version_parser.dart';
 
 class AdbApi({required final String adbPath}) {
   final processRunner = AdbProcessRunner(adbPath: adbPath);

@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:api_adb/adb/application/adb_device_connection.dart';
+import 'package:api_adb/adb/process/adb_device_connection.dart';
 import 'package:api_adb/api_adb.dart';
 import 'package:device_viewer/feat_device_agent/application/device_agent_client.dart';
+import 'package:device_viewer/feat_device_connections/application/dex_file_provider.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 import 'package:rxdart/rxdart.dart';
@@ -23,6 +24,7 @@ class const AdbAgentSession({
 class DeviceConnectionsRepositoryImpl({
   required final AdbApi api,
 }) implements DeviceConnectionsRepository {
+  final dexFilepathProvider = getDexFilepathProvider();
   final sessions = <AndroidDeviceId, AdbAgentSession>{};
   final connectedIds = BehaviorSubject.seeded(<AndroidDeviceId>{});
 
@@ -57,9 +59,10 @@ class DeviceConnectionsRepositoryImpl({
 
   Future<void> connect(AndroidDevice device) async {
     final connection = api.connect(device.id);
+    final dexFilepath = await dexFilepathProvider();
 
     await connection.pushFile(
-      localFilepath: 'assets/bundled_files/classes.dex',
+      localFilepath: dexFilepath,
       remoteFilepath: '/data/local/tmp/device_agent.dex',
     );
 

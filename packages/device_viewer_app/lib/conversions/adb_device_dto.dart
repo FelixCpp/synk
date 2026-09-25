@@ -1,4 +1,4 @@
-import 'package:api_adb/adb/dtos/adb_device_dto.dart';
+import 'package:api_adb/adb/devices/adb_device_dto.dart';
 import 'package:device_viewer/conversions/android_connection_type.dart';
 import 'package:device_viewer/conversions/android_device_state.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';

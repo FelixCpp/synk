@@ -1,5 +1,5 @@
-import 'package:api_adb/adb/dtos/adb_connection_type_dto.dart';
-import 'package:api_adb/adb/dtos/adb_device_state_dto.dart';
+import 'package:api_adb/adb/devices/adb_connection_type_dto.dart';
+import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'adb_device_dto.freezed.dart';

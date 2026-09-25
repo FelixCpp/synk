@@ -24,6 +24,7 @@ dependencies:
   file_selector: ^1.1.0
   intl: ^0.20.3
   async: ^2.13.1
+  path_provider: ^2.1.6
 dev_dependencies:
   flutter_test:
     sdk: flutter

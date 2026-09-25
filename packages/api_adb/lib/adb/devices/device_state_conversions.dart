@@ -1,4 +1,4 @@
-import 'package:api_adb/adb/dtos/adb_device_state_dto.dart';
+import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
 import 'package:api_adb/adb/proto/generated/lib/adb/proto/devices.pbenum.dart';
 
 extension ConnectionStateToDto on ConnectionState {

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:api_adb/adb/application/adb_process_runner.dart';
+import 'package:api_adb/adb/process/adb_process_runner.dart';
 
 class const AdbShellResult({
   required final int exitCode,

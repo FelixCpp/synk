@@ -1,4 +1,4 @@
-import 'package:api_adb/adb/dtos/adb_version_dto.dart';
+import 'package:api_adb/adb/version/adb_version_dto.dart';
 
 AdbVersionDto parseAdbVersionDto(String processOutput) {
   final expression = RegExp(r'^(\d+)\.(\d+)\.(\d+)-(\d+)$');
