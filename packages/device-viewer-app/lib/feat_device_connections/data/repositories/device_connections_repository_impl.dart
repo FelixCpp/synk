@@ -1,38 +1,38 @@
 import 'dart:async';
 
+import 'package:api_adb/api_adb.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
-import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
-import 'package:rxdart/rxdart.dart';
 
-class DeviceConnectionsRepositoryImpl(
-  final AdbDevicesRepository devicesRepository,
-) implements DeviceConnectionsRepository {
-  final _connectedDeviceIds = BehaviorSubject<Set<AndroidDeviceId>>.seeded(
-    const {},
-  );
+class DeviceConnectionsRepositoryImpl({
+  required final AdbApi api,
+}) implements DeviceConnectionsRepository {
+  @override
+  Future<void> dispose() async {}
 
   @override
-  Future<void> dispose() {
-    return _connectedDeviceIds.close();
-  }
-
-  @override
-  Future<void> toggleConnection(AndroidDeviceId id) async {
-    if (await isConnected(id)) {
-      _connectedDeviceIds.add(_connectedDeviceIds.value.difference({id}));
+  Future<void> toggleConnection(AndroidDevice device) async {
+    if (await isConnected(device.id)) {
+      await disconnect(device);
     } else {
-      _connectedDeviceIds.add({..._connectedDeviceIds.value, id});
+      await connect(device);
     }
   }
 
   @override
   Future<bool> isConnected(AndroidDeviceId id) async {
-    return _connectedDeviceIds.value.contains(id);
+    return false;
   }
 
   @override
   Stream<Set<AndroidDeviceId>> observeConnectedDeviceIds() {
-    return _connectedDeviceIds.stream;
+    return Stream.value(const {});
   }
+
+  Future<void> connect(AndroidDevice device) async {
+    final adbConnection = api.connect(device);
+    final session = adbSessionBootstrapper.createSession(adbConnection);
+  }
+
+  Future<void> disconnect(AndroidDevice device) async {}
 }

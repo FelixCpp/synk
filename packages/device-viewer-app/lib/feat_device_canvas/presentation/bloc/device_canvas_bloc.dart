@@ -19,9 +19,7 @@ class DeviceCanvasBloc(final DeviceCanvasRepository repository)
       );
     });
 
-    on<_OnCaptureScreenshot>((event, emit) {
-      return repository.captureAndSaveScreenshot(event.device.device);
-    });
+    on<_OnCaptureScreenshot>((event, emit) {});
 
     add(DeviceCanvasEvent.onSetup());
   }
