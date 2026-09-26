@@ -2,6 +2,7 @@ import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 typedef DeviceActionCallback = void Function(CanvasDevice);
@@ -150,16 +151,8 @@ class const _ScreenMirror({
               decoration: BoxDecoration(color: MacosColors.black),
               child: switch (textureId) {
                 final id? => Texture(textureId: id),
-                null => Column(
-                  mainAxisAlignment: .center,
-                  children: [
-                    Center(
-                      child: MacosIcon(
-                        CupertinoIcons.device_phone_portrait,
-                        size: 42.0,
-                      ),
-                    ),
-                  ],
+                null => const Center(
+                  child: _LoadingIndicator(),
                 ),
               },
             ),
@@ -172,6 +165,23 @@ class const _ScreenMirror({
           ],
         ),
       ),
+    );
+  }
+}
+
+class const _LoadingIndicator() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: .center,
+      fit: .passthrough,
+      children: [
+        MacosIcon(CupertinoIcons.device_phone_portrait),
+        Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: CircularProgressIndicator(),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ part 'android_device.freezed.dart';
 sealed class AndroidDevice with _$AndroidDevice {
   const factory AndroidDevice({
     required DeviceId id,
+    required String modelName,
     required AndroidDeviceState state,
     required AndroidDeviceConnection connection,
   }) = _AndroidDevice;

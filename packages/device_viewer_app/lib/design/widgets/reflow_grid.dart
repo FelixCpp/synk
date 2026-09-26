@@ -13,8 +13,8 @@ class ReflowGrid<T> extends StatefulWidget {
     required this.items,
     required this.itemBuilder,
     required this.keyOf,
-    required this.crossAxisCount,
-    this.childAspectRatio = 1,
+    required this.cellWidth,
+    required this.cellHeight,
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
     this.duration = const Duration(milliseconds: 300),
@@ -26,8 +26,14 @@ class ReflowGrid<T> extends StatefulWidget {
   final List<T> items;
   final ReflowGridItemBuilder<T> itemBuilder;
   final ReflowGridKeyOf<T> keyOf;
-  final int crossAxisCount;
-  final double childAspectRatio;
+
+  /// Every cell gets exactly this size, regardless of window size or how
+  /// many items there are - so a tile never grows or shrinks just because
+  /// another device connected or disconnected elsewhere in the grid. More
+  /// items past what fits simply wrap onto further rows, which scroll.
+  final double cellWidth;
+  final double cellHeight;
+
   final double mainAxisSpacing;
   final double crossAxisSpacing;
   final Duration duration;
@@ -83,73 +89,60 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
     setState(() => _exiting.remove(key));
   }
 
-  Rect _slotRect(int slot, double cellWidth, double cellHeight) {
-    final row = slot ~/ widget.crossAxisCount;
-    final col = slot % widget.crossAxisCount;
+  Rect _slotRect(int slot, int columns) {
+    final row = slot ~/ columns;
+    final col = slot % columns;
     return Rect.fromLTWH(
-      col * (cellWidth + widget.crossAxisSpacing),
-      row * (cellHeight + widget.mainAxisSpacing),
-      cellWidth,
-      cellHeight,
+      col * (widget.cellWidth + widget.crossAxisSpacing),
+      row * (widget.cellHeight + widget.mainAxisSpacing),
+      widget.cellWidth,
+      widget.cellHeight,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      controller: widget.scrollController,
-      padding: widget.padding,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final totalSpacing =
-              widget.crossAxisSpacing * (widget.crossAxisCount - 1);
-          final cellWidth =
-              (constraints.maxWidth - totalSpacing) / widget.crossAxisCount;
-          final cellHeight = cellWidth / widget.childAspectRatio;
+    return LayoutBuilder(
+      builder: (context, viewportConstraints) {
+        final columns = ((viewportConstraints.maxWidth + widget.crossAxisSpacing) /
+                (widget.cellWidth + widget.crossAxisSpacing))
+            .floor()
+            .clamp(1, 1 << 30);
 
-          final children = <Widget>[
-            for (var slot = 0; slot < widget.items.length; slot++)
-              _buildPresentItem(context, slot, cellWidth, cellHeight),
-            for (final entry in _exiting.entries)
-              _buildExitingItem(
-                context,
-                entry.key,
-                entry.value,
-                cellWidth,
-                cellHeight,
-              ),
-          ];
+        final children = <Widget>[
+          for (var slot = 0; slot < widget.items.length; slot++)
+            _buildPresentItem(context, slot, columns),
+          for (final entry in _exiting.entries)
+            _buildExitingItem(context, entry.key, entry.value, columns),
+        ];
 
-          final lastSlot = [
-            widget.items.length - 1,
-            for (final entry in _exiting.values) entry.slot,
-          ].reduce((a, b) => a > b ? a : b);
+        final lastSlot = [
+          widget.items.length - 1,
+          for (final entry in _exiting.values) entry.slot,
+        ].reduce((a, b) => a > b ? a : b);
 
-          final rowCount = lastSlot < 0
-              ? 0
-              : (lastSlot ~/ widget.crossAxisCount) + 1;
-          final totalHeight = rowCount == 0
-              ? 0.0
-              : rowCount * cellHeight + (rowCount - 1) * widget.mainAxisSpacing;
+        final rowCount = lastSlot < 0 ? 0 : (lastSlot ~/ columns) + 1;
+        final totalHeight = rowCount == 0
+            ? 0.0
+            : rowCount * widget.cellHeight +
+                  (rowCount - 1) * widget.mainAxisSpacing;
 
-          return SizedBox(
+        return SingleChildScrollView(
+          controller: widget.scrollController,
+          padding: widget.padding,
+          child: SizedBox(
             height: totalHeight,
             child: Stack(children: children),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildPresentItem(
-    BuildContext context,
-    int slot,
-    double cellWidth,
-    double cellHeight,
-  ) {
+  Widget _buildPresentItem(BuildContext context, int slot, int columns) {
     final item = widget.items[slot];
     final key = widget.keyOf(item);
-    final rect = _slotRect(slot, cellWidth, cellHeight);
+    final rect = _slotRect(slot, columns);
 
     return AnimatedPositioned(
       key: ValueKey(key),
@@ -175,10 +168,9 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
     BuildContext context,
     Object key,
     _ExitingEntry<T> entry,
-    double cellWidth,
-    double cellHeight,
+    int columns,
   ) {
-    final rect = _slotRect(entry.slot, cellWidth, cellHeight);
+    final rect = _slotRect(entry.slot, columns);
 
     return Positioned(
       key: ValueKey(('exiting', key)),

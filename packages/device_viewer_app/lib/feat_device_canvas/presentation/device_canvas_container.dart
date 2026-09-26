@@ -47,11 +47,8 @@ class const _Content({
         mainAxisSpacing: DeviceViewerTheme.verticalComponentSpacingMedium,
         crossAxisSpacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
         items: state.devices,
-        crossAxisCount: 4,
-        // Placeholder for an actual per-device value until we read the real
-        // screen resolution via adb (e.g. `wm size`) — a typical portrait
-        // phone ratio reads much better here than a square.
-        childAspectRatio: 9 / 19.5,
+        cellWidth: 320,
+        cellHeight: 320 / (9 / 19.5),
         duration: const Duration(milliseconds: 150),
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
@@ -61,7 +58,10 @@ class const _Content({
               BlocProvider.of<DeviceCanvasBloc>(context)
                   .add(DeviceCanvasEvent.onCaptureScreenshot(device));
             },
-            mirrorTextureId: item.textureId,
+            mirrorTextureId: item.when(
+              android: (device, isConnected, textureId) => textureId,
+              connecting: (device) => null,
+            ),
           );
         },
       ),

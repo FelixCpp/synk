@@ -9,6 +9,7 @@ extension AdbDeviceDtoToModel on AdbDeviceDto {
   AndroidDevice toDomain() {
     return AndroidDevice(
       id: DeviceId(serialNumber),
+      modelName: model ?? "Unbekanntes Gerät",
       state: state.toDomain(),
       connection: connectionType.toDomain(serialNumber),
     );

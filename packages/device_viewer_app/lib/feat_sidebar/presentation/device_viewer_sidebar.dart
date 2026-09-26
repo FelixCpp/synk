@@ -101,8 +101,13 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
                   crossAxisAlignment: .start,
                   children: [
                     Text(
-                      adbDevice.id,
+                      adbDevice.modelName,
                       style: context.typo.headline,
+                      overflow: .ellipsis,
+                    ),
+                    Text(
+                      adbDevice.id,
+                      style: context.typo.subheadline,
                       overflow: .ellipsis,
                     ),
                   ],

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AndroidDevice {
 
- DeviceId get id; AndroidDeviceState get state; AndroidDeviceConnection get connection;
+ DeviceId get id; String get modelName; AndroidDeviceState get state; AndroidDeviceConnection get connection;
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AndroidDeviceCopyWith<AndroidDevice> get copyWith => _$AndroidDeviceCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as AndroidDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connection, _this.connection) || other.connection == _this.connection));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connection, _this.connection) || other.connection == _this.connection));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AndroidDevice;
-  return Object.hash(runtimeType,_this.id,_this.state,_this.connection);
+  return Object.hash(runtimeType,_this.id,_this.modelName,_this.state,_this.connection);
 }
 
 @override
 String toString() {
   final _this = this as AndroidDevice;
-  return 'AndroidDevice(id: ${_this.id}, state: ${_this.state}, connection: ${_this.connection})';
+  return 'AndroidDevice(id: ${_this.id}, modelName: ${_this.modelName}, state: ${_this.state}, connection: ${_this.connection})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AndroidDeviceCopyWith<$Res>  {
   factory $AndroidDeviceCopyWith(AndroidDevice value, $Res Function(AndroidDevice) _then) = _$AndroidDeviceCopyWithImpl;
 @useResult
 $Res call({
- DeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection
+ DeviceId id, String modelName, AndroidDeviceState state, AndroidDeviceConnection connection
 });
 
 
@@ -68,10 +68,11 @@ class _$AndroidDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? state = null,Object? connection = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? modelName = null,Object? state = null,Object? connection = null,}) {
   return _then(AndroidDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as DeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
+as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceConnection,
   ));
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId id,  String modelName,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidDevice() when $default != null:
-return $default(_that.id,_that.state,_that.connection);case _:
+return $default(_that.id,_that.modelName,_that.state,_that.connection);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.id,_that.state,_that.connection);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId id,  String modelName,  AndroidDeviceState state,  AndroidDeviceConnection connection)  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDevice():
-return $default(_that.id,_that.state,_that.connection);}
+return $default(_that.id,_that.modelName,_that.state,_that.connection);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +194,10 @@ return $default(_that.id,_that.state,_that.connection);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId id,  String modelName,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDevice() when $default != null:
-return $default(_that.id,_that.state,_that.connection);case _:
+return $default(_that.id,_that.modelName,_that.state,_that.connection);case _:
   return null;
 
 }
@@ -208,10 +209,11 @@ return $default(_that.id,_that.state,_that.connection);case _:
 
 
 class _AndroidDevice implements AndroidDevice {
-  const _AndroidDevice({required this.id, required this.state, required this.connection});
+  const _AndroidDevice({required this.id, required this.modelName, required this.state, required this.connection});
   
 
 @override final  DeviceId id;
+@override final  String modelName;
 @override final  AndroidDeviceState state;
 @override final  AndroidDeviceConnection connection;
 
@@ -225,18 +227,18 @@ _$AndroidDeviceCopyWith<_AndroidDevice> get copyWith => __$AndroidDeviceCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.state, state) || other.state == state)&&(identical(other.connection, connection) || other.connection == connection));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.modelName, modelName) || other.modelName == modelName)&&(identical(other.state, state) || other.state == state)&&(identical(other.connection, connection) || other.connection == connection));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,state,connection);
+    return Object.hash(runtimeType,id,modelName,state,connection);
 }
 
 @override
 String toString() {
-    return 'AndroidDevice(id: $id, state: $state, connection: $connection)';
+    return 'AndroidDevice(id: $id, modelName: $modelName, state: $state, connection: $connection)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$AndroidDeviceCopyWith<$Res> implements $AndroidDeviceCopy
   factory _$AndroidDeviceCopyWith(_AndroidDevice value, $Res Function(_AndroidDevice) _then) = __$AndroidDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- DeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection
+ DeviceId id, String modelName, AndroidDeviceState state, AndroidDeviceConnection connection
 });
 
 
@@ -264,10 +266,11 @@ class __$AndroidDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? state = null,Object? connection = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? modelName = null,Object? state = null,Object? connection = null,}) {
   return _then(_AndroidDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as DeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
+as String,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceConnection,
   ));

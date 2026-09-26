@@ -17,6 +17,7 @@ class DeviceConnectionsRepositoryImpl({
   final androidDeviceAgentsById = <DeviceId, AndroidDeviceAgent>{};
   final androidDeviceInfos = <DeviceId, AndroidDeviceInfo>{};
   final connectedIds = BehaviorSubject.seeded(<DeviceId>{});
+  final connectingIds = BehaviorSubject.seeded(<DeviceId>{});
 
   @override
   Future<void> dispose() async {
@@ -35,6 +36,22 @@ class DeviceConnectionsRepositoryImpl({
   @override
   Future<bool> isConnected(DeviceId id) async {
     return androidDeviceAgentsById.containsKey(id);
+  }
+
+  @override
+  Stream<List<AndroidDevice>> observeConnectingDevices() {
+    return Rx.combineLatest2(
+      pluggedAdbDevicesRepository.observeAdbDevices(),
+      connectingIds,
+      (devices, ids) => (devices, ids),
+    ).map((pair) {
+      final (devices, ids) = pair;
+      final devicesById = {for (final device in devices) device.id: device};
+
+      return [
+        for (final id in ids) ?devicesById[id],
+      ];
+    });
   }
 
   @override
@@ -61,15 +78,21 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   Future<void> connect(AndroidDevice device) async {
-    if (androidDeviceAgentsById.containsKey(device.id)) {
+    if (androidDeviceAgentsById.containsKey(device.id) ||
+        connectingIds.value.contains(device.id)) {
       // TODO(Felix): Throw own exception type
       throw Exception('Device connection has already been established.');
     }
 
-    final agent = await agentRepository.establishConnection(device.id);
-    androidDeviceAgentsById[device.id] = agent;
-    androidDeviceInfos[device.id] = await agent.fetchDeviceInfo();
-    connectedIds.add(androidDeviceAgentsById.keys.toSet());
+    connectingIds.add({...connectingIds.value, device.id});
+    try {
+      final agent = await agentRepository.establishConnection(device.id);
+      androidDeviceAgentsById[device.id] = agent;
+      androidDeviceInfos[device.id] = await agent.fetchDeviceInfo();
+      connectedIds.add(androidDeviceAgentsById.keys.toSet());
+    } finally {
+      connectingIds.add({...connectingIds.value}..remove(device.id));
+    }
   }
 
   Future<void> disconnect(AndroidDevice device) async {

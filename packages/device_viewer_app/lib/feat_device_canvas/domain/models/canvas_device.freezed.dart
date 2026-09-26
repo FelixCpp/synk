@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CanvasDevice {
 
- AndroidDevice get device; bool get isConnected; NativeTextureId get textureId;
+ AndroidDevice get device;
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $CanvasDeviceCopyWith<CanvasDevice> get copyWith => _$CanvasDeviceCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as CanvasDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.isConnected, _this.isConnected) || other.isConnected == _this.isConnected)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CanvasDevice;
-  return Object.hash(runtimeType,_this.device,_this.isConnected,_this.textureId);
+  return Object.hash(runtimeType,_this.device);
 }
 
 @override
 String toString() {
   final _this = this as CanvasDevice;
-  return 'CanvasDevice(device: ${_this.device}, isConnected: ${_this.isConnected}, textureId: ${_this.textureId})';
+  return 'CanvasDevice(device: ${_this.device})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $CanvasDeviceCopyWith<$Res>  {
   factory $CanvasDeviceCopyWith(CanvasDevice value, $Res Function(CanvasDevice) _then) = _$CanvasDeviceCopyWithImpl;
 @useResult
 $Res call({
- AndroidDevice device, bool isConnected, NativeTextureId textureId
+ AndroidDevice device
 });
 
 
@@ -68,12 +68,10 @@ class _$CanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,}) {
-  return _then(CanvasDevice.android(
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,}) {
+  return _then(_self.copyWith(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as AndroidDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
-as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
-as NativeTextureId,
+as AndroidDevice,
   ));
 }
 /// Create a copy of CanvasDevice
@@ -103,11 +101,12 @@ extension CanvasDevicePatterns on CanvasDevice {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _AndroidCanvasDevice value)?  android,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _AndroidCanvasDevice value)?  android,TResult Function( _ConnectingCanvasDevice value)?  connecting,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that);case _:
+return android(_that);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that);case _:
   return orElse();
 
 }
@@ -125,11 +124,12 @@ return android(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _AndroidCanvasDevice value)  android,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _AndroidCanvasDevice value)  android,required TResult Function( _ConnectingCanvasDevice value)  connecting,}){
 final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice():
-return android(_that);}
+return android(_that);case _ConnectingCanvasDevice():
+return connecting(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -143,11 +143,12 @@ return android(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _AndroidCanvasDevice value)?  android,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _AndroidCanvasDevice value)?  android,TResult? Function( _ConnectingCanvasDevice value)?  connecting,}){
 final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that);case _:
+return android(_that);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that);case _:
   return null;
 
 }
@@ -164,10 +165,11 @@ return android(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,TResult Function( AndroidDevice device)?  connecting,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that.device,_that.isConnected,_that.textureId);case _:
+return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that.device);case _:
   return orElse();
 
 }
@@ -185,10 +187,11 @@ return android(_that.device,_that.isConnected,_that.textureId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)  android,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)  android,required TResult Function( AndroidDevice device)  connecting,}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice():
-return android(_that.device,_that.isConnected,_that.textureId);}
+return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice():
+return connecting(_that.device);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -202,10 +205,11 @@ return android(_that.device,_that.isConnected,_that.textureId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,TResult? Function( AndroidDevice device)?  connecting,}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that.device,_that.isConnected,_that.textureId);case _:
+return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that.device);case _:
   return null;
 
 }
@@ -221,8 +225,8 @@ class _AndroidCanvasDevice implements CanvasDevice {
   
 
 @override final  AndroidDevice device;
-@override final  bool isConnected;
-@override final  NativeTextureId textureId;
+ final  bool isConnected;
+ final  NativeTextureId textureId;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -279,6 +283,83 @@ device: null == device ? _self.device : device // ignore: cast_nullable_to_non_n
 as AndroidDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
 as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId,
+  ));
+}
+
+/// Create a copy of CanvasDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$AndroidDeviceCopyWith<$Res> get device {
+  
+  return $AndroidDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class _ConnectingCanvasDevice implements CanvasDevice {
+  const _ConnectingCanvasDevice({required this.device});
+  
+
+@override final  AndroidDevice device;
+
+/// Create a copy of CanvasDevice
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ConnectingCanvasDeviceCopyWith<_ConnectingCanvasDevice> get copyWith => __$ConnectingCanvasDeviceCopyWithImpl<_ConnectingCanvasDevice>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectingCanvasDevice&&(identical(other.device, device) || other.device == device));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,device);
+}
+
+@override
+String toString() {
+    return 'CanvasDevice.connecting(device: $device)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ConnectingCanvasDeviceCopyWith<$Res> implements $CanvasDeviceCopyWith<$Res> {
+  factory _$ConnectingCanvasDeviceCopyWith(_ConnectingCanvasDevice value, $Res Function(_ConnectingCanvasDevice) _then) = __$ConnectingCanvasDeviceCopyWithImpl;
+@override @useResult
+$Res call({
+ AndroidDevice device
+});
+
+
+@override $AndroidDeviceCopyWith<$Res> get device;
+
+}
+/// @nodoc
+class __$ConnectingCanvasDeviceCopyWithImpl<$Res>
+    implements _$ConnectingCanvasDeviceCopyWith<$Res> {
+  __$ConnectingCanvasDeviceCopyWithImpl(this._self, this._then);
+
+  final _ConnectingCanvasDevice _self;
+  final $Res Function(_ConnectingCanvasDevice) _then;
+
+/// Create a copy of CanvasDevice
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
+  return _then(_ConnectingCanvasDevice(
+device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
+as AndroidDevice,
   ));
 }
 

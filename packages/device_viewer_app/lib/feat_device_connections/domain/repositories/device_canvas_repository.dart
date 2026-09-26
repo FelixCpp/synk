@@ -7,6 +7,7 @@ abstract interface class DeviceConnectionsRepository {
   Future<void> dispose();
   Future<void> toggleConnection(AndroidDevice id);
   Future<bool> isConnected(DeviceId id);
+  Stream<List<AndroidDevice>> observeConnectingDevices();
   Stream<List<DeviceConnection>> observeDeviceConnections();
 
   AndroidDeviceAgent? getAgent(DeviceId id);

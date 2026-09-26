@@ -34,4 +34,11 @@ sealed class CanvasDevice with _$CanvasDevice {
     required bool isConnected,
     required NativeTextureId textureId,
   }) = _AndroidCanvasDevice;
+
+  /// Shown the moment the user asks to connect, before the agent connection
+  /// (and its mirror texture) actually exists - establishing it takes a
+  /// couple of seconds, and the canvas would otherwise give no feedback
+  /// during that time.
+  const factory CanvasDevice.connecting({required AndroidDevice device}) =
+      _ConnectingCanvasDevice;
 }

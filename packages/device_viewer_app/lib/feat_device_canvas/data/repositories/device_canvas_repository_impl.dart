@@ -5,17 +5,31 @@ import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canv
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:rxdart/rxdart.dart';
 
 class DeviceCanvasRepositoryImpl(
   final DeviceConnectionsRepository connectionsRepository,
 ) implements DeviceCanvasRepository {
   @override
   Stream<List<CanvasDevice>> observeDevices() {
-    return connectionsRepository.observeDeviceConnections().map((
-      connections,
-    ) {
+    return Rx.combineLatest2(
+      connectionsRepository.observeConnectingDevices(),
+      connectionsRepository.observeDeviceConnections(),
+      (connecting, connected) => (connecting, connected),
+    ).map((pair) {
+      final (connecting, connected) = pair;
+      final connectedIds = {for (final c in connected) c.device.id};
+
       return [
-        for (final connection in connections)
+        // The connecting/connected sets are tracked independently and
+        // update one after the other, not atomically, so a device can
+        // briefly show up in both right as its connection completes -
+        // without this check that would emit two CanvasDevices sharing
+        // the same device id, which crashes the grid (duplicate keys).
+        for (final device in connecting)
+          if (!connectedIds.contains(device.id))
+            CanvasDevice.connecting(device: device),
+        for (final connection in connected)
           CanvasDevice.android(
             device: connection.device,
             isConnected: true,
