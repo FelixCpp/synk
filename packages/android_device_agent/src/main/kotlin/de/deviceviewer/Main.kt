@@ -9,10 +9,6 @@ import de.deviceviewer.proto.CaptureScreenshotRequest
 import de.deviceviewer.proto.CaptureScreenshotResponse
 import de.deviceviewer.proto.GetInfoRequest
 import de.deviceviewer.proto.GetInfoResponse
-import de.deviceviewer.proto.StartScreenStreamRequest
-import de.deviceviewer.proto.StartScreenStreamResponse
-import de.deviceviewer.proto.StopScreenStreamRequest
-import de.deviceviewer.proto.StopScreenStreamResponse
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.EOFException
@@ -25,45 +21,37 @@ fun main() {
     val serverSocket = ServerSocket(PORT, 0, InetAddress.getLoopbackAddress())
     println("Agent listening on port $PORT")
 
-    val screenStreamSession = ScreenStreamSession()
-
     serverSocket.use { server ->
         val socket = server.accept()
         println("Client connected")
 
-        try {
-            socket.use {
-                val input = DataInputStream(socket.getInputStream())
-                val output = DataOutputStream(socket.getOutputStream())
+        socket.use {
+            val input = DataInputStream(socket.getInputStream())
+            val output = DataOutputStream(socket.getOutputStream())
 
-                while (true) {
-                    val length = try {
-                        input.readInt()
-                    } catch (e: EOFException) {
-                        break // Connection has been closed by the client.
-                    }
-
-                    val requestBytes = ByteArray(length)
-                    input.readFully(requestBytes)
-
-                    val request = AgentRequest.parseFrom(requestBytes)
-                    val response = dispatch(request, screenStreamSession)
-
-                    val responseBytes = response.toByteArray()
-                    output.writeInt(responseBytes.size)
-                    output.write(responseBytes)
-                    output.flush()
+            while (true) {
+                val length = try {
+                    input.readInt()
+                } catch (e: EOFException) {
+                    break // Connection has been closed by the client.
                 }
+
+                val requestBytes = ByteArray(length)
+                input.readFully(requestBytes)
+
+                val request = AgentRequest.parseFrom(requestBytes)
+                val response = dispatch(request)
+
+                val responseBytes = response.toByteArray()
+                output.writeInt(responseBytes.size)
+                output.write(responseBytes)
+                output.flush()
             }
-        } finally {
-            // The control connection dropped (or the loop above exited) -
-            // never leave the encoder/virtual display running unattended.
-            screenStreamSession.stop()
         }
     }
 }
 
-fun dispatch(request: AgentRequest, screenStreamSession: ScreenStreamSession): AgentResponse {
+fun dispatch(request: AgentRequest): AgentResponse {
     return try {
         when (request.payloadCase) {
             AgentRequest.PayloadCase.GET_INFO -> {
@@ -77,20 +65,6 @@ fun dispatch(request: AgentRequest, screenStreamSession: ScreenStreamSession): A
                 AgentResponse
                     .newBuilder()
                     .setCaptureScreenshot(handleCaptureScreenshot(request.captureScreenshot))
-                    .build()
-            }
-
-            AgentRequest.PayloadCase.START_SCREEN_STREAM -> {
-                AgentResponse
-                    .newBuilder()
-                    .setStartScreenStream(handleStartScreenStream(request.startScreenStream, screenStreamSession))
-                    .build()
-            }
-
-            AgentRequest.PayloadCase.STOP_SCREEN_STREAM -> {
-                AgentResponse
-                    .newBuilder()
-                    .setStopScreenStream(handleStopScreenStream(request.stopScreenStream, screenStreamSession))
                     .build()
             }
 
@@ -119,25 +93,6 @@ private fun handleGetInfo(request: GetInfoRequest): GetInfoResponse {
         .setAndroidVersion(Build.VERSION.RELEASE)
         .setSdkVersion(Build.VERSION.SDK_INT)
         .build()
-}
-
-private fun handleStartScreenStream(
-    request: StartScreenStreamRequest,
-    session: ScreenStreamSession
-): StartScreenStreamResponse {
-    val port = session.start()
-    return StartScreenStreamResponse
-        .newBuilder()
-        .setVideoPort(port)
-        .build()
-}
-
-private fun handleStopScreenStream(
-    request: StopScreenStreamRequest,
-    session: ScreenStreamSession
-): StopScreenStreamResponse {
-    session.stop()
-    return StopScreenStreamResponse.newBuilder().build()
 }
 
 private fun handleCaptureScreenshot(request: CaptureScreenshotRequest): CaptureScreenshotResponse {

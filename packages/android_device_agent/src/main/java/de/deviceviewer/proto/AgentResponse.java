@@ -23,8 +23,6 @@ public  final class AgentResponse extends
     GET_INFO(1),
     CAPTURE_SCREENSHOT(2),
     ERROR(3),
-    START_SCREEN_STREAM(4),
-    STOP_SCREEN_STREAM(5),
     PAYLOAD_NOT_SET(0);
     private final int value;
     private PayloadCase(int value) {
@@ -43,8 +41,6 @@ public  final class AgentResponse extends
         case 1: return GET_INFO;
         case 2: return CAPTURE_SCREENSHOT;
         case 3: return ERROR;
-        case 4: return START_SCREEN_STREAM;
-        case 5: return STOP_SCREEN_STREAM;
         case 0: return PAYLOAD_NOT_SET;
         default: return null;
       }
@@ -211,106 +207,6 @@ public  final class AgentResponse extends
    */
   private void clearError() {
     if (payloadCase_ == 3) {
-      payloadCase_ = 0;
-      payload_ = null;
-    }
-  }
-
-  public static final int START_SCREEN_STREAM_FIELD_NUMBER = 4;
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   */
-  @java.lang.Override
-  public boolean hasStartScreenStream() {
-    return payloadCase_ == 4;
-  }
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   */
-  @java.lang.Override
-  public de.deviceviewer.proto.StartScreenStreamResponse getStartScreenStream() {
-    if (payloadCase_ == 4) {
-       return (de.deviceviewer.proto.StartScreenStreamResponse) payload_;
-    }
-    return de.deviceviewer.proto.StartScreenStreamResponse.getDefaultInstance();
-  }
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   */
-  private void setStartScreenStream(de.deviceviewer.proto.StartScreenStreamResponse value) {
-    java.util.Objects.requireNonNull(value);
-    payload_ = value;
-    payloadCase_ = 4;
-  }
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   */
-  private void mergeStartScreenStream(de.deviceviewer.proto.StartScreenStreamResponse value) {
-    java.util.Objects.requireNonNull(value);
-    if (payloadCase_ == 4 &&
-        payload_ != de.deviceviewer.proto.StartScreenStreamResponse.getDefaultInstance()) {
-      payload_ = de.deviceviewer.proto.StartScreenStreamResponse.newBuilder((de.deviceviewer.proto.StartScreenStreamResponse) payload_)
-          .mergeFrom(value).buildPartial();
-    } else {
-      payload_ = value;
-    }
-    payloadCase_ = 4;
-  }
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   */
-  private void clearStartScreenStream() {
-    if (payloadCase_ == 4) {
-      payloadCase_ = 0;
-      payload_ = null;
-    }
-  }
-
-  public static final int STOP_SCREEN_STREAM_FIELD_NUMBER = 5;
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   */
-  @java.lang.Override
-  public boolean hasStopScreenStream() {
-    return payloadCase_ == 5;
-  }
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   */
-  @java.lang.Override
-  public de.deviceviewer.proto.StopScreenStreamResponse getStopScreenStream() {
-    if (payloadCase_ == 5) {
-       return (de.deviceviewer.proto.StopScreenStreamResponse) payload_;
-    }
-    return de.deviceviewer.proto.StopScreenStreamResponse.getDefaultInstance();
-  }
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   */
-  private void setStopScreenStream(de.deviceviewer.proto.StopScreenStreamResponse value) {
-    java.util.Objects.requireNonNull(value);
-    payload_ = value;
-    payloadCase_ = 5;
-  }
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   */
-  private void mergeStopScreenStream(de.deviceviewer.proto.StopScreenStreamResponse value) {
-    java.util.Objects.requireNonNull(value);
-    if (payloadCase_ == 5 &&
-        payload_ != de.deviceviewer.proto.StopScreenStreamResponse.getDefaultInstance()) {
-      payload_ = de.deviceviewer.proto.StopScreenStreamResponse.newBuilder((de.deviceviewer.proto.StopScreenStreamResponse) payload_)
-          .mergeFrom(value).buildPartial();
-    } else {
-      payload_ = value;
-    }
-    payloadCase_ = 5;
-  }
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   */
-  private void clearStopScreenStream() {
-    if (payloadCase_ == 5) {
       payloadCase_ = 0;
       payload_ = null;
     }
@@ -569,102 +465,6 @@ public  final class AgentResponse extends
       return this;
     }
 
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    @java.lang.Override
-    public boolean hasStartScreenStream() {
-      return instance.hasStartScreenStream();
-    }
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    @java.lang.Override
-    public de.deviceviewer.proto.StartScreenStreamResponse getStartScreenStream() {
-      return instance.getStartScreenStream();
-    }
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    public Builder setStartScreenStream(de.deviceviewer.proto.StartScreenStreamResponse value) {
-      copyOnWrite();
-      instance.setStartScreenStream(value);
-      return this;
-    }
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    public Builder setStartScreenStream(
-        de.deviceviewer.proto.StartScreenStreamResponse.Builder builderForValue) {
-      copyOnWrite();
-      instance.setStartScreenStream(builderForValue.build());
-      return this;
-    }
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    public Builder mergeStartScreenStream(de.deviceviewer.proto.StartScreenStreamResponse value) {
-      copyOnWrite();
-      instance.mergeStartScreenStream(value);
-      return this;
-    }
-    /**
-     * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-     */
-    public Builder clearStartScreenStream() {
-      copyOnWrite();
-      instance.clearStartScreenStream();
-      return this;
-    }
-
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    @java.lang.Override
-    public boolean hasStopScreenStream() {
-      return instance.hasStopScreenStream();
-    }
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    @java.lang.Override
-    public de.deviceviewer.proto.StopScreenStreamResponse getStopScreenStream() {
-      return instance.getStopScreenStream();
-    }
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    public Builder setStopScreenStream(de.deviceviewer.proto.StopScreenStreamResponse value) {
-      copyOnWrite();
-      instance.setStopScreenStream(value);
-      return this;
-    }
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    public Builder setStopScreenStream(
-        de.deviceviewer.proto.StopScreenStreamResponse.Builder builderForValue) {
-      copyOnWrite();
-      instance.setStopScreenStream(builderForValue.build());
-      return this;
-    }
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    public Builder mergeStopScreenStream(de.deviceviewer.proto.StopScreenStreamResponse value) {
-      copyOnWrite();
-      instance.mergeStopScreenStream(value);
-      return this;
-    }
-    /**
-     * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-     */
-    public Builder clearStopScreenStream() {
-      copyOnWrite();
-      instance.clearStopScreenStream();
-      return this;
-    }
-
     // @@protoc_insertion_point(builder_scope:device_agent.AgentResponse)
   }
   @java.lang.Override
@@ -686,12 +486,10 @@ public  final class AgentResponse extends
             de.deviceviewer.proto.GetInfoResponse.class,
             de.deviceviewer.proto.CaptureScreenshotResponse.class,
             de.deviceviewer.proto.AgentError.class,
-            de.deviceviewer.proto.StartScreenStreamResponse.class,
-            de.deviceviewer.proto.StopScreenStreamResponse.class,
           };
           java.lang.String info =
-              "\u0000\u0005\u0001\u0000\u0001\u0005\u0005\u0000\u0000\u0000\u0001<\u0000\u0002<" +
-              "\u0000\u0003<\u0000\u0004<\u0000\u0005<\u0000";
+              "\u0000\u0003\u0001\u0000\u0001\u0003\u0003\u0000\u0000\u0000\u0001<\u0000\u0002<" +
+              "\u0000\u0003<\u0000";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       case GET_DEFAULT_INSTANCE: {

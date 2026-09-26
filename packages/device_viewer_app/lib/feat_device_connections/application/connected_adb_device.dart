@@ -1,17 +1,19 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:api_adb/api_adb.dart';
 import 'package:device_viewer/feat_device_agent/application/device_agent_client.dart';
-import 'package:device_viewer/feat_device_connections/application/free_port_provider.dart';
+import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_video_session.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/adb/adb_device_info.dart';
 
 class ConnectedAdbDevice({
   required final DeviceAgentClient agent,
   required final AdbDeviceConnection connection,
+  required final ScrcpyVideoSession scrcpySession,
 }) {
-  AdbPortForward? _videoPortForward;
-  Socket? _videoSocket;
+  // late final _scrcpySession = ScrcpyVideoSession(
+  //   connection: connection,
+  //   serverFilepathProvider: scrcpyServerFilepathProvider,
+  // );
 
   Future<AdbAgentDeviceInfo> fetchDeviceInfo() async {
     final response = await agent.fetchInfo();
@@ -29,36 +31,11 @@ class ConnectedAdbDevice({
     return Uint8List.fromList(response.png);
   }
 
-  Future<Stream<Uint8List>> startScreenMirror() async {
-    await stopScreenMirror();
-
-    final remoteVideoPort = await agent.startScreenStream();
-    final localVideoPort = await reserveFreeLocalPort();
-    final forward = await connection.forward(
-      localPort: localVideoPort,
-      remotePort: remoteVideoPort,
-    );
-
-    final socket = await Socket.connect(
-      InternetAddress.loopbackIPv4,
-      forward.localPort,
-    );
-
-    _videoPortForward = forward;
-    _videoSocket = socket;
-
-    return socket;
+  Future<Stream<Uint8List>> startScreenMirror() {
+    return scrcpySession.start();
   }
 
-  Future<void> stopScreenMirror() async {
-    if (_videoSocket == null) {
-      return;
-    }
-
-    await agent.stopScreenStream();
-    await _videoSocket?.close();
-    await _videoPortForward?.dispose();
-    _videoSocket = null;
-    _videoPortForward = null;
+  Future<void> stopScreenMirror() {
+    return scrcpySession.stop();
   }
 }

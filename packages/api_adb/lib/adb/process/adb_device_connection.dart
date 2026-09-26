@@ -13,7 +13,8 @@ class const AdbPortForward({
   required final AdbProcessRunner processRunner,
   required final String serialNumber,
   required final int localPort,
-  required final int remotePort,
+  final int? remotePort,
+  final String? remoteSocketName,
 }) {
   Future<void> dispose() {
     return processRunner.run([
@@ -94,6 +95,31 @@ class const AdbDeviceConnection({
       serialNumber: serialNumber,
       localPort: localPort,
       remotePort: remotePort,
+    );
+  }
+
+  Future<AdbPortForward> forwardAbstract({
+    required int localPort,
+    required String remoteSocketName,
+  }) async {
+    final process = await processRunner.run([
+      '-s',
+      serialNumber,
+      'forward',
+      'tcp:$localPort',
+      'localabstract:$remoteSocketName',
+    ]);
+
+    if (process.exitCode != 0) {
+      // TODO(Felix): AdbException type
+      throw Exception('adb forward failed: ${process.stderr}');
+    }
+
+    return AdbPortForward(
+      processRunner: processRunner,
+      serialNumber: serialNumber,
+      localPort: localPort,
+      remoteSocketName: remoteSocketName,
     );
   }
 }

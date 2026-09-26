@@ -329,13 +329,12 @@ extension DeviceCanvasEventPatterns on DeviceCanvasEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnToggleScreenMirror value)?  onToggleScreenMirror,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
-return onCaptureScreenshot(_that);case _OnToggleScreenMirror() when onToggleScreenMirror != null:
-return onToggleScreenMirror(_that);case _:
+return onCaptureScreenshot(_that);case _:
   return orElse();
 
 }
@@ -353,13 +352,12 @@ return onToggleScreenMirror(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnToggleScreenMirror value)  onToggleScreenMirror,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup(_that);case _OnCaptureScreenshot():
-return onCaptureScreenshot(_that);case _OnToggleScreenMirror():
-return onToggleScreenMirror(_that);}
+return onCaptureScreenshot(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -373,13 +371,12 @@ return onToggleScreenMirror(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnToggleScreenMirror value)?  onToggleScreenMirror,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
-return onCaptureScreenshot(_that);case _OnToggleScreenMirror() when onToggleScreenMirror != null:
-return onToggleScreenMirror(_that);case _:
+return onCaptureScreenshot(_that);case _:
   return null;
 
 }
@@ -396,12 +393,11 @@ return onToggleScreenMirror(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCaptureScreenshot,TResult Function( CanvasDevice device)?  onToggleScreenMirror,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCaptureScreenshot,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
-return onCaptureScreenshot(_that.device);case _OnToggleScreenMirror() when onToggleScreenMirror != null:
-return onToggleScreenMirror(_that.device);case _:
+return onCaptureScreenshot(_that.device);case _:
   return orElse();
 
 }
@@ -419,12 +415,11 @@ return onToggleScreenMirror(_that.device);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCaptureScreenshot,required TResult Function( CanvasDevice device)  onToggleScreenMirror,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCaptureScreenshot,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnCaptureScreenshot():
-return onCaptureScreenshot(_that.device);case _OnToggleScreenMirror():
-return onToggleScreenMirror(_that.device);}
+return onCaptureScreenshot(_that.device);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -438,12 +433,11 @@ return onToggleScreenMirror(_that.device);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCaptureScreenshot,TResult? Function( CanvasDevice device)?  onToggleScreenMirror,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCaptureScreenshot,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
-return onCaptureScreenshot(_that.device);case _OnToggleScreenMirror() when onToggleScreenMirror != null:
-return onToggleScreenMirror(_that.device);case _:
+return onCaptureScreenshot(_that.device);case _:
   return null;
 
 }
@@ -543,83 +537,6 @@ class __$OnCaptureScreenshotCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
   return _then(_OnCaptureScreenshot(
-null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as CanvasDevice,
-  ));
-}
-
-/// Create a copy of DeviceCanvasEvent
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$CanvasDeviceCopyWith<$Res> get device {
-  
-  return $CanvasDeviceCopyWith<$Res>(_self.device, (value) {
-    return _then(_self.copyWith(device: value));
-  });
-}
-}
-
-/// @nodoc
-
-
-class _OnToggleScreenMirror implements DeviceCanvasEvent {
-  const _OnToggleScreenMirror(this.device);
-  
-
- final  CanvasDevice device;
-
-/// Create a copy of DeviceCanvasEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$OnToggleScreenMirrorCopyWith<_OnToggleScreenMirror> get copyWith => __$OnToggleScreenMirrorCopyWithImpl<_OnToggleScreenMirror>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnToggleScreenMirror&&(identical(other.device, device) || other.device == device));
-}
-
-
-@override
-int get hashCode {
-    return Object.hash(runtimeType,device);
-}
-
-@override
-String toString() {
-    return 'DeviceCanvasEvent.onToggleScreenMirror(device: $device)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$OnToggleScreenMirrorCopyWith<$Res> implements $DeviceCanvasEventCopyWith<$Res> {
-  factory _$OnToggleScreenMirrorCopyWith(_OnToggleScreenMirror value, $Res Function(_OnToggleScreenMirror) _then) = __$OnToggleScreenMirrorCopyWithImpl;
-@useResult
-$Res call({
- CanvasDevice device
-});
-
-
-$CanvasDeviceCopyWith<$Res> get device;
-
-}
-/// @nodoc
-class __$OnToggleScreenMirrorCopyWithImpl<$Res>
-    implements _$OnToggleScreenMirrorCopyWith<$Res> {
-  __$OnToggleScreenMirrorCopyWithImpl(this._self, this._then);
-
-  final _OnToggleScreenMirror _self;
-  final $Res Function(_OnToggleScreenMirror) _then;
-
-/// Create a copy of DeviceCanvasEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
-  return _then(_OnToggleScreenMirror(
 null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as CanvasDevice,
   ));

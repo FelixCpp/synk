@@ -43,27 +43,5 @@ public interface AgentResponseOrBuilder extends
    */
   de.deviceviewer.proto.AgentError getError();
 
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   * @return Whether the startScreenStream field is set.
-   */
-  boolean hasStartScreenStream();
-  /**
-   * <code>.device_agent.StartScreenStreamResponse start_screen_stream = 4;</code>
-   * @return The startScreenStream.
-   */
-  de.deviceviewer.proto.StartScreenStreamResponse getStartScreenStream();
-
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   * @return Whether the stopScreenStream field is set.
-   */
-  boolean hasStopScreenStream();
-  /**
-   * <code>.device_agent.StopScreenStreamResponse stop_screen_stream = 5;</code>
-   * @return The stopScreenStream.
-   */
-  de.deviceviewer.proto.StopScreenStreamResponse getStopScreenStream();
-
   public de.deviceviewer.proto.AgentResponse.PayloadCase getPayloadCase();
 }

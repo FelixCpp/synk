@@ -63,47 +63,6 @@ final $typed_data.Uint8List captureScreenshotResponseDescriptor =
     $convert.base64Decode(
         'ChlDYXB0dXJlU2NyZWVuc2hvdFJlc3BvbnNlEhAKA3BuZxgBIAEoDFIDcG5n');
 
-@$core.Deprecated('Use startScreenStreamRequestDescriptor instead')
-const StartScreenStreamRequest$json = {
-  '1': 'StartScreenStreamRequest',
-};
-
-/// Descriptor for `StartScreenStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startScreenStreamRequestDescriptor =
-    $convert.base64Decode('ChhTdGFydFNjcmVlblN0cmVhbVJlcXVlc3Q=');
-
-@$core.Deprecated('Use startScreenStreamResponseDescriptor instead')
-const StartScreenStreamResponse$json = {
-  '1': 'StartScreenStreamResponse',
-  '2': [
-    {'1': 'video_port', '3': 1, '4': 1, '5': 5, '10': 'videoPort'},
-  ],
-};
-
-/// Descriptor for `StartScreenStreamResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List startScreenStreamResponseDescriptor =
-    $convert.base64Decode(
-        'ChlTdGFydFNjcmVlblN0cmVhbVJlc3BvbnNlEh0KCnZpZGVvX3BvcnQYASABKAVSCXZpZGVvUG'
-        '9ydA==');
-
-@$core.Deprecated('Use stopScreenStreamRequestDescriptor instead')
-const StopScreenStreamRequest$json = {
-  '1': 'StopScreenStreamRequest',
-};
-
-/// Descriptor for `StopScreenStreamRequest`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopScreenStreamRequestDescriptor =
-    $convert.base64Decode('ChdTdG9wU2NyZWVuU3RyZWFtUmVxdWVzdA==');
-
-@$core.Deprecated('Use stopScreenStreamResponseDescriptor instead')
-const StopScreenStreamResponse$json = {
-  '1': 'StopScreenStreamResponse',
-};
-
-/// Descriptor for `StopScreenStreamResponse`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List stopScreenStreamResponseDescriptor =
-    $convert.base64Decode('ChhTdG9wU2NyZWVuU3RyZWFtUmVzcG9uc2U=');
-
 @$core.Deprecated('Use agentErrorDescriptor instead')
 const AgentError$json = {
   '1': 'AgentError',
@@ -138,24 +97,6 @@ const AgentRequest$json = {
       '9': 0,
       '10': 'captureScreenshot'
     },
-    {
-      '1': 'start_screen_stream',
-      '3': 3,
-      '4': 1,
-      '5': 11,
-      '6': '.device_agent.StartScreenStreamRequest',
-      '9': 0,
-      '10': 'startScreenStream'
-    },
-    {
-      '1': 'stop_screen_stream',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.device_agent.StopScreenStreamRequest',
-      '9': 0,
-      '10': 'stopScreenStream'
-    },
   ],
   '8': [
     {'1': 'payload'},
@@ -166,11 +107,8 @@ const AgentRequest$json = {
 final $typed_data.Uint8List agentRequestDescriptor = $convert.base64Decode(
     'CgxBZ2VudFJlcXVlc3QSOQoIZ2V0X2luZm8YASABKAsyHC5kZXZpY2VfYWdlbnQuR2V0SW5mb1'
     'JlcXVlc3RIAFIHZ2V0SW5mbxJXChJjYXB0dXJlX3NjcmVlbnNob3QYAiABKAsyJi5kZXZpY2Vf'
-    'YWdlbnQuQ2FwdHVyZVNjcmVlbnNob3RSZXF1ZXN0SABSEWNhcHR1cmVTY3JlZW5zaG90ElgKE3'
-    'N0YXJ0X3NjcmVlbl9zdHJlYW0YAyABKAsyJi5kZXZpY2VfYWdlbnQuU3RhcnRTY3JlZW5TdHJl'
-    'YW1SZXF1ZXN0SABSEXN0YXJ0U2NyZWVuU3RyZWFtElUKEnN0b3Bfc2NyZWVuX3N0cmVhbRgEIA'
-    'EoCzIlLmRldmljZV9hZ2VudC5TdG9wU2NyZWVuU3RyZWFtUmVxdWVzdEgAUhBzdG9wU2NyZWVu'
-    'U3RyZWFtQgkKB3BheWxvYWQ=');
+    'YWdlbnQuQ2FwdHVyZVNjcmVlbnNob3RSZXF1ZXN0SABSEWNhcHR1cmVTY3JlZW5zaG90QgkKB3'
+    'BheWxvYWQ=');
 
 @$core.Deprecated('Use agentResponseDescriptor instead')
 const AgentResponse$json = {
@@ -203,24 +141,6 @@ const AgentResponse$json = {
       '9': 0,
       '10': 'error'
     },
-    {
-      '1': 'start_screen_stream',
-      '3': 4,
-      '4': 1,
-      '5': 11,
-      '6': '.device_agent.StartScreenStreamResponse',
-      '9': 0,
-      '10': 'startScreenStream'
-    },
-    {
-      '1': 'stop_screen_stream',
-      '3': 5,
-      '4': 1,
-      '5': 11,
-      '6': '.device_agent.StopScreenStreamResponse',
-      '9': 0,
-      '10': 'stopScreenStream'
-    },
   ],
   '8': [
     {'1': 'payload'},
@@ -232,8 +152,5 @@ final $typed_data.Uint8List agentResponseDescriptor = $convert.base64Decode(
     'Cg1BZ2VudFJlc3BvbnNlEjoKCGdldF9pbmZvGAEgASgLMh0uZGV2aWNlX2FnZW50LkdldEluZm'
     '9SZXNwb25zZUgAUgdnZXRJbmZvElgKEmNhcHR1cmVfc2NyZWVuc2hvdBgCIAEoCzInLmRldmlj'
     'ZV9hZ2VudC5DYXB0dXJlU2NyZWVuc2hvdFJlc3BvbnNlSABSEWNhcHR1cmVTY3JlZW5zaG90Ej'
-    'AKBWVycm9yGAMgASgLMhguZGV2aWNlX2FnZW50LkFnZW50RXJyb3JIAFIFZXJyb3ISWQoTc3Rh'
-    'cnRfc2NyZWVuX3N0cmVhbRgEIAEoCzInLmRldmljZV9hZ2VudC5TdGFydFNjcmVlblN0cmVhbV'
-    'Jlc3BvbnNlSABSEXN0YXJ0U2NyZWVuU3RyZWFtElYKEnN0b3Bfc2NyZWVuX3N0cmVhbRgFIAEo'
-    'CzImLmRldmljZV9hZ2VudC5TdG9wU2NyZWVuU3RyZWFtUmVzcG9uc2VIAFIQc3RvcFNjcmVlbl'
-    'N0cmVhbUIJCgdwYXlsb2Fk');
+    'AKBWVycm9yGAMgASgLMhguZGV2aWNlX2FnZW50LkFnZW50RXJyb3JIAFIFZXJyb3JCCQoHcGF5'
+    'bG9hZA==');

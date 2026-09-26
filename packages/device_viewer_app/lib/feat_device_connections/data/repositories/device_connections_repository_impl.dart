@@ -6,6 +6,8 @@ import 'package:device_viewer/feat_device_agent/application/device_agent_client.
 import 'package:device_viewer/feat_device_connections/application/connected_adb_device.dart';
 import 'package:device_viewer/feat_device_connections/application/dex_file_provider.dart';
 import 'package:device_viewer/feat_device_connections/application/free_port_provider.dart';
+import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_server_file_provider.dart';
+import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_video_session.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
 import 'package:rxdart/rxdart.dart';
@@ -14,6 +16,7 @@ class DeviceConnectionsRepositoryImpl({
   required final AdbApi api,
 }) implements DeviceConnectionsRepository {
   final dexFilepathProvider = getDexFilepathProvider();
+  final scrcpyServerFilepathProvider = getScrcpyServerFilepathProvider();
   final sessions = <AndroidDeviceId, _AdbAgentSession>{};
   final connectedIds = BehaviorSubject.seeded(<AndroidDeviceId>{});
 
@@ -52,6 +55,11 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   Future<void> connect(AndroidDevice device) async {
+    assert(
+      !sessions.containsKey(device.id),
+      "There's already an open session for ${device.id}",
+    );
+
     final connection = api.connect(device.id);
     final dexFilepath = await dexFilepathProvider();
 
@@ -75,9 +83,6 @@ class DeviceConnectionsRepositoryImpl({
 
     await Future.delayed(const .new(seconds: 1));
 
-    // A fixed local port only works for a single device: two connected
-    // devices would both need to forward to the same host-side port, and
-    // the second `adb forward` would silently steal it from the first.
     final localControlPort = await reserveFreeLocalPort();
     final portForward = await connection.forward(
       localPort: localControlPort,
@@ -89,14 +94,24 @@ class DeviceConnectionsRepositoryImpl({
       portForward.localPort,
     );
 
-    final agent = DeviceAgentClient(socket: socket);
-
     sessions.putIfAbsent(device.id, () {
+      final agent = DeviceAgentClient(socket: socket);
+      final videoSession = ScrcpyVideoSession(
+        connection: connection,
+        serverFilepathProvider: scrcpyServerFilepathProvider,
+      );
+
+      final connectedDevice = ConnectedAdbDevice(
+        agent: agent,
+        connection: connection,
+        scrcpySession: videoSession,
+      );
+
       return _AdbAgentSession(
         agentProcess: agentProcess,
         portForward: portForward,
         agent: agent,
-        connectedDevice: ConnectedAdbDevice(agent: agent, connection: connection),
+        connectedDevice: connectedDevice,
       );
     });
 

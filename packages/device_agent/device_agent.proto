@@ -15,20 +15,12 @@ message GetInfoResponse {
 message CaptureScreenshotRequest {}
 message CaptureScreenshotResponse { bytes png = 1; }
 
-message StartScreenStreamRequest {}
-message StartScreenStreamResponse { int32 video_port = 1; }
-
-message StopScreenStreamRequest {}
-message StopScreenStreamResponse {}
-
 message AgentError { string message = 1; }
 
 message AgentRequest {
   oneof payload {
     GetInfoRequest get_info = 1;
     CaptureScreenshotRequest capture_screenshot = 2;
-    StartScreenStreamRequest start_screen_stream = 3;
-    StopScreenStreamRequest stop_screen_stream = 4;
   }
 }
 
@@ -37,7 +29,5 @@ message AgentResponse {
     GetInfoResponse get_info = 1;
     CaptureScreenshotResponse capture_screenshot = 2;
     AgentError error = 3;
-    StartScreenStreamResponse start_screen_stream = 4;
-    StopScreenStreamResponse stop_screen_stream = 5;
   }
 }

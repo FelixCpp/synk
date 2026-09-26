@@ -18,11 +18,6 @@ class DeviceAgentClient({
   final bytes = StreamQueue(socket.expand((chunk) => chunk));
 
   this {
-    // A failed write (e.g. the agent process died or the adb port forward
-    // was torn down) completes `socket.done` with an error on a path that
-    // isn't awaited anywhere. Left unhandled, that surfaces as an uncaught
-    // SocketException outside of `_call`'s try/catch. The actual failure is
-    // still reported to callers via the `bytes` stream erroring out.
     unawaited(socket.done.catchError((_) {}));
   }
 
@@ -59,42 +54,6 @@ class DeviceAgentClient({
     );
 
     return response.captureScreenshot;
-  }
-
-  Future<int> startScreenStream() async {
-    final response = await _call(
-      AgentRequest(startScreenStream: StartScreenStreamRequest()),
-    );
-
-    if (response.whichPayload() == .error) {
-      assert(response.hasError(), "Received Error object without being set.");
-      throw AdbAgentClientException(message: response.error.message);
-    }
-
-    assert(
-      (response.whichPayload() == .startScreenStream) &&
-          response.hasStartScreenStream(),
-      "Received unexpected response from agent.",
-    );
-
-    return response.startScreenStream.videoPort;
-  }
-
-  Future<void> stopScreenStream() async {
-    final response = await _call(
-      AgentRequest(stopScreenStream: StopScreenStreamRequest()),
-    );
-
-    if (response.whichPayload() == .error) {
-      assert(response.hasError(), "Received Error object without being set.");
-      throw AdbAgentClientException(message: response.error.message);
-    }
-
-    assert(
-      (response.whichPayload() == .stopScreenStream) &&
-          response.hasStopScreenStream(),
-      "Received unexpected response from agent.",
-    );
   }
 
   Future<AgentResponse> _call(AgentRequest request) async {

@@ -256,203 +256,6 @@ class CaptureScreenshotResponse extends $pb.GeneratedMessage {
   void clearPng() => $_clearField(1);
 }
 
-/// Starts mirroring the device screen. The agent opens a second, dedicated
-/// TCP socket carrying a raw H.264 Annex-B elementary stream (no framing, no
-/// protobuf envelope per frame) and reports the port to connect to here.
-class StartScreenStreamRequest extends $pb.GeneratedMessage {
-  factory StartScreenStreamRequest() => StartScreenStreamRequest._();
-
-  StartScreenStreamRequest._();
-
-  factory StartScreenStreamRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StartScreenStreamRequest()..mergeFromBuffer(data, registry);
-  factory StartScreenStreamRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StartScreenStreamRequest()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StartScreenStreamRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
-      createEmptyInstance: StartScreenStreamRequest.$_createMessage)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartScreenStreamRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartScreenStreamRequest copyWith(
-          void Function(StartScreenStreamRequest) updates) =>
-      super.copyWith((message) => updates(message as StartScreenStreamRequest))
-          as StartScreenStreamRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use StartScreenStreamRequest() / StartScreenStreamRequest.new instead')
-  static StartScreenStreamRequest create() => StartScreenStreamRequest._();
-  static $pb.GeneratedMessage $_createMessage() => StartScreenStreamRequest._();
-  @$core.override
-  StartScreenStreamRequest createEmptyInstance() =>
-      StartScreenStreamRequest._();
-  @$core.pragma('dart2js:noInline')
-  static StartScreenStreamRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StartScreenStreamRequest>(
-          StartScreenStreamRequest.$_createMessage);
-  static StartScreenStreamRequest? _defaultInstance;
-}
-
-class StartScreenStreamResponse extends $pb.GeneratedMessage {
-  factory StartScreenStreamResponse({
-    $core.int? videoPort,
-  }) {
-    final result = StartScreenStreamResponse._();
-    if (videoPort != null) result.videoPort = videoPort;
-    return result;
-  }
-
-  StartScreenStreamResponse._();
-
-  factory StartScreenStreamResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StartScreenStreamResponse()..mergeFromBuffer(data, registry);
-  factory StartScreenStreamResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StartScreenStreamResponse()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StartScreenStreamResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
-      createEmptyInstance: StartScreenStreamResponse.$_createMessage)
-    ..aI(1, _omitFieldNames ? '' : 'videoPort')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartScreenStreamResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StartScreenStreamResponse copyWith(
-          void Function(StartScreenStreamResponse) updates) =>
-      super.copyWith((message) => updates(message as StartScreenStreamResponse))
-          as StartScreenStreamResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use StartScreenStreamResponse() / StartScreenStreamResponse.new instead')
-  static StartScreenStreamResponse create() => StartScreenStreamResponse._();
-  static $pb.GeneratedMessage $_createMessage() =>
-      StartScreenStreamResponse._();
-  @$core.override
-  StartScreenStreamResponse createEmptyInstance() =>
-      StartScreenStreamResponse._();
-  @$core.pragma('dart2js:noInline')
-  static StartScreenStreamResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StartScreenStreamResponse>(
-          StartScreenStreamResponse.$_createMessage);
-  static StartScreenStreamResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.int get videoPort => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set videoPort($core.int value) => $_setSignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasVideoPort() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearVideoPort() => $_clearField(1);
-}
-
-/// Stops the screen mirror started by StartScreenStreamRequest and tears down
-/// the video socket on the agent side.
-class StopScreenStreamRequest extends $pb.GeneratedMessage {
-  factory StopScreenStreamRequest() => StopScreenStreamRequest._();
-
-  StopScreenStreamRequest._();
-
-  factory StopScreenStreamRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StopScreenStreamRequest()..mergeFromBuffer(data, registry);
-  factory StopScreenStreamRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StopScreenStreamRequest()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StopScreenStreamRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
-      createEmptyInstance: StopScreenStreamRequest.$_createMessage)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StopScreenStreamRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StopScreenStreamRequest copyWith(
-          void Function(StopScreenStreamRequest) updates) =>
-      super.copyWith((message) => updates(message as StopScreenStreamRequest))
-          as StopScreenStreamRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use StopScreenStreamRequest() / StopScreenStreamRequest.new instead')
-  static StopScreenStreamRequest create() => StopScreenStreamRequest._();
-  static $pb.GeneratedMessage $_createMessage() => StopScreenStreamRequest._();
-  @$core.override
-  StopScreenStreamRequest createEmptyInstance() => StopScreenStreamRequest._();
-  @$core.pragma('dart2js:noInline')
-  static StopScreenStreamRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StopScreenStreamRequest>(
-          StopScreenStreamRequest.$_createMessage);
-  static StopScreenStreamRequest? _defaultInstance;
-}
-
-class StopScreenStreamResponse extends $pb.GeneratedMessage {
-  factory StopScreenStreamResponse() => StopScreenStreamResponse._();
-
-  StopScreenStreamResponse._();
-
-  factory StopScreenStreamResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StopScreenStreamResponse()..mergeFromBuffer(data, registry);
-  factory StopScreenStreamResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      StopScreenStreamResponse()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'StopScreenStreamResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
-      createEmptyInstance: StopScreenStreamResponse.$_createMessage)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StopScreenStreamResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  StopScreenStreamResponse copyWith(
-          void Function(StopScreenStreamResponse) updates) =>
-      super.copyWith((message) => updates(message as StopScreenStreamResponse))
-          as StopScreenStreamResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  @$core.Deprecated(
-      'Use StopScreenStreamResponse() / StopScreenStreamResponse.new instead')
-  static StopScreenStreamResponse create() => StopScreenStreamResponse._();
-  static $pb.GeneratedMessage $_createMessage() => StopScreenStreamResponse._();
-  @$core.override
-  StopScreenStreamResponse createEmptyInstance() =>
-      StopScreenStreamResponse._();
-  @$core.pragma('dart2js:noInline')
-  static StopScreenStreamResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<StopScreenStreamResponse>(
-          StopScreenStreamResponse.$_createMessage);
-  static StopScreenStreamResponse? _defaultInstance;
-}
-
 class AgentError extends $pb.GeneratedMessage {
   factory AgentError({
     $core.String? message,
@@ -508,26 +311,16 @@ class AgentError extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(1);
 }
 
-enum AgentRequest_Payload {
-  getInfo,
-  captureScreenshot,
-  startScreenStream,
-  stopScreenStream,
-  notSet
-}
+enum AgentRequest_Payload { getInfo, captureScreenshot, notSet }
 
 class AgentRequest extends $pb.GeneratedMessage {
   factory AgentRequest({
     GetInfoRequest? getInfo,
     CaptureScreenshotRequest? captureScreenshot,
-    StartScreenStreamRequest? startScreenStream,
-    StopScreenStreamRequest? stopScreenStream,
   }) {
     final result = AgentRequest._();
     if (getInfo != null) result.getInfo = getInfo;
     if (captureScreenshot != null) result.captureScreenshot = captureScreenshot;
-    if (startScreenStream != null) result.startScreenStream = startScreenStream;
-    if (stopScreenStream != null) result.stopScreenStream = stopScreenStream;
     return result;
   }
 
@@ -544,25 +337,18 @@ class AgentRequest extends $pb.GeneratedMessage {
       _AgentRequest_PayloadByTag = {
     1: AgentRequest_Payload.getInfo,
     2: AgentRequest_Payload.captureScreenshot,
-    3: AgentRequest_Payload.startScreenStream,
-    4: AgentRequest_Payload.stopScreenStream,
     0: AgentRequest_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'AgentRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
       createEmptyInstance: AgentRequest.$_createMessage)
-    ..oo(0, [1, 2, 3, 4])
+    ..oo(0, [1, 2])
     ..aOM<GetInfoRequest>(1, _omitFieldNames ? '' : 'getInfo',
         subBuilder: GetInfoRequest.$_createMessage)
     ..aOM<CaptureScreenshotRequest>(
         2, _omitFieldNames ? '' : 'captureScreenshot',
         subBuilder: CaptureScreenshotRequest.$_createMessage)
-    ..aOM<StartScreenStreamRequest>(
-        3, _omitFieldNames ? '' : 'startScreenStream',
-        subBuilder: StartScreenStreamRequest.$_createMessage)
-    ..aOM<StopScreenStreamRequest>(4, _omitFieldNames ? '' : 'stopScreenStream',
-        subBuilder: StopScreenStreamRequest.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -589,14 +375,10 @@ class AgentRequest extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
-  @$pb.TagNumber(3)
-  @$pb.TagNumber(4)
   AgentRequest_Payload whichPayload() =>
       _AgentRequest_PayloadByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
-  @$pb.TagNumber(3)
-  @$pb.TagNumber(4)
   void clearPayload() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -620,53 +402,20 @@ class AgentRequest extends $pb.GeneratedMessage {
   void clearCaptureScreenshot() => $_clearField(2);
   @$pb.TagNumber(2)
   CaptureScreenshotRequest ensureCaptureScreenshot() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  StartScreenStreamRequest get startScreenStream => $_getN(2);
-  @$pb.TagNumber(3)
-  set startScreenStream(StartScreenStreamRequest value) => $_setField(3, value);
-  @$pb.TagNumber(3)
-  $core.bool hasStartScreenStream() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearStartScreenStream() => $_clearField(3);
-  @$pb.TagNumber(3)
-  StartScreenStreamRequest ensureStartScreenStream() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  StopScreenStreamRequest get stopScreenStream => $_getN(3);
-  @$pb.TagNumber(4)
-  set stopScreenStream(StopScreenStreamRequest value) => $_setField(4, value);
-  @$pb.TagNumber(4)
-  $core.bool hasStopScreenStream() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearStopScreenStream() => $_clearField(4);
-  @$pb.TagNumber(4)
-  StopScreenStreamRequest ensureStopScreenStream() => $_ensure(3);
 }
 
-enum AgentResponse_Payload {
-  getInfo,
-  captureScreenshot,
-  error,
-  startScreenStream,
-  stopScreenStream,
-  notSet
-}
+enum AgentResponse_Payload { getInfo, captureScreenshot, error, notSet }
 
 class AgentResponse extends $pb.GeneratedMessage {
   factory AgentResponse({
     GetInfoResponse? getInfo,
     CaptureScreenshotResponse? captureScreenshot,
     AgentError? error,
-    StartScreenStreamResponse? startScreenStream,
-    StopScreenStreamResponse? stopScreenStream,
   }) {
     final result = AgentResponse._();
     if (getInfo != null) result.getInfo = getInfo;
     if (captureScreenshot != null) result.captureScreenshot = captureScreenshot;
     if (error != null) result.error = error;
-    if (startScreenStream != null) result.startScreenStream = startScreenStream;
-    if (stopScreenStream != null) result.stopScreenStream = stopScreenStream;
     return result;
   }
 
@@ -684,15 +433,13 @@ class AgentResponse extends $pb.GeneratedMessage {
     1: AgentResponse_Payload.getInfo,
     2: AgentResponse_Payload.captureScreenshot,
     3: AgentResponse_Payload.error,
-    4: AgentResponse_Payload.startScreenStream,
-    5: AgentResponse_Payload.stopScreenStream,
     0: AgentResponse_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'AgentResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
       createEmptyInstance: AgentResponse.$_createMessage)
-    ..oo(0, [1, 2, 3, 4, 5])
+    ..oo(0, [1, 2, 3])
     ..aOM<GetInfoResponse>(1, _omitFieldNames ? '' : 'getInfo',
         subBuilder: GetInfoResponse.$_createMessage)
     ..aOM<CaptureScreenshotResponse>(
@@ -700,12 +447,6 @@ class AgentResponse extends $pb.GeneratedMessage {
         subBuilder: CaptureScreenshotResponse.$_createMessage)
     ..aOM<AgentError>(3, _omitFieldNames ? '' : 'error',
         subBuilder: AgentError.$_createMessage)
-    ..aOM<StartScreenStreamResponse>(
-        4, _omitFieldNames ? '' : 'startScreenStream',
-        subBuilder: StartScreenStreamResponse.$_createMessage)
-    ..aOM<StopScreenStreamResponse>(
-        5, _omitFieldNames ? '' : 'stopScreenStream',
-        subBuilder: StopScreenStreamResponse.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -733,15 +474,11 @@ class AgentResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
-  @$pb.TagNumber(4)
-  @$pb.TagNumber(5)
   AgentResponse_Payload whichPayload() =>
       _AgentResponse_PayloadByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
-  @$pb.TagNumber(4)
-  @$pb.TagNumber(5)
   void clearPayload() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -777,29 +514,6 @@ class AgentResponse extends $pb.GeneratedMessage {
   void clearError() => $_clearField(3);
   @$pb.TagNumber(3)
   AgentError ensureError() => $_ensure(2);
-
-  @$pb.TagNumber(4)
-  StartScreenStreamResponse get startScreenStream => $_getN(3);
-  @$pb.TagNumber(4)
-  set startScreenStream(StartScreenStreamResponse value) =>
-      $_setField(4, value);
-  @$pb.TagNumber(4)
-  $core.bool hasStartScreenStream() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearStartScreenStream() => $_clearField(4);
-  @$pb.TagNumber(4)
-  StartScreenStreamResponse ensureStartScreenStream() => $_ensure(3);
-
-  @$pb.TagNumber(5)
-  StopScreenStreamResponse get stopScreenStream => $_getN(4);
-  @$pb.TagNumber(5)
-  set stopScreenStream(StopScreenStreamResponse value) => $_setField(5, value);
-  @$pb.TagNumber(5)
-  $core.bool hasStopScreenStream() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearStopScreenStream() => $_clearField(5);
-  @$pb.TagNumber(5)
-  StopScreenStreamResponse ensureStopScreenStream() => $_ensure(4);
 }
 
 const $core.bool _omitFieldNames =

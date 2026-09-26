@@ -32,27 +32,5 @@ public interface AgentRequestOrBuilder extends
    */
   de.deviceviewer.proto.CaptureScreenshotRequest getCaptureScreenshot();
 
-  /**
-   * <code>.device_agent.StartScreenStreamRequest start_screen_stream = 3;</code>
-   * @return Whether the startScreenStream field is set.
-   */
-  boolean hasStartScreenStream();
-  /**
-   * <code>.device_agent.StartScreenStreamRequest start_screen_stream = 3;</code>
-   * @return The startScreenStream.
-   */
-  de.deviceviewer.proto.StartScreenStreamRequest getStartScreenStream();
-
-  /**
-   * <code>.device_agent.StopScreenStreamRequest stop_screen_stream = 4;</code>
-   * @return Whether the stopScreenStream field is set.
-   */
-  boolean hasStopScreenStream();
-  /**
-   * <code>.device_agent.StopScreenStreamRequest stop_screen_stream = 4;</code>
-   * @return The stopScreenStream.
-   */
-  de.deviceviewer.proto.StopScreenStreamRequest getStopScreenStream();
-
   public de.deviceviewer.proto.AgentRequest.PayloadCase getPayloadCase();
 }
