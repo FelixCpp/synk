@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CanvasDevice {
 
- AndroidDevice get device; bool get isConnected;
+ AndroidDevice get device; bool get isConnected; NativeTextureId get textureId;
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $CanvasDeviceCopyWith<CanvasDevice> get copyWith => _$CanvasDeviceCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as CanvasDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.isConnected, _this.isConnected) || other.isConnected == _this.isConnected));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.isConnected, _this.isConnected) || other.isConnected == _this.isConnected)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CanvasDevice;
-  return Object.hash(runtimeType,_this.device,_this.isConnected);
+  return Object.hash(runtimeType,_this.device,_this.isConnected,_this.textureId);
 }
 
 @override
 String toString() {
   final _this = this as CanvasDevice;
-  return 'CanvasDevice(device: ${_this.device}, isConnected: ${_this.isConnected})';
+  return 'CanvasDevice(device: ${_this.device}, isConnected: ${_this.isConnected}, textureId: ${_this.textureId})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $CanvasDeviceCopyWith<$Res>  {
   factory $CanvasDeviceCopyWith(CanvasDevice value, $Res Function(CanvasDevice) _then) = _$CanvasDeviceCopyWithImpl;
 @useResult
 $Res call({
- AndroidDevice device, bool isConnected
+ AndroidDevice device, bool isConnected, NativeTextureId textureId
 });
 
 
@@ -68,11 +68,12 @@ class _$CanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? isConnected = null,}) {
-  return _then(CanvasDevice(
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,}) {
+  return _then(CanvasDevice.android(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as AndroidDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
+as NativeTextureId,
   ));
 }
 /// Create a copy of CanvasDevice
@@ -102,11 +103,11 @@ extension CanvasDevicePatterns on CanvasDevice {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CanvasDevice value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _AndroidCanvasDevice value)?  android,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _CanvasDevice() when $default != null:
-return $default(_that);case _:
+case _AndroidCanvasDevice() when android != null:
+return android(_that);case _:
   return orElse();
 
 }
@@ -124,11 +125,11 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CanvasDevice value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _AndroidCanvasDevice value)  android,}){
 final _that = this;
 switch (_that) {
-case _CanvasDevice():
-return $default(_that);}
+case _AndroidCanvasDevice():
+return android(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -142,11 +143,11 @@ return $default(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CanvasDevice value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _AndroidCanvasDevice value)?  android,}){
 final _that = this;
 switch (_that) {
-case _CanvasDevice() when $default != null:
-return $default(_that);case _:
+case _AndroidCanvasDevice() when android != null:
+return android(_that);case _:
   return null;
 
 }
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AndroidDevice device,  bool isConnected)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _CanvasDevice() when $default != null:
-return $default(_that.device,_that.isConnected);case _:
+case _AndroidCanvasDevice() when android != null:
+return android(_that.device,_that.isConnected,_that.textureId);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.device,_that.isConnected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AndroidDevice device,  bool isConnected)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)  android,}) {final _that = this;
 switch (_that) {
-case _CanvasDevice():
-return $default(_that.device,_that.isConnected);}
+case _AndroidCanvasDevice():
+return android(_that.device,_that.isConnected,_that.textureId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -201,10 +202,10 @@ return $default(_that.device,_that.isConnected);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AndroidDevice device,  bool isConnected)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,}) {final _that = this;
 switch (_that) {
-case _CanvasDevice() when $default != null:
-return $default(_that.device,_that.isConnected);case _:
+case _AndroidCanvasDevice() when android != null:
+return android(_that.device,_that.isConnected,_that.textureId);case _:
   return null;
 
 }
@@ -215,46 +216,47 @@ return $default(_that.device,_that.isConnected);case _:
 /// @nodoc
 
 
-class _CanvasDevice implements CanvasDevice {
-  const _CanvasDevice({required this.device, required this.isConnected});
+class _AndroidCanvasDevice implements CanvasDevice {
+  const _AndroidCanvasDevice({required this.device, required this.isConnected, required this.textureId});
   
 
 @override final  AndroidDevice device;
 @override final  bool isConnected;
+@override final  NativeTextureId textureId;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$CanvasDeviceCopyWith<_CanvasDevice> get copyWith => __$CanvasDeviceCopyWithImpl<_CanvasDevice>(this, _$identity);
+_$AndroidCanvasDeviceCopyWith<_AndroidCanvasDevice> get copyWith => __$AndroidCanvasDeviceCopyWithImpl<_AndroidCanvasDevice>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected)&&(identical(other.textureId, textureId) || other.textureId == textureId));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,isConnected);
+    return Object.hash(runtimeType,device,isConnected,textureId);
 }
 
 @override
 String toString() {
-    return 'CanvasDevice(device: $device, isConnected: $isConnected)';
+    return 'CanvasDevice.android(device: $device, isConnected: $isConnected, textureId: $textureId)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$CanvasDeviceCopyWith<$Res> implements $CanvasDeviceCopyWith<$Res> {
-  factory _$CanvasDeviceCopyWith(_CanvasDevice value, $Res Function(_CanvasDevice) _then) = __$CanvasDeviceCopyWithImpl;
+abstract mixin class _$AndroidCanvasDeviceCopyWith<$Res> implements $CanvasDeviceCopyWith<$Res> {
+  factory _$AndroidCanvasDeviceCopyWith(_AndroidCanvasDevice value, $Res Function(_AndroidCanvasDevice) _then) = __$AndroidCanvasDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- AndroidDevice device, bool isConnected
+ AndroidDevice device, bool isConnected, NativeTextureId textureId
 });
 
 
@@ -262,20 +264,21 @@ $Res call({
 
 }
 /// @nodoc
-class __$CanvasDeviceCopyWithImpl<$Res>
-    implements _$CanvasDeviceCopyWith<$Res> {
-  __$CanvasDeviceCopyWithImpl(this._self, this._then);
+class __$AndroidCanvasDeviceCopyWithImpl<$Res>
+    implements _$AndroidCanvasDeviceCopyWith<$Res> {
+  __$AndroidCanvasDeviceCopyWithImpl(this._self, this._then);
 
-  final _CanvasDevice _self;
-  final $Res Function(_CanvasDevice) _then;
+  final _AndroidCanvasDevice _self;
+  final $Res Function(_AndroidCanvasDevice) _then;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,}) {
-  return _then(_CanvasDevice(
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,}) {
+  return _then(_AndroidCanvasDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as AndroidDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
+as NativeTextureId,
   ));
 }
 

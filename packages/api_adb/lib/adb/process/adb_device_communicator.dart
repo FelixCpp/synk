@@ -27,7 +27,7 @@ class const AdbPortForward({
   }
 }
 
-class const AdbDeviceConnection({
+class const AdbDeviceCommunicator({
   required final String serialNumber,
   required final AdbProcessRunner processRunner,
 }) {

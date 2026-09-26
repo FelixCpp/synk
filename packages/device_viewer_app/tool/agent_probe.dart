@@ -34,7 +34,11 @@ Future<void> main(List<String> arguments) async {
     InternetAddress.loopbackIPv4,
     portForward.localPort,
   );
-  final client = DeviceAgentClient(socket: socket);
+  final client = DeviceAgentCommunicator(
+    socket: socket,
+    process: agentProcess,
+    portForward: portForward,
+  );
 
   final info = await client.fetchInfo();
   print(info);

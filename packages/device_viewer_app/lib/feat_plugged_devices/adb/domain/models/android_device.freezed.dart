@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AndroidDevice {
 
- AndroidDeviceId get id; AndroidDeviceState get state; AndroidDeviceConnection get connection; AndroidDeviceInfo get info;
+ DeviceId get id; AndroidDeviceState get state; AndroidDeviceConnection get connection;
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AndroidDeviceCopyWith<AndroidDevice> get copyWith => _$AndroidDeviceCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as AndroidDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connection, _this.connection) || other.connection == _this.connection)&&(identical(other.info, _this.info) || other.info == _this.info));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.state, _this.state) || other.state == _this.state)&&(identical(other.connection, _this.connection) || other.connection == _this.connection));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AndroidDevice;
-  return Object.hash(runtimeType,_this.id,_this.state,_this.connection,_this.info);
+  return Object.hash(runtimeType,_this.id,_this.state,_this.connection);
 }
 
 @override
 String toString() {
   final _this = this as AndroidDevice;
-  return 'AndroidDevice(id: ${_this.id}, state: ${_this.state}, connection: ${_this.connection}, info: ${_this.info})';
+  return 'AndroidDevice(id: ${_this.id}, state: ${_this.state}, connection: ${_this.connection})';
 }
 
 
@@ -51,11 +51,11 @@ abstract mixin class $AndroidDeviceCopyWith<$Res>  {
   factory $AndroidDeviceCopyWith(AndroidDevice value, $Res Function(AndroidDevice) _then) = _$AndroidDeviceCopyWithImpl;
 @useResult
 $Res call({
- AndroidDeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection, AndroidDeviceInfo info
+ DeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection
 });
 
 
-$AndroidDeviceInfoCopyWith<$Res> get info;
+
 
 }
 /// @nodoc
@@ -68,25 +68,15 @@ class _$AndroidDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? state = null,Object? connection = null,Object? info = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? state = null,Object? connection = null,}) {
   return _then(AndroidDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as DeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceConnection,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceInfo,
+as AndroidDeviceConnection,
   ));
 }
-/// Create a copy of AndroidDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AndroidDeviceInfoCopyWith<$Res> get info {
-  
-  return $AndroidDeviceInfoCopyWith<$Res>(_self.info, (value) {
-    return _then(_self.copyWith(info: value));
-  });
-}
+
 }
 
 
@@ -165,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidDevice() when $default != null:
-return $default(_that.id,_that.state,_that.connection,_that.info);case _:
+return $default(_that.id,_that.state,_that.connection);case _:
   return orElse();
 
 }
@@ -186,10 +176,10 @@ return $default(_that.id,_that.state,_that.connection,_that.info);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDevice():
-return $default(_that.id,_that.state,_that.connection,_that.info);}
+return $default(_that.id,_that.state,_that.connection);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -203,10 +193,10 @@ return $default(_that.id,_that.state,_that.connection,_that.info);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AndroidDeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection,  AndroidDeviceInfo info)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId id,  AndroidDeviceState state,  AndroidDeviceConnection connection)?  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDevice() when $default != null:
-return $default(_that.id,_that.state,_that.connection,_that.info);case _:
+return $default(_that.id,_that.state,_that.connection);case _:
   return null;
 
 }
@@ -218,13 +208,12 @@ return $default(_that.id,_that.state,_that.connection,_that.info);case _:
 
 
 class _AndroidDevice implements AndroidDevice {
-  const _AndroidDevice({required this.id, required this.state, required this.connection, required this.info});
+  const _AndroidDevice({required this.id, required this.state, required this.connection});
   
 
-@override final  AndroidDeviceId id;
+@override final  DeviceId id;
 @override final  AndroidDeviceState state;
 @override final  AndroidDeviceConnection connection;
-@override final  AndroidDeviceInfo info;
 
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -236,18 +225,18 @@ _$AndroidDeviceCopyWith<_AndroidDevice> get copyWith => __$AndroidDeviceCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.state, state) || other.state == state)&&(identical(other.connection, connection) || other.connection == connection)&&(identical(other.info, info) || other.info == info));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.state, state) || other.state == state)&&(identical(other.connection, connection) || other.connection == connection));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,state,connection,info);
+    return Object.hash(runtimeType,id,state,connection);
 }
 
 @override
 String toString() {
-    return 'AndroidDevice(id: $id, state: $state, connection: $connection, info: $info)';
+    return 'AndroidDevice(id: $id, state: $state, connection: $connection)';
 }
 
 
@@ -258,11 +247,11 @@ abstract mixin class _$AndroidDeviceCopyWith<$Res> implements $AndroidDeviceCopy
   factory _$AndroidDeviceCopyWith(_AndroidDevice value, $Res Function(_AndroidDevice) _then) = __$AndroidDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- AndroidDeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection, AndroidDeviceInfo info
+ DeviceId id, AndroidDeviceState state, AndroidDeviceConnection connection
 });
 
 
-@override $AndroidDeviceInfoCopyWith<$Res> get info;
+
 
 }
 /// @nodoc
@@ -275,26 +264,16 @@ class __$AndroidDeviceCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? state = null,Object? connection = null,Object? info = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? state = null,Object? connection = null,}) {
   return _then(_AndroidDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as DeviceId,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceState,connection: null == connection ? _self.connection : connection // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceConnection,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
-as AndroidDeviceInfo,
+as AndroidDeviceConnection,
   ));
 }
 
-/// Create a copy of AndroidDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AndroidDeviceInfoCopyWith<$Res> get info {
-  
-  return $AndroidDeviceInfoCopyWith<$Res>(_self.info, (value) {
-    return _then(_self.copyWith(info: value));
-  });
-}
+
 }
 
 // dart format on

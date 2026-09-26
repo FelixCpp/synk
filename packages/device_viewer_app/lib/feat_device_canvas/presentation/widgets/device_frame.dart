@@ -94,7 +94,7 @@ class const _ToolBar({
           children: [
             Expanded(
               child: Text(
-                canvasDevice.device.info.model ?? canvasDevice.device.id,
+                canvasDevice.device.id,
                 style: context.typo.headline,
                 overflow: .ellipsis,
               ),

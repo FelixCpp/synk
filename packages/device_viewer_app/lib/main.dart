@@ -2,13 +2,13 @@ import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:device_viewer/design/theme/device_viewer_macos_theme.dart';
+import 'package:device_viewer/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
-import 'package:device_viewer/feat_devices/adb/data/datasources/adb_devices_datasource.dart';
-import 'package:device_viewer/feat_devices/adb/data/repositories/adb_devices_repository_impl.dart';
-import 'package:device_viewer/feat_devices/adb/data/repositories/dummy_adb_devices_repository.dart';
-import 'package:device_viewer/feat_devices/adb/domain/repositories/adb_devices_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/data/repositories/plugged_adb_devices_repository_impl.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
@@ -23,11 +23,6 @@ Future<void> _configureMacosWindowUtils() async {
   );
   await config.apply();
 }
-
-/// Adds a handful of fake devices to the device list so the UI can be
-/// tested without needing that many physical devices around.
-/// Flip to `false` to only see devices adb actually reports.
-const _useDummyDevices = false;
 
 Future<void> main() async {
   await _configureMacosWindowUtils();
@@ -50,26 +45,23 @@ Future<void> main() async {
           dispose: (service) => service.dispose(),
         ),
         RepositoryProvider.value(value: AdbApi(adbPath: adbPath)),
-        RepositoryProvider<AdbDevicesRepository>(
+        RepositoryProvider<PluggedAdbDevicesRepository>(
           create: (context) {
-            final repository = AdbDevicesRepositoryImpl(
+            return PluggedAdbDevicesRepositoryImpl(
               AdbDevicesDatasource(
                 api: RepositoryProvider.of(context),
               ),
             );
-
-            if (_useDummyDevices) {
-              return DummyAdbDevicesRepository(repository);
-            }
-
-            return repository;
           },
           lazy: false,
         ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) {
             return DeviceConnectionsRepositoryImpl(
-              api: RepositoryProvider.of(context),
+              pluggedAdbDevicesRepository: RepositoryProvider.of(context),
+              agentRepository: AndroidDeviceAgentRepositoryImpl(
+                RepositoryProvider.of(context),
+              ),
             );
           },
           lazy: false,

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AndroidDeviceInfo {
 
- String? get product; String? get model; String? get codename;
+ String get model; String get manufacturer; String get androidVersion; int get sdkVersion;
 /// Create a copy of AndroidDeviceInfo
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AndroidDeviceInfoCopyWith<AndroidDeviceInfo> get copyWith => _$AndroidDeviceInf
 @override
 bool operator ==(Object other) {
   final _this = this as AndroidDeviceInfo;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDeviceInfo&&(identical(other.product, _this.product) || other.product == _this.product)&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.codename, _this.codename) || other.codename == _this.codename));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AndroidDeviceInfo&&(identical(other.model, _this.model) || other.model == _this.model)&&(identical(other.manufacturer, _this.manufacturer) || other.manufacturer == _this.manufacturer)&&(identical(other.androidVersion, _this.androidVersion) || other.androidVersion == _this.androidVersion)&&(identical(other.sdkVersion, _this.sdkVersion) || other.sdkVersion == _this.sdkVersion));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AndroidDeviceInfo;
-  return Object.hash(runtimeType,_this.product,_this.model,_this.codename);
+  return Object.hash(runtimeType,_this.model,_this.manufacturer,_this.androidVersion,_this.sdkVersion);
 }
 
 @override
 String toString() {
   final _this = this as AndroidDeviceInfo;
-  return 'AndroidDeviceInfo(product: ${_this.product}, model: ${_this.model}, codename: ${_this.codename})';
+  return 'AndroidDeviceInfo(model: ${_this.model}, manufacturer: ${_this.manufacturer}, androidVersion: ${_this.androidVersion}, sdkVersion: ${_this.sdkVersion})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AndroidDeviceInfoCopyWith<$Res>  {
   factory $AndroidDeviceInfoCopyWith(AndroidDeviceInfo value, $Res Function(AndroidDeviceInfo) _then) = _$AndroidDeviceInfoCopyWithImpl;
 @useResult
 $Res call({
- String? product, String? model, String? codename
+ String model, String manufacturer, String androidVersion, int sdkVersion
 });
 
 
@@ -68,12 +68,13 @@ class _$AndroidDeviceInfoCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDeviceInfo
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? product = freezed,Object? model = freezed,Object? codename = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? model = null,Object? manufacturer = null,Object? androidVersion = null,Object? sdkVersion = null,}) {
   return _then(AndroidDeviceInfo(
-product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
-as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
-as String?,codename: freezed == codename ? _self.codename : codename // ignore: cast_nullable_to_non_nullable
-as String?,
+model: null == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
+as String,manufacturer: null == manufacturer ? _self.manufacturer : manufacturer // ignore: cast_nullable_to_non_nullable
+as String,androidVersion: null == androidVersion ? _self.androidVersion : androidVersion // ignore: cast_nullable_to_non_nullable
+as String,sdkVersion: null == sdkVersion ? _self.sdkVersion : sdkVersion // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -155,10 +156,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? product,  String? model,  String? codename)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String model,  String manufacturer,  String androidVersion,  int sdkVersion)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidDeviceInfo() when $default != null:
-return $default(_that.product,_that.model,_that.codename);case _:
+return $default(_that.model,_that.manufacturer,_that.androidVersion,_that.sdkVersion);case _:
   return orElse();
 
 }
@@ -176,10 +177,10 @@ return $default(_that.product,_that.model,_that.codename);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? product,  String? model,  String? codename)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String model,  String manufacturer,  String androidVersion,  int sdkVersion)  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDeviceInfo():
-return $default(_that.product,_that.model,_that.codename);}
+return $default(_that.model,_that.manufacturer,_that.androidVersion,_that.sdkVersion);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +194,10 @@ return $default(_that.product,_that.model,_that.codename);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? product,  String? model,  String? codename)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String model,  String manufacturer,  String androidVersion,  int sdkVersion)?  $default,) {final _that = this;
 switch (_that) {
 case _AndroidDeviceInfo() when $default != null:
-return $default(_that.product,_that.model,_that.codename);case _:
+return $default(_that.model,_that.manufacturer,_that.androidVersion,_that.sdkVersion);case _:
   return null;
 
 }
@@ -208,12 +209,13 @@ return $default(_that.product,_that.model,_that.codename);case _:
 
 
 class _AndroidDeviceInfo implements AndroidDeviceInfo {
-  const _AndroidDeviceInfo({required this.product, required this.model, required this.codename});
+  const _AndroidDeviceInfo({required this.model, required this.manufacturer, required this.androidVersion, required this.sdkVersion});
   
 
-@override final  String? product;
-@override final  String? model;
-@override final  String? codename;
+@override final  String model;
+@override final  String manufacturer;
+@override final  String androidVersion;
+@override final  int sdkVersion;
 
 /// Create a copy of AndroidDeviceInfo
 /// with the given fields replaced by the non-null parameter values.
@@ -225,18 +227,18 @@ _$AndroidDeviceInfoCopyWith<_AndroidDeviceInfo> get copyWith => __$AndroidDevice
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDeviceInfo&&(identical(other.product, product) || other.product == product)&&(identical(other.model, model) || other.model == model)&&(identical(other.codename, codename) || other.codename == codename));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDeviceInfo&&(identical(other.model, model) || other.model == model)&&(identical(other.manufacturer, manufacturer) || other.manufacturer == manufacturer)&&(identical(other.androidVersion, androidVersion) || other.androidVersion == androidVersion)&&(identical(other.sdkVersion, sdkVersion) || other.sdkVersion == sdkVersion));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,product,model,codename);
+    return Object.hash(runtimeType,model,manufacturer,androidVersion,sdkVersion);
 }
 
 @override
 String toString() {
-    return 'AndroidDeviceInfo(product: $product, model: $model, codename: $codename)';
+    return 'AndroidDeviceInfo(model: $model, manufacturer: $manufacturer, androidVersion: $androidVersion, sdkVersion: $sdkVersion)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$AndroidDeviceInfoCopyWith<$Res> implements $AndroidDevice
   factory _$AndroidDeviceInfoCopyWith(_AndroidDeviceInfo value, $Res Function(_AndroidDeviceInfo) _then) = __$AndroidDeviceInfoCopyWithImpl;
 @override @useResult
 $Res call({
- String? product, String? model, String? codename
+ String model, String manufacturer, String androidVersion, int sdkVersion
 });
 
 
@@ -264,12 +266,13 @@ class __$AndroidDeviceInfoCopyWithImpl<$Res>
 
 /// Create a copy of AndroidDeviceInfo
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? product = freezed,Object? model = freezed,Object? codename = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? model = null,Object? manufacturer = null,Object? androidVersion = null,Object? sdkVersion = null,}) {
   return _then(_AndroidDeviceInfo(
-product: freezed == product ? _self.product : product // ignore: cast_nullable_to_non_nullable
-as String?,model: freezed == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
-as String?,codename: freezed == codename ? _self.codename : codename // ignore: cast_nullable_to_non_nullable
-as String?,
+model: null == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
+as String,manufacturer: null == manufacturer ? _self.manufacturer : manufacturer // ignore: cast_nullable_to_non_nullable
+as String,androidVersion: null == androidVersion ? _self.androidVersion : androidVersion // ignore: cast_nullable_to_non_nullable
+as String,sdkVersion: null == sdkVersion ? _self.sdkVersion : sdkVersion // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

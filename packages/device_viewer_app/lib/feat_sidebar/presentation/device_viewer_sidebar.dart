@@ -1,7 +1,7 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
-import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
@@ -100,23 +100,11 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
                 child: Column(
                   crossAxisAlignment: .start,
                   children: [
-                    if (adbDevice.info.model case String model) ...[
-                      Text(
-                        model,
-                        style: context.typo.headline,
-                        overflow: .ellipsis,
-                      ),
-                      Text(
-                        adbDevice.id,
-                        style: context.typo.subheadline,
-                        overflow: .ellipsis,
-                      ),
-                    ] else ...[
-                      Text(
-                        adbDevice.id,
-                        style: context.typo.headline,
-                      ),
-                    ],
+                    Text(
+                      adbDevice.id,
+                      style: context.typo.headline,
+                      overflow: .ellipsis,
+                    ),
                   ],
                 ),
               ),

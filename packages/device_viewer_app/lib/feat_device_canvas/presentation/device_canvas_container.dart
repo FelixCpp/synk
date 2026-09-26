@@ -18,7 +18,6 @@ class const DeviceCanvasContainer({
       create: (context) => DeviceCanvasBloc(
         DeviceCanvasRepositoryImpl(
           RepositoryProvider.of(context),
-          RepositoryProvider.of(context),
         ),
         RepositoryProvider.of<NotificationService>(context),
       ),
@@ -62,7 +61,7 @@ class const _Content({
               BlocProvider.of<DeviceCanvasBloc>(context)
                   .add(DeviceCanvasEvent.onCaptureScreenshot(device));
             },
-            mirrorTextureId: state.mirrorTextureIds[item.device.id],
+            mirrorTextureId: item.textureId,
           );
         },
       ),

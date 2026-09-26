@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:api_adb/api_adb.dart';
 import 'package:async/async.dart';
 
 import 'package:device_viewer/feat_device_agent/generated/device_agent.pb.dart';
@@ -12,8 +13,10 @@ class const AdbAgentClientException({required final String message})
   String toString() => 'AdbAgentClientException: $message';
 }
 
-class DeviceAgentClient({
+class AndroidDeviceAgentCommunicator({
   required final Socket socket,
+  required final Process process,
+  required final AdbPortForward portForward,
 }) {
   final bytes = StreamQueue(socket.expand((chunk) => chunk));
 
@@ -21,8 +24,16 @@ class DeviceAgentClient({
     unawaited(socket.done.catchError((_) {}));
   }
 
+  Future<void> dispose() async {
+    await socket.close();
+    await portForward.dispose();
+    process.kill();
+  }
+
   Future<GetInfoResponse> fetchInfo() async {
-    final response = await _call(AgentRequest(getInfo: GetInfoRequest()));
+    final response = await _sendToSocket(
+      AgentRequest(getInfo: GetInfoRequest()),
+    );
 
     if (response.whichPayload() == .error) {
       assert(response.hasError(), "Received Error object without being set.");
@@ -38,7 +49,7 @@ class DeviceAgentClient({
   }
 
   Future<CaptureScreenshotResponse> captureScreenshot() async {
-    final response = await _call(
+    final response = await _sendToSocket(
       AgentRequest(captureScreenshot: CaptureScreenshotRequest()),
     );
 
@@ -56,7 +67,7 @@ class DeviceAgentClient({
     return response.captureScreenshot;
   }
 
-  Future<AgentResponse> _call(AgentRequest request) async {
+  Future<AgentResponse> _sendToSocket(AgentRequest request) async {
     final requestPayload = request.writeToBuffer();
     final header = ByteData(4)..setUint32(0, requestPayload.length, Endian.big);
 
@@ -82,9 +93,5 @@ class DeviceAgentClient({
     }
 
     return AgentResponse.fromBuffer(responsePayload);
-  }
-
-  Future<void> dispose() {
-    return socket.close();
   }
 }

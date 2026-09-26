@@ -1,33 +1,26 @@
 import 'dart:async';
-import 'dart:io';
 
-import 'package:api_adb/api_adb.dart';
-import 'package:device_viewer/feat_device_agent/application/device_agent_client.dart';
-import 'package:device_viewer/feat_device_connections/application/connected_adb_device.dart';
-import 'package:device_viewer/feat_device_connections/application/dex_file_provider.dart';
-import 'package:device_viewer/feat_device_connections/application/free_port_provider.dart';
-import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_server_file_provider.dart';
-import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_video_session.dart';
+import 'package:device_viewer/feat_device_agent/application/android_device_agent.dart';
+import 'package:device_viewer/feat_device_agent/domain/repositories/device_agent_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/models/android_device_info.dart';
+import 'package:device_viewer/feat_device_connections/domain/models/device_connection.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
-import 'package:device_viewer/feat_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DeviceConnectionsRepositoryImpl({
-  required final AdbApi api,
+  required final PluggedAdbDevicesRepository pluggedAdbDevicesRepository,
+  required final DeviceAgentRepository agentRepository,
 }) implements DeviceConnectionsRepository {
-  final dexFilepathProvider = getDexFilepathProvider();
-  final scrcpyServerFilepathProvider = getScrcpyServerFilepathProvider();
-  final sessions = <AndroidDeviceId, _AdbAgentSession>{};
-  final connectedIds = BehaviorSubject.seeded(<AndroidDeviceId>{});
+  final androidDeviceAgentsById = <DeviceId, AndroidDeviceAgent>{};
+  final androidDeviceInfos = <DeviceId, AndroidDeviceInfo>{};
+  final connectedIds = BehaviorSubject.seeded(<DeviceId>{});
 
   @override
   Future<void> dispose() async {
-    for (final session in sessions.values) {
-      await session.dispose();
-    }
-
-    sessions.clear();
-    await connectedIds.close();
+    await agentRepository.dispose();
   }
 
   @override
@@ -40,101 +33,54 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   @override
-  Future<bool> isConnected(AndroidDeviceId id) async {
-    return sessions.containsKey(id);
+  Future<bool> isConnected(DeviceId id) async {
+    return androidDeviceAgentsById.containsKey(id);
   }
 
   @override
-  Stream<Set<AndroidDeviceId>> observeConnectedDeviceIds() {
-    return connectedIds.stream;
-  }
+  Stream<List<DeviceConnection>> observeDeviceConnections() {
+    return Rx.combineLatest2(
+      pluggedAdbDevicesRepository.observeAdbDevices(),
+      connectedIds,
+      (devices, ids) => (devices, ids),
+    ).map((pair) {
+      final (devices, ids) = pair;
+      final devicesById = {for (final device in devices) device.id: device};
 
-  @override
-  ConnectedAdbDevice? getConnectedAdbDevice(AndroidDeviceId id) {
-    return sessions[id]?.connectedDevice;
+      return [
+        for (final id in ids)
+          if (devicesById[id] case final device?)
+            if (androidDeviceAgentsById[id] case final agent?)
+              DeviceConnection.android(
+                device: device,
+                info: androidDeviceInfos[id]!,
+                textureId: agent.textureId,
+              ),
+      ];
+    });
   }
 
   Future<void> connect(AndroidDevice device) async {
-    assert(
-      !sessions.containsKey(device.id),
-      "There's already an open session for ${device.id}",
-    );
+    if (androidDeviceAgentsById.containsKey(device.id)) {
+      // TODO(Felix): Throw own exception type
+      throw Exception('Device connection has already been established.');
+    }
 
-    final connection = api.connect(device.id);
-    final dexFilepath = await dexFilepathProvider();
-
-    await connection.pushFile(
-      localFilepath: dexFilepath,
-      remoteFilepath: '/data/local/tmp/device_agent.dex',
-    );
-
-    final agentProcess = await connection.startShell([
-      'CLASSPATH=/data/local/tmp/device_agent.dex',
-      'app_process',
-      '/system/bin',
-      'de.deviceviewer.MainKt',
-    ]);
-
-    // stdout and stderr are blocking the stream from closing
-    // until they've been read at least once. We don't do this
-    // but want them to close anyways.
-    agentProcess.stdout.drain();
-    agentProcess.stderr.drain();
-
-    await Future.delayed(const .new(seconds: 1));
-
-    final localControlPort = await reserveFreeLocalPort();
-    final portForward = await connection.forward(
-      localPort: localControlPort,
-      remotePort: 27183,
-    );
-
-    final socket = await Socket.connect(
-      InternetAddress.loopbackIPv4,
-      portForward.localPort,
-    );
-
-    sessions.putIfAbsent(device.id, () {
-      final agent = DeviceAgentClient(socket: socket);
-      final videoSession = ScrcpyVideoSession(
-        connection: connection,
-        serverFilepathProvider: scrcpyServerFilepathProvider,
-      );
-
-      final connectedDevice = ConnectedAdbDevice(
-        agent: agent,
-        connection: connection,
-        scrcpySession: videoSession,
-      );
-
-      return _AdbAgentSession(
-        agentProcess: agentProcess,
-        portForward: portForward,
-        agent: agent,
-        connectedDevice: connectedDevice,
-      );
-    });
-
-    connectedIds.add(sessions.keys.toSet());
+    final agent = await agentRepository.establishConnection(device.id);
+    androidDeviceAgentsById[device.id] = agent;
+    androidDeviceInfos[device.id] = await agent.fetchDeviceInfo();
+    connectedIds.add(androidDeviceAgentsById.keys.toSet());
   }
 
   Future<void> disconnect(AndroidDevice device) async {
-    final session = sessions.remove(device.id);
-    await session?.dispose();
-    connectedIds.add(sessions.keys.toSet());
+    await agentRepository.cutConnection(device.id);
+    androidDeviceAgentsById.remove(device.id);
+    androidDeviceInfos.remove(device.id);
+    connectedIds.add(androidDeviceAgentsById.keys.toSet());
   }
-}
 
-class const _AdbAgentSession({
-  required final Process agentProcess,
-  required final AdbPortForward portForward,
-  required final DeviceAgentClient agent,
-  required final ConnectedAdbDevice connectedDevice,
-}) {
-  Future<void> dispose() async {
-    await connectedDevice.stopScreenMirror();
-    await agent.dispose();
-    await portForward.dispose();
-    agentProcess.kill();
+  @override
+  AndroidDeviceAgent? getAgent(DeviceId id) {
+    return androidDeviceAgentsById[id];
   }
 }

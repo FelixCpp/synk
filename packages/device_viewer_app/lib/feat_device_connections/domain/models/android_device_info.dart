@@ -5,8 +5,9 @@ part 'android_device_info.freezed.dart';
 @freezed
 sealed class AndroidDeviceInfo with _$AndroidDeviceInfo {
   const factory AndroidDeviceInfo({
-    required String? product,
-    required String? model,
-    required String? codename,
+    required String model,
+    required String manufacturer,
+    required String androidVersion,
+    required int sdkVersion,
   }) = _AndroidDeviceInfo;
 }

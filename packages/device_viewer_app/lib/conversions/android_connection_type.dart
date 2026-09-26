@@ -1,5 +1,5 @@
 import 'package:api_adb/adb/devices/adb_connection_type_dto.dart';
-import 'package:device_viewer/feat_devices/adb/domain/models/android_device_connection.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 
 extension AdbConnectionTypeToDomain on AdbConnectionTypeDto {
   AndroidDeviceConnection toDomain(String serialNumber) {
