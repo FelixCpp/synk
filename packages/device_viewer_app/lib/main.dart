@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:device_viewer/design/build_context.dart';
+import 'package:device_viewer/design/theme/device_viewer_typography.dart';
 import 'package:device_viewer/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
@@ -90,19 +92,31 @@ class const _DeviceViewerApp() extends StatelessWidget {
       title: 'Device Viewer',
       themeMode: .system,
       debugShowCheckedModeBanner: false,
-      home: AppNotificationListener(
-        notifications: RepositoryProvider.of<NotificationService>(context),
-        child: MacosWindow(
-          sidebar: Sidebar(
-            minWidth: 200,
-            builder: (context, scrollController) {
-              return DeviceViewerSidebar(
-                scrollController: scrollController,
-              );
-            },
-          ),
-          child: _DeviceViewerScreen(),
-        ),
+      home: Builder(
+        builder: (context) {
+          final theme = MacosTheme.of(context);
+          return MacosTheme(
+            data: theme.copyWith(
+              typography: DeviceViewerTypography.scaled(theme.typography),
+            ),
+            child: AppNotificationListener(
+              notifications: RepositoryProvider.of<NotificationService>(
+                context,
+              ),
+              child: MacosWindow(
+                sidebar: Sidebar(
+                  minWidth: 240,
+                  builder: (context, scrollController) {
+                    return DeviceViewerSidebar(
+                      scrollController: scrollController,
+                    );
+                  },
+                ),
+                child: _DeviceViewerScreen(),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -121,7 +135,11 @@ class const _DeviceViewerScreen() extends StatelessWidget {
             onPressed: () {
               MacosWindowScope.of(context).toggleSidebar();
             },
-            icon: MacosIcon(CupertinoIcons.sidebar_left, size: 20),
+            icon: MacosIcon(
+              CupertinoIcons.sidebar_left,
+              size: 20,
+              color: context.colors.label,
+            ),
             boxConstraints: const BoxConstraints(
               minWidth: 20,
               minHeight: 20,

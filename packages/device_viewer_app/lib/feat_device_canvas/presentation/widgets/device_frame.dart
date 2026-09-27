@@ -60,10 +60,6 @@ class _DeviceFrameState extends State<DeviceFrame>
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Shrink the whole frame - toolbar included - to the device's shape
-        // instead of stretching the picture to fill the cell. That keeps the
-        // mirror box exactly the shape of the device, so it needs no
-        // letterboxing and touch positions map straight onto it.
         final mirrorSize = _fitToAspectRatio(
           _aspectRatioOf(widget.device),
           Size(
@@ -127,8 +123,6 @@ class _DeviceFrameState extends State<DeviceFrame>
   }
 }
 
-/// The shape to lay the frame out as - the device's own, or the reference
-/// shape while still connecting, when its size is not known yet.
 double _aspectRatioOf(CanvasDevice device) {
   final screenSize = device.when(
     android: (device, isConnected, textureId, screenSize) => screenSize,
@@ -142,7 +136,6 @@ double _aspectRatioOf(CanvasDevice device) {
   return screenSize.width / screenSize.height;
 }
 
-/// The largest box of [aspectRatio] that fits inside [available].
 Size _fitToAspectRatio(double aspectRatio, Size available) {
   if (available.width <= 0 || available.height <= 0) return Size.zero;
 
@@ -201,42 +194,48 @@ class const _ToolBar({
                 ],
               ),
             ),
-            Row(
-              children: [
-                // TODO(Felix): wire up recording the mirrored stream to a file.
-                MacosTooltip(
-                  message: 'Aufnahme starten',
-                  child: MacosIconButton(
-                    onPressed: () {},
-                    icon: MacosIcon(CupertinoIcons.video_camera),
+            MacosIconTheme(
+              data: MacosIconThemeData(
+                color: context.colors.label,
+                size: 18.0,
+              ),
+              child: Row(
+                children: [
+                  // TODO(Felix): wire up recording the mirrored stream to a file.
+                  MacosTooltip(
+                    message: 'Aufnahme starten',
+                    child: MacosIconButton(
+                      onPressed: () {},
+                      icon: MacosIcon(CupertinoIcons.video_camera),
+                    ),
                   ),
-                ),
-                MacosTooltip(
-                  message: 'Screenshot aufnehmen',
-                  child: MacosIconButton(
-                    onPressed: () {
-                      onCaptureScreenshot(canvasDevice);
-                    },
-                    icon: MacosIcon(CupertinoIcons.camera),
+                  MacosTooltip(
+                    message: 'Screenshot aufnehmen',
+                    child: MacosIconButton(
+                      onPressed: () {
+                        onCaptureScreenshot(canvasDevice);
+                      },
+                      icon: MacosIcon(CupertinoIcons.camera),
+                    ),
                   ),
-                ),
-                MacosTooltip(
-                  message: 'Weitere Aktionen',
-                  child: MacosIconButton(
-                    onPressed: () {},
-                    icon: MacosIcon(CupertinoIcons.ellipsis_vertical),
+                  MacosTooltip(
+                    message: 'Weitere Aktionen',
+                    child: MacosIconButton(
+                      onPressed: () {},
+                      icon: MacosIcon(CupertinoIcons.ellipsis_vertical),
+                    ),
                   ),
-                ),
-                MacosTooltip(
-                  message: 'Spiegelung beenden',
-                  child: MacosIconButton(
-                    onPressed: () {
-                      onClose(canvasDevice);
-                    },
-                    icon: MacosIcon(CupertinoIcons.clear),
+                  MacosTooltip(
+                    message: 'Spiegelung beenden',
+                    child: MacosIconButton(
+                      onPressed: () {
+                        onClose(canvasDevice);
+                      },
+                      icon: MacosIcon(CupertinoIcons.clear),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -245,8 +244,7 @@ class const _ToolBar({
   }
 }
 
-class const _StatusDot({required final bool isLive})
-    extends StatelessWidget {
+class const _StatusDot({required final bool isLive}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isLive
@@ -279,55 +277,55 @@ class const _ScreenMirror({
   Widget build(BuildContext context) {
     return Expanded(
       child: LayoutBuilder(
-          builder: (context, constraints) {
-            final size = constraints.biggest;
+        builder: (context, constraints) {
+          final size = constraints.biggest;
 
-            void handle(ScrcpyTouchId id, Offset touchPosition) {
-              if (size.width == 0 || size.height == 0) return;
-              final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
-              final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
-              onTouch(canvasDevice, id, touchX, touchY);
-            }
+          void handle(ScrcpyTouchId id, Offset touchPosition) {
+            if (size.width == 0 || size.height == 0) return;
+            final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
+            final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
+            onTouch(canvasDevice, id, touchX, touchY);
+          }
 
-            return Listener(
-              onPointerDown: (event) {
-                if (event.buttons == kPrimaryButton) {
-                  handle(.down, event.localPosition);
-                }
-              },
-              onPointerMove: (event) {
-                handle(.move, event.localPosition);
-              },
-              onPointerUp: (event) {
-                handle(.up, event.localPosition);
-              },
-              onPointerCancel: (event) {
-                handle(.up, event.localPosition);
-              },
-              child: Stack(
-                fit: .expand,
-                children: [
-                  switch (textureId) {
-                    final id? => ColoredBox(
-                      color: DeviceViewerColors.mirrorBackground,
-                      child: Texture(textureId: id),
-                    ),
-                    null => _ConnectingState(
-                      modelName: canvasDevice.device.modelName,
-                    ),
-                  },
-                  IgnorePointer(
-                    child: FadeTransition(
-                      opacity: flash,
-                      child: const ColoredBox(
-                        color: DeviceViewerColors.screenshotFlash,
-                      ),
+          return Listener(
+            onPointerDown: (event) {
+              if (event.buttons == kPrimaryButton) {
+                handle(.down, event.localPosition);
+              }
+            },
+            onPointerMove: (event) {
+              handle(.move, event.localPosition);
+            },
+            onPointerUp: (event) {
+              handle(.up, event.localPosition);
+            },
+            onPointerCancel: (event) {
+              handle(.up, event.localPosition);
+            },
+            child: Stack(
+              fit: .expand,
+              children: [
+                switch (textureId) {
+                  final id? => ColoredBox(
+                    color: DeviceViewerColors.mirrorBackground,
+                    child: Texture(textureId: id),
+                  ),
+                  null => _ConnectingState(
+                    modelName: canvasDevice.device.modelName,
+                  ),
+                },
+                IgnorePointer(
+                  child: FadeTransition(
+                    opacity: flash,
+                    child: const ColoredBox(
+                      color: DeviceViewerColors.screenshotFlash,
                     ),
                   ),
-                ],
-              ),
-            );
-          },
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -341,18 +339,18 @@ class const _ConnectingState({required final String modelName})
 
 class _ConnectingStateState extends State<_ConnectingState>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController =
-      AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 1600),
-      )..repeat(reverse: true);
+  late final AnimationController _pulseController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1600),
+  )..repeat(reverse: true);
 
-  late final Animation<double> _pulse = Tween(
-    begin: 0.55,
-    end: 1.0,
-  ).animate(
-    CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
-  );
+  late final Animation<double> _pulse =
+      Tween(
+        begin: 0.55,
+        end: 1.0,
+      ).animate(
+        CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
+      );
 
   @override
   void dispose() {

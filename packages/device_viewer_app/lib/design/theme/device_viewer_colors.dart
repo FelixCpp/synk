@@ -2,21 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 @immutable
-class DeviceViewerColors {
-  const DeviceViewerColors._({
-    required this.canvas,
-    required this.card,
-    required this.cardHover,
-    required this.divider,
-    required this.shadow,
-    required this.label,
-    required this.secondaryLabel,
-    required this.tertiaryLabel,
-    required this.error,
-    required this.deviceConnected,
-    required this.deviceDisconnected,
-  });
-
+class const DeviceViewerColors._({
+  required final Color canvas,
+  required final Color card,
+  required final Color cardHover,
+  required final Color divider,
+  required final Color shadow,
+  required final Color label,
+  required final Color secondaryLabel,
+  required final Color tertiaryLabel,
+  required final Color error,
+  required final Color deviceConnected,
+  required final Color deviceDisconnected,
+}) {
   factory DeviceViewerColors.of(BuildContext context) {
     final theme = MacosTheme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -38,18 +36,6 @@ class DeviceViewerColors {
       deviceDisconnected: variant(MacosColors.systemGrayColor),
     );
   }
-
-  final Color canvas;
-  final Color card;
-  final Color cardHover;
-  final Color divider;
-  final Color shadow;
-  final Color label;
-  final Color secondaryLabel;
-  final Color tertiaryLabel;
-  final Color error;
-  final Color deviceConnected;
-  final Color deviceDisconnected;
 
   static const Color mirrorBackground = MacosColors.black;
   static const Color screenshotFlash = MacosColors.white;

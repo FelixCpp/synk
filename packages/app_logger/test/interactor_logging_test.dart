@@ -88,8 +88,6 @@ void main() {
   });
 
   test('does not build messages the logger would discard', () async {
-    // Interactors that run per input event would otherwise stringify their
-    // input on every single invocation, filtered out or not.
     final muted = createAppLogger(level: Level.error, output: recorded);
 
     await _MutedInputInteractor().logger(target: muted).run(_ExplodingInput());
