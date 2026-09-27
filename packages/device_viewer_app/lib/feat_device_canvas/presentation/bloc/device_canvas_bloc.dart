@@ -70,8 +70,6 @@ class DeviceCanvasBloc(
       normalizedTouchY: event.normalizedY,
     );
 
-    // Trace, not debug: this runs on every pointer move, so at debug level
-    // it would bury everything else in the log.
     return simulateTouch.logger(level: Level.trace).run((
       device: event.device.device,
       action: action,
