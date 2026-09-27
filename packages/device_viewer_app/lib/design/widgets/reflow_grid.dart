@@ -104,10 +104,11 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
-        final columns = ((viewportConstraints.maxWidth + widget.crossAxisSpacing) /
-                (widget.cellWidth + widget.crossAxisSpacing))
-            .floor()
-            .clamp(1, 1 << 30);
+        final columns =
+            ((viewportConstraints.maxWidth + widget.crossAxisSpacing) /
+                    (widget.cellWidth + widget.crossAxisSpacing))
+                .floor()
+                .clamp(1, 1 << 30);
 
         final children = <Widget>[
           for (var slot = 0; slot < widget.items.length; slot++)

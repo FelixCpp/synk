@@ -165,10 +165,10 @@ return connecting(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,TResult Function( AndroidDevice device)?  connecting,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize)?  android,TResult Function( AndroidDevice device)?  connecting,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice() when connecting != null:
+return android(_that.device,_that.isConnected,_that.textureId,_that.screenSize);case _ConnectingCanvasDevice() when connecting != null:
 return connecting(_that.device);case _:
   return orElse();
 
@@ -187,10 +187,10 @@ return connecting(_that.device);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)  android,required TResult Function( AndroidDevice device)  connecting,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize)  android,required TResult Function( AndroidDevice device)  connecting,}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice():
-return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice():
+return android(_that.device,_that.isConnected,_that.textureId,_that.screenSize);case _ConnectingCanvasDevice():
 return connecting(_that.device);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -205,10 +205,10 @@ return connecting(_that.device);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId)?  android,TResult? Function( AndroidDevice device)?  connecting,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( AndroidDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize)?  android,TResult? Function( AndroidDevice device)?  connecting,}) {final _that = this;
 switch (_that) {
 case _AndroidCanvasDevice() when android != null:
-return android(_that.device,_that.isConnected,_that.textureId);case _ConnectingCanvasDevice() when connecting != null:
+return android(_that.device,_that.isConnected,_that.textureId,_that.screenSize);case _ConnectingCanvasDevice() when connecting != null:
 return connecting(_that.device);case _:
   return null;
 
@@ -221,12 +221,16 @@ return connecting(_that.device);case _:
 
 
 class _AndroidCanvasDevice implements CanvasDevice {
-  const _AndroidCanvasDevice({required this.device, required this.isConnected, required this.textureId});
+  const _AndroidCanvasDevice({required this.device, required this.isConnected, required this.textureId, required this.screenSize});
   
 
 @override final  AndroidDevice device;
  final  bool isConnected;
  final  NativeTextureId textureId;
+/// Shape the mirror has to be drawn in. Devices differ widely here
+/// (9:19.5, 9:20, tablets), so the frame follows this instead of
+/// assuming a ratio.
+ final  DeviceScreenSize screenSize;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -238,18 +242,18 @@ _$AndroidCanvasDeviceCopyWith<_AndroidCanvasDevice> get copyWith => __$AndroidCa
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected)&&(identical(other.textureId, textureId) || other.textureId == textureId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,isConnected,textureId);
+    return Object.hash(runtimeType,device,isConnected,textureId,screenSize);
 }
 
 @override
 String toString() {
-    return 'CanvasDevice.android(device: $device, isConnected: $isConnected, textureId: $textureId)';
+    return 'CanvasDevice.android(device: $device, isConnected: $isConnected, textureId: $textureId, screenSize: $screenSize)';
 }
 
 
@@ -260,11 +264,11 @@ abstract mixin class _$AndroidCanvasDeviceCopyWith<$Res> implements $CanvasDevic
   factory _$AndroidCanvasDeviceCopyWith(_AndroidCanvasDevice value, $Res Function(_AndroidCanvasDevice) _then) = __$AndroidCanvasDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- AndroidDevice device, bool isConnected, NativeTextureId textureId
+ AndroidDevice device, bool isConnected, NativeTextureId textureId, DeviceScreenSize screenSize
 });
 
 
-@override $AndroidDeviceCopyWith<$Res> get device;
+@override $AndroidDeviceCopyWith<$Res> get device;$DeviceScreenSizeCopyWith<$Res> get screenSize;
 
 }
 /// @nodoc
@@ -277,12 +281,13 @@ class __$AndroidCanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,Object? screenSize = null,}) {
   return _then(_AndroidCanvasDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as AndroidDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
 as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
-as NativeTextureId,
+as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
+as DeviceScreenSize,
   ));
 }
 
@@ -294,6 +299,15 @@ $AndroidDeviceCopyWith<$Res> get device {
   
   return $AndroidDeviceCopyWith<$Res>(_self.device, (value) {
     return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of CanvasDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$DeviceScreenSizeCopyWith<$Res> get screenSize {
+  
+  return $DeviceScreenSizeCopyWith<$Res>(_self.screenSize, (value) {
+    return _then(_self.copyWith(screenSize: value));
   });
 }
 }

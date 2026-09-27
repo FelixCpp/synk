@@ -1,3 +1,4 @@
+import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:device_viewer/feat_device_canvas/data/datasources/screen_mirror_texture_datasource.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:flutter/services.dart';
@@ -33,6 +34,11 @@ sealed class CanvasDevice with _$CanvasDevice {
     required AndroidDevice device,
     required bool isConnected,
     required NativeTextureId textureId,
+
+    /// Shape the mirror has to be drawn in. Devices differ widely here
+    /// (9:19.5, 9:20, tablets), so the frame follows this instead of
+    /// assuming a ratio.
+    required DeviceScreenSize screenSize,
   }) = _AndroidCanvasDevice;
 
   /// Shown the moment the user asks to connect, before the agent connection

@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
-import 'package:device_viewer/design/theme/device_viewer_macos_theme.dart';
+import 'package:app_logger/app_logger.dart';
 import 'package:device_viewer/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
-import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/data/repositories/plugged_adb_devices_repository_impl.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
@@ -13,6 +13,7 @@ import 'package:device_viewer/feat_notifications/application/notification_servic
 import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:macos_ui/macos_ui.dart';
 import 'package:path/path.dart' as path;
@@ -25,6 +26,13 @@ Future<void> _configureMacosWindowUtils() async {
 }
 
 Future<void> main() async {
+  // Interactors log at debug, except the ones driven by pointer events,
+  // which log at trace so they stay out of the way until someone turns the
+  // threshold down to look at them.
+  appLogger = createAppLogger(
+    level: kDebugMode ? Level.debug : Level.info,
+  );
+
   await _configureMacosWindowUtils();
 
   final adbPath = path.normalize(
@@ -81,8 +89,6 @@ class const _DeviceViewerApp() extends StatelessWidget {
     return MacosApp(
       title: 'Device Viewer',
       themeMode: .system,
-      theme: DeviceViewerMacosTheme.light,
-      darkTheme: DeviceViewerMacosTheme.dark,
       debugShowCheckedModeBanner: false,
       home: AppNotificationListener(
         notifications: RepositoryProvider.of<NotificationService>(context),

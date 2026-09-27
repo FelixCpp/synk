@@ -1,9 +1,15 @@
 import 'dart:async';
 
+import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_device_canvas/domain/usecases/capture_screenshot_interactor.dart';
+import 'package:device_viewer/feat_device_canvas/domain/usecases/simulate_touch_event_interactor.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -15,13 +21,18 @@ part 'device_canvas_event.dart';
 
 class DeviceCanvasBloc(
   final DeviceCanvasRepository repository,
+  final DeviceConnectionsRepository connectionsRepository,
   final NotificationService notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
   final captureScreenshot = CaptureScreenshotInteractor(repository);
+  final simulateTouch = SimulateTouchEventInteractor(repository);
+  final toggleConnection = ToggleConnectionInteractor(connectionsRepository);
 
   this : super(DeviceCanvasState.initial()) {
     on<_OnSetup>(_onSetup);
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: droppable());
+    on<_OnDeviceTapped>(_onDeviceTapped, transformer: sequential());
+    on<_OnCloseDevice>(_onCloseDevice, transformer: sequential());
 
     add(DeviceCanvasEvent.onSetup());
   }
@@ -40,6 +51,39 @@ class DeviceCanvasBloc(
     Emitter<DeviceCanvasState> emit,
   ) {
     return captureScreenshot
+        .logger()
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to capture screenshot: $e'),
+          ),
+        )
+        .run(event.device.device);
+  }
+
+  FutureOr<void> _onDeviceTapped(
+    _OnDeviceTapped event,
+    Emitter<DeviceCanvasState> emit,
+  ) {
+    final action = ScrcpyTouchAction(
+      id: event.action,
+      normalizedTouchX: event.normalizedX,
+      normalizedTouchY: event.normalizedY,
+    );
+
+    // Trace, not debug: this runs on every pointer move, so at debug level
+    // it would bury everything else in the log.
+    return simulateTouch.logger(level: Level.trace).run((
+      device: event.device.device,
+      action: action,
+    ));
+  }
+
+  FutureOr<void> _onCloseDevice(
+    _OnCloseDevice event,
+    Emitter<DeviceCanvasState> emit,
+  ) {
+    return toggleConnection
+        .logger()
         .intercept(
           (e) => notifications.notify(
             .new(message: 'Failed to capture screenshot: $e'),

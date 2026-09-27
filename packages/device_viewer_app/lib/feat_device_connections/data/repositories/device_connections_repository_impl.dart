@@ -4,7 +4,7 @@ import 'package:device_viewer/feat_device_agent/application/android_device_agent
 import 'package:device_viewer/feat_device_agent/domain/repositories/device_agent_repository.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/android_device_info.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/device_connection.dart';
-import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
@@ -72,6 +72,7 @@ class DeviceConnectionsRepositoryImpl({
                 device: device,
                 info: androidDeviceInfos[id]!,
                 textureId: agent.textureId,
+                screenSize: agent.screenSize,
               ),
       ];
     });
@@ -80,16 +81,21 @@ class DeviceConnectionsRepositoryImpl({
   Future<void> connect(AndroidDevice device) async {
     if (androidDeviceAgentsById.containsKey(device.id) ||
         connectingIds.value.contains(device.id)) {
-      // TODO(Felix): Throw own exception type
-      throw Exception('Device connection has already been established.');
+      throw DeviceAlreadyConnectingException(deviceId: device.id);
     }
 
     connectingIds.add({...connectingIds.value, device.id});
     try {
       final agent = await agentRepository.establishConnection(device.id);
-      androidDeviceAgentsById[device.id] = agent;
-      androidDeviceInfos[device.id] = await agent.fetchDeviceInfo();
-      connectedIds.add(androidDeviceAgentsById.keys.toSet());
+      try {
+        final info = await agent.fetchDeviceInfo();
+        androidDeviceAgentsById[device.id] = agent;
+        androidDeviceInfos[device.id] = info;
+        connectedIds.add(androidDeviceAgentsById.keys.toSet());
+      } catch (_) {
+        await agentRepository.cutConnection(device.id);
+        rethrow;
+      }
     } finally {
       connectingIds.add({...connectingIds.value}..remove(device.id));
     }

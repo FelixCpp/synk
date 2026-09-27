@@ -1,3 +1,4 @@
+import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/domain/models/app_notification.dart';
 import 'package:device_viewer/feat_notifications/presentation/bloc/notification_bloc.dart';
@@ -41,10 +42,7 @@ void _showDialog(BuildContext context, AppNotification notification) {
         appIcon: MacosIcon(
           CupertinoIcons.exclamationmark_triangle,
           size: 56,
-          color: MacosDynamicColor.resolve(
-            MacosColors.systemRedColor,
-            context,
-          ),
+          color: context.colors.error,
         ),
         title: const Text('Fehler'),
         message: Text(notification.message),

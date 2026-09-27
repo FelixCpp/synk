@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -21,7 +22,16 @@ class AndroidDeviceAgentCommunicator({
   final bytes = StreamQueue(socket.expand((chunk) => chunk));
 
   this {
-    unawaited(socket.done.catchError((_) {}));
+    unawaited(
+      socket.done.catchError((error, StackTrace stackTrace) {
+        developer.log(
+          'Agent socket closed with an error',
+          name: 'AndroidDeviceAgentCommunicator',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
   }
 
   Future<void> dispose() async {

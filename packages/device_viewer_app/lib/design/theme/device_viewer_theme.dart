@@ -1,44 +1,7 @@
-import 'package:device_viewer/design/theme/generated/theme.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class DeviceViewerTheme {
   const DeviceViewerTheme._();
-
-  static ThemeData light(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.light();
-  }
-
-  static ThemeData dark(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.dark();
-  }
-
-  static ThemeData lightMediumContrastMode(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.lightMediumContrast();
-  }
-
-  static ThemeData darkMediumContrastMode(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.darkMediumContrast();
-  }
-
-  static ThemeData lightHighContrast(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.lightHighContrast();
-  }
-
-  static ThemeData darkHighContrastMode(BuildContext context) {
-    final textTheme = TextTheme.of(context);
-    final materialTheme = MaterialTheme(textTheme);
-    return materialTheme.darkHighContrast();
-  }
 
   static const verticalComponentSpacingSmall = 4.0;
   static const verticalComponentSpacingMedium = 8.0;
@@ -63,4 +26,33 @@ class DeviceViewerTheme {
   );
 
   static const cornerRadius = 16.0;
+  static const smallCornerRadius = 10.0;
+
+  static const hairlineThickness = 1.0;
+
+  static const cardShadow = 18.0;
+  static const cardShadowOffset = Offset(0, 6);
+
+  /// Fixed so a device frame can work out how much room is left for the
+  /// mirror before laying it out - the mirror has to be sized to the
+  /// device's aspect ratio, which is impossible if the toolbar above it
+  /// takes an unknown amount of the height.
+  static const deviceFrameToolBarHeight = 56.0;
+
+  static const deviceFrameToolBarPadding = EdgeInsets.only(
+    left: 14.0,
+    right: 6.0,
+  );
+
+  static const deviceFrameWidth = 320.0;
+
+  /// The tallest device shape a frame is laid out for. Anything up to this
+  /// fills the frame's full width; taller devices (and tablets, which are
+  /// wider) get a correspondingly narrower frame rather than a distorted
+  /// picture. 9:20 covers current phones - a Pixel 6 sits exactly on it.
+  static const deviceFrameReferenceAspectRatio = 9 / 20;
+
+  static const deviceFrameHeight =
+      deviceFrameToolBarHeight +
+      deviceFrameWidth / deviceFrameReferenceAspectRatio;
 }

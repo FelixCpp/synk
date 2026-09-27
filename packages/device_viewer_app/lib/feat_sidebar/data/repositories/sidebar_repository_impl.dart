@@ -1,4 +1,4 @@
-import 'package:device_viewer/feat_device_connections/domain/repositories/device_canvas_repository.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/domain/repositories/sidebar_repository.dart';

@@ -37,39 +37,39 @@ class _NotificationToastState extends State<NotificationToast> {
       child: SafeArea(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
-          child: Container(
-            padding: DeviceViewerTheme.cardPadding,
+          child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(
                 DeviceViewerTheme.cornerRadius,
               ),
-              color: MacosDynamicColor.resolve(
-                MacosColors.controlBackgroundColor,
-                context,
+              color: context.colors.card,
+              border: Border.all(
+                color: context.colors.divider,
+                width: DeviceViewerTheme.hairlineThickness,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: MacosColors.black.withAlpha(60),
+                  color: context.colors.shadow,
                   blurRadius: 12.0,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: Row(
-              spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MacosIcon(
-                  CupertinoIcons.exclamationmark_circle,
-                  color: MacosDynamicColor.resolve(
-                    MacosColors.systemRedColor,
-                    context,
+            child: Padding(
+              padding: DeviceViewerTheme.cardPadding,
+              child: Row(
+                spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  MacosIcon(
+                    CupertinoIcons.exclamationmark_circle,
+                    color: context.colors.error,
                   ),
-                ),
-                Flexible(
-                  child: Text(widget.message, style: context.typo.body),
-                ),
-              ],
+                  Flexible(
+                    child: Text(widget.message, style: context.typo.body),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

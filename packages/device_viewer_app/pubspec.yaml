@@ -16,6 +16,8 @@ dependencies:
 
   api_adb:
     path: ../api_adb/
+  app_logger:
+    path: ../app_logger/
   flutter_bloc: ^9.1.1
   macos_ui: ^2.2.2
   rxdart: ^0.28.0
@@ -35,6 +37,5 @@ dev_dependencies:
   freezed: ^4.0.2
 
 flutter:
-  uses-material-design: true
   assets:
     - ./assets/bundled_files/

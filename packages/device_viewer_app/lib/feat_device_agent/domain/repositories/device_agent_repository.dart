@@ -6,3 +6,21 @@ abstract interface class DeviceAgentRepository {
   Future<AndroidDeviceAgent> establishConnection(DeviceId deviceId);
   Future<void> cutConnection(DeviceId deviceId);
 }
+
+class const DeviceAgentAlreadyConnectedException({
+  required final DeviceId deviceId,
+}) implements Exception {
+  @override
+  String toString() {
+    return 'Connection already established to device $deviceId.';
+  }
+}
+
+class const DeviceAgentNotConnectedException({
+  required final DeviceId deviceId,
+}) implements Exception {
+  @override
+  String toString() {
+    return 'Tried to close connection to unconnected device $deviceId.';
+  }
+}

@@ -12,3 +12,10 @@ abstract interface class DeviceConnectionsRepository {
 
   AndroidDeviceAgent? getAgent(DeviceId id);
 }
+
+class const DeviceAlreadyConnectingException({
+  required final DeviceId deviceId,
+}) implements Exception {
+  @override
+  String toString() => 'Device $deviceId is already connected or connecting.';
+}

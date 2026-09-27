@@ -1,24 +1,28 @@
 import 'package:device_viewer/design/build_context.dart';
+import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 typedef DeviceActionCallback = void Function(CanvasDevice);
+typedef DeviceTouchCallback = void Function(
+  CanvasDevice device,
+  ScrcpyTouchId id,
+  double touchX,
+  double touchY,
+);
 
-class DeviceFrame extends StatefulWidget {
-  const DeviceFrame({
-    super.key,
-    required this.device,
-    required this.onCaptureScreenshot,
-    required this.mirrorTextureId,
-  });
-
-  final CanvasDevice device;
-  final DeviceActionCallback onCaptureScreenshot;
-  final int? mirrorTextureId;
-
+class const DeviceFrame({
+  super.key,
+  required final CanvasDevice device,
+  required final DeviceActionCallback onCaptureScreenshot,
+  required final DeviceActionCallback onClose,
+  required final DeviceTouchCallback onTouch,
+  required final int? mirrorTextureId,
+}) extends StatefulWidget {
   @override
   State<DeviceFrame> createState() => _DeviceFrameState();
 }
@@ -54,72 +58,183 @@ class _DeviceFrameState extends State<DeviceFrame>
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _ToolBar(
-          canvasDevice: widget.device,
-          onCaptureScreenshot: _handleCaptureScreenshot,
-        ),
-        _ScreenMirror(
-          canvasDevice: widget.device,
-          flash: _screenshotFlash,
-          textureId: widget.mirrorTextureId,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Shrink the whole frame - toolbar included - to the device's shape
+        // instead of stretching the picture to fill the cell. That keeps the
+        // mirror box exactly the shape of the device, so it needs no
+        // letterboxing and touch positions map straight onto it.
+        final mirrorSize = _fitToAspectRatio(
+          _aspectRatioOf(widget.device),
+          Size(
+            constraints.maxWidth,
+            constraints.maxHeight - DeviceViewerTheme.deviceFrameToolBarHeight,
+          ),
+        );
+
+        return Center(
+          child: SizedBox(
+            width: mirrorSize.width,
+            height:
+                mirrorSize.height + DeviceViewerTheme.deviceFrameToolBarHeight,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: context.colors.card,
+                borderRadius: BorderRadius.circular(
+                  DeviceViewerTheme.cornerRadius,
+                ),
+                border: Border.all(
+                  color: context.colors.divider,
+                  width: DeviceViewerTheme.hairlineThickness,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: context.colors.shadow,
+                    blurRadius: DeviceViewerTheme.cardShadow,
+                    offset: DeviceViewerTheme.cardShadowOffset,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(
+                  DeviceViewerTheme.cornerRadius -
+                      DeviceViewerTheme.hairlineThickness,
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: DeviceViewerTheme.deviceFrameToolBarHeight,
+                      child: _ToolBar(
+                        canvasDevice: widget.device,
+                        onCaptureScreenshot: _handleCaptureScreenshot,
+                        onClose: widget.onClose,
+                      ),
+                    ),
+                    _ScreenMirror(
+                      canvasDevice: widget.device,
+                      onTouch: widget.onTouch,
+                      flash: _screenshotFlash,
+                      textureId: widget.mirrorTextureId,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
+}
+
+/// The shape to lay the frame out as - the device's own, or the reference
+/// shape while still connecting, when its size is not known yet.
+double _aspectRatioOf(CanvasDevice device) {
+  final screenSize = device.when(
+    android: (device, isConnected, textureId, screenSize) => screenSize,
+    connecting: (device) => null,
+  );
+
+  if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
+    return DeviceViewerTheme.deviceFrameReferenceAspectRatio;
+  }
+
+  return screenSize.width / screenSize.height;
+}
+
+/// The largest box of [aspectRatio] that fits inside [available].
+Size _fitToAspectRatio(double aspectRatio, Size available) {
+  if (available.width <= 0 || available.height <= 0) return Size.zero;
+
+  final heightAtFullWidth = available.width / aspectRatio;
+
+  return heightAtFullWidth <= available.height
+      ? Size(available.width, heightAtFullWidth)
+      : Size(available.height * aspectRatio, available.height);
 }
 
 class const _ToolBar({
   required final CanvasDevice canvasDevice,
   required final DeviceActionCallback onCaptureScreenshot,
+  required final DeviceActionCallback onClose,
 }) extends StatelessWidget {
+  bool get _isLive => canvasDevice.when(
+    android: (device, isConnected, textureId, screenSize) => isConnected,
+    connecting: (device) => false,
+  );
+
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: MacosDynamicColor.resolve(
-          MacosColors.controlBackgroundColor,
-          context,
+        color: context.colors.card,
+        border: .symmetric(
+          horizontal: BorderSide(
+            color: context.colors.divider,
+            width: DeviceViewerTheme.hairlineThickness,
+          ),
         ),
-        borderRadius: .only(
-          topLeft: .circular(DeviceViewerTheme.cornerRadius),
-          topRight: .circular(DeviceViewerTheme.cornerRadius),
-        ),
-        border: .all(color: MacosTheme.of(context).dividerColor, width: 2.0),
       ),
       child: Padding(
-        padding: DeviceViewerTheme.cardPadding,
+        padding: DeviceViewerTheme.deviceFrameToolBarPadding,
         child: Row(
-          spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
+          spacing: DeviceViewerTheme.horizontalComponentSpacingSmall,
           children: [
+            _StatusDot(isLive: _isLive),
             Expanded(
-              child: Text(
-                canvasDevice.device.id,
-                style: context.typo.headline,
-                overflow: .ellipsis,
+              child: Column(
+                crossAxisAlignment: .start,
+                mainAxisAlignment: .center,
+                children: [
+                  Text(
+                    canvasDevice.device.modelName,
+                    style: context.typo.headline,
+                    overflow: .ellipsis,
+                  ),
+                  Text(
+                    canvasDevice.device.id,
+                    style: context.typo.caption1.copyWith(
+                      color: context.colors.secondaryLabel,
+                    ),
+                    overflow: .ellipsis,
+                  ),
+                ],
               ),
             ),
             Row(
               children: [
                 // TODO(Felix): wire up recording the mirrored stream to a file.
-                MacosIconButton(
-                  onPressed: () {},
-                  icon: MacosIcon(CupertinoIcons.video_camera),
+                MacosTooltip(
+                  message: 'Aufnahme starten',
+                  child: MacosIconButton(
+                    onPressed: () {},
+                    icon: MacosIcon(CupertinoIcons.video_camera),
+                  ),
                 ),
-                MacosIconButton(
-                  onPressed: () {
-                    onCaptureScreenshot(canvasDevice);
-                  },
-                  icon: MacosIcon(CupertinoIcons.camera),
+                MacosTooltip(
+                  message: 'Screenshot aufnehmen',
+                  child: MacosIconButton(
+                    onPressed: () {
+                      onCaptureScreenshot(canvasDevice);
+                    },
+                    icon: MacosIcon(CupertinoIcons.camera),
+                  ),
                 ),
-                MacosIconButton(
-                  onPressed: () {},
-                  icon: MacosIcon(CupertinoIcons.ellipsis_vertical),
+                MacosTooltip(
+                  message: 'Weitere Aktionen',
+                  child: MacosIconButton(
+                    onPressed: () {},
+                    icon: MacosIcon(CupertinoIcons.ellipsis_vertical),
+                  ),
                 ),
-                MacosIconButton(
-                  onPressed: () {},
-                  icon: MacosIcon(CupertinoIcons.clear),
+                MacosTooltip(
+                  message: 'Spiegelung beenden',
+                  child: MacosIconButton(
+                    onPressed: () {
+                      onClose(canvasDevice);
+                    },
+                    icon: MacosIcon(CupertinoIcons.clear),
+                  ),
                 ),
               ],
             ),
@@ -130,58 +245,179 @@ class const _ToolBar({
   }
 }
 
+class const _StatusDot({required final bool isLive})
+    extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final color = isLive
+        ? context.colors.deviceConnected
+        : context.colors.deviceDisconnected;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 2.0),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: .circle,
+          color: color,
+          boxShadow: [
+            BoxShadow(color: color.withAlpha(90), blurRadius: 6.0),
+          ],
+        ),
+        child: const SizedBox.square(dimension: 7.0),
+      ),
+    );
+  }
+}
+
 class const _ScreenMirror({
   required final CanvasDevice canvasDevice,
+  required final DeviceTouchCallback onTouch,
   required final Animation<double> flash,
   required final int? textureId,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    const BorderRadius radius = .only(
-      bottomLeft: .circular(DeviceViewerTheme.cornerRadius),
-      bottomRight: .circular(DeviceViewerTheme.cornerRadius),
-    );
     return Expanded(
-      child: ClipRRect(
-        borderRadius: radius,
-        child: Stack(
-          fit: .expand,
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(color: MacosColors.black),
-              child: switch (textureId) {
-                final id? => Texture(textureId: id),
-                null => const Center(
-                  child: _LoadingIndicator(),
-                ),
+      child: LayoutBuilder(
+          builder: (context, constraints) {
+            final size = constraints.biggest;
+
+            void handle(ScrcpyTouchId id, Offset touchPosition) {
+              if (size.width == 0 || size.height == 0) return;
+              final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
+              final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
+              onTouch(canvasDevice, id, touchX, touchY);
+            }
+
+            return Listener(
+              onPointerDown: (event) {
+                if (event.buttons == kPrimaryButton) {
+                  handle(.down, event.localPosition);
+                }
               },
-            ),
-            IgnorePointer(
-              child: FadeTransition(
-                opacity: flash,
-                child: const ColoredBox(color: MacosColors.white),
+              onPointerMove: (event) {
+                handle(.move, event.localPosition);
+              },
+              onPointerUp: (event) {
+                handle(.up, event.localPosition);
+              },
+              onPointerCancel: (event) {
+                handle(.up, event.localPosition);
+              },
+              child: Stack(
+                fit: .expand,
+                children: [
+                  switch (textureId) {
+                    final id? => ColoredBox(
+                      color: DeviceViewerColors.mirrorBackground,
+                      child: Texture(textureId: id),
+                    ),
+                    null => _ConnectingState(
+                      modelName: canvasDevice.device.modelName,
+                    ),
+                  },
+                  IgnorePointer(
+                    child: FadeTransition(
+                      opacity: flash,
+                      child: const ColoredBox(
+                        color: DeviceViewerColors.screenshotFlash,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+            );
+          },
+      ),
+    );
+  }
+}
+
+class const _ConnectingState({required final String modelName})
+    extends StatefulWidget {
+  @override
+  State<_ConnectingState> createState() => _ConnectingStateState();
+}
+
+class _ConnectingStateState extends State<_ConnectingState>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulseController =
+      AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1600),
+      )..repeat(reverse: true);
+
+  late final Animation<double> _pulse = Tween(
+    begin: 0.55,
+    end: 1.0,
+  ).animate(
+    CurvedAnimation(parent: _pulseController, curve: Curves.easeInOutSine),
+  );
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CupertinoTheme(
+      data: const CupertinoThemeData(brightness: .dark),
+      child: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: .topCenter,
+            end: .bottomCenter,
+            colors: DeviceViewerColors.mirrorBackdrop,
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisSize: .min,
+            spacing: DeviceViewerTheme.verticalComponentSpacingLarge * 2,
+            children: [
+              FadeTransition(
+                opacity: _pulse,
+                child: const _DeviceOutline(),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Text(
+                  'Verbinde mit ${widget.modelName}',
+                  textAlign: .center,
+                  overflow: .ellipsis,
+                  style: context.typo.caption1.copyWith(
+                    color: DeviceViewerColors.mirrorLabel,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class const _LoadingIndicator() extends StatelessWidget {
+class const _DeviceOutline() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      alignment: .center,
-      fit: .passthrough,
-      children: [
-        MacosIcon(CupertinoIcons.device_phone_portrait),
-        Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: CircularProgressIndicator(),
+    return Container(
+      width: 62.0,
+      height: 116.0,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14.0),
+        border: Border.all(
+          color: DeviceViewerColors.mirrorOutline,
+          width: 1.5,
         ),
-      ],
+        boxShadow: const [
+          BoxShadow(color: DeviceViewerColors.mirrorGlow, blurRadius: 24.0),
+        ],
+      ),
+      child: const Center(child: ProgressCircle(radius: 9.0)),
     );
   }
 }

@@ -5,9 +5,15 @@ const scrcpyServerVersion = '4.1';
 
 const scrcpyServerRemotePath = '/data/local/tmp/scrcpy-server.jar';
 
+/// The class `app_process` boots. Doubles as the `pkill -f` pattern that
+/// matches every server we started and nothing else, since `-f` matches
+/// against the full command line.
+const scrcpyServerMainClass = 'com.genymobile.scrcpy.Server';
+
 /// Prefix of the abstract Unix domain socket name scrcpy-server listens on.
-/// With a `scid` passed, the server listens on `<prefix>_<scid as 8 lowercase
-/// hex digits>` (`DesktopConnection.getSocketName`) instead of the bare
+/// With a `scid` passed, the server listens on
+/// `{prefix}_{scid as 8 lowercase hex digits}`
+/// (`DesktopConnection.getSocketName`) instead of the bare
 /// prefix - a random scid per session is required so a new session can never
 /// attach to a still-listening (or not-yet-reaped) server left over from a
 /// previous one, since a stale process holding the bare name would otherwise
