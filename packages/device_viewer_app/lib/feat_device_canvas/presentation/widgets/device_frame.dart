@@ -1,10 +1,12 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 typedef DeviceActionCallback = void Function(CanvasDevice);
@@ -15,12 +17,18 @@ typedef DeviceTouchCallback = void Function(
   double touchY,
 );
 
+typedef DeviceKeyCallback = void Function(
+  CanvasDevice device,
+  ScrcpyKeyAction action,
+);
+
 class const DeviceFrame({
   super.key,
   required final CanvasDevice device,
   required final DeviceActionCallback onCaptureScreenshot,
   required final DeviceActionCallback onClose,
   required final DeviceTouchCallback onTouch,
+  required final DeviceKeyCallback onKey,
   required final int? mirrorTextureId,
 }) extends StatefulWidget {
   @override
@@ -109,6 +117,7 @@ class _DeviceFrameState extends State<DeviceFrame>
                     _ScreenMirror(
                       canvasDevice: widget.device,
                       onTouch: widget.onTouch,
+                      onKey: widget.onKey,
                       flash: _screenshotFlash,
                       textureId: widget.mirrorTextureId,
                     ),
@@ -270,63 +279,197 @@ class const _StatusDot({required final bool isLive}) extends StatelessWidget {
 class const _ScreenMirror({
   required final CanvasDevice canvasDevice,
   required final DeviceTouchCallback onTouch,
+  required final DeviceKeyCallback onKey,
   required final Animation<double> flash,
   required final int? textureId,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final size = constraints.biggest;
-
-          void handle(ScrcpyTouchId id, Offset touchPosition) {
-            if (size.width == 0 || size.height == 0) return;
-            final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
-            final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
-            onTouch(canvasDevice, id, touchX, touchY);
-          }
-
-          return Listener(
-            onPointerDown: (event) {
-              if (event.buttons == kPrimaryButton) {
-                handle(.down, event.localPosition);
-              }
-            },
-            onPointerMove: (event) {
-              handle(.move, event.localPosition);
-            },
-            onPointerUp: (event) {
-              handle(.up, event.localPosition);
-            },
-            onPointerCancel: (event) {
-              handle(.up, event.localPosition);
-            },
-            child: Stack(
-              fit: .expand,
-              children: [
-                switch (textureId) {
-                  final id? => ColoredBox(
-                    color: DeviceViewerColors.mirrorBackground,
-                    child: Texture(textureId: id),
-                  ),
-                  null => _ConnectingState(
-                    modelName: canvasDevice.device.modelName,
-                  ),
-                },
-                IgnorePointer(
-                  child: FadeTransition(
-                    opacity: flash,
-                    child: const ColoredBox(
-                      color: DeviceViewerColors.screenshotFlash,
-                    ),
+      child: _KeyStrokeListener(
+        device: canvasDevice,
+        onKey: onKey,
+        child: _TouchListener(
+          textureId: textureId,
+          canvasDevice: canvasDevice,
+          flash: flash,
+          onTouch: onTouch,
+          child: Stack(
+            fit: .expand,
+            children: [
+              switch (textureId) {
+                final id? => ColoredBox(
+                  color: DeviceViewerColors.mirrorBackground,
+                  child: Texture(textureId: id),
+                ),
+                null => _ConnectingState(
+                  modelName: canvasDevice.device.modelName,
+                ),
+              },
+              IgnorePointer(
+                child: FadeTransition(
+                  opacity: flash,
+                  child: const ColoredBox(
+                    color: DeviceViewerColors.screenshotFlash,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class const _KeyStrokeListener({
+  required final Widget child,
+  required final CanvasDevice device,
+  required final DeviceKeyCallback onKey,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      autofocus: true, // TODO(Felix): Maybe this should be changed
+      onKeyEvent: (_, event) {
+        print(
+          "physicalKey: ${event.physicalKey}, logicalKey: ${event.logicalKey}, character: ${event.character}",
+        );
+
+        final keyCode = _convertLogicalKeyToKeyCode(event.logicalKey);
+        if (keyCode == null) {
+          return .ignored;
+        }
+
+        final metaState = _convertMetaState(HardwareKeyboard.instance);
+
+        if (event is KeyDownEvent) {
+          onKey(device, .down(keyCode: keyCode, metaState: metaState));
+          return .handled;
+        }
+
+        if (event is KeyRepeatEvent) {
+          onKey(
+            device,
+            .repeat(
+              keyCode: keyCode,
+              repeat: 1,
+              metaState: metaState,
             ),
           );
-        },
-      ),
+
+          return .handled;
+        }
+
+        if (event is KeyUpEvent) {
+          onKey(device, .up(keyCode: keyCode, metaState: metaState));
+          return .handled;
+        }
+
+        return .ignored;
+      },
+      child: child,
+    );
+  }
+}
+
+final myTooleMap = Map.fromEntries(
+  kAndroidToLogicalKey.entries.map(
+    (entry) => MapEntry(entry.value, entry.key),
+  ),
+);
+
+int? _convertLogicalKeyToKeyCode(LogicalKeyboardKey logicalKey) {
+  return myTooleMap[logicalKey];
+}
+
+abstract final class AndroidMetaState {
+  static const none = 0;
+  static const shiftOn = 0x00000001;
+  static const altOn = 0x00000002;
+  static const symOn = 0x00000004;
+  static const functionOn = 0x00000008;
+  static const altLeftOn = 0x00000010;
+  static const altRightOn = 0x00000020;
+  static const shiftLeftOn = 0x00000040;
+  static const shiftRightOn = 0x00000080;
+  static const ctrlOn = 0x00001000;
+  static const ctrlLeftOn = 0x00002000;
+  static const ctrlRightOn = 0x00004000;
+  static const metaOn = 0x00010000;
+  static const metaLeftOn = 0x00020000;
+  static const metaRightOn = 0x00040000;
+  static const capLockOn = 0x00100000;
+  static const numLockOn = 0x00200000;
+  static const scrollLockOn = 0x00400000;
+}
+
+int _convertMetaState(HardwareKeyboard keyboard) {
+  var meta = AndroidMetaState.none;
+
+  if (keyboard.isShiftPressed) {
+    meta |= AndroidMetaState.shiftOn;
+  }
+
+  if (keyboard.isControlPressed) {
+    meta |= AndroidMetaState.ctrlOn;
+  }
+
+  if (keyboard.isAltPressed) {
+    meta |= AndroidMetaState.altOn;
+  }
+
+  if (keyboard.isMetaPressed) {
+    meta |= AndroidMetaState.metaOn;
+  }
+
+  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.capsLock)) {
+    meta |= AndroidMetaState.capLockOn;
+  }
+
+  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.numLock)) {
+    meta |= AndroidMetaState.numLockOn;
+  }
+
+  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.scrollLock)) {
+    meta |= AndroidMetaState.scrollLockOn;
+  }
+
+  return meta;
+}
+
+class const _TouchListener({
+  required final int? textureId,
+  required final CanvasDevice canvasDevice,
+  required final Animation<double> flash,
+  required final DeviceTouchCallback onTouch,
+  required final Widget child,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = constraints.biggest;
+
+        void handle(ScrcpyTouchId id, Offset touchPosition) {
+          if (size.width == 0 || size.height == 0) return;
+          final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
+          final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
+          onTouch(canvasDevice, id, touchX, touchY);
+        }
+
+        return Listener(
+          onPointerDown: (event) {
+            if (event.buttons == kPrimaryButton) {
+              handle(.down, event.localPosition);
+            }
+          },
+          onPointerMove: (event) => handle(.move, event.localPosition),
+          onPointerUp: (event) => handle(.up, event.localPosition),
+          onPointerCancel: (event) => handle(.up, event.localPosition),
+          child: child,
+        );
+      },
     );
   }
 }

@@ -13,4 +13,8 @@ sealed class DeviceCanvasEvent with _$DeviceCanvasEvent {
   }) = _OnDeviceTapped;
   const factory DeviceCanvasEvent.onCloseDevice(CanvasDevice device) =
       _OnCloseDevice;
+  const factory DeviceCanvasEvent.onKeyEvent({
+    required CanvasDevice device,
+    required ScrcpyKeyAction action,
+  }) = _OnKeyEvent;
 }

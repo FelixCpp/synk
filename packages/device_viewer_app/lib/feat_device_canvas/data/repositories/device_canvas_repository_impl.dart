@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
@@ -22,11 +23,6 @@ class DeviceCanvasRepositoryImpl(
       final connectedIds = {for (final c in connected) c.device.id};
 
       return [
-        // The connecting/connected sets are tracked independently and
-        // update one after the other, not atomically, so a device can
-        // briefly show up in both right as its connection completes -
-        // without this check that would emit two CanvasDevices sharing
-        // the same device id, which crashes the grid (duplicate keys).
         for (final device in connecting)
           if (!connectedIds.contains(device.id))
             CanvasDevice.connecting(device: device),
@@ -83,5 +79,15 @@ class DeviceCanvasRepositoryImpl(
     }
 
     agent.simulateTouchEvent(action);
+  }
+
+  @override
+  void simulateKeyEvent(AndroidDevice device, ScrcpyKeyAction action) {
+    final agent = connectionsRepository.getAgent(device.id);
+    if (agent == null) {
+      throw Exception('Failed to receive device agent (${device.id})');
+    }
+
+    agent.simulateKeyEvent(action);
   }
 }

@@ -28,9 +28,6 @@ Future<void> _configureMacosWindowUtils() async {
 }
 
 Future<void> main() async {
-  // Interactors log at debug, except the ones driven by pointer events,
-  // which log at trace so they stay out of the way until someone turns the
-  // threshold down to look at them.
   appLogger = createAppLogger(
     level: kDebugMode ? Level.debug : Level.info,
   );

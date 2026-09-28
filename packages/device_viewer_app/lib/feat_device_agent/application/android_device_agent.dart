@@ -5,6 +5,7 @@ import 'package:device_viewer/feat_device_agent/application/android_device_agent
 import 'package:device_viewer/feat_device_agent/application/android_interaction_transmission.dart';
 import 'package:device_viewer/feat_device_agent/application/android_screen_transmission.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/android_device_info.dart';
@@ -18,7 +19,7 @@ class AndroidDeviceAgent(
 
   this
     : _mirrorSubscription = screenTransmission.byteStream.listen(
-        screenTransmission.texture.upload,
+        (bytes) => screenTransmission.texture.upload(bytes),
       );
 
   NativeTextureId get textureId => screenTransmission.texture.id;
@@ -33,6 +34,10 @@ class AndroidDeviceAgent(
 
   void simulateTouchEvent(ScrcpyTouchAction action) {
     interactionTransmission.injectTouch(action);
+  }
+
+  void simulateKeyEvent(ScrcpyKeyAction action) {
+    interactionTransmission.injectKey(action);
   }
 
   Future<AndroidDeviceInfo> fetchDeviceInfo() async {

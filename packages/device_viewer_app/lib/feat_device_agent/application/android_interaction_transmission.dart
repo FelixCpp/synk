@@ -2,15 +2,21 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 
 class const AndroidInteractionTransmission({
   required final Socket socket,
   required final DeviceScreenSize screenSize,
 }) {
+  static const _typeInjectKeyEvent = 0;
   static const _typeInjectTouchEvent = 2;
+
   static const _pointerIdMouse = -1; // scrcpy POINTER_ID_MOUSE = UINT64_MAX
   static const _buttonPrimary = 1; // AMOTION_EVENT_BUTTON_PRIMARY
+
+  static const _keyActionDown = 0;
+  static const _keyActionUp = 1;
 
   Future<void> dispose() async {
     await socket.close();
@@ -23,6 +29,23 @@ class const AndroidInteractionTransmission({
     final scaledY = (touchY * screenSize.height).round();
 
     return (scaledX, scaledY);
+  }
+
+  void injectKey(ScrcpyKeyAction action) {
+    final (actionId, repeat) = action.map(
+      down: (_) => (_keyActionDown, 0),
+      repeat: (event) => (_keyActionDown, event.repeat),
+      up: (_) => (_keyActionUp, 0),
+    );
+
+    final message = ByteData(14)
+      ..setUint8(0, _typeInjectKeyEvent)
+      ..setUint8(1, actionId)
+      ..setUint32(2, action.keyCode, .big)
+      ..setUint32(6, repeat, .big)
+      ..setUint32(10, action.metaState, .big);
+
+    socket.add(message.buffer.asUint8List());
   }
 
   void injectTouch(ScrcpyTouchAction action) {

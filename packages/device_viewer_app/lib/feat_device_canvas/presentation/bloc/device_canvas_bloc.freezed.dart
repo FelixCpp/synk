@@ -320,14 +320,15 @@ extension DeviceCanvasEventPatterns on DeviceCanvasEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnDeviceTapped value)?  onDeviceTapped,TResult Function( _OnCloseDevice value)?  onCloseDevice,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnDeviceTapped value)?  onDeviceTapped,TResult Function( _OnCloseDevice value)?  onCloseDevice,TResult Function( _OnKeyEvent value)?  onKeyEvent,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that);case _OnDeviceTapped() when onDeviceTapped != null:
 return onDeviceTapped(_that);case _OnCloseDevice() when onCloseDevice != null:
-return onCloseDevice(_that);case _:
+return onCloseDevice(_that);case _OnKeyEvent() when onKeyEvent != null:
+return onKeyEvent(_that);case _:
   return orElse();
 
 }
@@ -345,14 +346,15 @@ return onCloseDevice(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnDeviceTapped value)  onDeviceTapped,required TResult Function( _OnCloseDevice value)  onCloseDevice,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnDeviceTapped value)  onDeviceTapped,required TResult Function( _OnCloseDevice value)  onCloseDevice,required TResult Function( _OnKeyEvent value)  onKeyEvent,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup(_that);case _OnCaptureScreenshot():
 return onCaptureScreenshot(_that);case _OnDeviceTapped():
 return onDeviceTapped(_that);case _OnCloseDevice():
-return onCloseDevice(_that);}
+return onCloseDevice(_that);case _OnKeyEvent():
+return onKeyEvent(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -366,14 +368,15 @@ return onCloseDevice(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnDeviceTapped value)?  onDeviceTapped,TResult? Function( _OnCloseDevice value)?  onCloseDevice,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnDeviceTapped value)?  onDeviceTapped,TResult? Function( _OnCloseDevice value)?  onCloseDevice,TResult? Function( _OnKeyEvent value)?  onKeyEvent,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that);case _OnDeviceTapped() when onDeviceTapped != null:
 return onDeviceTapped(_that);case _OnCloseDevice() when onCloseDevice != null:
-return onCloseDevice(_that);case _:
+return onCloseDevice(_that);case _OnKeyEvent() when onKeyEvent != null:
+return onKeyEvent(_that);case _:
   return null;
 
 }
@@ -390,13 +393,14 @@ return onCloseDevice(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCaptureScreenshot,TResult Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)?  onDeviceTapped,TResult Function( CanvasDevice device)?  onCloseDevice,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCaptureScreenshot,TResult Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)?  onDeviceTapped,TResult Function( CanvasDevice device)?  onCloseDevice,TResult Function( CanvasDevice device,  ScrcpyKeyAction action)?  onKeyEvent,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that.device);case _OnDeviceTapped() when onDeviceTapped != null:
 return onDeviceTapped(_that.device,_that.action,_that.normalizedX,_that.normalizedY);case _OnCloseDevice() when onCloseDevice != null:
-return onCloseDevice(_that.device);case _:
+return onCloseDevice(_that.device);case _OnKeyEvent() when onKeyEvent != null:
+return onKeyEvent(_that.device,_that.action);case _:
   return orElse();
 
 }
@@ -414,13 +418,14 @@ return onCloseDevice(_that.device);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCaptureScreenshot,required TResult Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)  onDeviceTapped,required TResult Function( CanvasDevice device)  onCloseDevice,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCaptureScreenshot,required TResult Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)  onDeviceTapped,required TResult Function( CanvasDevice device)  onCloseDevice,required TResult Function( CanvasDevice device,  ScrcpyKeyAction action)  onKeyEvent,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnCaptureScreenshot():
 return onCaptureScreenshot(_that.device);case _OnDeviceTapped():
 return onDeviceTapped(_that.device,_that.action,_that.normalizedX,_that.normalizedY);case _OnCloseDevice():
-return onCloseDevice(_that.device);}
+return onCloseDevice(_that.device);case _OnKeyEvent():
+return onKeyEvent(_that.device,_that.action);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -434,13 +439,14 @@ return onCloseDevice(_that.device);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCaptureScreenshot,TResult? Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)?  onDeviceTapped,TResult? Function( CanvasDevice device)?  onCloseDevice,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCaptureScreenshot,TResult? Function( CanvasDevice device,  ScrcpyTouchId action,  double normalizedX,  double normalizedY)?  onDeviceTapped,TResult? Function( CanvasDevice device)?  onCloseDevice,TResult? Function( CanvasDevice device,  ScrcpyKeyAction action)?  onKeyEvent,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that.device);case _OnDeviceTapped() when onDeviceTapped != null:
 return onDeviceTapped(_that.device,_that.action,_that.normalizedX,_that.normalizedY);case _OnCloseDevice() when onCloseDevice != null:
-return onCloseDevice(_that.device);case _:
+return onCloseDevice(_that.device);case _OnKeyEvent() when onKeyEvent != null:
+return onKeyEvent(_that.device,_that.action);case _:
   return null;
 
 }
@@ -713,6 +719,94 @@ $CanvasDeviceCopyWith<$Res> get device {
   
   return $CanvasDeviceCopyWith<$Res>(_self.device, (value) {
     return _then(_self.copyWith(device: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class _OnKeyEvent implements DeviceCanvasEvent {
+  const _OnKeyEvent({required this.device, required this.action});
+  
+
+ final  CanvasDevice device;
+ final  ScrcpyKeyAction action;
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnKeyEventCopyWith<_OnKeyEvent> get copyWith => __$OnKeyEventCopyWithImpl<_OnKeyEvent>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnKeyEvent&&(identical(other.device, device) || other.device == device)&&(identical(other.action, action) || other.action == action));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,device,action);
+}
+
+@override
+String toString() {
+    return 'DeviceCanvasEvent.onKeyEvent(device: $device, action: $action)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnKeyEventCopyWith<$Res> implements $DeviceCanvasEventCopyWith<$Res> {
+  factory _$OnKeyEventCopyWith(_OnKeyEvent value, $Res Function(_OnKeyEvent) _then) = __$OnKeyEventCopyWithImpl;
+@useResult
+$Res call({
+ CanvasDevice device, ScrcpyKeyAction action
+});
+
+
+$CanvasDeviceCopyWith<$Res> get device;$ScrcpyKeyActionCopyWith<$Res> get action;
+
+}
+/// @nodoc
+class __$OnKeyEventCopyWithImpl<$Res>
+    implements _$OnKeyEventCopyWith<$Res> {
+  __$OnKeyEventCopyWithImpl(this._self, this._then);
+
+  final _OnKeyEvent _self;
+  final $Res Function(_OnKeyEvent) _then;
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? device = null,Object? action = null,}) {
+  return _then(_OnKeyEvent(
+device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
+as CanvasDevice,action: null == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as ScrcpyKeyAction,
+  ));
+}
+
+/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CanvasDeviceCopyWith<$Res> get device {
+  
+  return $CanvasDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of DeviceCanvasEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ScrcpyKeyActionCopyWith<$Res> get action {
+  
+  return $ScrcpyKeyActionCopyWith<$Res>(_self.action, (value) {
+    return _then(_self.copyWith(action: value));
   });
 }
 }

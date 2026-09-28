@@ -227,9 +227,6 @@ class _AndroidCanvasDevice implements CanvasDevice {
 @override final  AndroidDevice device;
  final  bool isConnected;
  final  NativeTextureId textureId;
-/// Shape the mirror has to be drawn in. Devices differ widely here
-/// (9:19.5, 9:20, tablets), so the frame follows this instead of
-/// assuming a ratio.
  final  DeviceScreenSize screenSize;
 
 /// Create a copy of CanvasDevice

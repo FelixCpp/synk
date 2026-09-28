@@ -77,6 +77,14 @@ class const _Content({
                 ),
               );
             },
+            onKey: (device, action) {
+              BlocProvider.of<DeviceCanvasBloc>(context).add(
+                DeviceCanvasEvent.onKeyEvent(
+                  device: device,
+                  action: action,
+                ),
+              );
+            },
             mirrorTextureId: item.when(
               android: (device, isConnected, textureId, screenSize) =>
                   textureId,

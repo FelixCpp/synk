@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_device_canvas/domain/usecases/capture_screenshot_interactor.dart';
+import 'package:device_viewer/feat_device_canvas/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:device_viewer/feat_device_canvas/domain/usecases/simulate_touch_event_interactor.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
@@ -26,6 +28,7 @@ class DeviceCanvasBloc(
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
   final captureScreenshot = CaptureScreenshotInteractor(repository);
   final simulateTouch = SimulateTouchEventInteractor(repository);
+  final simulateKey = SimulateKeyEventInteractor(repository);
   final toggleConnection = ToggleConnectionInteractor(connectionsRepository);
 
   this : super(DeviceCanvasState.initial()) {
@@ -33,6 +36,7 @@ class DeviceCanvasBloc(
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: droppable());
     on<_OnDeviceTapped>(_onDeviceTapped, transformer: sequential());
     on<_OnCloseDevice>(_onCloseDevice, transformer: sequential());
+    on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
 
     add(DeviceCanvasEvent.onSetup());
   }
@@ -88,5 +92,19 @@ class DeviceCanvasBloc(
           ),
         )
         .run(event.device.device);
+  }
+
+  FutureOr<void> _onKeyEvent(
+    _OnKeyEvent event,
+    Emitter<DeviceCanvasState> emit,
+  ) {
+    return simulateKey
+        .logger()
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to capture screenshot: $e'),
+          ),
+        )
+        .run((device: event.device.device, action: event.action));
   }
 }
