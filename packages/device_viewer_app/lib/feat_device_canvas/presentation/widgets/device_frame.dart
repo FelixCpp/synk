@@ -53,6 +53,8 @@ class _DeviceFrameState extends State<DeviceFrame>
         ),
       );
 
+  late final focusNode = FocusNode(debugLabel: '${widget.device.device.id}');
+
   void _handleCaptureScreenshot(CanvasDevice canvasDevice) {
     _screenshotFlashController.forward(from: 0);
     widget.onCaptureScreenshot(canvasDevice);
@@ -61,6 +63,7 @@ class _DeviceFrameState extends State<DeviceFrame>
   @override
   void dispose() {
     _screenshotFlashController.dispose();
+    focusNode.dispose();
     super.dispose();
   }
 
@@ -104,24 +107,43 @@ class _DeviceFrameState extends State<DeviceFrame>
                   DeviceViewerTheme.cornerRadius -
                       DeviceViewerTheme.hairlineThickness,
                 ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: DeviceViewerTheme.deviceFrameToolBarHeight,
-                      child: _ToolBar(
-                        canvasDevice: widget.device,
-                        onCaptureScreenshot: _handleCaptureScreenshot,
-                        onClose: widget.onClose,
+                child: GestureDetector(
+                  onTap: () {
+                    focusNode.requestFocus();
+                  },
+                  behavior: .translucent,
+                  child: Column(
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.fromBorderSide(
+                            focusNode.hasFocus
+                                ? BorderSide(
+                                    color: MacosColors.systemRedColor,
+                                    width: 2,
+                                  )
+                                : BorderSide.none,
+                          ),
+                        ),
+                        child: SizedBox(
+                          height: DeviceViewerTheme.deviceFrameToolBarHeight,
+                          child: _ToolBar(
+                            canvasDevice: widget.device,
+                            onCaptureScreenshot: _handleCaptureScreenshot,
+                            onClose: widget.onClose,
+                          ),
+                        ),
                       ),
-                    ),
-                    _ScreenMirror(
-                      canvasDevice: widget.device,
-                      onTouch: widget.onTouch,
-                      onKey: widget.onKey,
-                      flash: _screenshotFlash,
-                      textureId: widget.mirrorTextureId,
-                    ),
-                  ],
+                      _ScreenMirror(
+                        canvasDevice: widget.device,
+                        onTouch: widget.onTouch,
+                        onKey: widget.onKey,
+                        flash: _screenshotFlash,
+                        textureId: widget.mirrorTextureId,
+                        focusNode: focusNode,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -282,6 +304,7 @@ class const _ScreenMirror({
   required final DeviceKeyCallback onKey,
   required final Animation<double> flash,
   required final int? textureId,
+  required final FocusNode focusNode,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -289,6 +312,7 @@ class const _ScreenMirror({
       child: _KeyStrokeListener(
         device: canvasDevice,
         onKey: onKey,
+        focusNode: focusNode,
         child: _TouchListener(
           textureId: textureId,
           canvasDevice: canvasDevice,
@@ -326,11 +350,12 @@ class const _KeyStrokeListener({
   required final Widget child,
   required final CanvasDevice device,
   required final DeviceKeyCallback onKey,
+  required final FocusNode focusNode,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Focus(
-      autofocus: true, // TODO(Felix): Maybe this should be changed
+      focusNode: focusNode,
       onKeyEvent: (_, event) {
         print(
           "physicalKey: ${event.physicalKey}, logicalKey: ${event.logicalKey}, character: ${event.character}",

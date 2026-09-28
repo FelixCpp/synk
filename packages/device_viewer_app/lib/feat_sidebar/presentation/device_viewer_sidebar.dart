@@ -67,8 +67,7 @@ class const _Content({
           if (state.devices.isEmpty)
             const _NoDevicesPlugged()
           else
-            for (final device in state.devices)
-              _AdbDeviceEntry(device: device),
+            for (final device in state.devices) _AdbDeviceEntry(device: device),
         ],
       ),
     );
@@ -176,7 +175,7 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
               ],
             ),
             PushButton(
-              controlSize: .regular,
+              controlSize: .large,
               secondary: device.isConnected,
               onPressed: () {
                 BlocProvider.of<SidebarBloc>(context)
