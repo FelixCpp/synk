@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 
 typedef SimulateTouchEventInput = ({
   AndroidDevice device,
-  ScrcpyTouchAction action,
+  ScrcpyPointerEvent action,
 });
 
 class const SimulateTouchEventInteractor(
@@ -15,6 +15,6 @@ class const SimulateTouchEventInteractor(
 ) implements ParameterizedInteractor<SimulateTouchEventInput> {
   @override
   FutureOr<void> getOrThrow(SimulateTouchEventInput input) async {
-    repository.simulateTouchEvent(input.device, input.action);
+    return repository.simulateTouchEvent(input.device, input.action);
   }
 }

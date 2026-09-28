@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
@@ -46,7 +46,7 @@ class DeviceCanvasRepositoryImpl(
       uniformTypeIdentifiers: ['public.png'],
     );
 
-    final agent = connectionsRepository.getAgent(device.id);
+    final agent = connectionsRepository.getAndroidDeviceAgent(device.id);
     if (agent == null) {
       throw DeviceNotConnectedException(deviceId: device.id);
     }
@@ -72,22 +72,36 @@ class DeviceCanvasRepositoryImpl(
   }
 
   @override
-  void simulateTouchEvent(AndroidDevice device, ScrcpyTouchAction action) {
-    final agent = connectionsRepository.getAgent(device.id);
+  void simulateTouchEvent(AndroidDevice device, ScrcpyPointerEvent event) {
+    final agent = connectionsRepository.getAndroidDeviceAgent(device.id);
     if (agent == null) {
       throw Exception('Failed to receive device agent (${device.id})');
     }
 
-    agent.simulateTouchEvent(action);
+    agent.simulateTouchEvent(event);
   }
 
   @override
-  void simulateKeyEvent(AndroidDevice device, ScrcpyKeyAction action) {
-    final agent = connectionsRepository.getAgent(device.id);
+  void simulateKeyEvent(AndroidDevice device, ScrcpyKeyEvent event) {
+    final agent = connectionsRepository.getAndroidDeviceAgent(device.id);
     if (agent == null) {
       throw Exception('Failed to receive device agent (${device.id})');
     }
 
-    agent.simulateKeyEvent(action);
+    agent.simulateKeyEvent(event);
+  }
+
+  @override
+  void wakeupDevice(AndroidDevice device) {
+    final agent = connectionsRepository.getAndroidDeviceAgent(device.id);
+    if (agent == null) {
+      throw Exception('Failed to receive device agent (${device.id})');
+    }
+
+    for (final type in [ScrcpyKeyEventType.down, ScrcpyKeyEventType.up]) {
+      agent.simulateKeyEvent(
+        ScrcpyKeyEvent(keyCode: .wakeup, metaState: .none, type: type),
+      );
+    }
   }
 }

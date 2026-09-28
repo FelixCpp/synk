@@ -5,16 +5,16 @@ sealed class DeviceCanvasEvent with _$DeviceCanvasEvent {
   const factory DeviceCanvasEvent.onSetup() = _OnSetup;
   const factory DeviceCanvasEvent.onCaptureScreenshot(CanvasDevice device) =
       _OnCaptureScreenshot;
-  const factory DeviceCanvasEvent.onDeviceTapped({
+  const factory DeviceCanvasEvent.onPointerEvent({
     required CanvasDevice device,
-    required ScrcpyTouchId action,
-    required double normalizedX,
-    required double normalizedY,
-  }) = _OnDeviceTapped;
+    required ScrcpyPointerEventType type,
+    required double normalizedPointerX,
+    required double normalizedPointerY,
+  }) = _OnPointerEvent;
   const factory DeviceCanvasEvent.onCloseDevice(CanvasDevice device) =
       _OnCloseDevice;
   const factory DeviceCanvasEvent.onKeyEvent({
     required CanvasDevice device,
-    required ScrcpyKeyAction action,
+    required KeyEvent event,
   }) = _OnKeyEvent;
 }

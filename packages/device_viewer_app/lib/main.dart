@@ -87,7 +87,7 @@ class const _DeviceViewerApp() extends StatelessWidget {
   Widget build(BuildContext context) {
     return MacosApp(
       title: 'Device Viewer',
-      themeMode: .light,
+      themeMode: .system,
       debugShowCheckedModeBanner: false,
       home: Builder(
         builder: (context) {

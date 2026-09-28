@@ -109,7 +109,7 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   @override
-  AndroidDeviceAgent? getAgent(DeviceId id) {
+  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) {
     return androidDeviceAgentsById[id];
   }
 }

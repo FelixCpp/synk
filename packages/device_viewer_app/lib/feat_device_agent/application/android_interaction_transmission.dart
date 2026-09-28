@@ -2,24 +2,93 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 
-class const AndroidInteractionTransmission({
-  required final Socket socket,
-  required final DeviceScreenSize screenSize,
-}) {
-  static const _typeInjectKeyEvent = 0;
-  static const _typeInjectTouchEvent = 2;
+mixin _InteractionTransmission {
+  Socket get socket;
 
-  static const _pointerIdMouse = -1; // scrcpy POINTER_ID_MOUSE = UINT64_MAX
-  static const _buttonPrimary = 1; // AMOTION_EVENT_BUTTON_PRIMARY
+  void send(ByteData data) {
+    socket.add(data.buffer.asUint8List());
+  }
+}
 
-  static const _keyActionDown = 0;
-  static const _keyActionUp = 1;
+mixin _KeyEventSimulator on _InteractionTransmission {
+  static const scrcpyInjectKeyEventId = 0;
+  static const scrcpyKeyDownEventId = 0;
+  static const scrcpyKeyUpEventId = 1;
 
-  Future<void> dispose() async {
-    await socket.close();
+  void simulateKeyEvent({
+    required ScrcpyKeyCode keyCode,
+    required ScrcpyKeyEventType type,
+    required ScrcpyKeyMetaState metaState,
+  }) {
+    final int keyEventId = switch (type) {
+      ScrcpyKeyEventType.down => scrcpyKeyDownEventId,
+      ScrcpyKeyEventType.repeat => scrcpyKeyDownEventId,
+      ScrcpyKeyEventType.up => scrcpyKeyUpEventId,
+    };
+
+    final bool isRepeated = type == .repeat;
+
+    final message = ByteData(14)
+      ..setUint8(0, scrcpyInjectKeyEventId)
+      ..setUint8(1, keyEventId)
+      ..setUint32(2, keyCode, .big)
+      ..setUint32(6, isRepeated ? 1 : 0, .big)
+      ..setUint32(10, metaState, .big);
+
+    send(message);
+  }
+}
+
+mixin _PointerEventSimulator on _InteractionTransmission {
+  DeviceScreenSize get screenSize;
+
+  static const scrcpyPointerEventId = 2;
+  static const scrcpyMousePointerId = -1; // scrcpy interprets -1 as mouse
+
+  static const scrcpyFullPreasure = 0xfff;
+  static const scrcpyNoPreasure = 0;
+
+  static const androidPrimaryButton = 1;
+  static const androidNoButton = 0;
+
+  void simulatePointerEvent({
+    required ScrcpyPointerEventType type,
+    required double normalizedPointerX,
+    required double normalizedPointerY,
+  }) {
+    final scrcpyPointerTypeId = switch (type) {
+      .down => 0,
+      .up => 1,
+      .move => 2,
+    };
+
+    final (pointerX, pointerY) = worldToScreen(
+      normalizedPointerX,
+      normalizedPointerY,
+    );
+
+    final preasure = type == .up ? scrcpyNoPreasure : scrcpyFullPreasure;
+    final changedButton = type == .move
+        ? androidNoButton
+        : androidPrimaryButton;
+    final pressedButton = type == .up ? androidNoButton : androidPrimaryButton;
+
+    final message = ByteData(32)
+      ..setUint8(0, scrcpyPointerEventId)
+      ..setUint8(1, scrcpyPointerTypeId)
+      ..setUint64(2, scrcpyMousePointerId, .big)
+      ..setInt32(10, pointerX, .big)
+      ..setInt32(14, pointerY, .big)
+      ..setUint16(18, screenSize.width, .big)
+      ..setUint16(20, screenSize.height, .big)
+      ..setUint16(22, preasure, .big)
+      ..setUint32(24, changedButton, .big)
+      ..setUint32(28, pressedButton, .big);
+
+    send(message);
   }
 
   (int, int) worldToScreen(double x, double y) {
@@ -30,46 +99,13 @@ class const AndroidInteractionTransmission({
 
     return (scaledX, scaledY);
   }
+}
 
-  void injectKey(ScrcpyKeyAction action) {
-    final (actionId, repeat) = action.map(
-      down: (_) => (_keyActionDown, 0),
-      repeat: (event) => (_keyActionDown, event.repeat),
-      up: (_) => (_keyActionUp, 0),
-    );
-
-    final message = ByteData(14)
-      ..setUint8(0, _typeInjectKeyEvent)
-      ..setUint8(1, actionId)
-      ..setUint32(2, action.keyCode, .big)
-      ..setUint32(6, repeat, .big)
-      ..setUint32(10, action.metaState, .big);
-
-    socket.add(message.buffer.asUint8List());
-  }
-
-  void injectTouch(ScrcpyTouchAction action) {
-    final touchId = action.id;
-    final (touchX, touchY) = worldToScreen(
-      action.normalizedTouchX,
-      action.normalizedTouchY,
-    );
-
-    final isUp = touchId == .up;
-    final isMove = touchId == .move;
-
-    final message = ByteData(32)
-      ..setUint8(0, _typeInjectTouchEvent)
-      ..setUint8(1, touchId.wireValue)
-      ..setUint64(2, _pointerIdMouse, .big)
-      ..setInt32(10, touchX, .big)
-      ..setInt32(14, touchY, .big)
-      ..setUint16(18, screenSize.width, .big)
-      ..setUint16(20, screenSize.height, .big)
-      ..setUint16(22, isUp ? 0 : 0xffff, .big)
-      ..setUint32(24, isMove ? 0 : _buttonPrimary, .big)
-      ..setUint32(28, isUp ? 0 : _buttonPrimary, .big);
-
-    socket.add(message.buffer.asUint8List());
+class const AndroidInteractionTransmission({
+  @override required final Socket socket,
+  @override required final DeviceScreenSize screenSize,
+}) with _InteractionTransmission, _KeyEventSimulator, _PointerEventSimulator {
+  Future<void> dispose() async {
+    await socket.close();
   }
 }

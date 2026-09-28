@@ -10,7 +10,7 @@ abstract interface class DeviceConnectionsRepository {
   Stream<List<AndroidDevice>> observeConnectingDevices();
   Stream<List<DeviceConnection>> observeDeviceConnections();
 
-  AndroidDeviceAgent? getAgent(DeviceId id);
+  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id);
 }
 
 class const DeviceAlreadyConnectingException({

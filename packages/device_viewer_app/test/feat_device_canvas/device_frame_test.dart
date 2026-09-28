@@ -1,3 +1,5 @@
+import 'package:device_viewer/design/build_context.dart';
+import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
@@ -6,6 +8,7 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_dev
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macos_ui/macos_ui.dart';
@@ -78,6 +81,67 @@ void main() {
 
       expect(mirror.width, closeTo(DeviceViewerTheme.deviceFrameWidth, 0.01));
     });
+
+    testWidgets('leaves an unfocused device on the plain card outline', (
+      tester,
+    ) async {
+      final colors = await _pumpFrame(tester, _referenceScreenSize);
+
+      expect(
+        _frameBorderOf(tester).top.color.toARGB32(),
+        colors.divider.toARGB32(),
+      );
+    });
+
+    testWidgets('marks the device that receives keystrokes', (tester) async {
+      final colors = await _pumpFrame(tester, _referenceScreenSize);
+
+      await tester.tap(find.byType(Texture));
+      await tester.pumpAndSettle();
+
+      expect(
+        _frameBorderOf(tester).top.color.toARGB32(),
+        colors.focusRing.toARGB32(),
+      );
+      expect(
+        _frameShadowsOf(tester).any((shadow) => shadow.color.a > 0),
+        isTrue,
+        reason: 'the focus ring glow should be painted',
+      );
+    });
+
+    testWidgets('takes focus from a swipe, not just from a tap', (
+      tester,
+    ) async {
+      final colors = await _pumpFrame(tester, _referenceScreenSize);
+
+      final mirror = tester.getCenter(find.byType(Texture));
+      final gesture = await tester.startGesture(mirror);
+      await gesture.moveBy(const Offset(0.0, -120.0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(
+        _frameBorderOf(tester).top.color.toARGB32(),
+        colors.focusRing.toARGB32(),
+      );
+    });
+
+    testWidgets('forwards keystrokes only while focused', (tester) async {
+      final pressed = <KeyEvent>[];
+      await _pumpFrame(tester, _referenceScreenSize, onKey: (_, event) {
+        pressed.add(event);
+      });
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+      expect(pressed, isEmpty);
+
+      await tester.tap(find.byType(Texture));
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+
+      expect(pressed, isNotEmpty);
+    });
   });
 }
 
@@ -88,6 +152,8 @@ const _device = AndroidDevice(
   connection: AndroidDeviceConnection.usb,
 );
 
+const _referenceScreenSize = DeviceScreenSize(width: 1080, height: 2400);
+
 /// Lays a [DeviceFrame] out in a cell the size the grid gives it and returns
 /// the size the mirrored picture ends up with - the part that has to match
 /// the device's shape.
@@ -95,6 +161,16 @@ Future<Size> _layOutMirror(
   WidgetTester tester,
   DeviceScreenSize screenSize,
 ) async {
+  await _pumpFrame(tester, screenSize);
+
+  return tester.getSize(find.byType(Texture));
+}
+
+Future<DeviceViewerColors> _pumpFrame(
+  WidgetTester tester,
+  DeviceScreenSize screenSize, {
+  DeviceKeyCallback? onKey,
+}) async {
   // The default test surface is shorter than a cell, which would silently
   // squash the frame and make every assertion here meaningless.
   await tester.binding.setSurfaceSize(
@@ -105,28 +181,56 @@ Future<Size> _layOutMirror(
   );
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
+  late DeviceViewerColors colors;
+
   await tester.pumpWidget(
     MacosApp(
-      home: Center(
-        child: SizedBox(
-          width: DeviceViewerTheme.deviceFrameWidth,
-          height: DeviceViewerTheme.deviceFrameHeight,
-          child: DeviceFrame(
-            device: CanvasDevice.android(
-              device: _device,
-              isConnected: true,
-              textureId: const NativeTextureId(1),
-              screenSize: screenSize,
+      home: Builder(
+        builder: (context) {
+          colors = context.colors;
+
+          return Center(
+            child: SizedBox(
+              width: DeviceViewerTheme.deviceFrameWidth,
+              height: DeviceViewerTheme.deviceFrameHeight,
+              child: DeviceFrame(
+                device: CanvasDevice.android(
+                  device: _device,
+                  isConnected: true,
+                  textureId: const NativeTextureId(1),
+                  screenSize: screenSize,
+                ),
+                onCaptureScreenshot: (_) {},
+                onClose: (_) {},
+                onTouch: (_, _, _, _) {},
+                onKey: onKey ?? (_, _) {},
+                mirrorTextureId: 1,
+              ),
             ),
-            onCaptureScreenshot: (_) {},
-            onClose: (_) {},
-            onTouch: (_, _, _, _) {},
-            mirrorTextureId: 1,
-          ),
-        ),
+          );
+        },
       ),
     ),
   );
 
-  return tester.getSize(find.byType(Texture));
+  return colors;
 }
+
+BoxDecoration _frameDecorationOf(WidgetTester tester) {
+  final decorated = tester.widget<DecoratedBox>(
+    find
+        .descendant(
+          of: find.byType(TweenAnimationBuilder<double>),
+          matching: find.byType(DecoratedBox),
+        )
+        .first,
+  );
+
+  return decorated.decoration as BoxDecoration;
+}
+
+Border _frameBorderOf(WidgetTester tester) =>
+    _frameDecorationOf(tester).border! as Border;
+
+List<BoxShadow> _frameShadowsOf(WidgetTester tester) =>
+    _frameDecorationOf(tester).boxShadow ?? const [];

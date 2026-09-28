@@ -13,45 +13,45 @@ part of 'scrcpy_touch_action.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$ScrcpyTouchAction {
+mixin _$ScrcpyPointerEvent {
 
- ScrcpyTouchId get id; double get normalizedTouchX; double get normalizedTouchY;
-/// Create a copy of ScrcpyTouchAction
+ ScrcpyPointerEventType get type; double get normalizedPointerX; double get normalizedPointerY;
+/// Create a copy of ScrcpyPointerEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$ScrcpyTouchActionCopyWith<ScrcpyTouchAction> get copyWith => _$ScrcpyTouchActionCopyWithImpl<ScrcpyTouchAction>(this as ScrcpyTouchAction, _$identity);
+$ScrcpyPointerEventCopyWith<ScrcpyPointerEvent> get copyWith => _$ScrcpyPointerEventCopyWithImpl<ScrcpyPointerEvent>(this as ScrcpyPointerEvent, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  final _this = this as ScrcpyTouchAction;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScrcpyTouchAction&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.normalizedTouchX, _this.normalizedTouchX) || other.normalizedTouchX == _this.normalizedTouchX)&&(identical(other.normalizedTouchY, _this.normalizedTouchY) || other.normalizedTouchY == _this.normalizedTouchY));
+  final _this = this as ScrcpyPointerEvent;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScrcpyPointerEvent&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.normalizedPointerX, _this.normalizedPointerX) || other.normalizedPointerX == _this.normalizedPointerX)&&(identical(other.normalizedPointerY, _this.normalizedPointerY) || other.normalizedPointerY == _this.normalizedPointerY));
 }
 
 
 @override
 int get hashCode {
-  final _this = this as ScrcpyTouchAction;
-  return Object.hash(runtimeType,_this.id,_this.normalizedTouchX,_this.normalizedTouchY);
+  final _this = this as ScrcpyPointerEvent;
+  return Object.hash(runtimeType,_this.type,_this.normalizedPointerX,_this.normalizedPointerY);
 }
 
 @override
 String toString() {
-  final _this = this as ScrcpyTouchAction;
-  return 'ScrcpyTouchAction(id: ${_this.id}, normalizedTouchX: ${_this.normalizedTouchX}, normalizedTouchY: ${_this.normalizedTouchY})';
+  final _this = this as ScrcpyPointerEvent;
+  return 'ScrcpyPointerEvent(type: ${_this.type}, normalizedPointerX: ${_this.normalizedPointerX}, normalizedPointerY: ${_this.normalizedPointerY})';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $ScrcpyTouchActionCopyWith<$Res>  {
-  factory $ScrcpyTouchActionCopyWith(ScrcpyTouchAction value, $Res Function(ScrcpyTouchAction) _then) = _$ScrcpyTouchActionCopyWithImpl;
+abstract mixin class $ScrcpyPointerEventCopyWith<$Res>  {
+  factory $ScrcpyPointerEventCopyWith(ScrcpyPointerEvent value, $Res Function(ScrcpyPointerEvent) _then) = _$ScrcpyPointerEventCopyWithImpl;
 @useResult
 $Res call({
- ScrcpyTouchId id, double normalizedTouchX, double normalizedTouchY
+ ScrcpyPointerEventType type, double normalizedPointerX, double normalizedPointerY
 });
 
 
@@ -59,20 +59,20 @@ $Res call({
 
 }
 /// @nodoc
-class _$ScrcpyTouchActionCopyWithImpl<$Res>
-    implements $ScrcpyTouchActionCopyWith<$Res> {
-  _$ScrcpyTouchActionCopyWithImpl(this._self, this._then);
+class _$ScrcpyPointerEventCopyWithImpl<$Res>
+    implements $ScrcpyPointerEventCopyWith<$Res> {
+  _$ScrcpyPointerEventCopyWithImpl(this._self, this._then);
 
-  final ScrcpyTouchAction _self;
-  final $Res Function(ScrcpyTouchAction) _then;
+  final ScrcpyPointerEvent _self;
+  final $Res Function(ScrcpyPointerEvent) _then;
 
-/// Create a copy of ScrcpyTouchAction
+/// Create a copy of ScrcpyPointerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? normalizedTouchX = null,Object? normalizedTouchY = null,}) {
-  return _then(ScrcpyTouchAction(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as ScrcpyTouchId,normalizedTouchX: null == normalizedTouchX ? _self.normalizedTouchX : normalizedTouchX // ignore: cast_nullable_to_non_nullable
-as double,normalizedTouchY: null == normalizedTouchY ? _self.normalizedTouchY : normalizedTouchY // ignore: cast_nullable_to_non_nullable
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? normalizedPointerX = null,Object? normalizedPointerY = null,}) {
+  return _then(ScrcpyPointerEvent(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as ScrcpyPointerEventType,normalizedPointerX: null == normalizedPointerX ? _self.normalizedPointerX : normalizedPointerX // ignore: cast_nullable_to_non_nullable
+as double,normalizedPointerY: null == normalizedPointerY ? _self.normalizedPointerY : normalizedPointerY // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -80,8 +80,8 @@ as double,
 }
 
 
-/// Adds pattern-matching-related methods to [ScrcpyTouchAction].
-extension ScrcpyTouchActionPatterns on ScrcpyTouchAction {
+/// Adds pattern-matching-related methods to [ScrcpyPointerEvent].
+extension ScrcpyPointerEventPatterns on ScrcpyPointerEvent {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -94,10 +94,10 @@ extension ScrcpyTouchActionPatterns on ScrcpyTouchAction {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ScrcpyTouchAction value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ScrcpyPointerEvent value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction() when $default != null:
+case _ScrcpyPointerEvent() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -116,10 +116,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ScrcpyTouchAction value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ScrcpyPointerEvent value)  $default,){
 final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction():
+case _ScrcpyPointerEvent():
 return $default(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -134,10 +134,10 @@ return $default(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ScrcpyTouchAction value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ScrcpyPointerEvent value)?  $default,){
 final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction() when $default != null:
+case _ScrcpyPointerEvent() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -155,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ScrcpyTouchId id,  double normalizedTouchX,  double normalizedTouchY)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction() when $default != null:
-return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);case _:
+case _ScrcpyPointerEvent() when $default != null:
+return $default(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _:
   return orElse();
 
 }
@@ -176,10 +176,10 @@ return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ScrcpyTouchId id,  double normalizedTouchX,  double normalizedTouchY)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  $default,) {final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction():
-return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);}
+case _ScrcpyPointerEvent():
+return $default(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +193,10 @@ return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ScrcpyTouchId id,  double normalizedTouchX,  double normalizedTouchY)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  $default,) {final _that = this;
 switch (_that) {
-case _ScrcpyTouchAction() when $default != null:
-return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);case _:
+case _ScrcpyPointerEvent() when $default != null:
+return $default(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _:
   return null;
 
 }
@@ -207,47 +207,47 @@ return $default(_that.id,_that.normalizedTouchX,_that.normalizedTouchY);case _:
 /// @nodoc
 
 
-class _ScrcpyTouchAction implements ScrcpyTouchAction {
-  const _ScrcpyTouchAction({required this.id, required this.normalizedTouchX, required this.normalizedTouchY});
+class _ScrcpyPointerEvent implements ScrcpyPointerEvent {
+  const _ScrcpyPointerEvent({required this.type, required this.normalizedPointerX, required this.normalizedPointerY});
   
 
-@override final  ScrcpyTouchId id;
-@override final  double normalizedTouchX;
-@override final  double normalizedTouchY;
+@override final  ScrcpyPointerEventType type;
+@override final  double normalizedPointerX;
+@override final  double normalizedPointerY;
 
-/// Create a copy of ScrcpyTouchAction
+/// Create a copy of ScrcpyPointerEvent
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$ScrcpyTouchActionCopyWith<_ScrcpyTouchAction> get copyWith => __$ScrcpyTouchActionCopyWithImpl<_ScrcpyTouchAction>(this, _$identity);
+_$ScrcpyPointerEventCopyWith<_ScrcpyPointerEvent> get copyWith => __$ScrcpyPointerEventCopyWithImpl<_ScrcpyPointerEvent>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScrcpyTouchAction&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedTouchX, normalizedTouchX) || other.normalizedTouchX == normalizedTouchX)&&(identical(other.normalizedTouchY, normalizedTouchY) || other.normalizedTouchY == normalizedTouchY));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScrcpyPointerEvent&&(identical(other.type, type) || other.type == type)&&(identical(other.normalizedPointerX, normalizedPointerX) || other.normalizedPointerX == normalizedPointerX)&&(identical(other.normalizedPointerY, normalizedPointerY) || other.normalizedPointerY == normalizedPointerY));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,normalizedTouchX,normalizedTouchY);
+    return Object.hash(runtimeType,type,normalizedPointerX,normalizedPointerY);
 }
 
 @override
 String toString() {
-    return 'ScrcpyTouchAction(id: $id, normalizedTouchX: $normalizedTouchX, normalizedTouchY: $normalizedTouchY)';
+    return 'ScrcpyPointerEvent(type: $type, normalizedPointerX: $normalizedPointerX, normalizedPointerY: $normalizedPointerY)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ScrcpyTouchActionCopyWith<$Res> implements $ScrcpyTouchActionCopyWith<$Res> {
-  factory _$ScrcpyTouchActionCopyWith(_ScrcpyTouchAction value, $Res Function(_ScrcpyTouchAction) _then) = __$ScrcpyTouchActionCopyWithImpl;
+abstract mixin class _$ScrcpyPointerEventCopyWith<$Res> implements $ScrcpyPointerEventCopyWith<$Res> {
+  factory _$ScrcpyPointerEventCopyWith(_ScrcpyPointerEvent value, $Res Function(_ScrcpyPointerEvent) _then) = __$ScrcpyPointerEventCopyWithImpl;
 @override @useResult
 $Res call({
- ScrcpyTouchId id, double normalizedTouchX, double normalizedTouchY
+ ScrcpyPointerEventType type, double normalizedPointerX, double normalizedPointerY
 });
 
 
@@ -255,20 +255,20 @@ $Res call({
 
 }
 /// @nodoc
-class __$ScrcpyTouchActionCopyWithImpl<$Res>
-    implements _$ScrcpyTouchActionCopyWith<$Res> {
-  __$ScrcpyTouchActionCopyWithImpl(this._self, this._then);
+class __$ScrcpyPointerEventCopyWithImpl<$Res>
+    implements _$ScrcpyPointerEventCopyWith<$Res> {
+  __$ScrcpyPointerEventCopyWithImpl(this._self, this._then);
 
-  final _ScrcpyTouchAction _self;
-  final $Res Function(_ScrcpyTouchAction) _then;
+  final _ScrcpyPointerEvent _self;
+  final $Res Function(_ScrcpyPointerEvent) _then;
 
-/// Create a copy of ScrcpyTouchAction
+/// Create a copy of ScrcpyPointerEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? normalizedTouchX = null,Object? normalizedTouchY = null,}) {
-  return _then(_ScrcpyTouchAction(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as ScrcpyTouchId,normalizedTouchX: null == normalizedTouchX ? _self.normalizedTouchX : normalizedTouchX // ignore: cast_nullable_to_non_nullable
-as double,normalizedTouchY: null == normalizedTouchY ? _self.normalizedTouchY : normalizedTouchY // ignore: cast_nullable_to_non_nullable
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? normalizedPointerX = null,Object? normalizedPointerY = null,}) {
+  return _then(_ScrcpyPointerEvent(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as ScrcpyPointerEventType,normalizedPointerX: null == normalizedPointerX ? _self.normalizedPointerX : normalizedPointerX // ignore: cast_nullable_to_non_nullable
+as double,normalizedPointerY: null == normalizedPointerY ? _self.normalizedPointerY : normalizedPointerY // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

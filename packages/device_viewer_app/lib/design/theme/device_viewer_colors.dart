@@ -14,6 +14,8 @@ class const DeviceViewerColors._({
   required final Color error,
   required final Color deviceConnected,
   required final Color deviceDisconnected,
+  required final Color focusRing,
+  required final Color focusGlow,
 }) {
   factory DeviceViewerColors.of(BuildContext context) {
     final theme = MacosTheme.of(context);
@@ -34,6 +36,8 @@ class const DeviceViewerColors._({
       error: variant(MacosColors.systemRedColor),
       deviceConnected: variant(MacosColors.systemGreenColor),
       deviceDisconnected: variant(MacosColors.systemGrayColor),
+      focusRing: theme.primaryColor,
+      focusGlow: theme.primaryColor.withAlpha(isDark ? 0x80 : 0x59),
     );
   }
 

@@ -67,21 +67,21 @@ class const _Content({
               BlocProvider.of<DeviceCanvasBloc>(context)
                   .add(DeviceCanvasEvent.onCloseDevice(device));
             },
-            onTouch: (device, actionId, x, y) {
+            onTouch: (device, type, x, y) {
               BlocProvider.of<DeviceCanvasBloc>(context).add(
-                DeviceCanvasEvent.onDeviceTapped(
+                DeviceCanvasEvent.onPointerEvent(
                   device: device,
-                  action: actionId,
-                  normalizedX: x,
-                  normalizedY: y,
+                  type: type,
+                  normalizedPointerX: x,
+                  normalizedPointerY: y,
                 ),
               );
             },
-            onKey: (device, action) {
+            onKey: (device, event) {
               BlocProvider.of<DeviceCanvasBloc>(context).add(
                 DeviceCanvasEvent.onKeyEvent(
                   device: device,
-                  action: action,
+                  event: event,
                 ),
               );
             },

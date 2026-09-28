@@ -1,25 +1,23 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
-import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_action.dart';
-import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_action.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 typedef DeviceActionCallback = void Function(CanvasDevice);
 typedef DeviceTouchCallback = void Function(
   CanvasDevice device,
-  ScrcpyTouchId id,
-  double touchX,
-  double touchY,
+  ScrcpyPointerEventType id,
+  double normalizedPointerX,
+  double normalizedPointerY,
 );
 
 typedef DeviceKeyCallback = void Function(
   CanvasDevice device,
-  ScrcpyKeyAction action,
+  KeyEvent event,
 );
 
 class const DeviceFrame({
@@ -79,70 +77,55 @@ class _DeviceFrameState extends State<DeviceFrame>
           ),
         );
 
+        final hasFocus = focusNode.hasFocus;
+
         return Center(
           child: SizedBox(
             width: mirrorSize.width,
             height:
                 mirrorSize.height + DeviceViewerTheme.deviceFrameToolBarHeight,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: context.colors.card,
-                borderRadius: BorderRadius.circular(
-                  DeviceViewerTheme.cornerRadius,
-                ),
-                border: Border.all(
-                  color: context.colors.divider,
-                  width: DeviceViewerTheme.hairlineThickness,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: context.colors.shadow,
-                    blurRadius: DeviceViewerTheme.cardShadow,
-                    offset: DeviceViewerTheme.cardShadowOffset,
+            child: Focus(
+              focusNode: focusNode,
+              onFocusChange: (_) => setState(() {}),
+              onKeyEvent: (_, event) {
+                widget.onKey(widget.device, event);
+                return .handled;
+              },
+              child: Listener(
+                onPointerDown: (_) => focusNode.requestFocus(),
+                behavior: .translucent,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: hasFocus ? 1.0 : 0.0),
+                  duration: DeviceViewerTheme.focusTransitionDuration,
+                  curve: Curves.easeOut,
+                  builder: (context, focus, child) => DecoratedBox(
+                    decoration: _frameDecoration(context, focus),
+                    child: child,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  DeviceViewerTheme.cornerRadius -
-                      DeviceViewerTheme.hairlineThickness,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    focusNode.requestFocus();
-                  },
-                  behavior: .translucent,
-                  child: Column(
-                    children: [
-                      DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border.fromBorderSide(
-                            focusNode.hasFocus
-                                ? BorderSide(
-                                    color: MacosColors.systemRedColor,
-                                    width: 2,
-                                  )
-                                : BorderSide.none,
-                          ),
-                        ),
-                        child: SizedBox(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(
+                      DeviceViewerTheme.cornerRadius -
+                          DeviceViewerTheme.hairlineThickness,
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
                           height: DeviceViewerTheme.deviceFrameToolBarHeight,
                           child: _ToolBar(
                             canvasDevice: widget.device,
+                            hasFocus: hasFocus,
                             onCaptureScreenshot: _handleCaptureScreenshot,
                             onClose: widget.onClose,
                           ),
                         ),
-                      ),
-                      _ScreenMirror(
-                        canvasDevice: widget.device,
-                        onTouch: widget.onTouch,
-                        onKey: widget.onKey,
-                        flash: _screenshotFlash,
-                        textureId: widget.mirrorTextureId,
-                        focusNode: focusNode,
-                      ),
-                    ],
+                        _ScreenMirror(
+                          canvasDevice: widget.device,
+                          onTouch: widget.onTouch,
+                          flash: _screenshotFlash,
+                          textureId: widget.mirrorTextureId,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -152,6 +135,31 @@ class _DeviceFrameState extends State<DeviceFrame>
       },
     );
   }
+}
+
+BoxDecoration _frameDecoration(BuildContext context, double focus) {
+  final colors = context.colors;
+
+  return BoxDecoration(
+    color: colors.card,
+    borderRadius: BorderRadius.circular(DeviceViewerTheme.cornerRadius),
+    border: Border.all(
+      color: Color.lerp(colors.divider, colors.focusRing, focus)!,
+      width: DeviceViewerTheme.hairlineThickness,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: colors.shadow,
+        blurRadius: DeviceViewerTheme.cardShadow,
+        offset: DeviceViewerTheme.cardShadowOffset,
+      ),
+      BoxShadow(
+        color: Color.lerp(const Color(0x00000000), colors.focusGlow, focus)!,
+        blurRadius: DeviceViewerTheme.focusRingBlur,
+        spreadRadius: DeviceViewerTheme.focusRingThickness * focus,
+      ),
+    ],
+  );
 }
 
 double _aspectRatioOf(CanvasDevice device) {
@@ -179,6 +187,7 @@ Size _fitToAspectRatio(double aspectRatio, Size available) {
 
 class const _ToolBar({
   required final CanvasDevice canvasDevice,
+  required final bool hasFocus,
   required final DeviceActionCallback onCaptureScreenshot,
   required final DeviceActionCallback onClose,
 }) extends StatelessWidget {
@@ -232,6 +241,7 @@ class const _ToolBar({
               ),
               child: Row(
                 children: [
+                  _KeyboardTargetBadge(hasFocus: hasFocus),
                   // TODO(Felix): wire up recording the mirrored stream to a file.
                   MacosTooltip(
                     message: 'Aufnahme starten',
@@ -301,166 +311,66 @@ class const _StatusDot({required final bool isLive}) extends StatelessWidget {
 class const _ScreenMirror({
   required final CanvasDevice canvasDevice,
   required final DeviceTouchCallback onTouch,
-  required final DeviceKeyCallback onKey,
   required final Animation<double> flash,
   required final int? textureId,
-  required final FocusNode focusNode,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: _KeyStrokeListener(
-        device: canvasDevice,
-        onKey: onKey,
-        focusNode: focusNode,
-        child: _TouchListener(
-          textureId: textureId,
-          canvasDevice: canvasDevice,
-          flash: flash,
-          onTouch: onTouch,
-          child: Stack(
-            fit: .expand,
-            children: [
-              switch (textureId) {
-                final id? => ColoredBox(
-                  color: DeviceViewerColors.mirrorBackground,
-                  child: Texture(textureId: id),
-                ),
-                null => _ConnectingState(
-                  modelName: canvasDevice.device.modelName,
-                ),
-              },
-              IgnorePointer(
-                child: FadeTransition(
-                  opacity: flash,
-                  child: const ColoredBox(
-                    color: DeviceViewerColors.screenshotFlash,
-                  ),
+      child: _TouchListener(
+        textureId: textureId,
+        canvasDevice: canvasDevice,
+        flash: flash,
+        onTouch: onTouch,
+        child: Stack(
+          fit: .expand,
+          children: [
+            switch (textureId) {
+              final id? => ColoredBox(
+                color: DeviceViewerColors.mirrorBackground,
+                child: Texture(textureId: id),
+              ),
+              null => _ConnectingState(
+                modelName: canvasDevice.device.modelName,
+              ),
+            },
+            IgnorePointer(
+              child: FadeTransition(
+                opacity: flash,
+                child: const ColoredBox(
+                  color: DeviceViewerColors.screenshotFlash,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class const _KeyStrokeListener({
-  required final Widget child,
-  required final CanvasDevice device,
-  required final DeviceKeyCallback onKey,
-  required final FocusNode focusNode,
-}) extends StatelessWidget {
+class const _KeyboardTargetBadge({required final bool hasFocus})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Focus(
-      focusNode: focusNode,
-      onKeyEvent: (_, event) {
-        print(
-          "physicalKey: ${event.physicalKey}, logicalKey: ${event.logicalKey}, character: ${event.character}",
-        );
-
-        final keyCode = _convertLogicalKeyToKeyCode(event.logicalKey);
-        if (keyCode == null) {
-          return .ignored;
-        }
-
-        final metaState = _convertMetaState(HardwareKeyboard.instance);
-
-        if (event is KeyDownEvent) {
-          onKey(device, .down(keyCode: keyCode, metaState: metaState));
-          return .handled;
-        }
-
-        if (event is KeyRepeatEvent) {
-          onKey(
-            device,
-            .repeat(
-              keyCode: keyCode,
-              repeat: 1,
-              metaState: metaState,
+    return MacosTooltip(
+      message: 'Tastatureingaben gehen an dieses Gerät',
+      child: SizedBox.square(
+        dimension: DeviceViewerTheme.deviceFrameToolBarIconSlot,
+        child: AnimatedOpacity(
+          duration: DeviceViewerTheme.focusTransitionDuration,
+          curve: Curves.easeOut,
+          opacity: hasFocus ? 1.0 : 0.0,
+          child: Center(
+            child: MacosIcon(
+              CupertinoIcons.keyboard,
+              color: context.colors.focusRing,
             ),
-          );
-
-          return .handled;
-        }
-
-        if (event is KeyUpEvent) {
-          onKey(device, .up(keyCode: keyCode, metaState: metaState));
-          return .handled;
-        }
-
-        return .ignored;
-      },
-      child: child,
+          ),
+        ),
+      ),
     );
   }
-}
-
-final myTooleMap = Map.fromEntries(
-  kAndroidToLogicalKey.entries.map(
-    (entry) => MapEntry(entry.value, entry.key),
-  ),
-);
-
-int? _convertLogicalKeyToKeyCode(LogicalKeyboardKey logicalKey) {
-  return myTooleMap[logicalKey];
-}
-
-abstract final class AndroidMetaState {
-  static const none = 0;
-  static const shiftOn = 0x00000001;
-  static const altOn = 0x00000002;
-  static const symOn = 0x00000004;
-  static const functionOn = 0x00000008;
-  static const altLeftOn = 0x00000010;
-  static const altRightOn = 0x00000020;
-  static const shiftLeftOn = 0x00000040;
-  static const shiftRightOn = 0x00000080;
-  static const ctrlOn = 0x00001000;
-  static const ctrlLeftOn = 0x00002000;
-  static const ctrlRightOn = 0x00004000;
-  static const metaOn = 0x00010000;
-  static const metaLeftOn = 0x00020000;
-  static const metaRightOn = 0x00040000;
-  static const capLockOn = 0x00100000;
-  static const numLockOn = 0x00200000;
-  static const scrollLockOn = 0x00400000;
-}
-
-int _convertMetaState(HardwareKeyboard keyboard) {
-  var meta = AndroidMetaState.none;
-
-  if (keyboard.isShiftPressed) {
-    meta |= AndroidMetaState.shiftOn;
-  }
-
-  if (keyboard.isControlPressed) {
-    meta |= AndroidMetaState.ctrlOn;
-  }
-
-  if (keyboard.isAltPressed) {
-    meta |= AndroidMetaState.altOn;
-  }
-
-  if (keyboard.isMetaPressed) {
-    meta |= AndroidMetaState.metaOn;
-  }
-
-  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.capsLock)) {
-    meta |= AndroidMetaState.capLockOn;
-  }
-
-  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.numLock)) {
-    meta |= AndroidMetaState.numLockOn;
-  }
-
-  if (keyboard.lockModesEnabled.contains(KeyboardLockMode.scrollLock)) {
-    meta |= AndroidMetaState.scrollLockOn;
-  }
-
-  return meta;
 }
 
 class const _TouchListener({
@@ -476,11 +386,11 @@ class const _TouchListener({
       builder: (context, constraints) {
         final size = constraints.biggest;
 
-        void handle(ScrcpyTouchId id, Offset touchPosition) {
+        void handle(ScrcpyPointerEventType type, Offset touchPosition) {
           if (size.width == 0 || size.height == 0) return;
           final touchX = (touchPosition.dx / size.width).clamp(0.0, 1.0);
           final touchY = (touchPosition.dy / size.height).clamp(0.0, 1.0);
-          onTouch(canvasDevice, id, touchX, touchY);
+          onTouch(canvasDevice, type, touchX, touchY);
         }
 
         return Listener(

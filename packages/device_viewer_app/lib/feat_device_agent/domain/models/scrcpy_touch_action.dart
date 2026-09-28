@@ -1,13 +1,18 @@
-import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_touch_id.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'scrcpy_touch_action.freezed.dart';
 
+enum ScrcpyPointerEventType {
+  down,
+  up,
+  move,
+}
+
 @freezed
-sealed class ScrcpyTouchAction with _$ScrcpyTouchAction {
-  const factory ScrcpyTouchAction({
-    required ScrcpyTouchId id,
-    required double normalizedTouchX,
-    required double normalizedTouchY,
-  }) = _ScrcpyTouchAction;
+sealed class ScrcpyPointerEvent with _$ScrcpyPointerEvent {
+  const factory ScrcpyPointerEvent({
+    required ScrcpyPointerEventType type,
+    required double normalizedPointerX,
+    required double normalizedPointerY,
+  }) = _ScrcpyPointerEvent;
 }

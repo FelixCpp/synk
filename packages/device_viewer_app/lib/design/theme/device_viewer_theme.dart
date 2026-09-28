@@ -33,11 +33,16 @@ class DeviceViewerTheme {
   static const cardShadow = 18.0;
   static const cardShadowOffset = Offset(0, 6);
 
+  static const focusRingThickness = 3.0;
+  static const focusRingBlur = 4.0;
+  static const focusTransitionDuration = Duration(milliseconds: 140);
+
   static const deviceFrameToolBarHeight = 56.0;
   static const deviceFrameToolBarPadding = EdgeInsets.only(
     left: 14.0,
     right: 6.0,
   );
+  static const deviceFrameToolBarIconSlot = 24.0;
 
   static const deviceFrameWidth = 320.0;
   static const deviceFrameReferenceAspectRatio = 9 / 20;

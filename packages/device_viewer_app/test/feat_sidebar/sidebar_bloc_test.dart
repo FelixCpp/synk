@@ -53,7 +53,7 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   }
 
   @override
-  AndroidDeviceAgent? getAgent(DeviceId id) => null;
+  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 }
 
 AndroidDevice buildDevice(String serial) {
