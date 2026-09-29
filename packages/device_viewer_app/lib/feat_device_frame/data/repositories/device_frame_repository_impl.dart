@@ -2,6 +2,7 @@ import 'package:device_viewer/feat_device_agent/application/android_device_agent
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:device_viewer/feat_device_frame/domain/models/control_button_type.dart';
 import 'package:device_viewer/feat_device_frame/domain/models/dropped_file_outcome.dart';
 import 'package:device_viewer/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
@@ -71,11 +72,32 @@ class const DeviceFrameRepositoryImpl({
     agent.simulatePointerEvent(event);
   }
 
+  @override
+  void simulateControlButtonEvent(DeviceId deviceId, ControlButtonType type) {
+    final agent = repository.getAndroidDeviceAgent(deviceId);
+    if (agent == null) {
+      return;
+    }
+
+    final ScrcpyKeyCode keyCode = switch (type) {
+      .back => .back,
+      .home => .home,
+      .appSwitch => .appSwitch,
+      .power => .power,
+    };
+
+    _pressKey(agent, keyCode);
+  }
+
   void wakeup(AndroidDeviceAgent agent) {
+    _pressKey(agent, .wakeup);
+  }
+
+  void _pressKey(AndroidDeviceAgent agent, ScrcpyKeyCode keyCode) {
     for (final type in [ScrcpyKeyEventType.down, ScrcpyKeyEventType.up]) {
       agent.simulateKeyEvent(
         ScrcpyKeyEvent(
-          keyCode: .wakeup,
+          keyCode: keyCode,
           metaState: .none,
           type: type,
         ),

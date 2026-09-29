@@ -2,9 +2,9 @@ import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:device_viewer/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:device_viewer/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
+import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
 import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_drop_feedback.dart';
-import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_hover_detector.dart';
 import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_pointer_listener.dart';
 import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_surface.dart';
 import 'package:device_viewer/feat_device_frame/presentation/widgets/device_frame_tool_bar.dart';
@@ -71,11 +71,11 @@ class _DeviceFrameState extends State<DeviceFrame>
           _aspectRatioOf(widget.screenSize),
           Size(
             constraints.maxWidth,
-            constraints.maxHeight - DeviceViewerTheme.deviceFrameToolBarHeight,
+            constraints.maxHeight -
+                DeviceViewerTheme.deviceFrameToolBarHeight -
+                DeviceViewerTheme.deviceFrameControlsBarHeight,
           ),
         );
-
-        final hasFocus = focusNode.hasFocus;
 
         return Center(
           child: Hero(
@@ -87,86 +87,118 @@ class _DeviceFrameState extends State<DeviceFrame>
               width: mirrorSize.width,
               height:
                   mirrorSize.height +
-                  DeviceViewerTheme.deviceFrameToolBarHeight,
-              child: BlocProvider(
-                create: (context) => DeviceFrameBloc(
-                  deviceId: widget.deviceId,
-                  repository: DeviceFrameRepositoryImpl(
-                    repository: RepositoryProvider.of(context),
-                  ),
-                  notifications: RepositoryProvider.of(context),
-                ),
-                child: Builder(
-                  builder: (context) {
-                    final isProcessingDroppedFiles = context
-                        .watch<DeviceFrameBloc>()
-                        .state
-                        .isProcessingDroppedFiles;
-
-                    return DeviceFrameHoverDetector(
-                      builder: (context, isHovered) => DeviceFrameDropDetector(
-                        onFilesDropped: (filepaths) {
-                          BlocProvider.of<DeviceFrameBloc>(context)
-                              .add(.onFilesDropped(filepaths));
-                        },
-                        builder: (context, isDragHovered) => Focus(
-                          focusNode: focusNode,
-                          autofocus: widget.isMaximized,
-                          onFocusChange: (_) => setState(() {}),
-                          onKeyEvent: (focusNode, keyEvent) {
-                            return _handleKeyEvent(
-                              context,
-                              focusNode,
-                              keyEvent,
-                            );
-                          },
-                          child: Listener(
-                            onPointerDown: (_) => focusNode.requestFocus(),
-                            behavior: .translucent,
-                            child: DeviceFrameSurface(
-                              hasFocus: hasFocus,
-                              child: DeviceFrameDropFeedback(
-                                isDragHovered: isDragHovered,
-                                isProcessing: isProcessingDroppedFiles,
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      height: DeviceViewerTheme
-                                          .deviceFrameToolBarHeight,
-                                      child: DeviceFrameToolBar(
-                                        deviceId: widget.deviceId,
-                                        modelName: widget.modelName,
-                                        isLive: widget.isLive,
-                                        isMaximized: widget.isMaximized,
-                                        areActionsVisible:
-                                            isHovered || widget.isMaximized,
-                                        onCaptureScreenshot: () =>
-                                            _handleCaptureScreenshot(context),
-                                        onToggleMaximize:
-                                            widget.onToggleMaximize,
-                                        onClose: widget.onClose,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: DeviceFramePointerListener(
-                                        child: DeviceScreenMirror(
-                                          textureId: widget.textureId,
-                                          modelName: widget.modelName,
-                                          hasFocus: hasFocus,
-                                          flash: _screenshotFlash,
+                  DeviceViewerTheme.deviceFrameToolBarHeight +
+                  DeviceViewerTheme.deviceFrameControlsBarHeight,
+              child: _DeviceFrameBlocProvider(
+                deviceId: widget.deviceId,
+                builder: (context, state) {
+                  return DeviceFrameDropDetector(
+                    onFilesDropped: (filepaths) {
+                      BlocProvider.of<DeviceFrameBloc>(context)
+                          .add(.onFilesDropped(filepaths));
+                    },
+                    builder: (context, isDragHovered) => Focus(
+                      focusNode: focusNode,
+                      autofocus: widget.isMaximized,
+                      onFocusChange: (_) => setState(() {}),
+                      onKeyEvent: (focusNode, keyEvent) {
+                        return _handleKeyEvent(
+                          context,
+                          focusNode,
+                          keyEvent,
+                        );
+                      },
+                      child: Listener(
+                        onPointerDown: (_) => focusNode.requestFocus(),
+                        behavior: .translucent,
+                        child: DeviceFrameSurface(
+                          hasFocus: focusNode.hasFocus,
+                          child: DeviceFrameDropFeedback(
+                            isDragHovered: isDragHovered,
+                            isProcessing: state.isProcessingDroppedFiles,
+                            child: Column(
+                              children: [
+                                SizedBox(
+                                  height: DeviceViewerTheme
+                                      .deviceFrameToolBarHeight,
+                                  child: DeviceFrameToolBar(
+                                    deviceId: widget.deviceId,
+                                    modelName: widget.modelName,
+                                    isLive: widget.isLive,
+                                    isMaximized: widget.isMaximized,
+                                    onCaptureScreenshot: () =>
+                                        _handleCaptureScreenshot(
+                                          context,
                                         ),
-                                      ),
-                                    ),
-                                  ],
+                                    onToggleMaximize:
+                                        widget.onToggleMaximize,
+                                    onClose: widget.onClose,
+                                    onStandby: () {
+                                      BlocProvider.of<DeviceFrameBloc>(
+                                        context,
+                                      ).add(
+                                        const .onControlButtonPressed(
+                                          .power,
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
-                              ),
+                                Expanded(
+                                  child: DeviceFramePointerListener(
+                                    child: DeviceScreenMirror(
+                                      textureId: widget.textureId,
+                                      modelName: widget.modelName,
+                                      hasFocus: focusNode.hasFocus,
+                                      flash: _screenshotFlash,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: DeviceViewerTheme
+                                      .deviceFrameControlsBarHeight,
+                                  child: Padding(
+                                    padding: DeviceViewerTheme
+                                        .deviceFrameControlsBarPadding,
+                                    child: DeviceFrameControls(
+                                      onBackPressed: () {
+                                        BlocProvider.of<DeviceFrameBloc>(
+                                          context,
+                                        ).add(
+                                          const .onControlButtonPressed(
+                                            .back,
+                                          ),
+                                        );
+                                      },
+                                      onHomePressed: () {
+                                        BlocProvider.of<DeviceFrameBloc>(
+                                          context,
+                                        ).add(
+                                          const .onControlButtonPressed(
+                                            .home,
+                                          ),
+                                        );
+                                      },
+                                      onAppLibraryPressed: () {
+                                        BlocProvider.of<DeviceFrameBloc>(
+                                          context,
+                                        ).add(
+                                          const .onControlButtonPressed(
+                                            .appSwitch,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -188,6 +220,27 @@ class _DeviceFrameState extends State<DeviceFrame>
 
     BlocProvider.of<DeviceFrameBloc>(context).add(.onKeyEvent(event));
     return .handled;
+  }
+}
+
+class const _DeviceFrameBlocProvider({
+  required final DeviceId deviceId,
+  required final BlocWidgetBuilder<DeviceFrameState> builder,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<DeviceFrameBloc>(
+      create: (context) => DeviceFrameBloc(
+        deviceId: deviceId,
+        repository: DeviceFrameRepositoryImpl(
+          repository: RepositoryProvider.of(context),
+        ),
+        notifications: RepositoryProvider.of(context),
+      ),
+      child: BlocBuilder<DeviceFrameBloc, DeviceFrameState>(
+        builder: builder,
+      ),
+    );
   }
 }
 

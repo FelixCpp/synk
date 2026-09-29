@@ -1,4 +1,7 @@
-enum DroppedFileAction { installed, pushed }
+enum DroppedFileAction {
+  installed,
+  pushed,
+}
 
 typedef DroppedFileOutcome = ({
   DroppedFileAction action,

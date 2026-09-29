@@ -127,6 +127,7 @@ class const _DeviceViewerScreen() extends StatelessWidget {
         title: const Text("Device Viewer"),
         padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
         leading: MacosTooltip(
+          useMousePosition: false,
           message: "Seitenleisten ausblenden/anzeigen",
           child: MacosIconButton(
             onPressed: () {

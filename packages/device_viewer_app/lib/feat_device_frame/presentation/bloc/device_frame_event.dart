@@ -12,4 +12,8 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onKeyEvent(KeyEvent keyEvent) = _OnKeyEvent;
   const factory DeviceFrameEvent.onFilesDropped(List<String> filepaths) =
       _OnFilesDropped;
+
+  const factory DeviceFrameEvent.onControlButtonPressed(
+    ControlButtonType type,
+  ) = _OnControlButtonPressed;
 }

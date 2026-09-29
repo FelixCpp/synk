@@ -13,7 +13,6 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_dev
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -133,29 +132,12 @@ void main() {
       );
     });
 
-    testWidgets('keeps the action icons out of the way until hovered', (
+    testWidgets('always shows the action icons, hovered or not', (
       tester,
     ) async {
       await _pumpFrame(tester, _referenceScreenSize);
 
-      expect(_actionsOpacity(tester), 0.0);
-      expect(_actionsIgnorePointer(tester), isTrue);
-
-      await _hoverOverMirror(tester);
-
-      expect(_actionsOpacity(tester), 1.0);
-      expect(_actionsIgnorePointer(tester), isFalse);
-    });
-
-    testWidgets('leaves the actions in reach while maximized', (tester) async {
-      await _pumpFrame(tester, _referenceScreenSize, isMaximized: true);
-
-      expect(
-        _actionsOpacity(tester),
-        1.0,
-        reason: 'a maximized device has room to show its actions outright',
-      );
-      expect(_actionsIgnorePointer(tester), isFalse);
+      expect(_screenshotIcon(), findsOneWidget);
     });
 
     testWidgets('never hides the device it belongs to', (tester) async {
@@ -300,37 +282,9 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   Future<void> dispose() async {}
 }
 
-Future<void> _hoverOverMirror(WidgetTester tester) async {
-  final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
-  await mouse.addPointer(location: Offset.zero);
-  addTearDown(mouse.removePointer);
-
-  await mouse.moveTo(tester.getCenter(find.byType(Texture)));
-  await tester.pump();
-  await tester.pump(DeviceViewerTheme.actionRevealDuration);
-}
-
 Finder _screenshotIcon() => find.byWidgetPredicate(
   (widget) => widget is MacosIcon && widget.icon == CupertinoIcons.camera,
 );
-
-double _actionsOpacity(WidgetTester tester) {
-  final finder = find.ancestor(
-    of: _screenshotIcon(),
-    matching: find.byType(AnimatedOpacity),
-  );
-  expect(finder, findsOneWidget);
-
-  return tester.widget<AnimatedOpacity>(finder).opacity;
-}
-
-bool _actionsIgnorePointer(WidgetTester tester) {
-  final finder = find
-      .ancestor(of: _screenshotIcon(), matching: find.byType(IgnorePointer))
-      .first;
-
-  return tester.widget<IgnorePointer>(finder).ignoring;
-}
 
 BoxDecoration _frameDecorationOf(WidgetTester tester) {
   final decorated = tester.widget<DecoratedBox>(

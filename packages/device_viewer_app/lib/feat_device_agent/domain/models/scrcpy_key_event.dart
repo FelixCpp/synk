@@ -6,6 +6,11 @@ extension type const ScrcpyKeyCode(int value) implements int {
   static const wakeup = ScrcpyKeyCode(224);
   static const copy = ScrcpyKeyCode(31);
   static const paste = ScrcpyKeyCode(50);
+
+  static const home = ScrcpyKeyCode(3);
+  static const back = ScrcpyKeyCode(4);
+  static const appSwitch = ScrcpyKeyCode(187);
+  static const power = ScrcpyKeyCode(26);
 }
 
 extension type const ScrcpyKeyMetaState(int value) implements int {

@@ -130,60 +130,120 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: .stretch,
-          spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
+        child: Row(
+          spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
           children: [
-            Row(
-              spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(
-                      DeviceViewerTheme.smallCornerRadius,
-                    ),
-                    color: statusColor.withAlpha(38),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(9.0),
-                    child: MacosIcon(
-                      CupertinoIcons.device_phone_portrait,
-                      size: 18.0,
-                      color: statusColor,
-                    ),
-                  ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(
+                  DeviceViewerTheme.smallCornerRadius,
                 ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: .start,
-                    children: [
-                      Text(
-                        adbDevice.modelName,
-                        style: context.typo.headline,
-                        overflow: .ellipsis,
-                      ),
-                      Text(
-                        adbDevice.id,
-                        style: context.typo.caption1.copyWith(
-                          color: context.colors.secondaryLabel,
-                        ),
-                        overflow: .ellipsis,
-                      ),
-                    ],
-                  ),
+                color: statusColor.withAlpha(38),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(9.0),
+                child: MacosIcon(
+                  CupertinoIcons.device_phone_portrait,
+                  size: 18.0,
+                  color: statusColor,
                 ),
-              ],
+              ),
             ),
-            PushButton(
-              controlSize: .large,
-              secondary: device.isConnected,
+            Expanded(
+              child: Column(
+                crossAxisAlignment: .start,
+                children: [
+                  Text(
+                    adbDevice.modelName,
+                    style: context.typo.headline,
+                    overflow: .ellipsis,
+                  ),
+                  Text(
+                    adbDevice.id,
+                    style: context.typo.caption1.copyWith(
+                      color: context.colors.secondaryLabel,
+                    ),
+                    overflow: .ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            _ConnectButton(
+              isConnected: device.isConnected,
               onPressed: () {
                 BlocProvider.of<SidebarBloc>(context)
                     .add(SidebarEvent.onConnect(adbDevice));
               },
-              child: Text(device.isConnected ? "Trennen" : "Verbinden"),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class const _ConnectButton({
+  required final bool isConnected,
+  required final VoidCallback onPressed,
+}) extends StatefulWidget {
+  @override
+  State<_ConnectButton> createState() => _ConnectButtonState();
+}
+
+class _ConnectButtonState extends State<_ConnectButton> {
+  var _isHovered = false;
+  var _isPressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = context.macosTheme.brightness == .dark;
+    // Same neutral scrim PushButton/_OverflowMenuItem use for their click
+    // effect, layered on top of the hover tint instead of replacing it, so
+    // rest/hover/press read as one progression instead of three looks.
+    final clickEffectColor = isDark
+        ? const Color.fromRGBO(255, 255, 255, 0.15)
+        : const Color.fromRGBO(0, 0, 0, 0.06);
+
+    return MacosTooltip(
+      useMousePosition: false,
+      message: widget.isConnected ? "Trennen" : "Verbinden",
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _isHovered = true),
+        onExit: (_) => setState(() {
+          _isHovered = false;
+          _isPressed = false;
+        }),
+        child: GestureDetector(
+          onTapDown: (_) => setState(() => _isPressed = true),
+          onTapCancel: () => setState(() => _isPressed = false),
+          onTapUp: (_) => setState(() => _isPressed = false),
+          onTap: widget.onPressed,
+          child: AnimatedContainer(
+            duration: DeviceViewerTheme.actionRevealDuration,
+            width: 26.0,
+            height: 26.0,
+            alignment: .center,
+            decoration: BoxDecoration(
+              color: _isHovered
+                  ? context.colors.cardHover
+                  : const Color(0x00000000),
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            foregroundDecoration: BoxDecoration(
+              color: _isPressed ? clickEffectColor : const Color(0x00000000),
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            child: MacosIcon(
+              widget.isConnected
+                  ? CupertinoIcons.bolt_slash_fill
+                  : CupertinoIcons.bolt_fill,
+              size: 15.0,
+              color: widget.isConnected
+                  ? context.colors.error
+                  : context.macosTheme.primaryColor,
+            ),
+          ),
         ),
       ),
     );

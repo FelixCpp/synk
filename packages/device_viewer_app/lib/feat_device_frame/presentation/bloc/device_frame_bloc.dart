@@ -4,9 +4,11 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
+import 'package:device_viewer/feat_device_frame/domain/models/control_button_type.dart';
 import 'package:device_viewer/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
+import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
@@ -30,6 +32,9 @@ class DeviceFrameBloc({
   final simulatePointerEvent = SimulatePointerEventInteractor(repository);
   final captureScreenshot = CaptureScreenshotInteractor(repository);
   final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
+  final simulateControlButton = SimulateControlButtonEventInteractor(
+    repository,
+  );
 
   this : super(.initial()) {
     on<_OnSetup>(_onSetup);
@@ -37,6 +42,10 @@ class DeviceFrameBloc({
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
     on<_OnFilesDropped>(_onFilesDropped, transformer: sequential());
+    on<_OnControlButtonPressed>(
+      _onControlButtonPressed,
+      transformer: sequential(),
+    );
 
     add(const .onSetup());
   }
@@ -124,6 +133,20 @@ class DeviceFrameBloc({
           ),
         )
         .run((deviceId: deviceId, filepaths: event.filepaths));
+  }
+
+  FutureOr<void> _onControlButtonPressed(
+    _OnControlButtonPressed event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return simulateControlButton
+        .logger()
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to simulate control button press: $e'),
+          ),
+        )
+        .run((deviceId: deviceId, type: event.type));
   }
 }
 

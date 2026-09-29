@@ -56,7 +56,7 @@ extension DeviceFrameEventPatterns on DeviceFrameEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnFilesDropped value)?  onFilesDropped,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnFilesDropped value)?  onFilesDropped,TResult Function( _OnControlButtonPressed value)?  onControlButtonPressed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
@@ -64,7 +64,8 @@ return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != nu
 return onCaptureScreenshot(_that);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that);case _OnKeyEvent() when onKeyEvent != null:
 return onKeyEvent(_that);case _OnFilesDropped() when onFilesDropped != null:
-return onFilesDropped(_that);case _:
+return onFilesDropped(_that);case _OnControlButtonPressed() when onControlButtonPressed != null:
+return onControlButtonPressed(_that);case _:
   return orElse();
 
 }
@@ -82,7 +83,7 @@ return onFilesDropped(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnFilesDropped value)  onFilesDropped,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnFilesDropped value)  onFilesDropped,required TResult Function( _OnControlButtonPressed value)  onControlButtonPressed,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
@@ -90,7 +91,8 @@ return onSetup(_that);case _OnCaptureScreenshot():
 return onCaptureScreenshot(_that);case _OnPointerEvent():
 return onPointerEvent(_that);case _OnKeyEvent():
 return onKeyEvent(_that);case _OnFilesDropped():
-return onFilesDropped(_that);}
+return onFilesDropped(_that);case _OnControlButtonPressed():
+return onControlButtonPressed(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -104,7 +106,7 @@ return onFilesDropped(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnFilesDropped value)?  onFilesDropped,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnFilesDropped value)?  onFilesDropped,TResult? Function( _OnControlButtonPressed value)?  onControlButtonPressed,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
@@ -112,7 +114,8 @@ return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != nu
 return onCaptureScreenshot(_that);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that);case _OnKeyEvent() when onKeyEvent != null:
 return onKeyEvent(_that);case _OnFilesDropped() when onFilesDropped != null:
-return onFilesDropped(_that);case _:
+return onFilesDropped(_that);case _OnControlButtonPressed() when onControlButtonPressed != null:
+return onControlButtonPressed(_that);case _:
   return null;
 
 }
@@ -129,14 +132,15 @@ return onFilesDropped(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function()?  onCaptureScreenshot,TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( KeyEvent keyEvent)?  onKeyEvent,TResult Function( List<String> filepaths)?  onFilesDropped,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function()?  onCaptureScreenshot,TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( KeyEvent keyEvent)?  onKeyEvent,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( ControlButtonType type)?  onControlButtonPressed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnKeyEvent() when onKeyEvent != null:
 return onKeyEvent(_that.keyEvent);case _OnFilesDropped() when onFilesDropped != null:
-return onFilesDropped(_that.filepaths);case _:
+return onFilesDropped(_that.filepaths);case _OnControlButtonPressed() when onControlButtonPressed != null:
+return onControlButtonPressed(_that.type);case _:
   return orElse();
 
 }
@@ -154,14 +158,15 @@ return onFilesDropped(_that.filepaths);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function()  onCaptureScreenshot,required TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( KeyEvent keyEvent)  onKeyEvent,required TResult Function( List<String> filepaths)  onFilesDropped,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function()  onCaptureScreenshot,required TResult Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( KeyEvent keyEvent)  onKeyEvent,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( ControlButtonType type)  onControlButtonPressed,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnCaptureScreenshot():
 return onCaptureScreenshot();case _OnPointerEvent():
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnKeyEvent():
 return onKeyEvent(_that.keyEvent);case _OnFilesDropped():
-return onFilesDropped(_that.filepaths);}
+return onFilesDropped(_that.filepaths);case _OnControlButtonPressed():
+return onControlButtonPressed(_that.type);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -175,14 +180,15 @@ return onFilesDropped(_that.filepaths);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function()?  onCaptureScreenshot,TResult? Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( KeyEvent keyEvent)?  onKeyEvent,TResult? Function( List<String> filepaths)?  onFilesDropped,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function()?  onCaptureScreenshot,TResult? Function( ScrcpyPointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( KeyEvent keyEvent)?  onKeyEvent,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( ControlButtonType type)?  onControlButtonPressed,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnKeyEvent() when onKeyEvent != null:
 return onKeyEvent(_that.keyEvent);case _OnFilesDropped() when onFilesDropped != null:
-return onFilesDropped(_that.filepaths);case _:
+return onFilesDropped(_that.filepaths);case _OnControlButtonPressed() when onControlButtonPressed != null:
+return onControlButtonPressed(_that.type);case _:
   return null;
 
 }
@@ -462,6 +468,74 @@ class __$OnFilesDroppedCopyWithImpl<$Res>
   return _then(_OnFilesDropped(
 null == filepaths ? _self._filepaths : filepaths // ignore: cast_nullable_to_non_nullable
 as List<String>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _OnControlButtonPressed implements DeviceFrameEvent {
+  const _OnControlButtonPressed(this.type);
+  
+
+ final  ControlButtonType type;
+
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnControlButtonPressedCopyWith<_OnControlButtonPressed> get copyWith => __$OnControlButtonPressedCopyWithImpl<_OnControlButtonPressed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnControlButtonPressed&&(identical(other.type, type) || other.type == type));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,type);
+}
+
+@override
+String toString() {
+    return 'DeviceFrameEvent.onControlButtonPressed(type: $type)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnControlButtonPressedCopyWith<$Res> implements $DeviceFrameEventCopyWith<$Res> {
+  factory _$OnControlButtonPressedCopyWith(_OnControlButtonPressed value, $Res Function(_OnControlButtonPressed) _then) = __$OnControlButtonPressedCopyWithImpl;
+@useResult
+$Res call({
+ ControlButtonType type
+});
+
+
+
+
+}
+/// @nodoc
+class __$OnControlButtonPressedCopyWithImpl<$Res>
+    implements _$OnControlButtonPressedCopyWith<$Res> {
+  __$OnControlButtonPressedCopyWithImpl(this._self, this._then);
+
+  final _OnControlButtonPressed _self;
+  final $Res Function(_OnControlButtonPressed) _then;
+
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? type = null,}) {
+  return _then(_OnControlButtonPressed(
+null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as ControlButtonType,
   ));
 }
 

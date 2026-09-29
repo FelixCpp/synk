@@ -44,6 +44,12 @@ class DeviceViewerTheme {
   );
   static const deviceFrameToolBarIconSlot = 24.0;
 
+  static const deviceFrameControlsBarHeight = 44.0;
+  static const deviceFrameControlsBarPadding = EdgeInsets.only(
+    left: 14.0,
+    right: 6.0,
+  );
+
   static const actionRevealDuration = Duration(milliseconds: 120);
 
   static const statusOverlayPadding = EdgeInsets.all(8.0);
@@ -63,5 +69,6 @@ class DeviceViewerTheme {
   static const deviceFrameReferenceAspectRatio = 9 / 20;
   static const deviceFrameHeight =
       deviceFrameToolBarHeight +
+      deviceFrameControlsBarHeight +
       (deviceFrameWidth / deviceFrameReferenceAspectRatio);
 }
