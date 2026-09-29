@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:device_viewer/feat_notifications/domain/models/app_notification.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:macos_ui/macos_ui.dart';
 
 class const NotificationToast({
   super.key,
   required final String message,
+  required final NotificationSeverity severity,
   required final VoidCallback onDismissed,
 }) extends StatefulWidget {
   @override
@@ -31,6 +33,12 @@ class _NotificationToastState extends State<NotificationToast> {
 
   @override
   Widget build(BuildContext context) {
+    final isSuccess = widget.severity == NotificationSeverity.success;
+    final icon = isSuccess
+        ? CupertinoIcons.checkmark_circle
+        : CupertinoIcons.exclamationmark_circle;
+    final color = isSuccess ? context.colors.success : context.colors.error;
+
     return Positioned(
       right: DeviceViewerTheme.horizontalPagePadding,
       bottom: DeviceViewerTheme.verticalPagePadding,
@@ -61,10 +69,7 @@ class _NotificationToastState extends State<NotificationToast> {
                 spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  MacosIcon(
-                    CupertinoIcons.exclamationmark_circle,
-                    color: context.colors.error,
-                  ),
+                  MacosIcon(icon, color: color),
                   Flexible(
                     child: Text(widget.message, style: context.typo.body),
                   ),

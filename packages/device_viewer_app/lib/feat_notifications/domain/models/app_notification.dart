@@ -2,7 +2,11 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'app_notification.freezed.dart';
 
-enum NotificationSeverity { error, critical }
+enum NotificationSeverity {
+  success,
+  error,
+  critical,
+}
 
 @freezed
 sealed class AppNotification with _$AppNotification {

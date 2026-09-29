@@ -11,14 +11,12 @@ import 'package:device_viewer/feat_device_agent/data/datasources/device_agent_la
 import 'package:device_viewer/feat_device_agent/data/datasources/scrcpy_server_launcher.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:device_viewer/feat_device_agent/domain/repositories/device_agent_repository.dart';
-import 'package:device_viewer/feat_device_canvas/data/datasources/screen_mirror_texture_datasource.dart';
-import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_connections/application/scrcpy/scrcpy_constants.dart';
+import 'package:device_viewer/feat_native_texture/native_texture.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
 
 class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
     implements DeviceAgentRepository {
-  final nativeTextureAdapter = ScreenMirrorTextureDatasource();
   final runningAgents = <DeviceId, AndroidDeviceAgent>{};
 
   @override
@@ -55,9 +53,10 @@ class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
 
       final scrcpy = scrcpyServer!;
       final screenSize = await _fetchScreenSize(communicator);
-      texture = await NativeTexture.create(nativeTextureAdapter);
+      texture = await NativeTexture.create();
 
       final agent = AndroidDeviceAgent(
+        communicator,
         agentCommunicator!,
         AndroidScreenTransmission(
           socket: scrcpy.videoSocket,

@@ -25,6 +25,7 @@ class const AppNotificationListener({
             case NotificationSeverity.critical:
               _showDialog(context, notification);
             case NotificationSeverity.error:
+            case NotificationSeverity.success:
               _showToast(context, notification);
           }
         },
@@ -64,6 +65,7 @@ void _showToast(BuildContext context, AppNotification notification) {
     builder: (context) {
       return NotificationToast(
         message: notification.message,
+        severity: notification.severity,
         onDismissed: () => entry.remove(),
       );
     },

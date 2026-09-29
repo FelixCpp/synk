@@ -2,14 +2,20 @@ import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
-import 'package:device_viewer/feat_device_canvas/presentation/widgets/device_frame.dart';
+import 'package:device_viewer/feat_device_agent/application/android_device_agent.dart';
+import 'package:device_viewer/feat_device_connections/domain/models/device_connection.dart';
+import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:device_viewer/feat_device_frame/presentation/device_frame.dart';
+import 'package:device_viewer/feat_notifications/application/notification_service.dart';
+import 'package:device_viewer/feat_native_texture/native_texture.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:macos_ui/macos_ui.dart';
 
@@ -127,20 +133,62 @@ void main() {
       );
     });
 
+    testWidgets('keeps the action icons out of the way until hovered', (
+      tester,
+    ) async {
+      await _pumpFrame(tester, _referenceScreenSize);
+
+      expect(_actionsOpacity(tester), 0.0);
+      expect(_actionsIgnorePointer(tester), isTrue);
+
+      await _hoverOverMirror(tester);
+
+      expect(_actionsOpacity(tester), 1.0);
+      expect(_actionsIgnorePointer(tester), isFalse);
+    });
+
+    testWidgets('leaves the actions in reach while maximized', (tester) async {
+      await _pumpFrame(tester, _referenceScreenSize, isMaximized: true);
+
+      expect(
+        _actionsOpacity(tester),
+        1.0,
+        reason: 'a maximized device has room to show its actions outright',
+      );
+      expect(_actionsIgnorePointer(tester), isFalse);
+    });
+
+    testWidgets('never hides the device it belongs to', (tester) async {
+      await _pumpFrame(tester, _referenceScreenSize);
+
+      expect(
+        find.text(_device.modelName),
+        findsOneWidget,
+        reason: 'the model name has to stay readable without hovering',
+      );
+    });
+
     testWidgets('forwards keystrokes only while focused', (tester) async {
-      final pressed = <KeyEvent>[];
-      await _pumpFrame(tester, _referenceScreenSize, onKey: (_, event) {
-        pressed.add(event);
-      });
+      final reachedTheCanvas = <KeyEvent>[];
+      await _pumpFrame(
+        tester,
+        _referenceScreenSize,
+        onKeyEscapedFrame: reachedTheCanvas.add,
+      );
 
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
-      expect(pressed, isEmpty);
+      expect(reachedTheCanvas, isNotEmpty);
+      reachedTheCanvas.clear();
 
       await tester.tap(find.byType(Texture));
       await tester.pumpAndSettle();
       await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
 
-      expect(pressed, isNotEmpty);
+      expect(
+        reachedTheCanvas,
+        isEmpty,
+        reason: 'a focused frame has to swallow the keystroke and mirror it',
+      );
     });
   });
 }
@@ -169,7 +217,8 @@ Future<Size> _layOutMirror(
 Future<DeviceViewerColors> _pumpFrame(
   WidgetTester tester,
   DeviceScreenSize screenSize, {
-  DeviceKeyCallback? onKey,
+  ValueChanged<KeyEvent>? onKeyEscapedFrame,
+  bool isMaximized = false,
 }) async {
   // The default test surface is shorter than a cell, which would silently
   // squash the frame and make every assertion here meaningless.
@@ -184,36 +233,103 @@ Future<DeviceViewerColors> _pumpFrame(
   late DeviceViewerColors colors;
 
   await tester.pumpWidget(
-    MacosApp(
-      home: Builder(
-        builder: (context) {
-          colors = context.colors;
+    MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<DeviceConnectionsRepository>.value(
+          value: _OfflineConnections(),
+        ),
+        RepositoryProvider<NotificationService>(
+          create: (_) => NotificationService(),
+          dispose: (service) => service.dispose(),
+        ),
+      ],
+      child: MacosApp(
+        home: Builder(
+          builder: (context) {
+            colors = context.colors;
 
-          return Center(
-            child: SizedBox(
-              width: DeviceViewerTheme.deviceFrameWidth,
-              height: DeviceViewerTheme.deviceFrameHeight,
-              child: DeviceFrame(
-                device: CanvasDevice.android(
-                  device: _device,
-                  isConnected: true,
-                  textureId: const NativeTextureId(1),
-                  screenSize: screenSize,
+            return Focus(
+              autofocus: true,
+              onKeyEvent: (_, event) {
+                onKeyEscapedFrame?.call(event);
+                return KeyEventResult.handled;
+              },
+              child: Center(
+                child: SizedBox(
+                  width: DeviceViewerTheme.deviceFrameWidth,
+                  height: DeviceViewerTheme.deviceFrameHeight,
+                  child: DeviceFrame(
+                    deviceId: _device.id,
+                    modelName: _device.modelName,
+                    isLive: true,
+                    textureId: const NativeTextureId(1),
+                    screenSize: screenSize,
+                    isMaximized: isMaximized,
+                    onToggleMaximize: () {},
+                    onClose: () {},
+                  ),
                 ),
-                onCaptureScreenshot: (_) {},
-                onClose: (_) {},
-                onTouch: (_, _, _, _) {},
-                onKey: onKey ?? (_, _) {},
-                mirrorTextureId: 1,
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     ),
   );
 
   return colors;
+}
+
+class _OfflineConnections implements DeviceConnectionsRepository {
+  @override
+  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
+
+  @override
+  Stream<List<AndroidDevice>> observeConnectingDevices() => const .empty();
+
+  @override
+  Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
+
+  @override
+  Future<bool> isConnected(DeviceId id) async => false;
+
+  @override
+  Future<void> toggleConnection(AndroidDevice id) async {}
+
+  @override
+  Future<void> dispose() async {}
+}
+
+Future<void> _hoverOverMirror(WidgetTester tester) async {
+  final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+  await mouse.addPointer(location: Offset.zero);
+  addTearDown(mouse.removePointer);
+
+  await mouse.moveTo(tester.getCenter(find.byType(Texture)));
+  await tester.pump();
+  await tester.pump(DeviceViewerTheme.actionRevealDuration);
+}
+
+Finder _screenshotIcon() => find.byWidgetPredicate(
+  (widget) => widget is MacosIcon && widget.icon == CupertinoIcons.camera,
+);
+
+double _actionsOpacity(WidgetTester tester) {
+  final finder = find.ancestor(
+    of: _screenshotIcon(),
+    matching: find.byType(AnimatedOpacity),
+  );
+  expect(finder, findsOneWidget);
+
+  return tester.widget<AnimatedOpacity>(finder).opacity;
+}
+
+bool _actionsIgnorePointer(WidgetTester tester) {
+  final finder = find
+      .ancestor(of: _screenshotIcon(), matching: find.byType(IgnorePointer))
+      .first;
+
+  return tester.widget<IgnorePointer>(finder).ignoring;
 }
 
 BoxDecoration _frameDecorationOf(WidgetTester tester) {

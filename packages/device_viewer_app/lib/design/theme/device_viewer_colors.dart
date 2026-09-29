@@ -12,6 +12,7 @@ class const DeviceViewerColors._({
   required final Color secondaryLabel,
   required final Color tertiaryLabel,
   required final Color error,
+  required final Color success,
   required final Color deviceConnected,
   required final Color deviceDisconnected,
   required final Color focusRing,
@@ -34,6 +35,7 @@ class const DeviceViewerColors._({
       secondaryLabel: variant(MacosColors.secondaryLabelColor),
       tertiaryLabel: variant(MacosColors.tertiaryLabelColor),
       error: variant(MacosColors.systemRedColor),
+      success: variant(MacosColors.systemGreenColor),
       deviceConnected: variant(MacosColors.systemGreenColor),
       deviceDisconnected: variant(MacosColors.systemGrayColor),
       focusRing: theme.primaryColor,
@@ -48,6 +50,9 @@ class const DeviceViewerColors._({
     Color(0xFF20242B),
     Color(0xFF0B0D10),
   ];
+  static const Color statusOverlayBackground = Color(0x99000000);
+  static const Color statusOverlayLabel = Color(0xF2FFFFFF);
+
   static const Color mirrorLabel = Color(0xCCFFFFFF);
   static const Color mirrorOutline = Color(0x59FFFFFF);
   static const Color mirrorGlow = Color(0x1AFFFFFF);

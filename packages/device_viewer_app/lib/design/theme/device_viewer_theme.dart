@@ -37,12 +37,27 @@ class DeviceViewerTheme {
   static const focusRingBlur = 4.0;
   static const focusTransitionDuration = Duration(milliseconds: 140);
 
-  static const deviceFrameToolBarHeight = 56.0;
+  static const deviceFrameToolBarHeight = 44.0;
   static const deviceFrameToolBarPadding = EdgeInsets.only(
     left: 14.0,
     right: 6.0,
   );
   static const deviceFrameToolBarIconSlot = 24.0;
+
+  static const actionRevealDuration = Duration(milliseconds: 120);
+
+  static const statusOverlayPadding = EdgeInsets.all(8.0);
+  static const statusOverlayRadius = 6.0;
+  static const statusOverlayInsets = EdgeInsets.symmetric(
+    horizontal: 6.0,
+    vertical: 4.0,
+  );
+  static const statusOverlayIconSize = 13.0;
+
+  static const maximizeTransitionDuration = Duration(milliseconds: 340);
+  static const maximizeBackdropBlur = 10.0;
+  static const maximizeScrimAlpha = 140;
+  static const maximizeDevicePadding = EdgeInsets.all(28.0);
 
   static const deviceFrameWidth = 320.0;
   static const deviceFrameReferenceAspectRatio = 9 / 20;

@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/design/widgets/reflow_grid.dart';
 import 'package:device_viewer/feat_device_canvas/data/repositories/device_canvas_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
-import 'package:device_viewer/feat_device_canvas/presentation/widgets/device_frame.dart';
+import 'package:device_viewer/feat_device_frame/presentation/device_frame.dart';
+import 'package:device_viewer/feat_maximized_device/domain/models/maximized_device.dart';
+import 'package:device_viewer/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,21 +28,93 @@ class const DeviceCanvasContainer({
         RepositoryProvider.of(context),
         RepositoryProvider.of<NotificationService>(context),
       ),
-      child: BlocBuilder<DeviceCanvasBloc, DeviceCanvasState>(
-        builder: (context, state) {
-          return _Content(
-            scrollController: scrollController,
-            state: state,
-          );
-        },
-      ),
+      child: _MaximizableCanvas(scrollController: scrollController),
     );
   }
 }
 
+class const _MaximizableCanvas({
+  required final ScrollController scrollController,
+}) extends StatefulWidget {
+  @override
+  State<_MaximizableCanvas> createState() => _MaximizableCanvasState();
+}
+
+class _MaximizableCanvasState extends State<_MaximizableCanvas> {
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  final _heroController = HeroController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Navigator(
+      key: _navigatorKey,
+      observers: [_heroController],
+      onGenerateRoute: (settings) {
+        return PageRouteBuilder(
+          settings: settings,
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          pageBuilder: (context, animation, secondaryAnimation) {
+            return BlocBuilder<DeviceCanvasBloc, DeviceCanvasState>(
+              builder: (context, state) {
+                return _Content(
+                  scrollController: widget.scrollController,
+                  state: state,
+                  onMaximize: (device) => _openMaximized(context, device),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _openMaximized(BuildContext context, CanvasDevice device) async {
+    final maximizedDevice = device.when(
+      android: (device, isConnected, textureId, screenSize) => MaximizedDevice(
+        deviceId: device.id,
+        modelName: device.modelName,
+        isLive: isConnected,
+        textureId: textureId,
+        screenSize: screenSize,
+      ),
+      connecting: (device) => MaximizedDevice(
+        deviceId: device.id,
+        modelName: device.modelName,
+        isLive: false,
+        textureId: null,
+        screenSize: null,
+      ),
+    );
+
+    final route = PageRouteBuilder<void>(
+      opaque: false,
+      barrierDismissible: false,
+      transitionDuration: DeviceViewerTheme.maximizeTransitionDuration,
+      reverseTransitionDuration: DeviceViewerTheme.maximizeTransitionDuration,
+      pageBuilder: (context, animation, secondaryAnimation) {
+        return MaximizedDeviceScreen(
+          device: maximizedDevice,
+          animation: animation,
+          onStopMirroring: () {
+            BlocProvider.of<DeviceCanvasBloc>(this.context)
+                .add(DeviceCanvasEvent.onCloseDevice(device));
+          },
+        );
+      },
+    );
+
+    unawaited(Navigator.of(context).push(route));
+  }
+}
+
+typedef MaximizeCallback = void Function(CanvasDevice device);
+
 class const _Content({
   required final ScrollController scrollController,
   required final DeviceCanvasState state,
+  required final MaximizeCallback onMaximize,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -58,38 +134,29 @@ class const _Content({
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
           return DeviceFrame(
-            device: item,
-            onCaptureScreenshot: (device) {
-              BlocProvider.of<DeviceCanvasBloc>(context)
-                  .add(DeviceCanvasEvent.onCaptureScreenshot(device));
-            },
-            onClose: (device) {
-              BlocProvider.of<DeviceCanvasBloc>(context)
-                  .add(DeviceCanvasEvent.onCloseDevice(device));
-            },
-            onTouch: (device, type, x, y) {
-              BlocProvider.of<DeviceCanvasBloc>(context).add(
-                DeviceCanvasEvent.onPointerEvent(
-                  device: device,
-                  type: type,
-                  normalizedPointerX: x,
-                  normalizedPointerY: y,
-                ),
-              );
-            },
-            onKey: (device, event) {
-              BlocProvider.of<DeviceCanvasBloc>(context).add(
-                DeviceCanvasEvent.onKeyEvent(
-                  device: device,
-                  event: event,
-                ),
-              );
-            },
-            mirrorTextureId: item.when(
+            deviceId: item.device.id,
+            modelName: item.device.modelName,
+            isLive: item.when(
+              android: (device, isConnected, textureId, screenSize) =>
+                  isConnected,
+              connecting: (device) => false,
+            ),
+            textureId: item.when(
               android: (device, isConnected, textureId, screenSize) =>
                   textureId,
               connecting: (device) => null,
             ),
+            screenSize: item.when(
+              android: (device, isConnected, textureId, screenSize) =>
+                  screenSize,
+              connecting: (device) => null,
+            ),
+            isMaximized: false,
+            onToggleMaximize: () => onMaximize(item),
+            onClose: () {
+              BlocProvider.of<DeviceCanvasBloc>(context)
+                  .add(.onCloseDevice(item));
+            },
           );
         },
       ),

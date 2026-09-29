@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:api_adb/adb/process/adb_device_communicator.dart';
-import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
+import 'package:device_viewer/feat_native_texture/native_texture.dart';
 
 class const AndroidScreenTransmission({
   required final Socket socket,

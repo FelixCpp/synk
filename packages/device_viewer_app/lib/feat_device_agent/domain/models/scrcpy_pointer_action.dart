@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'scrcpy_touch_action.freezed.dart';
+part 'scrcpy_pointer_action.freezed.dart';
 
 enum ScrcpyPointerEventType {
   down,

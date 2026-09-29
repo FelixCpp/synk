@@ -4,6 +4,8 @@ part 'scrcpy_key_event.freezed.dart';
 
 extension type const ScrcpyKeyCode(int value) implements int {
   static const wakeup = ScrcpyKeyCode(224);
+  static const copy = ScrcpyKeyCode(31);
+  static const paste = ScrcpyKeyCode(50);
 }
 
 extension type const ScrcpyKeyMetaState(int value) implements int {

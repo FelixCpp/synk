@@ -97,6 +97,24 @@ class const AdbDeviceCommunicator({
     }
   }
 
+  Future<void> install({
+    required String localFilepath,
+  }) async {
+    final process = await processRunner.runRaw([
+      '-s',
+      serialNumber,
+      'install',
+      '-r',
+      localFilepath,
+    ]);
+
+    if (process.exitCode != 0) {
+      throw AdbCommandException(
+        message: 'adb install failed: ${process.stderr}',
+      );
+    }
+  }
+
   /// Forwards a local port to [remotePort] on the device. Without an
   /// explicit [localPort] a free one is picked automatically; either way the
   /// port actually used is on the returned [AdbPortForward].
