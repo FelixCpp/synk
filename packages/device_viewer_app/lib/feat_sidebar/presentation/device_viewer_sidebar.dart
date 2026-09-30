@@ -1,6 +1,7 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
+import 'package:device_viewer/feat_device_pairing/presentation/wireless_pairing_dialog.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
@@ -51,6 +52,7 @@ class const _Content({required final SidebarState state})
         crossAxisAlignment: .stretch,
         spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
         children: [
+          _ConnectWirelessDeviceButton(),
           _SectionHeader(title: "VERBUNDENE GERÄTE"),
           if (state.devices.isEmpty)
             const _NoDevicesPlugged()
@@ -66,6 +68,42 @@ class const _Content({required final SidebarState state})
           ],
         ],
       ),
+    );
+  }
+}
+
+class const _ConnectWirelessDeviceButton() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BenchInteractive(
+      onPressed: () => showWirelessPairingDialog(context),
+      builder: (context, state) {
+        final colors = context.bench.colors;
+        final foregroundColor = colors.text;
+
+        return BenchCard(
+          padding: const .all(BenchSpace.s12),
+          focused: state.contains(WidgetState.focused),
+          overlayColor: colors.overlayFor(state),
+          child: Column(
+            mainAxisAlignment: .center,
+            spacing: BenchSpace.s4,
+            children: [
+              Icon(
+                CupertinoIcons.add,
+                size: BenchSize.icon,
+                color: foregroundColor,
+              ),
+              Text(
+                "Wireless-Gerät verbinden",
+                style: context.bench.typography.label.copyWith(
+                  color: foregroundColor,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -113,8 +151,7 @@ class const _NoDevicesPlugged() extends StatelessWidget {
       icon: CupertinoIcons.device_phone_portrait,
       iconSize: 28.0,
       title: 'Kein Gerät angeschlossen',
-      message:
-          'Verbinde ein Android- oder iOS-Gerät per USB und aktiviere USB-Debugging.',
+      message: 'Verbinde ein Android- oder iOS-Gerät per USB und aktiviere USB-Debugging.',
     );
   }
 }

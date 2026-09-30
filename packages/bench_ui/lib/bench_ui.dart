@@ -12,6 +12,7 @@ export 'src/components/bench_status_dot.dart';
 export 'src/components/bench_spinner.dart';
 export 'src/components/bench_status_tile.dart';
 export 'src/components/bench_tag.dart';
+export 'src/components/bench_text_field.dart';
 export 'src/components/bench_toast.dart';
 export 'src/components/bench_tooltip.dart';
 export 'src/layout/bench_shell.dart';

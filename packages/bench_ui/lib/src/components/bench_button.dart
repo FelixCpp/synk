@@ -37,11 +37,7 @@ class const BenchButton({
             const Color(0x00000000),
           ),
           BenchButtonVariant.secondary => (
-            pressed
-                ? Color.alphaBlend(colors.pressOverlay, colors.surface)
-                : hovered
-                ? Color.alphaBlend(colors.hoverOverlay, colors.surface)
-                : colors.surface,
+            colors.surfaceFor(states),
             colors.text,
             colors.line,
           ),

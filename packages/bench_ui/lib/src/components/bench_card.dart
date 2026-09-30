@@ -10,6 +10,7 @@ class const BenchCard({
   final List<BoxShadow> elevation = BenchElevation.flat,
   final bool clip = false,
   final bool focused = false,
+  final Color overlayColor = const Color(0x00000000),
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -25,6 +26,7 @@ class const BenchCard({
         boxShadow: elevation,
       ),
       foregroundDecoration: BoxDecoration(
+        color: overlayColor,
         borderRadius: borderRadius,
         border: Border.all(
           color: focused

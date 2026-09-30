@@ -66,4 +66,24 @@ class const BenchColors({
       );
 
   Color soft(Color color) => color.withValues(alpha: 0.16);
+
+  Color surfaceFor(Set<WidgetState> states, {Color? base}) {
+    final background = base ?? surface;
+
+    if (states.contains(WidgetState.pressed)) {
+      return Color.alphaBlend(pressOverlay, background);
+    }
+
+    if (states.contains(WidgetState.hovered)) {
+      return Color.alphaBlend(hoverOverlay, background);
+    }
+
+    return background;
+  }
+
+  Color overlayFor(Set<WidgetState> states) {
+    if (states.contains(WidgetState.pressed)) return pressOverlay;
+    if (states.contains(WidgetState.hovered)) return hoverOverlay;
+    return const Color(0x00000000);
+  }
 }
