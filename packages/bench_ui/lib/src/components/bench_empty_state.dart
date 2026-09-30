@@ -23,12 +23,16 @@ class const BenchEmptyState({
           spacing: BenchSpace.s12,
           children: [
             Icon(icon, size: iconSize, color: theme.colors.textTertiary),
-            Text(title, style: theme.type.title, textAlign: TextAlign.center),
+            Text(
+              title,
+              style: theme.typography.title,
+              textAlign: TextAlign.center,
+            ),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 320.0),
               child: Text(
                 message,
-                style: theme.type.secondary,
+                style: theme.typography.secondary,
                 textAlign: TextAlign.center,
               ),
             ),

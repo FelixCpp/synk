@@ -12,6 +12,8 @@ class const DeviceFrameToolBar({
   required final bool isMaximized,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleMaximize,
+  required final VoidCallback onInstallApk,
+  required final VoidCallback onShareFile,
   required final VoidCallback onClose,
   required final VoidCallback onStandby,
 }) extends StatelessWidget {
@@ -52,6 +54,8 @@ class const DeviceFrameToolBar({
               onCaptureScreenshot: onCaptureScreenshot,
               onToggleMaximize: onToggleMaximize,
               onClose: onClose,
+              onInstallApk: onInstallApk,
+              onShareFile: onShareFile,
               onStandby: onStandby,
             ),
           ],
@@ -66,6 +70,8 @@ class const _Actions({
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
+  required final VoidCallback onInstallApk,
+  required final VoidCallback onShareFile,
   required final VoidCallback onStandby,
 }) extends StatelessWidget {
   @override
@@ -96,7 +102,11 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        _OverflowButton(onStandby: onStandby),
+        _OverflowButton(
+          onInstallApk: onInstallApk,
+          onShareFile: onShareFile,
+          onStandby: onStandby,
+        ),
         BenchTooltip(
           message: 'Spiegelung beenden',
           child: BenchIconButton(
@@ -109,20 +119,48 @@ class const _Actions({
   }
 }
 
-class const _OverflowButton({required final VoidCallback onStandby})
-    extends StatelessWidget {
+class const _OverflowButton({
+  required final VoidCallback onInstallApk,
+  required final VoidCallback onShareFile,
+  required final VoidCallback onStandby,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BenchMenu(
       width: 190.0,
       itemsBuilder: (context, controller) => [
-        BenchMenuItem(
-          icon: CupertinoIcons.power,
-          label: 'Standby',
-          onPressed: () {
-            controller.close();
-            onStandby();
-          },
+        BenchTooltip(
+          message: 'APK auf dem Gerät installieren',
+          child: BenchMenuItem(
+            icon: CupertinoIcons.arrow_down_to_line,
+            label: 'APK Installieren',
+            onPressed: () {
+              controller.close();
+              onInstallApk();
+            },
+          ),
+        ),
+        BenchTooltip(
+          message: 'Datei auf das Gerät übertragen',
+          child: BenchMenuItem(
+            icon: CupertinoIcons.share,
+            label: 'Datei senden',
+            onPressed: () {
+              controller.close();
+              onShareFile();
+            },
+          ),
+        ),
+        BenchTooltip(
+          message: 'Gerät An-/Ausschalten',
+          child: BenchMenuItem(
+            icon: CupertinoIcons.power,
+            label: 'Standby',
+            onPressed: () {
+              controller.close();
+              onStandby();
+            },
+          ),
         ),
       ],
       triggerBuilder: (context, controller) => BenchTooltip(

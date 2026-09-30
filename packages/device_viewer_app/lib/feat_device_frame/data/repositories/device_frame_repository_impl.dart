@@ -167,4 +167,28 @@ class const DeviceFrameRepositoryImpl({
 
     return outcomes;
   }
+
+  @override
+  Future<DroppedFileOutcome?> installApk(DeviceId deviceId) async {
+    const apkGroup = XTypeGroup(label: 'APKs', extensions: ['apk']);
+
+    final file = await openFile(acceptedTypeGroups: const [apkGroup]);
+    if (file == null) {
+      return null;
+    }
+
+    final outcomes = await handleDroppedFiles(deviceId, [file.path]);
+    return outcomes.isEmpty ? null : outcomes.first;
+  }
+
+  @override
+  Future<DroppedFileOutcome?> shareFile(DeviceId deviceId) async {
+    final file = await openFile();
+    if (file == null) {
+      return null;
+    }
+
+    final outcomes = await handleDroppedFiles(deviceId, [file.path]);
+    return outcomes.isEmpty ? null : outcomes.first;
+  }
 }

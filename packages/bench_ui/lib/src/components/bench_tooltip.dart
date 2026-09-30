@@ -7,14 +7,23 @@ class const BenchTooltip({
   required final String message,
   required final Widget child,
   final Duration hoverDelay = const .new(milliseconds: 500),
+  final double verticalOffset = BenchSpace.s8,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RawTooltip(
       semanticsTooltip: message,
       hoverDelay: hoverDelay,
-      triggerMode: TooltipTriggerMode.manual,
-      enableTapToDismiss: false,
+      triggerMode: .manual,
+      enableTapToDismiss: true,
+      ignorePointer: true,
+      positionDelegate: (context) => positionDependentBox(
+        size: context.overlaySize,
+        childSize: context.tooltipSize,
+        target: context.target,
+        preferBelow: context.preferBelow,
+        verticalOffset: verticalOffset,
+      ),
       tooltipBuilder: (context, animation) => IgnorePointer(
         child: FadeTransition(
           opacity: animation,
@@ -50,7 +59,7 @@ class const _Bubble({
         ),
         child: Text(
           message,
-          style: theme.type.secondary.copyWith(color: theme.colors.text),
+          style: theme.typography.secondary.copyWith(color: theme.colors.text),
         ),
       ),
     );

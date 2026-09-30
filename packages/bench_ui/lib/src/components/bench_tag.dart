@@ -23,7 +23,7 @@ class const BenchTag({
         ),
         child: Text(
           label.toUpperCase(),
-          style: theme.type.microLabel.copyWith(
+          style: theme.typography.microLabel.copyWith(
             color: color,
             fontSize: 10.0,
             letterSpacing: 0.6,

@@ -13,7 +13,7 @@ class const BenchButton({
   super.key,
   required final String label,
   final VoidCallback? onPressed,
-  final BenchButtonVariant variant = BenchButtonVariant.primary,
+  final BenchButtonVariant variant = .primary,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -75,7 +75,7 @@ class const BenchButton({
               widthFactor: 1.0,
               child: Text(
                 label,
-                style: theme.type.label.copyWith(color: foreground),
+                style: theme.typography.label.copyWith(color: foreground),
               ),
             ),
           ),

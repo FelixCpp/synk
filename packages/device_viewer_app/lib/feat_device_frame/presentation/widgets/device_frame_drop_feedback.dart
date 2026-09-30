@@ -47,7 +47,9 @@ class const _DragOverlay({super.key}) extends StatelessWidget {
             ),
             Text(
               'Datei hier ablegen',
-              style: theme.type.label.copyWith(color: theme.colors.accent),
+              style: theme.typography.label.copyWith(
+                color: theme.colors.accent,
+              ),
             ),
           ],
         ),
@@ -71,7 +73,7 @@ class const _BusyOverlay({super.key}) extends StatelessWidget {
             const BenchSpinner(size: 18.0, color: foreground),
             Text(
               'Wird übertragen…',
-              style: context.bench.type.label.copyWith(color: foreground),
+              style: context.bench.typography.label.copyWith(color: foreground),
             ),
           ],
         ),

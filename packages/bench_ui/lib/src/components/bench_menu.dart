@@ -83,7 +83,7 @@ class _Panel extends StatelessWidget {
         decoration: BoxDecoration(
           color: colors.surface,
           borderRadius: BorderRadius.circular(BenchRadius.card),
-          border: Border.all(
+          border: .all(
             color: colors.lineStrong,
             width: BenchSize.hairline,
           ),
@@ -145,7 +145,7 @@ class const BenchMenuItem({
                 Expanded(
                   child: Text(
                     label,
-                    style: theme.type.label.copyWith(color: foreground),
+                    style: theme.typography.label.copyWith(color: foreground),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

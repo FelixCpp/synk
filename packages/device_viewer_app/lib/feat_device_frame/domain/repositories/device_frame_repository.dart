@@ -14,4 +14,7 @@ abstract interface class DeviceFrameRepository {
     DeviceId deviceId,
     List<String> filepaths,
   );
+
+  Future<DroppedFileOutcome?> installApk(DeviceId deviceId);
+  Future<DroppedFileOutcome?> shareFile(DeviceId deviceId);
 }

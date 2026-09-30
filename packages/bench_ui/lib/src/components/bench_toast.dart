@@ -44,7 +44,7 @@ class const BenchToast({
               Flexible(
                 child: Text(
                   message,
-                  style: theme.type.body,
+                  style: theme.typography.body,
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),

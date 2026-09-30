@@ -12,6 +12,8 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugg
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
+import 'package:device_viewer/feat_theme_mode/presentation/bloc/theme_mode_bloc.dart';
+import 'package:device_viewer/feat_theme_mode/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -108,19 +110,21 @@ class const _DeviceViewerApp() extends StatelessWidget {
 class const _Root() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = BenchThemeData.forBrightness(
-      MediaQuery.platformBrightnessOf(context),
-    );
+    return ThemeModeProvider(
+      builder: (context, state) {
+        final theme = BenchThemeData.forBrightness(state.themeMode);
 
-    return BenchTheme(
-      data: theme,
-      child: DefaultTextStyle(
-        style: theme.type.body,
-        child: AppNotificationListener(
-          notifications: RepositoryProvider.of<NotificationService>(context),
-          child: const _DeviceViewerScreen(),
-        ),
-      ),
+        return BenchTheme(
+          data: theme,
+          child: DefaultTextStyle(
+            style: theme.typography.body,
+            child: AppNotificationListener(
+              notifications: RepositoryProvider.of<NotificationService>(context),
+              child: const _DeviceViewerScreen(),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -135,6 +139,8 @@ class _DeviceViewerScreenState extends State<_DeviceViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.watch<ThemeModeBloc>().state.themeMode;
+
     return BenchShell(
       title: 'Device Viewer',
       showSidebar: _showSidebar,
@@ -145,6 +151,21 @@ class _DeviceViewerScreenState extends State<_DeviceViewerScreen> {
           onPressed: () => setState(() => _showSidebar = !_showSidebar),
         ),
       ),
+      actions: [
+        BenchTooltip(
+          message: themeMode == .dark
+              ? 'Helles Design aktivieren'
+              : 'Dunkles Design aktivieren',
+          child: BenchIconButton(
+            icon: themeMode == .dark
+                ? CupertinoIcons.sun_max
+                : CupertinoIcons.moon,
+            onPressed: () => context.read<ThemeModeBloc>().add(
+              const .onToggleThemeMode(),
+            ),
+          ),
+        ),
+      ],
       sidebar: const DeviceViewerSidebar(),
       child: const DeviceCanvasContainer(),
     );

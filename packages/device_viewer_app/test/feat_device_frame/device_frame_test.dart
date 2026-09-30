@@ -231,34 +231,34 @@ Future<DeviceViewerColors> _pumpFrame(
         home: BenchTheme(
           data: BenchThemeData.dark,
           child: DefaultTextStyle(
-            style: BenchThemeData.dark.type.body,
+            style: BenchThemeData.dark.typography.body,
             child: Builder(
-          builder: (context) {
-            colors = context.colors;
+              builder: (context) {
+                colors = context.colors;
 
-            return Focus(
-              autofocus: true,
-              onKeyEvent: (_, event) {
-                onKeyEscapedFrame?.call(event);
-                return KeyEventResult.handled;
-              },
-              child: Center(
-                child: SizedBox(
-                  width: DeviceViewerTheme.deviceFrameWidth,
-                  height: DeviceViewerTheme.deviceFrameHeight,
-                  child: DeviceFrame(
-                    deviceId: _device.id,
-                    modelName: _device.modelName,
-                    isLive: true,
-                    textureId: const NativeTextureId(1),
-                    screenSize: screenSize,
-                    isMaximized: isMaximized,
-                    onToggleMaximize: () {},
-                    onClose: () {},
+                return Focus(
+                  autofocus: true,
+                  onKeyEvent: (_, event) {
+                    onKeyEscapedFrame?.call(event);
+                    return KeyEventResult.handled;
+                  },
+                  child: Center(
+                    child: SizedBox(
+                      width: DeviceViewerTheme.deviceFrameWidth,
+                      height: DeviceViewerTheme.deviceFrameHeight,
+                      child: DeviceFrame(
+                        deviceId: _device.id,
+                        modelName: _device.modelName,
+                        isLive: true,
+                        textureId: const NativeTextureId(1),
+                        screenSize: screenSize,
+                        isMaximized: isMaximized,
+                        onToggleMaximize: () {},
+                        onClose: () {},
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            );
+                );
               },
             ),
           ),
@@ -310,4 +310,3 @@ BoxDecoration _frameDecorationOf(WidgetTester tester) {
 
 Border _frameBorderOf(WidgetTester tester) =>
     _frameDecorationOf(tester).border! as Border;
-

@@ -59,13 +59,13 @@ class _BenchListRowState extends State<BenchListRow> {
                   children: [
                     Text(
                       widget.title,
-                      style: theme.type.label,
+                      style: theme.typography.label,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
                     Text(
                       widget.subtitle,
-                      style: theme.type.mono,
+                      style: theme.typography.mono,
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),

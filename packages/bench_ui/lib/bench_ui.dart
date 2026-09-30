@@ -4,6 +4,7 @@ export 'src/components/bench_card.dart';
 export 'src/components/bench_dialog.dart';
 export 'src/components/bench_empty_state.dart';
 export 'src/components/bench_icon_button.dart';
+export 'src/components/bench_info_popover.dart';
 export 'src/components/bench_interactive.dart';
 export 'src/components/bench_list_row.dart';
 export 'src/components/bench_menu.dart';

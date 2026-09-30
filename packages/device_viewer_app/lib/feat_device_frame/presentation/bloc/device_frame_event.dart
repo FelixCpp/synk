@@ -16,4 +16,6 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onControlButtonPressed(
     ControlButtonType type,
   ) = _OnControlButtonPressed;
+  const factory DeviceFrameEvent.onInstallApk() = _OnInstallApk;
+  const factory DeviceFrameEvent.onShareFile() = _OnShareFile;
 }

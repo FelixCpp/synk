@@ -8,6 +8,8 @@ import 'package:device_viewer/feat_device_frame/domain/models/control_button_typ
 import 'package:device_viewer/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
+import 'package:device_viewer/feat_device_frame/domain/usecases/install_apk_interactor.dart';
+import 'package:device_viewer/feat_device_frame/domain/usecases/share_file_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
@@ -35,6 +37,8 @@ class DeviceFrameBloc({
   final simulateControlButton = SimulateControlButtonEventInteractor(
     repository,
   );
+  final installApk = InstallApkInteractor(repository);
+  final shareFile = ShareFileInteractor(repository);
 
   this : super(.initial()) {
     on<_OnSetup>(_onSetup);
@@ -46,6 +50,8 @@ class DeviceFrameBloc({
       _onControlButtonPressed,
       transformer: sequential(),
     );
+    on<_OnInstallApk>(_onInstallApk, transformer: sequential());
+    on<_OnShareFile>(_onShareFile, transformer: sequential());
 
     add(const .onSetup());
   }
@@ -147,6 +153,67 @@ class DeviceFrameBloc({
           ),
         )
         .run((deviceId: deviceId, type: event.type));
+  }
+
+  FutureOr<void> _onInstallApk(
+    _OnInstallApk event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return installApk
+        .logger()
+        .busyStateChange(
+          (isBusy) => emit(state.copyWith(isProcessingDroppedFiles: isBusy)),
+        )
+        .after((outcome) {
+          if (outcome == null) {
+            return;
+          }
+
+          notifications.notify(
+            .new(
+              severity: .success,
+              message: 'App installiert: ${outcome.filename}',
+            ),
+          );
+        })
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to install APK: $e'),
+          ),
+        )
+        .run(deviceId);
+  }
+
+  FutureOr<void> _onShareFile(
+    _OnShareFile event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return shareFile
+        .logger()
+        .busyStateChange(
+          (isBusy) => emit(state.copyWith(isProcessingDroppedFiles: isBusy)),
+        )
+        .after((outcome) {
+          if (outcome == null) {
+            return;
+          }
+
+          notifications.notify(
+            .new(
+              severity: .success,
+              message: switch (outcome.action) {
+                .installed => 'App installiert: ${outcome.filename}',
+                .pushed => 'Datei auf Gerät übertragen: ${outcome.filename}',
+              },
+            ),
+          );
+        })
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to share file: $e'),
+          ),
+        )
+        .run(deviceId);
   }
 }
 

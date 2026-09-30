@@ -37,8 +37,8 @@ class const BenchDialog({
               children: [
                 if (icon != null)
                   Icon(icon, size: 28.0, color: colors.textSecondary),
-                Text(title, style: theme.type.heading),
-                Text(message, style: theme.type.secondary),
+                Text(title, style: theme.typography.heading),
+                Text(message, style: theme.typography.secondary),
                 Padding(
                   padding: const EdgeInsets.only(top: BenchSpace.s4),
                   child: Row(

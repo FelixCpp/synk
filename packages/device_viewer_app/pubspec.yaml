@@ -33,6 +33,7 @@ dependencies:
   use_in_case: ^1.4.3
   dartz: ^0.10.1
   desktop_drop: ^0.8.4
+  shared_preferences: ^2.5.5
 
 dev_dependencies:
   flutter_test:

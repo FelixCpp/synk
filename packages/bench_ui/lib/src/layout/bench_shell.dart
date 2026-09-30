@@ -65,7 +65,7 @@ class const BenchShell({
                         Expanded(
                           child: Text(
                             title,
-                            style: theme.type.secondary.copyWith(
+                            style: theme.typography.secondary.copyWith(
                               fontWeight: FontWeight.w500,
                             ),
                             overflow: TextOverflow.ellipsis,
@@ -96,14 +96,17 @@ class _Seam extends StatelessWidget {
     final colors = context.bench.colors;
 
     const outer = BorderRadius.only(
-      topLeft: Radius.circular(BenchRadius.card),
+      topLeft: .circular(BenchRadius.card),
     );
     const inner = BorderRadius.only(
-      topLeft: Radius.circular(BenchRadius.card - BenchSize.hairline),
+      topLeft: .circular(BenchRadius.card - BenchSize.hairline),
     );
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: colors.line, borderRadius: outer),
+      decoration: BoxDecoration(
+        color: colors.line,
+        borderRadius: outer,
+      ),
       child: Padding(
         padding: const EdgeInsets.only(
           top: BenchSize.hairline,
@@ -114,7 +117,10 @@ class _Seam extends StatelessWidget {
             color: colors.canvas,
             borderRadius: inner,
           ),
-          child: ClipRRect(borderRadius: inner, child: child),
+          child: ClipRRect(
+            borderRadius: inner,
+            child: child,
+          ),
         ),
       ),
     );

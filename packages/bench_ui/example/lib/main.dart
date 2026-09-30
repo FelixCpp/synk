@@ -52,7 +52,7 @@ class _BenchPreviewAppState extends State<BenchPreviewApp> {
       home: BenchTheme(
         data: theme,
         child: DefaultTextStyle(
-          style: theme.type.body,
+          style: theme.typography.body,
           child: _Preview(onToggleBrightness: _toggleBrightness),
         ),
       ),
@@ -106,7 +106,7 @@ class _Sidebar extends StatelessWidget {
             BenchSpace.s16,
             BenchSpace.s8,
           ),
-          child: Text('GERÄTE', style: theme.type.microLabel),
+          child: Text('GERÄTE', style: theme.typography.microLabel),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: BenchSpace.s8),
@@ -243,7 +243,7 @@ class _DeviceTileState extends State<_DeviceTile> {
                       Expanded(
                         child: Text(
                           widget.name,
-                          style: theme.type.label,
+                          style: theme.typography.label,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -257,7 +257,8 @@ class _DeviceTileState extends State<_DeviceTile> {
                               onPressed: () {},
                             ),
                             BenchIconButton(
-                              icon: CupertinoIcons.arrow_up_left_arrow_down_right,
+                              icon:
+                                  CupertinoIcons.arrow_up_left_arrow_down_right,
                               onPressed: () {},
                             ),
                           ],
@@ -344,7 +345,7 @@ class _Gallery extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: BenchSpace.s12,
       children: [
-        Text('BAUSTEINE', style: theme.type.microLabel),
+        Text('BAUSTEINE', style: theme.typography.microLabel),
         Wrap(
           spacing: BenchSpace.s8,
           runSpacing: BenchSpace.s8,
@@ -368,16 +369,41 @@ class _Gallery extends StatelessWidget {
             BenchTag(label: 'Fehler', color: colors.error),
             const SizedBox(width: BenchSpace.s8),
             BenchIconButton(icon: CupertinoIcons.camera, onPressed: () {}),
-            BenchIconButton(icon: CupertinoIcons.video_camera, onPressed: () {}),
+            BenchIconButton(
+              icon: CupertinoIcons.video_camera,
+              onPressed: () {},
+            ),
             const BenchIconButton(icon: CupertinoIcons.clear, onPressed: null),
+            const SizedBox(width: BenchSpace.s8),
+            BenchInfoPopover(
+              title: 'Pixel 6',
+              rows: const [
+                BenchInfoRow(label: 'Modell', value: 'Pixel 6'),
+                BenchInfoRow(label: 'Hersteller', value: 'Google'),
+                BenchInfoRow(label: 'Android-Version', value: '16'),
+                BenchInfoRow(label: 'SDK-Level', value: '36'),
+                BenchInfoRow(label: 'CPU-Architektur', value: 'arm64-v8a'),
+                BenchInfoRow(label: 'Auflösung', value: '720x1600'),
+                BenchInfoRow(
+                  label: 'Seriennummer',
+                  value: '18131FDF6002UE',
+                  monospace: true,
+                ),
+              ],
+              triggerBuilder: (context, controller) => BenchIconButton(
+                icon: CupertinoIcons.info_circle,
+                onPressed: () =>
+                    controller.isOpen ? controller.close() : controller.open(),
+              ),
+            ),
           ],
         ),
         Row(
           spacing: BenchSpace.s24,
           children: [
-            Text('Fließtext in 13 Punkt.', style: theme.type.body),
-            Text('Sekundär in 12.', style: theme.type.secondary),
-            Text('1080×2400 · 8 Mbit/s · 60 fps', style: theme.type.mono),
+            Text('Fließtext in 13 Punkt.', style: theme.typography.body),
+            Text('Sekundär in 12.', style: theme.typography.secondary),
+            Text('1080×2400 · 8 Mbit/s · 60 fps', style: theme.typography.mono),
           ],
         ),
       ],

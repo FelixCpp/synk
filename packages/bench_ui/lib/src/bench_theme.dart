@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 class const BenchThemeData._({
   required final Brightness brightness,
   required final BenchColors colors,
-  required final BenchTypography type,
+  required final BenchTypography typography,
 }) {
   static final BenchThemeData dark = _of(
     Brightness.dark,
@@ -22,7 +22,7 @@ class const BenchThemeData._({
     return BenchThemeData._(
       brightness: brightness,
       colors: colors,
-      type: BenchTypography.forColors(colors),
+      typography: BenchTypography.forColors(colors),
     );
   }
 

@@ -10,7 +10,7 @@ class const DeviceViewerTypography._({
   required final TextStyle caption2,
 }) {
   factory DeviceViewerTypography.of(BuildContext context) {
-    final type = BenchTheme.of(context).type;
+    final type = BenchTheme.of(context).typography;
 
     return DeviceViewerTypography._(
       title3: type.title,
