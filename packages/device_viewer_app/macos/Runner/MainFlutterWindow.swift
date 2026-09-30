@@ -12,6 +12,14 @@ class MainFlutterWindow: NSWindow {
     ScreenMirrorPlugin.register(
       with: flutterViewController.registrar(forPlugin: "ScreenMirrorPlugin")
     )
+    if #available(macOS 14.0, *) {
+      IosMirrorPlugin.register(
+        with: flutterViewController.registrar(forPlugin: "IosMirrorPlugin")
+      )
+    }
+    IosDeviceDiscoveryPlugin.register(
+      with: flutterViewController.registrar(forPlugin: "IosDeviceDiscoveryPlugin")
+    )
 
     super.awakeFromNib()
   }

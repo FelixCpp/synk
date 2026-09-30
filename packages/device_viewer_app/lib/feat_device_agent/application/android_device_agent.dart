@@ -6,6 +6,7 @@ import 'package:device_viewer/feat_device_agent/application/android_device_agent
 import 'package:device_viewer/feat_device_agent/application/android_interaction_transmission.dart';
 import 'package:device_viewer/feat_device_agent/application/android_screen_transmission.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/android_device_info.dart';
@@ -19,7 +20,7 @@ class AndroidDeviceAgent(
   final AndroidDeviceAgentCommunicator communicator,
   final AndroidScreenTransmission screenTransmission,
   final AndroidInteractionTransmission interactionTransmission,
-) {
+) implements ScreenCaptureAgent {
   final StreamSubscription<Uint8List> _mirrorSubscription;
 
   this
@@ -27,7 +28,9 @@ class AndroidDeviceAgent(
         (bytes) => screenTransmission.texture.upload(bytes),
       );
 
+  @override
   NativeTextureId get textureId => screenTransmission.texture.id;
+  @override
   DeviceScreenSize get screenSize => interactionTransmission.screenSize;
 
   Future<void> dispose() async {
@@ -83,15 +86,18 @@ class AndroidDeviceAgent(
     );
   }
 
+  @override
   Future<Uint8List> captureScreenshot() async {
     final response = await communicator.captureScreenshot();
     return Uint8List.fromList(response.png);
   }
 
+  @override
   Future<void> startRecording(String path) {
     return screenTransmission.texture.startRecording(path);
   }
 
+  @override
   Future<bool> stopRecording() {
     return screenTransmission.texture.stopRecording();
   }

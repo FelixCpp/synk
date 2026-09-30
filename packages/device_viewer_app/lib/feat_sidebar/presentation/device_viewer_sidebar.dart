@@ -1,7 +1,7 @@
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
-import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
@@ -16,6 +16,7 @@ class const DeviceViewerSidebar({super.key}) extends StatelessWidget {
     return BlocProvider<SidebarBloc>(
       create: (context) => SidebarBloc(
         SidebarRepositoryImpl(
+          RepositoryProvider.of(context),
           RepositoryProvider.of(context),
           RepositoryProvider.of(context),
         ),
@@ -35,31 +36,71 @@ class const _Content({required final SidebarState state})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final authorizedDevices = [
+      for (final device in state.devices)
+        if (device.device.isAuthorized) device,
+    ];
+    final unauthorizedDevices = [
+      for (final device in state.devices)
+        if (!device.device.isAuthorized) device,
+    ];
+
     return SingleChildScrollView(
       padding: DeviceViewerTheme.pagePadding,
       child: Column(
         crossAxisAlignment: .stretch,
         spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 4.0,
-              top: DeviceViewerTheme.verticalComponentSpacingSmall,
-            ),
-            child: Text(
-              "ANDROID DEBUG BRIDGE",
-              style: context.typo.caption2.copyWith(
-                color: context.colors.secondaryLabel,
-                fontWeight: .w600,
-                letterSpacing: 0.8,
-              ),
-            ),
-          ),
+          _SectionHeader(title: "VERBUNDENE GERÄTE"),
           if (state.devices.isEmpty)
             const _NoDevicesPlugged()
+          else if (authorizedDevices.isEmpty)
+            _NoAuthorizedDevices()
           else
-            for (final device in state.devices) _AdbDeviceEntry(device: device),
+            for (final device in authorizedDevices)
+              _DeviceEntry(device: device),
+          if (unauthorizedDevices.isNotEmpty) ...[
+            _SectionHeader(title: "NICHT AUTORISIERT"),
+            for (final device in unauthorizedDevices)
+              _DeviceEntry(device: device),
+          ],
         ],
+      ),
+    );
+  }
+}
+
+class const _SectionHeader({required final String title})
+    extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 4.0,
+        top: DeviceViewerTheme.verticalComponentSpacingSmall,
+      ),
+      child: Text(
+        title,
+        style: context.typo.caption2.copyWith(
+          color: context.colors.secondaryLabel,
+          fontWeight: .w600,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+}
+
+class const _NoAuthorizedDevices() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        'Keine Geräte für Screenmirroring autorisiert.',
+        style: context.typo.caption1.copyWith(
+          color: context.colors.secondaryLabel,
+        ),
       ),
     );
   }
@@ -73,18 +114,21 @@ class const _NoDevicesPlugged() extends StatelessWidget {
       iconSize: 28.0,
       title: 'Kein Gerät angeschlossen',
       message:
-          'Verbinde ein Android-Gerät per USB und aktiviere USB-Debugging.',
+          'Verbinde ein Android- oder iOS-Gerät per USB und aktiviere USB-Debugging.',
     );
   }
 }
 
-class const _AdbDeviceEntry({required final SidebarDevice device})
+class const _DeviceEntry({required final SidebarDevice device})
     extends StatelessWidget {
-  AndroidDevice get adbDevice => device.device;
+  PluggedDevice get pluggedDevice => device.device;
 
   @override
   Widget build(BuildContext context) {
-    final statusColor = device.isConnected
+    final isAuthorized = pluggedDevice.isAuthorized;
+    final statusColor = !isAuthorized
+        ? context.colors.deviceUnauthorized
+        : device.isConnected
         ? context.colors.deviceConnected
         : context.colors.deviceDisconnected;
 
@@ -123,14 +167,27 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
             Expanded(
               child: Column(
                 crossAxisAlignment: .start,
+                spacing: 2.0,
                 children: [
-                  Text(
-                    adbDevice.modelName,
-                    style: context.typo.headline,
-                    overflow: .ellipsis,
+                  Row(
+                    spacing: DeviceViewerTheme.horizontalComponentSpacingSmall,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          pluggedDevice.modelName,
+                          style: context.typo.headline,
+                          overflow: .ellipsis,
+                        ),
+                      ),
+                      if (!isAuthorized)
+                        BenchTag(
+                          label: 'Nicht autorisiert',
+                          color: context.colors.deviceUnauthorized,
+                        ),
+                    ],
                   ),
                   Text(
-                    adbDevice.id,
+                    pluggedDevice.id,
                     style: context.typo.caption1.copyWith(
                       color: context.colors.secondaryLabel,
                     ),
@@ -139,13 +196,14 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
                 ],
               ),
             ),
-            _ConnectButton(
-              isConnected: device.isConnected,
-              onPressed: () {
-                BlocProvider.of<SidebarBloc>(context)
-                    .add(SidebarEvent.onConnect(adbDevice));
-              },
-            ),
+            if (isAuthorized)
+              _ConnectButton(
+                isConnected: device.isConnected,
+                onPressed: () {
+                  BlocProvider.of<SidebarBloc>(context)
+                      .add(SidebarEvent.onConnect(pluggedDevice));
+                },
+              ),
           ],
         ),
       ),

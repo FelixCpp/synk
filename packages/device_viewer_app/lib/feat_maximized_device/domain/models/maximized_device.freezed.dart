@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MaximizedDevice {
 
- DeviceId get deviceId; String get modelName; bool get isLive; NativeTextureId? get textureId; DeviceScreenSize? get screenSize;
+ DeviceId get deviceId; String get modelName; bool get isLive; NativeTextureId? get textureId; DeviceScreenSize? get screenSize; bool get supportsInteraction;
 /// Create a copy of MaximizedDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $MaximizedDeviceCopyWith<MaximizedDevice> get copyWith => _$MaximizedDeviceCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as MaximizedDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MaximizedDevice&&(identical(other.deviceId, _this.deviceId) || other.deviceId == _this.deviceId)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName)&&(identical(other.isLive, _this.isLive) || other.isLive == _this.isLive)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MaximizedDevice&&(identical(other.deviceId, _this.deviceId) || other.deviceId == _this.deviceId)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName)&&(identical(other.isLive, _this.isLive) || other.isLive == _this.isLive)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction));
 }
 
 
 @override
 int get hashCode {
   final _this = this as MaximizedDevice;
-  return Object.hash(runtimeType,_this.deviceId,_this.modelName,_this.isLive,_this.textureId,_this.screenSize);
+  return Object.hash(runtimeType,_this.deviceId,_this.modelName,_this.isLive,_this.textureId,_this.screenSize,_this.supportsInteraction);
 }
 
 @override
 String toString() {
   final _this = this as MaximizedDevice;
-  return 'MaximizedDevice(deviceId: ${_this.deviceId}, modelName: ${_this.modelName}, isLive: ${_this.isLive}, textureId: ${_this.textureId}, screenSize: ${_this.screenSize})';
+  return 'MaximizedDevice(deviceId: ${_this.deviceId}, modelName: ${_this.modelName}, isLive: ${_this.isLive}, textureId: ${_this.textureId}, screenSize: ${_this.screenSize}, supportsInteraction: ${_this.supportsInteraction})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $MaximizedDeviceCopyWith<$Res>  {
   factory $MaximizedDeviceCopyWith(MaximizedDevice value, $Res Function(MaximizedDevice) _then) = _$MaximizedDeviceCopyWithImpl;
 @useResult
 $Res call({
- DeviceId deviceId, String modelName, bool isLive, NativeTextureId? textureId, DeviceScreenSize? screenSize
+ DeviceId deviceId, String modelName, bool isLive, NativeTextureId? textureId, DeviceScreenSize? screenSize, bool supportsInteraction
 });
 
 
@@ -68,14 +68,15 @@ class _$MaximizedDeviceCopyWithImpl<$Res>
 
 /// Create a copy of MaximizedDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? deviceId = null,Object? modelName = null,Object? isLive = null,Object? textureId = freezed,Object? screenSize = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? deviceId = null,Object? modelName = null,Object? isLive = null,Object? textureId = freezed,Object? screenSize = freezed,Object? supportsInteraction = null,}) {
   return _then(MaximizedDevice(
 deviceId: null == deviceId ? _self.deviceId : deviceId // ignore: cast_nullable_to_non_nullable
 as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
 as String,isLive: null == isLive ? _self.isLive : isLive // ignore: cast_nullable_to_non_nullable
 as bool,textureId: freezed == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId?,screenSize: freezed == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
-as DeviceScreenSize?,
+as DeviceScreenSize?,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of MaximizedDevice
@@ -169,10 +170,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize,  bool supportsInteraction)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MaximizedDevice() when $default != null:
-return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize);case _:
+return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize,_that.supportsInteraction);case _:
   return orElse();
 
 }
@@ -190,10 +191,10 @@ return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize,  bool supportsInteraction)  $default,) {final _that = this;
 switch (_that) {
 case _MaximizedDevice():
-return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize);}
+return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize,_that.supportsInteraction);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -207,10 +208,10 @@ return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId deviceId,  String modelName,  bool isLive,  NativeTextureId? textureId,  DeviceScreenSize? screenSize,  bool supportsInteraction)?  $default,) {final _that = this;
 switch (_that) {
 case _MaximizedDevice() when $default != null:
-return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize);case _:
+return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_that.screenSize,_that.supportsInteraction);case _:
   return null;
 
 }
@@ -222,7 +223,7 @@ return $default(_that.deviceId,_that.modelName,_that.isLive,_that.textureId,_tha
 
 
 class _MaximizedDevice implements MaximizedDevice {
-  const _MaximizedDevice({required this.deviceId, required this.modelName, required this.isLive, required this.textureId, required this.screenSize});
+  const _MaximizedDevice({required this.deviceId, required this.modelName, required this.isLive, required this.textureId, required this.screenSize, required this.supportsInteraction});
   
 
 @override final  DeviceId deviceId;
@@ -230,6 +231,7 @@ class _MaximizedDevice implements MaximizedDevice {
 @override final  bool isLive;
 @override final  NativeTextureId? textureId;
 @override final  DeviceScreenSize? screenSize;
+@override final  bool supportsInteraction;
 
 /// Create a copy of MaximizedDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +243,18 @@ _$MaximizedDeviceCopyWith<_MaximizedDevice> get copyWith => __$MaximizedDeviceCo
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MaximizedDevice&&(identical(other.deviceId, deviceId) || other.deviceId == deviceId)&&(identical(other.modelName, modelName) || other.modelName == modelName)&&(identical(other.isLive, isLive) || other.isLive == isLive)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MaximizedDevice&&(identical(other.deviceId, deviceId) || other.deviceId == deviceId)&&(identical(other.modelName, modelName) || other.modelName == modelName)&&(identical(other.isLive, isLive) || other.isLive == isLive)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,deviceId,modelName,isLive,textureId,screenSize);
+    return Object.hash(runtimeType,deviceId,modelName,isLive,textureId,screenSize,supportsInteraction);
 }
 
 @override
 String toString() {
-    return 'MaximizedDevice(deviceId: $deviceId, modelName: $modelName, isLive: $isLive, textureId: $textureId, screenSize: $screenSize)';
+    return 'MaximizedDevice(deviceId: $deviceId, modelName: $modelName, isLive: $isLive, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$MaximizedDeviceCopyWith<$Res> implements $MaximizedDevice
   factory _$MaximizedDeviceCopyWith(_MaximizedDevice value, $Res Function(_MaximizedDevice) _then) = __$MaximizedDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- DeviceId deviceId, String modelName, bool isLive, NativeTextureId? textureId, DeviceScreenSize? screenSize
+ DeviceId deviceId, String modelName, bool isLive, NativeTextureId? textureId, DeviceScreenSize? screenSize, bool supportsInteraction
 });
 
 
@@ -280,14 +282,15 @@ class __$MaximizedDeviceCopyWithImpl<$Res>
 
 /// Create a copy of MaximizedDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? deviceId = null,Object? modelName = null,Object? isLive = null,Object? textureId = freezed,Object? screenSize = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? deviceId = null,Object? modelName = null,Object? isLive = null,Object? textureId = freezed,Object? screenSize = freezed,Object? supportsInteraction = null,}) {
   return _then(_MaximizedDevice(
 deviceId: null == deviceId ? _self.deviceId : deviceId // ignore: cast_nullable_to_non_nullable
 as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
 as String,isLive: null == isLive ? _self.isLive : isLive // ignore: cast_nullable_to_non_nullable
 as bool,textureId: freezed == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId?,screenSize: freezed == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
-as DeviceScreenSize?,
+as DeviceScreenSize?,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -65,19 +65,22 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
 
   Future<void> _openMaximized(BuildContext context, CanvasDevice device) async {
     final maximizedDevice = device.when(
-      android: (device, isConnected, textureId, screenSize) => MaximizedDevice(
-        deviceId: device.id,
-        modelName: device.modelName,
-        isLive: isConnected,
-        textureId: textureId,
-        screenSize: screenSize,
-      ),
-      connecting: (device) => MaximizedDevice(
+      connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
+          MaximizedDevice(
+            deviceId: device.id,
+            modelName: device.modelName,
+            isLive: isConnected,
+            textureId: textureId,
+            screenSize: screenSize,
+            supportsInteraction: supportsInteraction,
+          ),
+      connecting: (device, supportsInteraction) => MaximizedDevice(
         deviceId: device.id,
         modelName: device.modelName,
         isLive: false,
         textureId: null,
         screenSize: null,
+        supportsInteraction: supportsInteraction,
       ),
     );
 
@@ -136,20 +139,21 @@ class const _Content({
             deviceId: item.device.id,
             modelName: item.device.modelName,
             isLive: item.when(
-              android: (device, isConnected, textureId, screenSize) =>
+              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
                   isConnected,
-              connecting: (device) => false,
+              connecting: (device, supportsInteraction) => false,
             ),
             textureId: item.when(
-              android: (device, isConnected, textureId, screenSize) =>
+              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
                   textureId,
-              connecting: (device) => null,
+              connecting: (device, supportsInteraction) => null,
             ),
             screenSize: item.when(
-              android: (device, isConnected, textureId, screenSize) =>
+              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
                   screenSize,
-              connecting: (device) => null,
+              connecting: (device, supportsInteraction) => null,
             ),
+            supportsInteraction: item.supportsInteraction,
             isMaximized: false,
             onToggleMaximize: () => onMaximize(item),
             onClose: () {

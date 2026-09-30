@@ -1,7 +1,7 @@
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
-import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/domain/models/app_notification.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';

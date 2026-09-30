@@ -384,7 +384,7 @@ return onConnect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( AndroidDevice device)?  onConnect,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( PluggedDevice device)?  onConnect,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnConnect() when onConnect != null:
@@ -406,7 +406,7 @@ return onConnect(_that.device);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( AndroidDevice device)  onConnect,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( PluggedDevice device)  onConnect,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnConnect():
@@ -424,7 +424,7 @@ return onConnect(_that.device);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( AndroidDevice device)?  onConnect,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( PluggedDevice device)?  onConnect,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnConnect() when onConnect != null:
@@ -475,7 +475,7 @@ class _OnConnect implements SidebarEvent {
   const _OnConnect(this.device);
   
 
- final  AndroidDevice device;
+ final  PluggedDevice device;
 
 /// Create a copy of SidebarEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -509,11 +509,11 @@ abstract mixin class _$OnConnectCopyWith<$Res> implements $SidebarEventCopyWith<
   factory _$OnConnectCopyWith(_OnConnect value, $Res Function(_OnConnect) _then) = __$OnConnectCopyWithImpl;
 @useResult
 $Res call({
- AndroidDevice device
+ PluggedDevice device
 });
 
 
-$AndroidDeviceCopyWith<$Res> get device;
+
 
 }
 /// @nodoc
@@ -529,20 +529,11 @@ class __$OnConnectCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
   return _then(_OnConnect(
 null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as AndroidDevice,
+as PluggedDevice,
   ));
 }
 
-/// Create a copy of SidebarEvent
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$AndroidDeviceCopyWith<$Res> get device {
-  
-  return $AndroidDeviceCopyWith<$Res>(_self.device, (value) {
-    return _then(_self.copyWith(device: value));
-  });
-}
+
 }
 
 // dart format on

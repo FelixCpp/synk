@@ -4,6 +4,8 @@ import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:device_viewer/feat_device_agent/application/android_device_agent.dart';
+import 'package:device_viewer/feat_device_agent/application/ios_device_agent.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/device_connection.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_device_frame/presentation/device_frame.dart';
@@ -13,6 +15,7 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_dev
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -145,6 +148,20 @@ void main() {
       );
     });
 
+    testWidgets('hides interaction-only controls for a non-interactive device', (
+      tester,
+    ) async {
+      await _pumpFrame(
+        tester,
+        _referenceScreenSize,
+        supportsInteraction: false,
+      );
+
+      expect(find.byIcon(CupertinoIcons.home), findsNothing);
+      expect(find.byIcon(CupertinoIcons.ellipsis_vertical), findsNothing);
+      expect(_screenshotIcon(), findsOneWidget);
+    });
+
     testWidgets('forwards keystrokes only while focused', (tester) async {
       final reachedTheCanvas = <KeyEvent>[];
       await _pumpFrame(
@@ -196,6 +213,7 @@ Future<DeviceViewerColors> _pumpFrame(
   DeviceScreenSize screenSize, {
   ValueChanged<KeyEvent>? onKeyEscapedFrame,
   bool isMaximized = false,
+  bool supportsInteraction = true,
 }) async {
   // The default test surface is shorter than a cell, which would silently
   // squash the frame and make every assertion here meaningless.
@@ -252,6 +270,7 @@ Future<DeviceViewerColors> _pumpFrame(
                         isLive: true,
                         textureId: const NativeTextureId(1),
                         screenSize: screenSize,
+                        supportsInteraction: supportsInteraction,
                         isMaximized: isMaximized,
                         onToggleMaximize: () {},
                         onClose: () {},
@@ -275,7 +294,13 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 
   @override
-  Stream<List<AndroidDevice>> observeConnectingDevices() => const .empty();
+  IosDeviceAgent? getIosDeviceAgent(DeviceId id) => null;
+
+  @override
+  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+  @override
+  Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
@@ -284,7 +309,7 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   Future<bool> isConnected(DeviceId id) async => false;
 
   @override
-  Future<void> toggleConnection(AndroidDevice id) async {}
+  Future<void> toggleConnection(PluggedDevice device) async {}
 
   @override
   Future<void> dispose() async {}

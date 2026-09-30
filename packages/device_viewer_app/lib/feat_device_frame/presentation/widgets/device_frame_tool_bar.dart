@@ -11,6 +11,7 @@ class const DeviceFrameToolBar({
   required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
@@ -54,6 +55,7 @@ class const DeviceFrameToolBar({
             _Actions(
               isMaximized: isMaximized,
               isRecording: isRecording,
+              supportsInteraction: supportsInteraction,
               onCaptureScreenshot: onCaptureScreenshot,
               onToggleRecording: onToggleRecording,
               onToggleMaximize: onToggleMaximize,
@@ -72,6 +74,7 @@ class const DeviceFrameToolBar({
 class const _Actions({
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
@@ -110,11 +113,12 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        _OverflowButton(
-          onInstallApk: onInstallApk,
-          onShareFile: onShareFile,
-          onStandby: onStandby,
-        ),
+        if (supportsInteraction)
+          _OverflowButton(
+            onInstallApk: onInstallApk,
+            onShareFile: onShareFile,
+            onStandby: onStandby,
+          ),
         BenchTooltip(
           message: 'Spiegelung beenden',
           child: BenchIconButton(

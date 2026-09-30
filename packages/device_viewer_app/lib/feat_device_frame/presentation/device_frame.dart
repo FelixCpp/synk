@@ -23,6 +23,7 @@ class const DeviceFrame({
   required final bool isLive,
   required final NativeTextureId? textureId,
   required final DeviceScreenSize? screenSize,
+  required final bool supportsInteraction,
   required final bool isMaximized,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
@@ -68,6 +69,7 @@ class _DeviceFrameState extends State<DeviceFrame>
       child: _DeviceFrameBlocProvider(
         deviceId: widget.deviceId,
         builder: (context, state) => _FrameDropTarget(
+          enabled: widget.supportsInteraction,
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
@@ -85,6 +87,7 @@ class _DeviceFrameState extends State<DeviceFrame>
                     isLive: widget.isLive,
                     isMaximized: widget.isMaximized,
                     isRecording: state.isRecording,
+                    supportsInteraction: widget.supportsInteraction,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
                     onToggleMaximize: widget.onToggleMaximize,
@@ -103,17 +106,18 @@ class _DeviceFrameState extends State<DeviceFrame>
                       flash: _screenshotFlash,
                     ),
                   ),
-                  _ControlsBar(
-                    onBackPressed: () {
-                      _pressControlButton(context, .back);
-                    },
-                    onHomePressed: () {
-                      _pressControlButton(context, .home);
-                    },
-                    onAppSwitchPressed: () {
-                      _pressControlButton(context, .appSwitch);
-                    },
-                  ),
+                  if (widget.supportsInteraction)
+                    _ControlsBar(
+                      onBackPressed: () {
+                        _pressControlButton(context, .back);
+                      },
+                      onHomePressed: () {
+                        _pressControlButton(context, .home);
+                      },
+                      onAppSwitchPressed: () {
+                        _pressControlButton(context, .appSwitch);
+                      },
+                    ),
                 ],
               ),
             ),
@@ -203,11 +207,16 @@ class const _FrameLayout({
 }
 
 class const _FrameDropTarget({
+  required final bool enabled,
   required final Widget Function(BuildContext context, bool isDragHovered)
   builder,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    if (!enabled) {
+      return builder(context, false);
+    }
+
     return DeviceFrameDropDetector(
       onFilesDropped: (filepaths) {
         BlocProvider.of<DeviceFrameBloc>(context)
@@ -278,6 +287,7 @@ class const _ToolBar({
   required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
@@ -296,6 +306,7 @@ class const _ToolBar({
         isLive: isLive,
         isMaximized: isMaximized,
         isRecording: isRecording,
+        supportsInteraction: supportsInteraction,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
         onToggleMaximize: onToggleMaximize,

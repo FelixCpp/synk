@@ -208,8 +208,8 @@ return $default(_that.id,_that.modelName,_that.state,_that.connection);case _:
 /// @nodoc
 
 
-class _AndroidDevice implements AndroidDevice {
-  const _AndroidDevice({required this.id, required this.modelName, required this.state, required this.connection});
+class _AndroidDevice extends AndroidDevice {
+  const _AndroidDevice({required this.id, required this.modelName, required this.state, required this.connection}): super._();
   
 
 @override final  DeviceId id;

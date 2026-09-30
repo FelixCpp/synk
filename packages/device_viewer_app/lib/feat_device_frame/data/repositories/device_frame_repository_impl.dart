@@ -113,7 +113,7 @@ class const DeviceFrameRepositoryImpl({
       uniformTypeIdentifiers: ['public.png'],
     );
 
-    final agent = repository.getAndroidDeviceAgent(deviceId);
+    final agent = repository.getScreenCaptureAgent(deviceId);
     if (agent == null) {
       // TODO(Felix): Custom exception type
       throw Exception('Could not resolve agent for device $deviceId');
@@ -147,7 +147,7 @@ class const DeviceFrameRepositoryImpl({
       uniformTypeIdentifiers: ['public.mpeg-4'],
     );
 
-    final agent = repository.getAndroidDeviceAgent(deviceId);
+    final agent = repository.getScreenCaptureAgent(deviceId);
     if (agent == null) {
       // TODO(Felix): Custom exception type
       throw Exception('Could not resolve agent for device $deviceId');
@@ -168,7 +168,7 @@ class const DeviceFrameRepositoryImpl({
 
   @override
   Future<void> stopRecording(DeviceId deviceId) async {
-    final agent = repository.getAndroidDeviceAgent(deviceId);
+    final agent = repository.getScreenCaptureAgent(deviceId);
     if (agent == null) {
       return;
     }

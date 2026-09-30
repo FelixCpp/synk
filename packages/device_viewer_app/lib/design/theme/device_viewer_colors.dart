@@ -15,6 +15,7 @@ class const DeviceViewerColors._({
   required final Color success,
   required final Color deviceConnected,
   required final Color deviceDisconnected,
+  required final Color deviceUnauthorized,
   required final Color focusRing,
   required final Color focusGlow,
 }) {
@@ -34,6 +35,7 @@ class const DeviceViewerColors._({
       success: colors.live,
       deviceConnected: colors.live,
       deviceDisconnected: colors.idle,
+      deviceUnauthorized: colors.warn,
       focusRing: colors.accent,
       focusGlow: colors.soft(colors.accent),
     );

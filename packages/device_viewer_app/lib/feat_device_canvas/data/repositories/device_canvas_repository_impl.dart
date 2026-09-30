@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:device_viewer/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:device_viewer/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DeviceCanvasRepositoryImpl(
@@ -21,14 +22,18 @@ class DeviceCanvasRepositoryImpl(
       return [
         for (final device in connecting)
           if (!connectedIds.contains(device.id))
-            CanvasDevice.connecting(device: device),
+            CanvasDevice.connecting(
+              device: device,
+              supportsInteraction: device is AndroidDevice,
+            ),
 
         for (final connection in connected)
-          CanvasDevice.android(
+          CanvasDevice.connected(
             device: connection.device,
             isConnected: true,
             textureId: connection.textureId,
             screenSize: connection.screenSize,
+            supportsInteraction: connection.device is AndroidDevice,
           ),
       ];
     });

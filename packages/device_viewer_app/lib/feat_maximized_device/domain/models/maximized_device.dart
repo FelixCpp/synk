@@ -13,5 +13,6 @@ sealed class MaximizedDevice with _$MaximizedDevice {
     required bool isLive,
     required NativeTextureId? textureId,
     required DeviceScreenSize? screenSize,
+    required bool supportsInteraction,
   }) = _MaximizedDevice;
 }

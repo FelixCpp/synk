@@ -2,13 +2,18 @@ import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:device_viewer/feat_device_agent/data/datasources/ios_mirror_channel.dart';
 import 'package:device_viewer/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
+import 'package:device_viewer/feat_device_agent/data/repositories/ios_device_agent_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/data/repositories/plugged_adb_devices_repository_impl.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/ios/data/datasources/ios_device_discovery_channel.dart';
+import 'package:device_viewer/feat_plugged_devices/ios/data/repositories/plugged_ios_devices_repository_impl.dart';
+import 'package:device_viewer/feat_plugged_devices/ios/domain/repositories/plugged_ios_devices_repository.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
@@ -70,12 +75,22 @@ Future<void> main() async {
           },
           lazy: false,
         ),
+        RepositoryProvider<PluggedIosDevicesRepository>(
+          create: (context) {
+            return PluggedIosDevicesRepositoryImpl(IosDeviceDiscoveryChannel());
+          },
+          lazy: false,
+        ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) {
             return DeviceConnectionsRepositoryImpl(
               pluggedAdbDevicesRepository: RepositoryProvider.of(context),
               agentRepository: AndroidDeviceAgentRepositoryImpl(
                 RepositoryProvider.of(context),
+              ),
+              pluggedIosDevicesRepository: RepositoryProvider.of(context),
+              iosAgentRepository: IosDeviceAgentRepositoryImpl(
+                IosMirrorChannel(),
               ),
             );
           },
@@ -90,12 +105,6 @@ Future<void> main() async {
   );
 }
 
-// `BenchTheme` must wrap `WidgetsApp`, not sit inside `home`: the Navigator
-// owns the single root `Overlay`, and every `OverlayEntry`/dialog route
-// (toasts, `showBenchDialog`, ...) is grafted directly onto that `Overlay`
-// as a sibling branch - it only inherits from ancestors of the `Overlay`
-// itself, never from widgets placed inside a routed page. Theming has to
-// sit above the `Overlay` for any of those floating surfaces to see it.
 class const _Root() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

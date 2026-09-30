@@ -85,6 +85,7 @@ class const _Content({
               isLive: device.isLive,
               textureId: device.textureId,
               screenSize: device.screenSize,
+              supportsInteraction: device.supportsInteraction,
               isMaximized: true,
               onToggleMaximize: minimize,
               onClose: onClose,

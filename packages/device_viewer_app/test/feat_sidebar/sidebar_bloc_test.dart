@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:device_viewer/feat_device_agent/application/android_device_agent.dart';
+import 'package:device_viewer/feat_device_agent/application/ios_device_agent.dart';
+import 'package:device_viewer/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:device_viewer/feat_device_connections/domain/models/device_connection.dart';
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
@@ -10,6 +12,8 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_dev
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:device_viewer/feat_plugged_devices/ios/domain/models/ios_device.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/domain/repositories/sidebar_repository.dart';
 import 'package:device_viewer/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
@@ -28,10 +32,10 @@ class FakeSidebarRepository implements SidebarRepository {
 
 class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   Object? errorToThrow;
-  AndroidDevice? lastToggled;
+  PluggedDevice? lastToggled;
 
   @override
-  Future<void> toggleConnection(AndroidDevice device) async {
+  Future<void> toggleConnection(PluggedDevice device) async {
     lastToggled = device;
     if (errorToThrow != null) throw errorToThrow!;
   }
@@ -43,7 +47,7 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   Future<bool> isConnected(DeviceId id) async => false;
 
   @override
-  Stream<List<AndroidDevice>> observeConnectingDevices() {
+  Stream<List<PluggedDevice>> observeConnectingDevices() {
     return const Stream.empty();
   }
 
@@ -54,6 +58,12 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
 
   @override
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
+
+  @override
+  IosDeviceAgent? getIosDeviceAgent(DeviceId id) => null;
+
+  @override
+  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
 }
 
 AndroidDevice buildDevice(String serial) {
@@ -63,6 +73,10 @@ AndroidDevice buildDevice(String serial) {
     state: AndroidDeviceState.device,
     connection: AndroidDeviceConnection.usb,
   );
+}
+
+IosDevice buildIosDevice(String serial) {
+  return IosDevice(id: DeviceId(serial), modelName: 'iPhone');
 }
 
 void main() {
@@ -90,6 +104,19 @@ void main() {
 
   test('reflects the devices emitted by the repository', () async {
     final device = buildDevice('serial-1');
+
+    sidebarRepository.emit([
+      SidebarDevice(device: device, isConnected: false),
+    ]);
+    await pumpEventQueue();
+
+    expect(bloc.state.devices, [
+      SidebarDevice(device: device, isConnected: false),
+    ]);
+  });
+
+  test('reflects an iOS device emitted by the repository', () async {
+    final device = buildIosDevice('ios-serial-1');
 
     sidebarRepository.emit([
       SidebarDevice(device: device, isConnected: false),

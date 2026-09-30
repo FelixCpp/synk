@@ -1,6 +1,7 @@
 import 'package:device_viewer/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:device_viewer/feat_maximized_device/domain/models/maximized_device.dart';
 import 'package:device_viewer/feat_maximized_device/domain/repositories/maximized_device_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -22,6 +23,7 @@ class const MaximizedDeviceRepositoryImpl({
             isLive: true,
             textureId: connection.textureId,
             screenSize: connection.screenSize,
+            supportsInteraction: connection.device is AndroidDevice,
           );
         }
 
@@ -34,6 +36,7 @@ class const MaximizedDeviceRepositoryImpl({
             isLive: false,
             textureId: null,
             screenSize: null,
+            supportsInteraction: device is AndroidDevice,
           );
         }
 
