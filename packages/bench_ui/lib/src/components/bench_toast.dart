@@ -3,22 +3,14 @@ import 'package:bench_ui/src/components/bench_icon_button.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchToast extends StatelessWidget {
-  const BenchToast({
-    super.key,
-    required this.icon,
-    required this.message,
-    required this.accent,
-    this.onDismiss,
-    this.dismissIcon,
-  });
-
-  final IconData icon;
-  final String message;
-  final Color accent;
-  final VoidCallback? onDismiss;
-  final IconData? dismissIcon;
-
+class const BenchToast({
+  super.key,
+  required final IconData icon,
+  required final String message,
+  required final Color accent,
+  final VoidCallback? onDismiss,
+  final IconData? dismissIcon,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

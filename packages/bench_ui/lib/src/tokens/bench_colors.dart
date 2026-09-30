@@ -1,28 +1,26 @@
 import 'package:flutter/widgets.dart';
 
 @immutable
-class BenchColors {
-  const BenchColors({
-    required this.canvas,
-    required this.panel,
-    required this.surface,
-    required this.raised,
-    required this.inset,
-    required this.line,
-    required this.lineStrong,
-    required this.text,
-    required this.textSecondary,
-    required this.textTertiary,
-    required this.accent,
-    required this.onAccent,
-    required this.hoverOverlay,
-    required this.pressOverlay,
-    required this.live,
-    required this.idle,
-    required this.warn,
-    required this.error,
-  });
-
+class const BenchColors({
+  required final Color canvas,
+  required final Color panel,
+  required final Color surface,
+  required final Color raised,
+  required final Color inset,
+  required final Color line,
+  required final Color lineStrong,
+  required final Color text,
+  required final Color textSecondary,
+  required final Color textTertiary,
+  required final Color accent,
+  required final Color onAccent,
+  required final Color hoverOverlay,
+  required final Color pressOverlay,
+  required final Color live,
+  required final Color idle,
+  required final Color warn,
+  required final Color error,
+}) {
   const BenchColors.dark()
     : this(
         canvas: const Color(0xFF14171A),
@@ -66,25 +64,6 @@ class BenchColors {
         warn: const Color(0xFFB57A16),
         error: const Color(0xFFD0453A),
       );
-
-  final Color canvas;
-  final Color panel;
-  final Color surface;
-  final Color raised;
-  final Color inset;
-  final Color line;
-  final Color lineStrong;
-  final Color text;
-  final Color textSecondary;
-  final Color textTertiary;
-  final Color accent;
-  final Color onAccent;
-  final Color hoverOverlay;
-  final Color pressOverlay;
-  final Color live;
-  final Color idle;
-  final Color warn;
-  final Color error;
 
   Color soft(Color color) => color.withValues(alpha: 0.16);
 }

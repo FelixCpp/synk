@@ -2,12 +2,11 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchTag extends StatelessWidget {
-  const BenchTag({super.key, required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
+class const BenchTag({
+  super.key,
+  required final String label,
+  required final Color color,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

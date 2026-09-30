@@ -2,22 +2,14 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchEmptyState extends StatelessWidget {
-  const BenchEmptyState({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.action,
-    this.iconSize = 40.0,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-  final Widget? action;
-  final double iconSize;
-
+class const BenchEmptyState({
+  super.key,
+  required final IconData icon,
+  required final String title,
+  required final String message,
+  final Widget? action,
+  final double iconSize = 40.0,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

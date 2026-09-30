@@ -5,28 +5,28 @@ import 'package:bench_ui/src/components/bench_interactive.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-typedef BenchMenuItemsBuilder =
-    List<Widget> Function(BuildContext context, MenuController controller);
+typedef BenchMenuItemsBuilder = List<Widget> Function(
+  BuildContext context,
+  MenuController controller,
+);
 
-typedef BenchMenuTriggerBuilder =
-    Widget Function(BuildContext context, MenuController controller);
+typedef BenchMenuTriggerBuilder = Widget Function(
+  BuildContext context,
+  MenuController controller,
+);
 
-enum BenchMenuAlignment { start, end }
+enum BenchMenuAlignment {
+  start,
+  end,
+}
 
-class BenchMenu extends StatefulWidget {
-  const BenchMenu({
-    super.key,
-    required this.itemsBuilder,
-    required this.triggerBuilder,
-    this.width = 200.0,
-    this.alignment = BenchMenuAlignment.end,
-  });
-
-  final BenchMenuItemsBuilder itemsBuilder;
-  final BenchMenuTriggerBuilder triggerBuilder;
-  final double width;
-  final BenchMenuAlignment alignment;
-
+class const BenchMenu({
+  super.key,
+  required final BenchMenuItemsBuilder itemsBuilder,
+  required final BenchMenuTriggerBuilder triggerBuilder,
+  final double width = 200.0,
+  final BenchMenuAlignment alignment = BenchMenuAlignment.end,
+}) extends StatefulWidget {
   @override
   State<BenchMenu> createState() => _BenchMenuState();
 }
@@ -102,20 +102,13 @@ class _Panel extends StatelessWidget {
   }
 }
 
-class BenchMenuItem extends StatelessWidget {
-  const BenchMenuItem({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    this.destructive = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-  final bool destructive;
-
+class const BenchMenuItem({
+  super.key,
+  required final IconData icon,
+  required final String label,
+  required final VoidCallback? onPressed,
+  final bool destructive = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;
@@ -165,9 +158,7 @@ class BenchMenuItem extends StatelessWidget {
   }
 }
 
-class BenchMenuDivider extends StatelessWidget {
-  const BenchMenuDivider({super.key});
-
+class const BenchMenuDivider({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(

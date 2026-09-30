@@ -2,24 +2,15 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchShell extends StatelessWidget {
-  const BenchShell({
-    super.key,
-    required this.title,
-    required this.sidebar,
-    required this.child,
-    this.actions = const [],
-    this.leading,
-    this.showSidebar = true,
-  });
-
-  final String title;
-  final Widget sidebar;
-  final Widget child;
-  final List<Widget> actions;
-  final Widget? leading;
-  final bool showSidebar;
-
+class const BenchShell({
+  super.key,
+  required final String title,
+  required final Widget sidebar,
+  required final Widget child,
+  final List<Widget> actions = const [],
+  final Widget? leading,
+  final bool showSidebar = true,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

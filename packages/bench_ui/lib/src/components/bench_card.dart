@@ -2,24 +2,15 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchCard extends StatelessWidget {
-  const BenchCard({
-    super.key,
-    required this.child,
-    this.radius = BenchRadius.card,
-    this.padding = EdgeInsets.zero,
-    this.elevation = BenchElevation.flat,
-    this.clip = false,
-    this.focused = false,
-  });
-
-  final Widget child;
-  final double radius;
-  final EdgeInsets padding;
-  final List<BoxShadow> elevation;
-  final bool clip;
-  final bool focused;
-
+class const BenchCard({
+  super.key,
+  required final Widget child,
+  final double radius = BenchRadius.card,
+  final EdgeInsets padding = EdgeInsets.zero,
+  final List<BoxShadow> elevation = BenchElevation.flat,
+  final bool clip = false,
+  final bool focused = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.bench.colors;
@@ -46,7 +37,9 @@ class BenchCard extends StatelessWidget {
       ),
       child: Padding(
         padding: padding,
-        child: clip ? ClipRRect(borderRadius: borderRadius, child: child) : child,
+        child: clip
+            ? ClipRRect(borderRadius: borderRadius, child: child)
+            : child,
       ),
     );
   }

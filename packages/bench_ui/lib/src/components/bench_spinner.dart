@@ -3,12 +3,10 @@ import 'dart:math' as math;
 import 'package:bench_ui/src/bench_theme.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchSpinner extends StatefulWidget {
-  const BenchSpinner({super.key, this.size = 18.0, this.color});
-
-  final double size;
-  final Color? color;
-
+class const BenchSpinner({
+  final double size = 18.0,
+  final Color? color,
+}) extends StatefulWidget {
   @override
   State<BenchSpinner> createState() => _BenchSpinnerState();
 }
@@ -40,11 +38,7 @@ class _BenchSpinnerState extends State<BenchSpinner>
   }
 }
 
-class _ArcPainter extends CustomPainter {
-  const _ArcPainter({required this.color});
-
-  final Color color;
-
+class const _ArcPainter({required final Color color}) extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final stroke = size.width / 9.0;

@@ -1,18 +1,12 @@
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchStatusDot extends StatelessWidget {
-  const BenchStatusDot({
-    super.key,
-    required this.color,
-    this.glow = false,
-    this.size = BenchSize.statusDot,
-  });
-
-  final Color color;
-  final bool glow;
-  final double size;
-
+class const BenchStatusDot({
+  super.key,
+  required final Color color,
+  final bool glow = false,
+  final double size = BenchSize.statusDot,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(

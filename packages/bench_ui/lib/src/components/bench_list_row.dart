@@ -2,28 +2,17 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchListRow extends StatefulWidget {
-  const BenchListRow({
-    super.key,
-    required this.leading,
-    required this.title,
-    required this.subtitle,
-    this.trailing,
-    this.revealTrailingOnHover = true,
-    this.selected = false,
-    this.onTap,
-    this.onSecondaryTap,
-  });
-
-  final Widget leading;
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-  final bool revealTrailingOnHover;
-  final bool selected;
-  final VoidCallback? onTap;
-  final VoidCallback? onSecondaryTap;
-
+class const BenchListRow({
+  super.key,
+  required final Widget leading,
+  required final String title,
+  required final String subtitle,
+  final Widget? trailing,
+  final bool revealTrailingOnHover = true,
+  final bool selected = false,
+  final VoidCallback? onTap,
+  final VoidCallback? onSecondaryTap,
+}) extends StatefulWidget {
   @override
   State<BenchListRow> createState() => _BenchListRowState();
 }
@@ -88,7 +77,9 @@ class _BenchListRowState extends State<BenchListRow> {
                 AnimatedOpacity(
                   duration: BenchMotion.reveal,
                   curve: BenchMotion.standard,
-                  opacity: !widget.revealTrailingOnHover || _hovered ? 1.0 : 0.0,
+                  opacity: !widget.revealTrailingOnHover || _hovered
+                      ? 1.0
+                      : 0.0,
                   child: trailing,
                 ),
               ],

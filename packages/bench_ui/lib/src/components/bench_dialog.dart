@@ -2,20 +2,13 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchDialog extends StatelessWidget {
-  const BenchDialog({
-    super.key,
-    required this.title,
-    required this.message,
-    required this.actions,
-    this.icon,
-  });
-
-  final String title;
-  final String message;
-  final List<Widget> actions;
-  final IconData? icon;
-
+class const BenchDialog({
+  super.key,
+  required final String title,
+  required final String message,
+  required final List<Widget> actions,
+  final IconData? icon,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

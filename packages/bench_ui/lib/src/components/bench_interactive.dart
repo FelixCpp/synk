@@ -1,22 +1,17 @@
 import 'package:flutter/widgets.dart';
 
-typedef BenchStateBuilder =
-    Widget Function(BuildContext context, Set<WidgetState> states);
+typedef BenchStateBuilder = Widget Function(
+  BuildContext context,
+  Set<WidgetState> states,
+);
 
-class BenchInteractive extends StatefulWidget {
-  const BenchInteractive({
-    super.key,
-    required this.builder,
-    required this.onPressed,
-    this.cursor = SystemMouseCursors.basic,
-    this.autofocus = false,
-  });
-
-  final BenchStateBuilder builder;
-  final VoidCallback? onPressed;
-  final MouseCursor cursor;
-  final bool autofocus;
-
+class const BenchInteractive({
+  super.key,
+  required final BenchStateBuilder builder,
+  final VoidCallback? onPressed,
+  final MouseCursor cursor = SystemMouseCursors.basic,
+  final bool autofocus = false,
+}) extends StatefulWidget {
   @override
   State<BenchInteractive> createState() => _BenchInteractiveState();
 }

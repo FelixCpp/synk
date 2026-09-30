@@ -1,20 +1,17 @@
-
 import 'package:bench_ui/src/tokens/bench_colors.dart';
 import 'package:flutter/widgets.dart';
 
 @immutable
-class BenchTypography {
-  const BenchTypography({
-    required this.display,
-    required this.heading,
-    required this.title,
-    required this.label,
-    required this.body,
-    required this.secondary,
-    required this.mono,
-    required this.microLabel,
-  });
-
+class const BenchTypography({
+  required final TextStyle display,
+  required final TextStyle heading,
+  required final TextStyle title,
+  required final TextStyle label,
+  required final TextStyle body,
+  required final TextStyle secondary,
+  required final TextStyle mono,
+  required final TextStyle microLabel,
+}) {
   factory BenchTypography.forColors(BenchColors colors) {
     const tabular = [FontFeature.tabularFigures()];
 
@@ -85,13 +82,4 @@ class BenchTypography {
 
   static const String? fontFamily = null;
   static const String monoFamily = 'Menlo';
-
-  final TextStyle display;
-  final TextStyle heading;
-  final TextStyle title;
-  final TextStyle label;
-  final TextStyle body;
-  final TextStyle secondary;
-  final TextStyle mono;
-  final TextStyle microLabel;
 }

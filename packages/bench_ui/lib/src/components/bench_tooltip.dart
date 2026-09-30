@@ -2,18 +2,12 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchTooltip extends StatelessWidget {
-  const BenchTooltip({
-    super.key,
-    required this.message,
-    required this.child,
-    this.hoverDelay = const Duration(milliseconds: 500),
-  });
-
-  final String message;
-  final Widget child;
-  final Duration hoverDelay;
-
+class const BenchTooltip({
+  super.key,
+  required final String message,
+  required final Widget child,
+  final Duration hoverDelay = const .new(milliseconds: 500),
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RawTooltip(
@@ -32,11 +26,9 @@ class BenchTooltip extends StatelessWidget {
   }
 }
 
-class _Bubble extends StatelessWidget {
-  const _Bubble({required this.message});
-
-  final String message;
-
+class const _Bubble({
+  required final String message,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

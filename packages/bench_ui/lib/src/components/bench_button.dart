@@ -3,20 +3,18 @@ import 'package:bench_ui/src/components/bench_interactive.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-enum BenchButtonVariant { primary, secondary, danger }
+enum BenchButtonVariant {
+  primary,
+  secondary,
+  danger,
+}
 
-class BenchButton extends StatelessWidget {
-  const BenchButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.variant = BenchButtonVariant.primary,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final BenchButtonVariant variant;
-
+class const BenchButton({
+  super.key,
+  required final String label,
+  final VoidCallback? onPressed,
+  final BenchButtonVariant variant = BenchButtonVariant.primary,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.bench;

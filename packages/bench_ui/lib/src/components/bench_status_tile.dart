@@ -2,18 +2,12 @@ import 'package:bench_ui/src/bench_theme.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchStatusTile extends StatelessWidget {
-  const BenchStatusTile({
-    super.key,
-    required this.icon,
-    required this.color,
-    this.size = BenchSize.statusTile,
-  });
-
-  final IconData icon;
-  final Color color;
-  final double size;
-
+class const BenchStatusTile({
+  super.key,
+  required final IconData icon,
+  required final Color color,
+  final double size = BenchSize.statusTile,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.bench.colors;

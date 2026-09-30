@@ -3,22 +3,14 @@ import 'package:bench_ui/src/components/bench_interactive.dart';
 import 'package:bench_ui/src/tokens/bench_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class BenchIconButton extends StatelessWidget {
-  const BenchIconButton({
-    super.key,
-    required this.icon,
-    required this.onPressed,
-    this.size = BenchSize.iconButton,
-    this.iconSize = BenchSize.icon,
-    this.color,
-  });
-
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final double size;
-  final double iconSize;
-  final Color? color;
-
+class const BenchIconButton({
+  super.key,
+  required final IconData icon,
+  required final VoidCallback? onPressed,
+  final double size = BenchSize.iconButton,
+  final double iconSize = BenchSize.icon,
+  final Color? color,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.bench.colors;
@@ -37,8 +29,7 @@ class BenchIconButton extends StatelessWidget {
 
         final foreground = switch (states) {
           _ when disabled => colors.textTertiary.withValues(alpha: 0.45),
-          _ when states.contains(WidgetState.hovered) =>
-            color ?? colors.text,
+          _ when states.contains(WidgetState.hovered) => color ?? colors.text,
           _ => color ?? colors.textSecondary,
         };
 
