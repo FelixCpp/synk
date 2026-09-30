@@ -2,8 +2,6 @@ import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
-import 'package:device_viewer/design/build_context.dart';
-import 'package:device_viewer/design/theme/device_viewer_typography.dart';
 import 'package:device_viewer/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
 import 'package:device_viewer/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:device_viewer/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
@@ -17,22 +15,29 @@ import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.da
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:bench_ui/bench_ui.dart';
+import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
 
-Future<void> _configureMacosWindowUtils() async {
-  const config = MacosWindowUtilsConfig(
-    toolbarStyle: .unified,
+Future<void> _configureWindow() async {
+  await WindowManipulator.initialize();
+  await WindowManipulator.makeTitlebarTransparent();
+  await WindowManipulator.enableFullSizeContentView();
+  await WindowManipulator.hideTitle();
+  await WindowManipulator.addToolbar();
+  await WindowManipulator.setToolbarStyle(
+    toolbarStyle: NSWindowToolbarStyle.unified,
   );
-  await config.apply();
 }
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   appLogger = createAppLogger(
     level: kDebugMode ? Level.debug : Level.info,
   );
 
-  await _configureMacosWindowUtils();
+  await _configureWindow();
 
   final adbPath = path.normalize(
     path.join(
@@ -85,77 +90,63 @@ Future<void> main() async {
 class const _DeviceViewerApp() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MacosApp(
+    return WidgetsApp(
       title: 'Device Viewer',
-      themeMode: .system,
+      color: const BenchColors.dark().accent,
       debugShowCheckedModeBanner: false,
-      home: Builder(
-        builder: (context) {
-          final theme = MacosTheme.of(context);
-          return MacosTheme(
-            data: theme.copyWith(
-              typography: DeviceViewerTypography.scaled(theme.typography),
-            ),
-            child: AppNotificationListener(
-              notifications: RepositoryProvider.of<NotificationService>(
-                context,
-              ),
-              child: MacosWindow(
-                sidebar: Sidebar(
-                  minWidth: 240,
-                  builder: (context, scrollController) {
-                    return DeviceViewerSidebar(
-                      scrollController: scrollController,
-                    );
-                  },
-                ),
-                child: _DeviceViewerScreen(),
-              ),
-            ),
-          );
-        },
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return PageRouteBuilder<T>(
+          settings: settings,
+          pageBuilder: (context, _, _) => builder(context),
+        );
+      },
+      home: const _Root(),
+    );
+  }
+}
+
+class const _Root() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = BenchThemeData.forBrightness(
+      MediaQuery.platformBrightnessOf(context),
+    );
+
+    return BenchTheme(
+      data: theme,
+      child: DefaultTextStyle(
+        style: theme.type.body,
+        child: AppNotificationListener(
+          notifications: RepositoryProvider.of<NotificationService>(context),
+          child: const _DeviceViewerScreen(),
+        ),
       ),
     );
   }
 }
 
-class const _DeviceViewerScreen() extends StatelessWidget {
+class const _DeviceViewerScreen() extends StatefulWidget {
+  @override
+  State<_DeviceViewerScreen> createState() => _DeviceViewerScreenState();
+}
+
+class _DeviceViewerScreenState extends State<_DeviceViewerScreen> {
+  var _showSidebar = true;
+
   @override
   Widget build(BuildContext context) {
-    return MacosScaffold(
-      toolBar: ToolBar(
-        title: const Text("Device Viewer"),
-        padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5.0),
-        leading: MacosTooltip(
-          useMousePosition: false,
-          message: "Seitenleisten ausblenden/anzeigen",
-          child: MacosIconButton(
-            onPressed: () {
-              MacosWindowScope.of(context).toggleSidebar();
-            },
-            icon: MacosIcon(
-              CupertinoIcons.sidebar_left,
-              size: 20,
-              color: context.colors.label,
-            ),
-            boxConstraints: const BoxConstraints(
-              minWidth: 20,
-              minHeight: 20,
-              maxWidth: 48,
-              maxHeight: 48,
-            ),
-          ),
+    return BenchShell(
+      title: 'Device Viewer',
+      showSidebar: _showSidebar,
+      leading: BenchTooltip(
+        message: 'Seitenleiste ausblenden/anzeigen',
+        child: BenchIconButton(
+          icon: CupertinoIcons.sidebar_left,
+          onPressed: () => setState(() => _showSidebar = !_showSidebar),
         ),
       ),
-      children: [
-        ContentArea(
-          builder: ((context, scrollController) {
-            return DeviceCanvasContainer(
-              scrollController: scrollController,
-            );
-          }),
-        ),
-      ],
+      sidebar: const DeviceViewerSidebar(),
+      child: const DeviceCanvasContainer(),
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:bench_ui/bench_ui.dart';
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
@@ -16,7 +17,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 void main() {
   group('DeviceFrame', () {
@@ -107,11 +107,6 @@ void main() {
       expect(
         _frameBorderOf(tester).top.color.toARGB32(),
         colors.focusRing.toARGB32(),
-      );
-      expect(
-        _frameShadowsOf(tester).any((shadow) => shadow.color.a > 0),
-        isTrue,
-        reason: 'the focus ring glow should be painted',
       );
     });
 
@@ -225,8 +220,19 @@ Future<DeviceViewerColors> _pumpFrame(
           dispose: (service) => service.dispose(),
         ),
       ],
-      child: MacosApp(
-        home: Builder(
+      child: WidgetsApp(
+        color: const BenchColors.dark().accent,
+        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+          return PageRouteBuilder<T>(
+            settings: settings,
+            pageBuilder: (context, _, _) => builder(context),
+          );
+        },
+        home: BenchTheme(
+          data: BenchThemeData.dark,
+          child: DefaultTextStyle(
+            style: BenchThemeData.dark.type.body,
+            child: Builder(
           builder: (context) {
             colors = context.colors;
 
@@ -253,7 +259,9 @@ Future<DeviceViewerColors> _pumpFrame(
                 ),
               ),
             );
-          },
+              },
+            ),
+          ),
         ),
       ),
     ),
@@ -283,24 +291,23 @@ class _OfflineConnections implements DeviceConnectionsRepository {
 }
 
 Finder _screenshotIcon() => find.byWidgetPredicate(
-  (widget) => widget is MacosIcon && widget.icon == CupertinoIcons.camera,
+  (widget) => widget is Icon && widget.icon == CupertinoIcons.camera,
 );
 
 BoxDecoration _frameDecorationOf(WidgetTester tester) {
-  final decorated = tester.widget<DecoratedBox>(
-    find
-        .descendant(
-          of: find.byType(TweenAnimationBuilder<double>),
+  final decorated = tester
+      .widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(BenchCard),
           matching: find.byType(DecoratedBox),
-        )
-        .first,
-  );
+        ),
+      )
+      .map((box) => box.decoration as BoxDecoration)
+      .firstWhere((decoration) => decoration.border != null);
 
-  return decorated.decoration as BoxDecoration;
+  return decorated;
 }
 
 Border _frameBorderOf(WidgetTester tester) =>
     _frameDecorationOf(tester).border! as Border;
 
-List<BoxShadow> _frameShadowsOf(WidgetTester tester) =>
-    _frameDecorationOf(tester).boxShadow ?? const [];

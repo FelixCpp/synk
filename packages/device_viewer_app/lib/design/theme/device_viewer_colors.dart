@@ -1,5 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:bench_ui/bench_ui.dart';
+import 'package:flutter/widgets.dart';
 
 @immutable
 class const DeviceViewerColors._({
@@ -19,36 +19,32 @@ class const DeviceViewerColors._({
   required final Color focusGlow,
 }) {
   factory DeviceViewerColors.of(BuildContext context) {
-    final theme = MacosTheme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    Color variant(CupertinoDynamicColor color) =>
-        isDark ? color.darkColor : color.color;
+    final colors = BenchTheme.of(context).colors;
 
     return DeviceViewerColors._(
-      canvas: theme.canvasColor,
-      card: variant(MacosColors.controlBackgroundColor),
-      cardHover: isDark ? const Color(0x14FFFFFF) : const Color(0x0A000000),
-      divider: theme.dividerColor,
-      shadow: isDark ? const Color(0x59000000) : const Color(0x24000000),
-      label: variant(MacosColors.labelColor),
-      secondaryLabel: variant(MacosColors.secondaryLabelColor),
-      tertiaryLabel: variant(MacosColors.tertiaryLabelColor),
-      error: variant(MacosColors.systemRedColor),
-      success: variant(MacosColors.systemGreenColor),
-      deviceConnected: variant(MacosColors.systemGreenColor),
-      deviceDisconnected: variant(MacosColors.systemGrayColor),
-      focusRing: theme.primaryColor,
-      focusGlow: theme.primaryColor.withAlpha(isDark ? 0x80 : 0x59),
+      canvas: colors.canvas,
+      card: colors.surface,
+      cardHover: colors.raised,
+      divider: colors.line,
+      shadow: const Color(0x00000000),
+      label: colors.text,
+      secondaryLabel: colors.textSecondary,
+      tertiaryLabel: colors.textTertiary,
+      error: colors.error,
+      success: colors.live,
+      deviceConnected: colors.live,
+      deviceDisconnected: colors.idle,
+      focusRing: colors.accent,
+      focusGlow: colors.soft(colors.accent),
     );
   }
 
-  static const Color mirrorBackground = MacosColors.black;
-  static const Color screenshotFlash = MacosColors.white;
+  static const Color mirrorBackground = Color(0xFF0C0E10);
+  static const Color screenshotFlash = Color(0xFFFFFFFF);
 
   static const List<Color> mirrorBackdrop = [
-    Color(0xFF20242B),
-    Color(0xFF0B0D10),
+    Color(0xFF181C21),
+    Color(0xFF0C0E10),
   ];
   static const Color statusOverlayBackground = Color(0x99000000);
   static const Color statusOverlayLabel = Color(0xF2FFFFFF);

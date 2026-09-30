@@ -3,7 +3,7 @@ import 'package:device_viewer/design/theme/device_viewer_colors.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/feat_native_texture/native_texture.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:macos_ui/macos_ui.dart';
+import 'package:bench_ui/bench_ui.dart';
 
 class const DeviceScreenMirror({
   super.key,
@@ -70,10 +70,10 @@ class const _KeyboardTargetBadge({required final bool hasFocus})
       curve: Curves.easeOut,
       opacity: hasFocus ? 1.0 : 0.0,
       child: _StatusBadge(
-        child: MacosIcon(
+        child: Icon(
           CupertinoIcons.keyboard,
           size: DeviceViewerTheme.statusOverlayIconSize,
-          color: context.colors.focusRing,
+          color: context.benchTheme.colors.accent,
         ),
       ),
     );
@@ -183,7 +183,7 @@ class const _DeviceOutline() extends StatelessWidget {
           BoxShadow(color: DeviceViewerColors.mirrorGlow, blurRadius: 24.0),
         ],
       ),
-      child: const Center(child: ProgressCircle(radius: 9.0)),
+      child: const Center(child: BenchSpinner(size: 18.0)),
     );
   }
 }

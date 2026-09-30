@@ -1,11 +1,10 @@
-import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/domain/models/app_notification.dart';
 import 'package:device_viewer/feat_notifications/presentation/bloc/notification_bloc.dart';
 import 'package:device_viewer/feat_notifications/presentation/widgets/notification_toast.dart';
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 class const AppNotificationListener({
   super.key,
@@ -36,22 +35,19 @@ class const AppNotificationListener({
 }
 
 void _showDialog(BuildContext context, AppNotification notification) {
-  showMacosAlertDialog(
+  showBenchDialog<void>(
     context: context,
     builder: (context) {
-      return MacosAlertDialog(
-        appIcon: MacosIcon(
-          CupertinoIcons.exclamationmark_triangle,
-          size: 56,
-          color: context.colors.error,
-        ),
-        title: const Text('Fehler'),
-        message: Text(notification.message),
-        primaryButton: PushButton(
-          controlSize: .large,
-          onPressed: Navigator.of(context).pop,
-          child: const Text('OK'),
-        ),
+      return BenchDialog(
+        icon: CupertinoIcons.exclamationmark_triangle,
+        title: 'Fehler',
+        message: notification.message,
+        actions: [
+          BenchButton(
+            label: 'OK',
+            onPressed: Navigator.of(context).pop,
+          ),
+        ],
       );
     },
   );

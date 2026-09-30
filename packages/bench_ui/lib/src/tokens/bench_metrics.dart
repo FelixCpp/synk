@@ -1,0 +1,73 @@
+import 'package:flutter/widgets.dart';
+
+class BenchSpace {
+  const BenchSpace._();
+
+  static const s2 = 2.0;
+  static const s4 = 4.0;
+  static const s6 = 6.0;
+  static const s8 = 8.0;
+  static const s12 = 12.0;
+  static const s16 = 16.0;
+  static const s24 = 24.0;
+  static const s32 = 32.0;
+}
+
+class BenchRadius {
+  const BenchRadius._();
+
+  static const tag = 4.0;
+  static const control = 6.0;
+  static const row = 8.0;
+  static const card = 10.0;
+  static const frame = 14.0;
+}
+
+class BenchSize {
+  const BenchSize._();
+
+  static const hairline = 1.0;
+  static const iconButton = 26.0;
+  static const icon = 14.0;
+  static const control = 28.0;
+  static const statusTile = 28.0;
+  static const statusDot = 7.0;
+  static const titleStrip = 52.0;
+  static const trafficGutter = 88.0;
+  static const sidebarWidth = 248.0;
+  static const deviceToolbar = 34.0;
+}
+
+class BenchElevation {
+  const BenchElevation._();
+
+  static const List<BoxShadow> flat = [];
+
+  static const List<BoxShadow> overlay = [
+    BoxShadow(
+      color: Color(0x66000000),
+      blurRadius: 24.0,
+      offset: Offset(0, 8),
+    ),
+  ];
+
+  static const List<BoxShadow> modal = [
+    BoxShadow(
+      color: Color(0x8C000000),
+      blurRadius: 64.0,
+      offset: Offset(0, 24),
+    ),
+  ];
+}
+
+class BenchMotion {
+  const BenchMotion._();
+
+  static const reveal = Duration(milliseconds: 80);
+  static const state = Duration(milliseconds: 140);
+  static const move = Duration(milliseconds: 220);
+  static const present = Duration(milliseconds: 320);
+
+  static const standard = Curves.easeOutCubic;
+  static const emphasized = Cubic(0.2, 0.0, 0.0, 1.0);
+}

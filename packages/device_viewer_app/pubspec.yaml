@@ -16,10 +16,13 @@ dependencies:
 
   api_adb:
     path: ../api_adb/
+  bench_ui:
+    path: ../bench_ui/
   app_logger:
     path: ../app_logger/
+
   flutter_bloc: ^9.1.1
-  macos_ui: ^2.2.2
+  macos_window_utils: ^1.9.0
   rxdart: ^0.28.0
   bloc_concurrency: ^0.3.0
   path: ^1.9.1
@@ -30,6 +33,7 @@ dependencies:
   use_in_case: ^1.4.3
   dartz: ^0.10.1
   desktop_drop: ^0.8.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

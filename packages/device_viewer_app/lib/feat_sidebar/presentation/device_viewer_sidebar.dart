@@ -6,14 +6,11 @@ import 'package:device_viewer/feat_notifications/application/notification_servic
 import 'package:device_viewer/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
 import 'package:device_viewer/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:device_viewer/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
 
-class const DeviceViewerSidebar({
-  super.key,
-  required final ScrollController scrollController,
-}) extends StatelessWidget {
+class const DeviceViewerSidebar({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<SidebarBloc>(
@@ -27,24 +24,18 @@ class const DeviceViewerSidebar({
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
         builder: (context, state) {
-          return _Content(
-            scrollController: scrollController,
-            state: state,
-          );
+          return _Content(state: state);
         },
       ),
     );
   }
 }
 
-class const _Content({
-  required final ScrollController scrollController,
-  required final SidebarState state,
-}) extends StatelessWidget {
+class const _Content({required final SidebarState state})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      controller: scrollController,
       padding: DeviceViewerTheme.pagePadding,
       child: Column(
         crossAxisAlignment: .stretch,
@@ -77,32 +68,12 @@ class const _Content({
 class const _NoDevicesPlugged() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 8.0),
-      child: Column(
-        spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
-        children: [
-          MacosIcon(
-            CupertinoIcons.device_phone_portrait,
-            size: 28.0,
-            color: context.colors.secondaryLabel,
-          ),
-          Text(
-            "Kein Gerät angeschlossen",
-            textAlign: .center,
-            style: context.typo.headline.copyWith(
-              color: context.colors.label,
-            ),
-          ),
-          Text(
-            "Verbinde ein Android-Gerät per USB und aktiviere USB-Debugging.",
-            textAlign: .center,
-            style: context.typo.caption2.copyWith(
-              color: context.colors.secondaryLabel,
-            ),
-          ),
-        ],
-      ),
+    return const BenchEmptyState(
+      icon: CupertinoIcons.device_phone_portrait,
+      iconSize: 28.0,
+      title: 'Kein Gerät angeschlossen',
+      message:
+          'Verbinde ein Android-Gerät per USB und aktiviere USB-Debugging.',
     );
   }
 }
@@ -119,7 +90,7 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.colors.cardHover,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(
           DeviceViewerTheme.smallCornerRadius,
         ),
@@ -142,7 +113,7 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
               ),
               child: Padding(
                 padding: const EdgeInsets.all(9.0),
-                child: MacosIcon(
+                child: Icon(
                   CupertinoIcons.device_phone_portrait,
                   size: 18.0,
                   color: statusColor,
@@ -185,66 +156,20 @@ class const _AdbDeviceEntry({required final SidebarDevice device})
 class const _ConnectButton({
   required final bool isConnected,
   required final VoidCallback onPressed,
-}) extends StatefulWidget {
-  @override
-  State<_ConnectButton> createState() => _ConnectButtonState();
-}
-
-class _ConnectButtonState extends State<_ConnectButton> {
-  var _isHovered = false;
-  var _isPressed = false;
-
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = context.macosTheme.brightness == .dark;
-    // Same neutral scrim PushButton/_OverflowMenuItem use for their click
-    // effect, layered on top of the hover tint instead of replacing it, so
-    // rest/hover/press read as one progression instead of three looks.
-    final clickEffectColor = isDark
-        ? const Color.fromRGBO(255, 255, 255, 0.15)
-        : const Color.fromRGBO(0, 0, 0, 0.06);
+    final colors = context.benchTheme.colors;
 
-    return MacosTooltip(
-      useMousePosition: false,
-      message: widget.isConnected ? "Trennen" : "Verbinden",
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _isHovered = true),
-        onExit: (_) => setState(() {
-          _isHovered = false;
-          _isPressed = false;
-        }),
-        child: GestureDetector(
-          onTapDown: (_) => setState(() => _isPressed = true),
-          onTapCancel: () => setState(() => _isPressed = false),
-          onTapUp: (_) => setState(() => _isPressed = false),
-          onTap: widget.onPressed,
-          child: AnimatedContainer(
-            duration: DeviceViewerTheme.actionRevealDuration,
-            width: 26.0,
-            height: 26.0,
-            alignment: .center,
-            decoration: BoxDecoration(
-              color: _isHovered
-                  ? context.colors.cardHover
-                  : const Color(0x00000000),
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            foregroundDecoration: BoxDecoration(
-              color: _isPressed ? clickEffectColor : const Color(0x00000000),
-              borderRadius: BorderRadius.circular(6.0),
-            ),
-            child: MacosIcon(
-              widget.isConnected
-                  ? CupertinoIcons.bolt_slash_fill
-                  : CupertinoIcons.bolt_fill,
-              size: 15.0,
-              color: widget.isConnected
-                  ? context.colors.error
-                  : context.macosTheme.primaryColor,
-            ),
-          ),
-        ),
+    return BenchTooltip(
+      message: isConnected ? 'Trennen' : 'Verbinden',
+      child: BenchIconButton(
+        icon: isConnected
+            ? CupertinoIcons.bolt_slash_fill
+            : CupertinoIcons.bolt_fill,
+        iconSize: 15.0,
+        color: isConnected ? colors.error : colors.accent,
+        onPressed: onPressed,
       ),
     );
   }

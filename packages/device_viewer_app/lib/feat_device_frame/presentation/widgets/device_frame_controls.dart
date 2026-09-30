@@ -1,7 +1,5 @@
-import 'package:device_viewer/design/build_context.dart';
-import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 class const DeviceFrameControls({
   super.key,
@@ -11,55 +9,44 @@ class const DeviceFrameControls({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.colors.card,
-      ),
-      clipBehavior: .antiAlias,
-      child: Row(
-        mainAxisAlignment: .spaceEvenly,
-        spacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
-        children: [
-          MacosTooltip(
-            useMousePosition: false,
-            message: 'Zurück',
-            child: MacosIconButton(
-              boxConstraints: .tightFor(width: 38.0, height: 38.0),
-              onPressed: onBackPressed,
-              icon: MacosIcon(
-                CupertinoIcons.back,
+    final colors = context.bench.colors;
+
+    return ColoredBox(
+      color: colors.surface,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: BenchSpace.s4),
+        child: Row(
+          mainAxisAlignment: .spaceEvenly,
+          children: [
+            BenchTooltip(
+              message: 'Zurück',
+              child: BenchIconButton(
+                icon: CupertinoIcons.back,
                 size: 38.0,
-                color: context.colors.secondaryLabel,
+                iconSize: 22.0,
+                onPressed: onBackPressed,
               ),
             ),
-          ),
-          MacosTooltip(
-            useMousePosition: false,
-            message: 'Home',
-            child: MacosIconButton(
-              boxConstraints: .tightFor(width: 38.0, height: 38.0),
-              onPressed: onHomePressed,
-              icon: MacosIcon(
-                CupertinoIcons.home,
+            BenchTooltip(
+              message: 'Home',
+              child: BenchIconButton(
+                icon: CupertinoIcons.home,
                 size: 38.0,
-                color: context.colors.secondaryLabel,
+                iconSize: 20.0,
+                onPressed: onHomePressed,
               ),
             ),
-          ),
-          MacosTooltip(
-            useMousePosition: false,
-            message: 'Übersicht',
-            child: MacosIconButton(
-              boxConstraints: .tightFor(width: 38.0, height: 38.0),
-              onPressed: onAppLibraryPressed,
-              icon: MacosIcon(
-                CupertinoIcons.line_horizontal_3,
+            BenchTooltip(
+              message: 'Übersicht',
+              child: BenchIconButton(
+                icon: CupertinoIcons.line_horizontal_3,
                 size: 38.0,
-                color: context.colors.secondaryLabel,
+                iconSize: 22.0,
+                onPressed: onAppLibraryPressed,
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

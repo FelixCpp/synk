@@ -2,19 +2,18 @@ import 'dart:math' as math;
 
 import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_colors.dart';
-import 'package:flutter/material.dart' show ThemeMode;
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 void main() {
   group('DeviceViewerColors', () {
-    for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-      group('in ${mode.name} appearance', () {
+    for (final brightness in [Brightness.light, Brightness.dark]) {
+      group('in ${brightness.name} appearance', () {
         testWidgets('paints text readably on every app surface', (
           tester,
         ) async {
-          final colors = await _resolve(tester, mode);
+          final colors = await _resolve(tester, brightness);
 
           for (final surface in [colors.canvas, colors.card, colors.cardHover]) {
             expect(
@@ -38,7 +37,7 @@ void main() {
         testWidgets('tells a card apart from the canvas behind it', (
           tester,
         ) async {
-          final colors = await _resolve(tester, mode);
+          final colors = await _resolve(tester, brightness);
 
           expect(
             (_asPainted(colors.card).computeLuminance() -
@@ -64,13 +63,16 @@ void main() {
   });
 }
 
-Future<DeviceViewerColors> _resolve(WidgetTester tester, ThemeMode mode) async {
+Future<DeviceViewerColors> _resolve(
+  WidgetTester tester,
+  Brightness brightness,
+) async {
   late DeviceViewerColors resolved;
 
   await tester.pumpWidget(
-    MacosApp(
-      themeMode: mode,
-      home: Builder(
+    BenchTheme(
+      data: BenchThemeData.forBrightness(brightness),
+      child: Builder(
         builder: (context) {
           resolved = context.colors;
           return const SizedBox();

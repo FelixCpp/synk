@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:device_viewer/design/build_context.dart';
 import 'package:device_viewer/design/theme/device_viewer_theme.dart';
 import 'package:device_viewer/design/widgets/reflow_grid.dart';
 import 'package:device_viewer/feat_device_canvas/data/repositories/device_canvas_repository_impl.dart';
@@ -10,14 +9,11 @@ import 'package:device_viewer/feat_device_frame/presentation/device_frame.dart';
 import 'package:device_viewer/feat_maximized_device/domain/models/maximized_device.dart';
 import 'package:device_viewer/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
 
-class const DeviceCanvasContainer({
-  super.key,
-  required final ScrollController scrollController,
-}) extends StatelessWidget {
+class const DeviceCanvasContainer({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<DeviceCanvasBloc>(
@@ -28,14 +24,12 @@ class const DeviceCanvasContainer({
         RepositoryProvider.of(context),
         RepositoryProvider.of<NotificationService>(context),
       ),
-      child: _MaximizableCanvas(scrollController: scrollController),
+      child: const _MaximizableCanvas(),
     );
   }
 }
 
-class const _MaximizableCanvas({
-  required final ScrollController scrollController,
-}) extends StatefulWidget {
+class const _MaximizableCanvas() extends StatefulWidget {
   @override
   State<_MaximizableCanvas> createState() => _MaximizableCanvasState();
 }
@@ -58,7 +52,6 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
             return BlocBuilder<DeviceCanvasBloc, DeviceCanvasState>(
               builder: (context, state) {
                 return _Content(
-                  scrollController: widget.scrollController,
                   state: state,
                   onMaximize: (device) => _openMaximized(context, device),
                 );
@@ -112,18 +105,24 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
 typedef MaximizeCallback = void Function(CanvasDevice device);
 
 class const _Content({
-  required final ScrollController scrollController,
   required final DeviceCanvasState state,
   required final MaximizeCallback onMaximize,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    if (state.devices.isEmpty) return const _NoDevicesMirrored();
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: state.devices.isEmpty
+          ? const _NoDevicesMirrored()
+          : _buildGrid(context),
+    );
+  }
 
+  Widget _buildGrid(BuildContext context) {
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: ReflowGrid<CanvasDevice>(
-        scrollController: scrollController,
         padding: DeviceViewerTheme.pagePadding,
         mainAxisSpacing: DeviceViewerTheme.verticalComponentSpacingMedium,
         crossAxisSpacing: DeviceViewerTheme.horizontalComponentSpacingMedium,
@@ -167,34 +166,10 @@ class const _Content({
 class const _NoDevicesMirrored() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32.0),
-        child: Column(
-          mainAxisSize: .min,
-          spacing: DeviceViewerTheme.verticalComponentSpacingLarge,
-          children: [
-            MacosIcon(
-              CupertinoIcons.rectangle_stack,
-              size: 44.0,
-              color: context.colors.secondaryLabel,
-            ),
-            Text(
-              "Keine Gerät aktiv",
-              style: context.typo.title3.copyWith(
-                color: context.colors.label,
-              ),
-            ),
-            Text(
-              "Wähle links ein Gerät aus und tippe auf „Verbinden“.",
-              textAlign: .center,
-              style: context.typo.body.copyWith(
-                color: context.colors.secondaryLabel,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return const BenchEmptyState(
+      icon: CupertinoIcons.rectangle_stack,
+      title: 'Keine Geräte aktiv',
+      message: 'Wähle links ein Gerät aus und klicke auf „Verbinden".',
     );
   }
 }

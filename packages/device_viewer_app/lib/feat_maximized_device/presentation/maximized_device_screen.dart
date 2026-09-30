@@ -7,7 +7,6 @@ import 'package:device_viewer/feat_maximized_device/domain/models/maximized_devi
 import 'package:device_viewer/feat_maximized_device/presentation/bloc/maximized_device_bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 class const MaximizedDeviceScreen({
   super.key,
@@ -68,7 +67,7 @@ class const _Content({
                 return BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                   child: ColoredBox(
-                    color: MacosColors.black.withAlpha(
+                    color: const Color(0xFF000000).withAlpha(
                       (DeviceViewerTheme.maximizeScrimAlpha * t).round(),
                     ),
                   ),

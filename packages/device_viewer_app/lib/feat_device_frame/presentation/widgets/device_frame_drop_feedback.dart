@@ -1,7 +1,5 @@
-import 'package:device_viewer/design/build_context.dart';
-import 'package:device_viewer/design/theme/device_viewer_theme.dart';
+import 'package:bench_ui/bench_ui.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:macos_ui/macos_ui.dart';
 
 class const DeviceFrameDropFeedback({
   super.key,
@@ -17,7 +15,7 @@ class const DeviceFrameDropFeedback({
         child,
         IgnorePointer(
           child: AnimatedSwitcher(
-            duration: DeviceViewerTheme.actionRevealDuration,
+            duration: BenchMotion.reveal,
             child: switch ((isProcessing, isDragHovered)) {
               (true, _) => const _BusyOverlay(key: ValueKey('busy')),
               (false, true) => const _DragOverlay(key: ValueKey('drag')),
@@ -33,24 +31,23 @@ class const DeviceFrameDropFeedback({
 class const _DragOverlay({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(color: context.colors.focusRing.withAlpha(36)),
+    final theme = context.bench;
+
+    return ColoredBox(
+      color: theme.colors.soft(theme.colors.accent),
       child: Center(
         child: Column(
           mainAxisSize: .min,
-          spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
+          spacing: BenchSpace.s8,
           children: [
-            MacosIcon(
+            Icon(
               CupertinoIcons.tray_arrow_down_fill,
               size: 32.0,
-              color: context.colors.focusRing,
+              color: theme.colors.accent,
             ),
             Text(
               'Datei hier ablegen',
-              style: context.typo.caption1.copyWith(
-                color: context.colors.focusRing,
-                fontWeight: .w600,
-              ),
+              style: theme.type.label.copyWith(color: theme.colors.accent),
             ),
           ],
         ),
@@ -62,19 +59,19 @@ class const _DragOverlay({super.key}) extends StatelessWidget {
 class const _BusyOverlay({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(color: MacosColors.black.withAlpha(150)),
+    const foreground = Color(0xFFFFFFFF);
+
+    return ColoredBox(
+      color: const Color(0x99000000),
       child: Center(
         child: Column(
           mainAxisSize: .min,
-          spacing: DeviceViewerTheme.verticalComponentSpacingMedium,
+          spacing: BenchSpace.s8,
           children: [
-            const ProgressCircle(radius: 9.0),
+            const BenchSpinner(size: 18.0, color: foreground),
             Text(
               'Wird übertragen…',
-              style: context.typo.caption1.copyWith(
-                color: MacosColors.white,
-              ),
+              style: context.bench.type.label.copyWith(color: foreground),
             ),
           ],
         ),
