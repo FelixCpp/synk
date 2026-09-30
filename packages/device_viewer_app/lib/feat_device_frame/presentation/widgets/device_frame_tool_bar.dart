@@ -10,7 +10,9 @@ class const DeviceFrameToolBar({
   required final String modelName,
   required final bool isLive,
   required final bool isMaximized,
+  required final bool isRecording,
   required final VoidCallback onCaptureScreenshot,
+  required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -51,7 +53,9 @@ class const DeviceFrameToolBar({
             ),
             _Actions(
               isMaximized: isMaximized,
+              isRecording: isRecording,
               onCaptureScreenshot: onCaptureScreenshot,
+              onToggleRecording: onToggleRecording,
               onToggleMaximize: onToggleMaximize,
               onClose: onClose,
               onInstallApk: onInstallApk,
@@ -67,7 +71,9 @@ class const DeviceFrameToolBar({
 
 class const _Actions({
   required final bool isMaximized,
+  required final bool isRecording,
   required final VoidCallback onCaptureScreenshot,
+  required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
   required final VoidCallback onInstallApk,
@@ -78,12 +84,14 @@ class const _Actions({
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // TODO(Felix): wire up recording the mirrored stream to a file.
         BenchTooltip(
-          message: 'Aufnahme starten',
+          message: isRecording ? 'Aufnahme beenden' : 'Aufnahme starten',
           child: BenchIconButton(
-            icon: CupertinoIcons.video_camera,
-            onPressed: () {},
+            icon: isRecording
+                ? CupertinoIcons.stop_fill
+                : CupertinoIcons.video_camera,
+            color: isRecording ? context.colors.error : null,
+            onPressed: onToggleRecording,
           ),
         ),
         BenchTooltip(

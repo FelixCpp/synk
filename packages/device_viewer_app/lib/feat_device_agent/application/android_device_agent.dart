@@ -87,4 +87,12 @@ class AndroidDeviceAgent(
     final response = await communicator.captureScreenshot();
     return Uint8List.fromList(response.png);
   }
+
+  Future<void> startRecording(String path) {
+    return screenTransmission.texture.startRecording(path);
+  }
+
+  Future<bool> stopRecording() {
+    return screenTransmission.texture.stopRecording();
+  }
 }

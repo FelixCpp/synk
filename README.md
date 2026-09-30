@@ -8,7 +8,7 @@ Stand: 2026-09-29. Aktuell basiert das Screen-Mirroring auf scrcpy (USB/ADB) mit
 
 ### Bare-Minimum-Lücken
 
-- [ ] **Recording** – Aufnahme-Button ist nur ein Platzhalter (`feat_device_frame/presentation/widgets/device_frame_tool_bar.dart`), Aufnahme des gespiegelten Streams in eine Datei ist nicht implementiert.
+- [x] **Recording** – Aufnahme des gespiegelten Streams per `AVAssetWriter` (`ScreenMirrorPlugin.swift`), zapft dieselben CMSampleBuffer ab, die auch an VideoToolbox zum Decodieren gehen.
 - [ ] **Audio** – Server wird mit `audio=false` gestartet (`feat_device_agent/data/datasources/scrcpy_server_launcher.dart`). scrcpy unterstützt Audio-Forwarding seit v2.0, fehlt hier nur Flag + Playback-Handling.
 - [ ] **Kabelloses Pairing (WLAN)** – kein `adb pair`/`adb connect`/TCP-IP-Handling vorhanden, aktuell nur USB-Geräte über `adb devices`.
 - [x] **Clipboard-Sync** – kein Copy/Paste zwischen Mac und Gerät.
@@ -28,6 +28,30 @@ Stand: 2026-09-29. Aktuell basiert das Screen-Mirroring auf scrcpy (USB/ADB) mit
 1. Wireless-Pairing und Recording (größter wahrgenommener Vysor-Abstand, Audio ist z. B. nur ein Flag-Flip auf dem bestehenden scrcpy-Unterbau).
 2. Datei-/APK-Transfer und Clipboard-Sync.
 3. Hardware-Buttons in der Toolbar (Interaktionspipeline in `android_interaction_transmission.dart` existiert bereits, müsste nur um weitere Key-Events erweitert werden).
+
+## Roadmap: iOS-Unterstützung
+
+Stand: 2026-09-30. Die Android-Pipeline basiert darauf, per ADB eine eigene Server-JAR aufs Gerät zu pushen (`ScrcpyServerLauncher`) und dort mit erhöhten Rechten laufen zu lassen – das erlaubt rohen H264-Stream, Input-Injection per `InputManager`-Reflection und Clipboard-Zugriff über ein eigenes Socket-Protokoll (`android_interaction_transmission.dart`). Diese Tür gibt es bei iOS grundsätzlich nicht – Apple lässt keine eigene Binary mit Systemrechten auf dem Gerät laufen. Der Aufwand ist deshalb keine reine Fleißarbeit wie bei Android, sondern durch Plattformgrenzen strukturell größer, und manche Features sind ohne Jailbreak gar nicht sauber erreichbar.
+
+### Vergleich Android (Ist-Zustand) vs. iOS (realistisch)
+
+| Feature | Android (jetzt) | iOS (realistisch) |
+| --- | --- | --- |
+| Geräte-Discovery | `adb track-devices` | kein ADB-Äquivalent; `usbmuxd`-Protokoll (z. B. über `libimobiledevice`) |
+| Bildschirm-Mirroring | eigener Server streamt H264 über Socket | `AVFoundation`/`CoreMediaIO` captured Gerät als Kamera (wie QuickTime „Movie Recording"), liefert fertige `CMSampleBuffer` – kein eigener H264-Decoder nötig |
+| Touch-/Key-Injection | InputManager-Reflection im eigenen Server | keine offizielle Möglichkeit; einzig praktikabler Weg ist `WebDriverAgent`/XCTest-UI-Automation über eine signierte, auf dem Gerät installierte Companion-App – fragil, braucht Dev-Account + Codesigning/Provisioning |
+| Clipboard-Sync | Custom-Protokoll im eigenen Server | kein Public API; nur über denselben WDA-Umweg oder gar nicht |
+| Datei-Transfer | `adb push` | AFC-Protokoll (libimobiledevice), stark sandboxed |
+| App-Install | `pm install` | braucht gültig signierte/provisionierte IPA, kein freies Sideloading |
+| Screenshot | RPC an eigenen Server | benötigt gemountetes Developer-Disk-Image, wechselt mit jeder iOS-Version |
+| Recording | `AVAssetWriter` zapft den Decode-Stream ab | bei AVCaptureSession-Ansatz eher einfacher als bei Android, da Sample Buffer direkt vorliegen |
+
+### Priorisierungsvorschlag
+
+1. **View-only-Mirroring** (Screen sehen, ggf. aufnehmen) – via `AVCaptureSession`/`CoreMediaIO`, technisch überschaubar und eher weniger Aufwand als der bestehende Android-Videopfad, da kein eigener NAL-Parser/Decoder nötig ist.
+2. **Interaktion** (Touch, Keys, Clipboard, App-Install) als separates, deutlich riskanteres Folgeprojekt über `WebDriverAgent`/XCTest – eigenständige Infrastruktur (Code-Signing, Provisioning, Test-Runner-App pro Zielgerät), kein Feature-Zusatz auf der bestehenden Pipeline.
+
+Diese zwei Stufen nicht als ein „iOS-Support"-Ticket planen, sondern getrennt bewerten.
 
 ## Visuelles Konzept: Fragment-Shader
 

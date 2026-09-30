@@ -84,7 +84,9 @@ class _DeviceFrameState extends State<DeviceFrame>
                     modelName: widget.modelName,
                     isLive: widget.isLive,
                     isMaximized: widget.isMaximized,
+                    isRecording: state.isRecording,
                     onCaptureScreenshot: () => _captureScreenshot(context),
+                    onToggleRecording: () => _toggleRecording(context),
                     onToggleMaximize: widget.onToggleMaximize,
                     onInstallApk: () => _installApk(context),
                     onShareFile: () => _shareFile(context),
@@ -129,6 +131,10 @@ class _DeviceFrameState extends State<DeviceFrame>
   void _captureScreenshot(BuildContext context) {
     _screenshotFlashController.forward(from: 0);
     BlocProvider.of<DeviceFrameBloc>(context).add(const .onCaptureScreenshot());
+  }
+
+  void _toggleRecording(BuildContext context) {
+    BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleRecording());
   }
 
   void _installApk(BuildContext context) {
@@ -271,7 +277,9 @@ class const _ToolBar({
   required final String modelName,
   required final bool isLive,
   required final bool isMaximized,
+  required final bool isRecording,
   required final VoidCallback onCaptureScreenshot,
+  required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -287,7 +295,9 @@ class const _ToolBar({
         modelName: modelName,
         isLive: isLive,
         isMaximized: isMaximized,
+        isRecording: isRecording,
         onCaptureScreenshot: onCaptureScreenshot,
+        onToggleRecording: onToggleRecording,
         onToggleMaximize: onToggleMaximize,
         onInstallApk: onInstallApk,
         onShareFile: onShareFile,

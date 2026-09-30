@@ -13,6 +13,8 @@ import 'package:device_viewer/feat_device_frame/domain/usecases/share_file_inter
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:device_viewer/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
+import 'package:device_viewer/feat_device_frame/domain/usecases/start_recording_interactor.dart';
+import 'package:device_viewer/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:flutter/services.dart';
@@ -33,6 +35,8 @@ class DeviceFrameBloc({
   final simulateKeyEvent = SimulateKeyEventInteractor(repository);
   final simulatePointerEvent = SimulatePointerEventInteractor(repository);
   final captureScreenshot = CaptureScreenshotInteractor(repository);
+  final startRecording = StartRecordingInteractor(repository);
+  final stopRecording = StopRecordingInteractor(repository);
   final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
   final simulateControlButton = SimulateControlButtonEventInteractor(
     repository,
@@ -45,6 +49,7 @@ class DeviceFrameBloc({
     on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
+    on<_OnToggleRecording>(_onToggleRecording, transformer: sequential());
     on<_OnFilesDropped>(_onFilesDropped, transformer: sequential());
     on<_OnControlButtonPressed>(
       _onControlButtonPressed,
@@ -106,6 +111,36 @@ class DeviceFrameBloc({
         .intercept(
           (e) => notifications.notify(
             .new(message: 'Failed to capture screenshot: $e'),
+          ),
+        )
+        .run(deviceId);
+  }
+
+  FutureOr<void> _onToggleRecording(
+    _OnToggleRecording event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    if (state.isRecording) {
+      emit(state.copyWith(isRecording: false));
+
+      return stopRecording
+          .logger()
+          .intercept(
+            (e) => notifications.notify(
+              .new(message: 'Failed to stop recording: $e'),
+            ),
+          )
+          .run(deviceId);
+    }
+
+    return startRecording
+        .logger()
+        .after((started) {
+          if (started) emit(state.copyWith(isRecording: true));
+        })
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to start recording: $e'),
           ),
         )
         .run(deviceId);

@@ -10,6 +10,8 @@ abstract interface class DeviceFrameRepository {
   void simulateControlButtonEvent(DeviceId deviceId, ControlButtonType type);
 
   Future<void> captureScreenshot(DeviceId deviceId);
+  Future<bool> startRecording(DeviceId deviceId);
+  Future<void> stopRecording(DeviceId deviceId);
   Future<List<DroppedFileOutcome>> handleDroppedFiles(
     DeviceId deviceId,
     List<String> filepaths,

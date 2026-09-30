@@ -1,3 +1,4 @@
+import AVFoundation
 import Cocoa
 import CoreMedia
 import FlutterMacOS
@@ -55,6 +56,13 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
 
   private var pendingBuffer = Data()
 
+  // MARK: Recording
+
+  private var assetWriter: AVAssetWriter?
+  private var assetWriterInput: AVAssetWriterInput?
+  private var isRecordingArmed = false
+  private var isRecording = false
+
   init(registry: FlutterTextureRegistry) {
     self.registry = registry
     super.init()
@@ -84,6 +92,79 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     bufferLock.lock()
     latestPixelBuffer = nil
     bufferLock.unlock()
+
+    if isRecording || isRecordingArmed {
+      assetWriterInput?.markAsFinished()
+      assetWriter?.cancelWriting()
+    }
+    assetWriter = nil
+    assetWriterInput = nil
+    isRecordingArmed = false
+    isRecording = false
+  }
+
+  // MARK: Recording
+
+  /// Arms recording: the actual `AVAssetWriter` session only starts once the
+  /// next IDR frame arrives, so the output file always begins on a keyframe
+  /// and is decodable from byte zero.
+  func startRecording(path: String) throws {
+    guard !isRecording, !isRecordingArmed else { return }
+
+    let url = URL(fileURLWithPath: path)
+    try? FileManager.default.removeItem(at: url)
+
+    let writer = try AVAssetWriter(outputURL: url, fileType: .mp4)
+    let input = AVAssetWriterInput(
+      mediaType: .video,
+      outputSettings: nil,
+      sourceFormatHint: formatDescription
+    )
+    input.expectsMediaDataInRealTime = true
+
+    guard writer.canAdd(input) else {
+      throw NSError(
+        domain: "ScreenMirrorPlugin",
+        code: -1,
+        userInfo: [NSLocalizedDescriptionKey: "Recorder cannot accept the incoming H264 stream."]
+      )
+    }
+    writer.add(input)
+    writer.startWriting()
+
+    assetWriter = writer
+    assetWriterInput = input
+    isRecordingArmed = true
+  }
+
+  func stopRecording(completion: @escaping (Bool) -> Void) {
+    guard let writer = assetWriter, isRecording || isRecordingArmed else {
+      completion(false)
+      return
+    }
+
+    isRecording = false
+    isRecordingArmed = false
+    assetWriterInput?.markAsFinished()
+    writer.finishWriting {
+      completion(writer.status == .completed)
+    }
+    assetWriter = nil
+    assetWriterInput = nil
+  }
+
+  private func appendToRecording(sampleBuffer: CMSampleBuffer, isKeyframe: Bool, presentationTime: CMTime) {
+    guard isRecording || isRecordingArmed else { return }
+
+    if isRecordingArmed {
+      guard isKeyframe else { return }
+      assetWriter?.startSession(atSourceTime: presentationTime)
+      isRecordingArmed = false
+      isRecording = true
+    }
+
+    guard isRecording, let input = assetWriterInput, input.isReadyForMoreMediaData else { return }
+    input.append(sampleBuffer)
   }
 
   // MARK: Incremental Annex-B parsing
@@ -141,7 +222,7 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
       pendingPPS = payload
       tryCreateSession()
     case 1, 5:
-      decode(nal: payload)
+      decode(nal: payload, isKeyframe: type == 5)
     default:
       break
     }
@@ -183,7 +264,7 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     }
   }
 
-  private func decode(nal: Data) {
+  private func decode(nal: Data, isKeyframe: Bool) {
     guard let session, let formatDescription else { return }
 
     var avcc = Data()
@@ -215,6 +296,13 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     }
     guard replaceStatus == kCMBlockBufferNoErr else { return }
 
+    let presentationTime = CMClockGetTime(CMClockGetHostTimeClock())
+    var timing = CMSampleTimingInfo(
+      duration: .invalid,
+      presentationTimeStamp: presentationTime,
+      decodeTimeStamp: .invalid
+    )
+
     var sampleBuffer: CMSampleBuffer?
     var sampleSize = avcc.count
     let sampleStatus = CMSampleBufferCreateReady(
@@ -222,13 +310,15 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
       dataBuffer: blockBuffer,
       formatDescription: formatDescription,
       sampleCount: 1,
-      sampleTimingEntryCount: 0,
-      sampleTimingArray: nil,
+      sampleTimingEntryCount: 1,
+      sampleTimingArray: &timing,
       sampleSizeEntryCount: 1,
       sampleSizeArray: &sampleSize,
       sampleBufferOut: &sampleBuffer
     )
     guard sampleStatus == noErr, let sampleBuffer else { return }
+
+    appendToRecording(sampleBuffer: sampleBuffer, isKeyframe: isKeyframe, presentationTime: presentationTime)
 
     var infoFlags = VTDecodeInfoFlags()
     let decodeStatus = VTDecompressionSessionDecodeFrame(
@@ -335,6 +425,29 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
       }
       destroySession(textureId)
       result(nil)
+    case "startRecording":
+      guard let textureId = textureId(from: call), let session = session(for: textureId) else {
+        result(FlutterError(code: "invalid_args", message: "textureId is required", details: nil))
+        return
+      }
+      guard let args = call.arguments as? [String: Any], let path = args["path"] as? String else {
+        result(FlutterError(code: "invalid_args", message: "path is required", details: nil))
+        return
+      }
+      do {
+        try session.startRecording(path: path)
+        result(nil)
+      } catch {
+        result(FlutterError(code: "recording_failed", message: error.localizedDescription, details: nil))
+      }
+    case "stopRecording":
+      guard let textureId = textureId(from: call), let session = session(for: textureId) else {
+        result(FlutterError(code: "invalid_args", message: "textureId is required", details: nil))
+        return
+      }
+      session.stopRecording { success in
+        result(success)
+      }
     default:
       result(FlutterMethodNotImplemented)
     }

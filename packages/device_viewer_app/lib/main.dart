@@ -12,6 +12,7 @@ import 'package:device_viewer/feat_plugged_devices/adb/domain/repositories/plugg
 import 'package:device_viewer/feat_notifications/application/notification_service.dart';
 import 'package:device_viewer/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:device_viewer/feat_sidebar/presentation/device_viewer_sidebar.dart';
+import 'package:device_viewer/feat_theme_mode/domain/models/theme_mode.dart';
 import 'package:device_viewer/feat_theme_mode/presentation/bloc/theme_mode_bloc.dart';
 import 'package:device_viewer/feat_theme_mode/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -84,12 +85,38 @@ Future<void> main() async {
           },
         ),
       ],
-      child: const _DeviceViewerApp(),
+      child: const _Root(),
     ),
   );
 }
 
-class const _DeviceViewerApp() extends StatelessWidget {
+// `BenchTheme` must wrap `WidgetsApp`, not sit inside `home`: the Navigator
+// owns the single root `Overlay`, and every `OverlayEntry`/dialog route
+// (toasts, `showBenchDialog`, ...) is grafted directly onto that `Overlay`
+// as a sibling branch - it only inherits from ancestors of the `Overlay`
+// itself, never from widgets placed inside a routed page. Theming has to
+// sit above the `Overlay` for any of those floating surfaces to see it.
+class const _Root() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ThemeModeProvider(
+      builder: (context, state) {
+        final theme = BenchThemeData.forBrightness(state.themeMode);
+
+        return BenchTheme(
+          data: theme,
+          child: DefaultTextStyle(
+            style: theme.typography.body,
+            child: _DeviceViewerApp(themeMode: state.themeMode),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class const _DeviceViewerApp({required final ThemeMode themeMode})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return WidgetsApp(
@@ -102,34 +129,17 @@ class const _DeviceViewerApp() extends StatelessWidget {
           pageBuilder: (context, _, _) => builder(context),
         );
       },
-      home: const _Root(),
+      home: AppNotificationListener(
+        notifications: RepositoryProvider.of<NotificationService>(context),
+        child: _DeviceViewerScreen(themeMode: themeMode),
+      ),
     );
   }
 }
 
-class const _Root() extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ThemeModeProvider(
-      builder: (context, state) {
-        final theme = BenchThemeData.forBrightness(state.themeMode);
-
-        return BenchTheme(
-          data: theme,
-          child: DefaultTextStyle(
-            style: theme.typography.body,
-            child: AppNotificationListener(
-              notifications: RepositoryProvider.of<NotificationService>(context),
-              child: const _DeviceViewerScreen(),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class const _DeviceViewerScreen() extends StatefulWidget {
+class const _DeviceViewerScreen({
+  required final ThemeMode themeMode,
+}) extends StatefulWidget {
   @override
   State<_DeviceViewerScreen> createState() => _DeviceViewerScreenState();
 }
@@ -139,8 +149,6 @@ class _DeviceViewerScreenState extends State<_DeviceViewerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<ThemeModeBloc>().state.themeMode;
-
     return BenchShell(
       title: 'Device Viewer',
       showSidebar: _showSidebar,
@@ -153,11 +161,11 @@ class _DeviceViewerScreenState extends State<_DeviceViewerScreen> {
       ),
       actions: [
         BenchTooltip(
-          message: themeMode == .dark
+          message: widget.themeMode == .dark
               ? 'Helles Design aktivieren'
               : 'Dunkles Design aktivieren',
           child: BenchIconButton(
-            icon: themeMode == .dark
+            icon: widget.themeMode == .dark
                 ? CupertinoIcons.sun_max
                 : CupertinoIcons.moon,
             onPressed: () => context.read<ThemeModeBloc>().add(

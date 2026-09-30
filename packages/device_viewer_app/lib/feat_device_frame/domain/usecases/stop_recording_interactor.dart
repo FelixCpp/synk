@@ -1,0 +1,13 @@
+import 'dart:async';
+
+import 'package:device_viewer/feat_device_frame/domain/repositories/device_frame_repository.dart';
+import 'package:device_viewer/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:use_in_case/use_in_case.dart';
+
+class const StopRecordingInteractor(final DeviceFrameRepository repository)
+    implements ParameterizedInteractor<DeviceId> {
+  @override
+  FutureOr<void> getOrThrow(DeviceId input) {
+    return repository.stopRecording(input);
+  }
+}

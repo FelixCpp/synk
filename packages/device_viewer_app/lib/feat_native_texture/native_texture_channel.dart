@@ -28,4 +28,17 @@ class const NativeTextureChannel._() {
     message.setRange(8, message.length, chunk);
     return _videoChunkChannel.send(message.buffer.asByteData());
   }
+
+  static Future<void> startRecording(NativeTextureId textureId, String path) {
+    return _methodChannel.invokeMethod('startRecording', {
+      'textureId': textureId.value,
+      'path': path,
+    });
+  }
+
+  static Future<bool> stopRecording(NativeTextureId textureId) {
+    return _methodChannel
+        .invokeMethod<bool>('stopRecording', {'textureId': textureId.value})
+        .then((value) => value ?? false);
+  }
 }

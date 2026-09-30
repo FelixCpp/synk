@@ -140,6 +140,43 @@ class const DeviceFrameRepositoryImpl({
   }
 
   @override
+  Future<bool> startRecording(DeviceId deviceId) async {
+    const mp4Group = XTypeGroup(
+      label: 'MP4-Videos',
+      extensions: ['mp4'],
+      uniformTypeIdentifiers: ['public.mpeg-4'],
+    );
+
+    final agent = repository.getAndroidDeviceAgent(deviceId);
+    if (agent == null) {
+      // TODO(Felix): Custom exception type
+      throw Exception('Could not resolve agent for device $deviceId');
+    }
+
+    final saveLocation = await getSaveLocation(
+      acceptedTypeGroups: const [mp4Group],
+      suggestedName: 'recording_$deviceId.mp4',
+    );
+
+    if (saveLocation == null) {
+      return false;
+    }
+
+    await agent.startRecording(saveLocation.path);
+    return true;
+  }
+
+  @override
+  Future<void> stopRecording(DeviceId deviceId) async {
+    final agent = repository.getAndroidDeviceAgent(deviceId);
+    if (agent == null) {
+      return;
+    }
+
+    await agent.stopRecording();
+  }
+
+  @override
   Future<List<DroppedFileOutcome>> handleDroppedFiles(
     DeviceId deviceId,
     List<String> filepaths,

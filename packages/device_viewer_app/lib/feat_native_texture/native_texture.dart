@@ -19,4 +19,12 @@ class const NativeTexture._({
   Future<void> upload(Uint8List chunk) async {
     await NativeTextureChannel.sendChunk(id, chunk);
   }
+
+  Future<void> startRecording(String path) {
+    return NativeTextureChannel.startRecording(id, path);
+  }
+
+  Future<bool> stopRecording() {
+    return NativeTextureChannel.stopRecording(id);
+  }
 }
