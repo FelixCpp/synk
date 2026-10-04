@@ -2,7 +2,7 @@ import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_notifications/presentation/bloc/notification_bloc.dart';
 import 'package:synk/feat_notifications/presentation/widgets/notification_toast.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_colors.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 

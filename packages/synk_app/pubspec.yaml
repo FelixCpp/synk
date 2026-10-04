@@ -16,8 +16,8 @@ dependencies:
 
   api_adb:
     path: ../api_adb/
-  bench_ui:
-    path: ../bench_ui/
+  synk_ui:
+    path: ../synk_ui/
   app_logger:
     path: ../app_logger/
 

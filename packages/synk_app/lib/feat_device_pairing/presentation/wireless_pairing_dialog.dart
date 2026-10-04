@@ -1,5 +1,5 @@
 import 'package:app_logger/app_logger.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
 import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
 import 'package:flutter/widgets.dart';

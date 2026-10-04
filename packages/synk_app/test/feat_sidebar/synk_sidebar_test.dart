@@ -1,4 +1,4 @@
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';

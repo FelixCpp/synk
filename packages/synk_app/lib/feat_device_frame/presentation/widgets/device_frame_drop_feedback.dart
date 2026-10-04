@@ -1,4 +1,4 @@
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 
 class const DeviceFrameDropFeedback({

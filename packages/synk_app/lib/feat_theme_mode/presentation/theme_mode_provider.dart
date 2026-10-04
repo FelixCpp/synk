@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_theme_mode/data/repositories/theme_mode_repository_impl.dart';
 import 'package:synk/feat_theme_mode/domain/models/theme_mode.dart';
 import 'package:synk/feat_theme_mode/domain/repositories/theme_mode_repository.dart';

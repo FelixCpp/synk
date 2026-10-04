@@ -3,7 +3,7 @@ import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_native_texture/native_texture.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 
 class const DeviceScreenMirror({
   super.key,

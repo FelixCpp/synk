@@ -9,7 +9,7 @@ import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_maximized_device/domain/models/maximized_device.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

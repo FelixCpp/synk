@@ -23,7 +23,7 @@ import 'package:synk/feat_theme_mode/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:bench_ui/bench_ui.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
 
