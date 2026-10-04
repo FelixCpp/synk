@@ -75,28 +75,28 @@ class const _Content({required final SidebarState state})
 class const _ConnectWirelessDeviceButton() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BenchInteractive(
+    return SynkUiInteractive(
       onPressed: () => showWirelessPairingDialog(context),
       builder: (context, state) {
-        final colors = context.bench.colors;
+        final colors = context.synkUi.colors;
         final foregroundColor = colors.text;
 
-        return BenchCard(
-          padding: const .all(BenchSpace.s12),
+        return SynkUiCard(
+          padding: const .all(SynkUiSpace.s12),
           focused: state.contains(WidgetState.focused),
           overlayColor: colors.overlayFor(state),
           child: Column(
             mainAxisAlignment: .center,
-            spacing: BenchSpace.s4,
+            spacing: SynkUiSpace.s4,
             children: [
               Icon(
                 CupertinoIcons.add,
-                size: BenchSize.icon,
+                size: SynkUiSize.icon,
                 color: foregroundColor,
               ),
               Text(
                 "Wireless-Gerät verbinden",
-                style: context.bench.typography.label.copyWith(
+                style: context.synkUi.typography.label.copyWith(
                   color: foregroundColor,
                 ),
               ),
@@ -147,7 +147,7 @@ class const _NoAuthorizedDevices() extends StatelessWidget {
 class const _NoDevicesPlugged() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const BenchEmptyState(
+    return const SynkUiEmptyState(
       icon: CupertinoIcons.device_phone_portrait,
       iconSize: 28.0,
       title: 'Kein Gerät angeschlossen',
@@ -217,7 +217,7 @@ class const _DeviceEntry({required final SidebarDevice device})
                         ),
                       ),
                       if (!isAuthorized)
-                        BenchTag(
+                        SynkUiTag(
                           label: 'Nicht autorisiert',
                           color: context.colors.deviceUnauthorized,
                         ),
@@ -254,11 +254,11 @@ class const _ConnectButton({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors = context.benchTheme.colors;
+    final colors = context.synkUiTheme.colors;
 
-    return BenchTooltip(
+    return SynkUiTooltip(
       message: isConnected ? 'Trennen' : 'Verbinden',
-      child: BenchIconButton(
+      child: SynkUiIconButton(
         icon: isConnected
             ? CupertinoIcons.bolt_slash_fill
             : CupertinoIcons.bolt_fill,

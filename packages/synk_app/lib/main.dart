@@ -110,9 +110,9 @@ class const _Root() extends StatelessWidget {
   Widget build(BuildContext context) {
     return ThemeModeProvider(
       builder: (context, state) {
-        final theme = BenchThemeData.forBrightness(state.themeMode);
+        final theme = SynkUiThemeData.forBrightness(state.themeMode);
 
-        return BenchTheme(
+        return SynkUiTheme(
           data: theme,
           child: DefaultTextStyle(
             style: theme.typography.body,
@@ -130,7 +130,7 @@ class const _SynkApp({required final ThemeMode themeMode})
   Widget build(BuildContext context) {
     return WidgetsApp(
       title: 'Synk',
-      color: const BenchColors.dark().accent,
+      color: const SynkUiColors.dark().accent,
       debugShowCheckedModeBanner: false,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
         return PageRouteBuilder<T>(
@@ -158,22 +158,22 @@ class _SynkScreenState extends State<_SynkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BenchShell(
+    return SynkUiShell(
       title: 'Synk',
       showSidebar: _showSidebar,
-      leading: BenchTooltip(
+      leading: SynkUiTooltip(
         message: 'Seitenleiste ausblenden/anzeigen',
-        child: BenchIconButton(
+        child: SynkUiIconButton(
           icon: CupertinoIcons.sidebar_left,
           onPressed: () => setState(() => _showSidebar = !_showSidebar),
         ),
       ),
       actions: [
-        BenchTooltip(
+        SynkUiTooltip(
           message: widget.themeMode == .dark
               ? 'Helles Design aktivieren'
               : 'Dunkles Design aktivieren',
-          child: BenchIconButton(
+          child: SynkUiIconButton(
             icon: widget.themeMode == .dark
                 ? CupertinoIcons.sun_max
                 : CupertinoIcons.moon,

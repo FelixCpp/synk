@@ -1,13 +1,13 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchTooltip({
+class const SynkUiTooltip({
   super.key,
   required final String message,
   required final Widget child,
   final Duration hoverDelay = const .new(milliseconds: 500),
-  final double verticalOffset = BenchSpace.s8,
+  final double verticalOffset = SynkUiSpace.s8,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -40,22 +40,22 @@ class const _Bubble({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         color: theme.colors.surface,
-        borderRadius: BorderRadius.circular(BenchRadius.control),
+        borderRadius: BorderRadius.circular(SynkUiRadius.control),
         border: Border.all(
           color: theme.colors.lineStrong,
-          width: BenchSize.hairline,
+          width: SynkUiSize.hairline,
         ),
-        boxShadow: BenchElevation.overlay,
+        boxShadow: SynkUiElevation.overlay,
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(
-          horizontal: BenchSpace.s8,
-          vertical: BenchSpace.s4,
+          horizontal: SynkUiSpace.s8,
+          vertical: SynkUiSpace.s4,
         ),
         child: Text(
           message,

@@ -1,28 +1,28 @@
 import 'package:flutter/widgets.dart';
 
-typedef BenchStateBuilder = Widget Function(
+typedef SynkUiStateBuilder = Widget Function(
   BuildContext context,
   Set<WidgetState> states,
 );
 
-class const BenchInteractive({
+class const SynkUiInteractive({
   super.key,
-  required final BenchStateBuilder builder,
+  required final SynkUiStateBuilder builder,
   final VoidCallback? onPressed,
   final MouseCursor cursor = SystemMouseCursors.basic,
   final bool autofocus = false,
 }) extends StatefulWidget {
   @override
-  State<BenchInteractive> createState() => _BenchInteractiveState();
+  State<SynkUiInteractive> createState() => _SynkUiInteractiveState();
 }
 
-class _BenchInteractiveState extends State<BenchInteractive> {
+class _SynkUiInteractiveState extends State<SynkUiInteractive> {
   late final WidgetStatesController _states = WidgetStatesController(
     widget.onPressed == null ? {WidgetState.disabled} : null,
   );
 
   @override
-  void didUpdateWidget(covariant BenchInteractive oldWidget) {
+  void didUpdateWidget(covariant SynkUiInteractive oldWidget) {
     super.didUpdateWidget(oldWidget);
     _states.update(WidgetState.disabled, widget.onPressed == null);
   }

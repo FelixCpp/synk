@@ -10,7 +10,7 @@ class const SynkTypography._({
   required final TextStyle caption2,
 }) {
   factory SynkTypography.of(BuildContext context) {
-    final type = BenchTheme.of(context).typography;
+    final type = SynkUiTheme.of(context).typography;
 
     return SynkTypography._(
       title3: type.title,

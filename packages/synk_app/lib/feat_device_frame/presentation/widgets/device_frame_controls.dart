@@ -9,36 +9,36 @@ class const DeviceFrameControls({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
 
     return ColoredBox(
       color: colors.surface,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: BenchSpace.s4),
+        padding: const EdgeInsets.symmetric(vertical: SynkUiSpace.s4),
         child: Row(
           mainAxisAlignment: .spaceEvenly,
           children: [
-            BenchTooltip(
+            SynkUiTooltip(
               message: 'Zurück',
-              child: BenchIconButton(
+              child: SynkUiIconButton(
                 icon: CupertinoIcons.back,
                 size: 38.0,
                 iconSize: 22.0,
                 onPressed: onBackPressed,
               ),
             ),
-            BenchTooltip(
+            SynkUiTooltip(
               message: 'Home',
-              child: BenchIconButton(
+              child: SynkUiIconButton(
                 icon: CupertinoIcons.home,
                 size: 38.0,
                 iconSize: 20.0,
                 onPressed: onHomePressed,
               ),
             ),
-            BenchTooltip(
+            SynkUiTooltip(
               message: 'Übersicht',
-              child: BenchIconButton(
+              child: SynkUiIconButton(
                 icon: CupertinoIcons.line_horizontal_3,
                 size: 38.0,
                 iconSize: 22.0,

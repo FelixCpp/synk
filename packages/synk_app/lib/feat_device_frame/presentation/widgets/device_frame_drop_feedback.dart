@@ -15,7 +15,7 @@ class const DeviceFrameDropFeedback({
         child,
         IgnorePointer(
           child: AnimatedSwitcher(
-            duration: BenchMotion.reveal,
+            duration: SynkUiMotion.reveal,
             child: switch ((isProcessing, isDragHovered)) {
               (true, _) => const _BusyOverlay(key: ValueKey('busy')),
               (false, true) => const _DragOverlay(key: ValueKey('drag')),
@@ -31,14 +31,14 @@ class const DeviceFrameDropFeedback({
 class const _DragOverlay({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
     return ColoredBox(
       color: theme.colors.soft(theme.colors.accent),
       child: Center(
         child: Column(
           mainAxisSize: .min,
-          spacing: BenchSpace.s8,
+          spacing: SynkUiSpace.s8,
           children: [
             Icon(
               CupertinoIcons.tray_arrow_down_fill,
@@ -68,12 +68,12 @@ class const _BusyOverlay({super.key}) extends StatelessWidget {
       child: Center(
         child: Column(
           mainAxisSize: .min,
-          spacing: BenchSpace.s8,
+          spacing: SynkUiSpace.s8,
           children: [
-            const BenchSpinner(size: 18.0, color: foreground),
+            const SynkUiSpinner(size: 18.0, color: foreground),
             Text(
               'Wird übertragen…',
-              style: context.bench.typography.label.copyWith(color: foreground),
+              style: context.synkUi.typography.label.copyWith(color: foreground),
             ),
           ],
         ),

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-class BenchSpace {
-  const BenchSpace._();
+class SynkUiSpace {
+  const SynkUiSpace._();
 
   static const s2 = 2.0;
   static const s4 = 4.0;
@@ -13,8 +13,8 @@ class BenchSpace {
   static const s32 = 32.0;
 }
 
-class BenchRadius {
-  const BenchRadius._();
+class SynkUiRadius {
+  const SynkUiRadius._();
 
   static const tag = 4.0;
   static const control = 6.0;
@@ -23,8 +23,8 @@ class BenchRadius {
   static const frame = 14.0;
 }
 
-class BenchSize {
-  const BenchSize._();
+class SynkUiSize {
+  const SynkUiSize._();
 
   static const hairline = 1.0;
   static const iconButton = 26.0;
@@ -38,8 +38,8 @@ class BenchSize {
   static const deviceToolbar = 34.0;
 }
 
-class BenchElevation {
-  const BenchElevation._();
+class SynkUiElevation {
+  const SynkUiElevation._();
 
   static const List<BoxShadow> flat = [];
 
@@ -60,8 +60,8 @@ class BenchElevation {
   ];
 }
 
-class BenchMotion {
-  const BenchMotion._();
+class SynkUiMotion {
+  const SynkUiMotion._();
 
   static const reveal = Duration(milliseconds: 80);
   static const state = Duration(milliseconds: 140);

@@ -1,9 +1,9 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/components/bench_icon_button.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/components/synk_ui_icon_button.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchToast({
+class const SynkUiToast({
   super.key,
   required final IconData icon,
   required final String message,
@@ -13,7 +13,7 @@ class const BenchToast({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
     final dismissIcon = this.dismissIcon;
 
@@ -22,25 +22,25 @@ class const BenchToast({
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(BenchRadius.card),
+          borderRadius: BorderRadius.circular(SynkUiRadius.card),
           border: Border.all(
             color: colors.lineStrong,
-            width: BenchSize.hairline,
+            width: SynkUiSize.hairline,
           ),
-          boxShadow: BenchElevation.overlay,
+          boxShadow: SynkUiElevation.overlay,
         ),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(
-            BenchSpace.s12,
-            BenchSpace.s8,
-            BenchSpace.s6,
-            BenchSpace.s8,
+            SynkUiSpace.s12,
+            SynkUiSpace.s8,
+            SynkUiSpace.s6,
+            SynkUiSpace.s8,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-            spacing: BenchSpace.s8,
+            spacing: SynkUiSpace.s8,
             children: [
-              Icon(icon, size: BenchSize.icon, color: accent),
+              Icon(icon, size: SynkUiSize.icon, color: accent),
               Flexible(
                 child: Text(
                   message,
@@ -50,7 +50,7 @@ class const BenchToast({
                 ),
               ),
               if (onDismiss != null && dismissIcon != null)
-                BenchIconButton(icon: dismissIcon, onPressed: onDismiss),
+                SynkUiIconButton(icon: dismissIcon, onPressed: onDismiss),
             ],
           ),
         ),

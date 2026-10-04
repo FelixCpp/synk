@@ -73,7 +73,7 @@ class const _KeyboardTargetBadge({required final bool hasFocus})
         child: Icon(
           CupertinoIcons.keyboard,
           size: SynkTheme.statusOverlayIconSize,
-          color: context.benchTheme.colors.accent,
+          color: context.synkUiTheme.colors.accent,
         ),
       ),
     );
@@ -183,7 +183,7 @@ class const _DeviceOutline() extends StatelessWidget {
           BoxShadow(color: SynkColors.mirrorGlow, blurRadius: 24.0),
         ],
       ),
-      child: const Center(child: BenchSpinner(size: 18.0)),
+      child: const Center(child: SynkUiSpinner(size: 18.0)),
     );
   }
 }

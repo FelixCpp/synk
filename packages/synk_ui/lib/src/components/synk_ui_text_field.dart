@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchTextField({
+class const SynkUiTextField({
   super.key,
   required final TextEditingController controller,
   final String? placeholder,
@@ -13,10 +13,10 @@ class const BenchTextField({
   final ValueChanged<String>? onSubmitted,
 }) extends StatefulWidget {
   @override
-  State<BenchTextField> createState() => _BenchTextFieldState();
+  State<SynkUiTextField> createState() => _SynkUiTextFieldState();
 }
 
-class _BenchTextFieldState extends State<BenchTextField> {
+class _SynkUiTextFieldState extends State<SynkUiTextField> {
   FocusNode? _ownedFocusNode;
 
   FocusNode get _focusNode => widget.focusNode ?? (_ownedFocusNode ??= FocusNode());
@@ -29,7 +29,7 @@ class _BenchTextFieldState extends State<BenchTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
     return ListenableBuilder(
@@ -45,16 +45,16 @@ class _BenchTextFieldState extends State<BenchTextField> {
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: colors.inset,
-              borderRadius: BorderRadius.circular(BenchRadius.control),
+              borderRadius: BorderRadius.circular(SynkUiRadius.control),
               border: Border.all(
                 color: focused ? colors.accent : colors.line,
-                width: focused ? 2.0 : BenchSize.hairline,
+                width: focused ? 2.0 : SynkUiSize.hairline,
               ),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: BenchSpace.s12,
-                vertical: BenchSpace.s8,
+                horizontal: SynkUiSpace.s12,
+                vertical: SynkUiSpace.s8,
               ),
               child: Stack(
                 alignment: Alignment.centerLeft,

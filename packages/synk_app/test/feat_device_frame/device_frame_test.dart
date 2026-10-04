@@ -239,17 +239,17 @@ Future<SynkColors> _pumpFrame(
         ),
       ],
       child: WidgetsApp(
-        color: const BenchColors.dark().accent,
+        color: const SynkUiColors.dark().accent,
         pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
           return PageRouteBuilder<T>(
             settings: settings,
             pageBuilder: (context, _, _) => builder(context),
           );
         },
-        home: BenchTheme(
-          data: BenchThemeData.dark,
+        home: SynkUiTheme(
+          data: SynkUiThemeData.dark,
           child: DefaultTextStyle(
-            style: BenchThemeData.dark.typography.body,
+            style: SynkUiThemeData.dark.typography.body,
             child: Builder(
               builder: (context) {
                 colors = context.colors;
@@ -323,7 +323,7 @@ BoxDecoration _frameDecorationOf(WidgetTester tester) {
   final decorated = tester
       .widgetList<DecoratedBox>(
         find.descendant(
-          of: find.byType(BenchCard),
+          of: find.byType(SynkUiCard),
           matching: find.byType(DecoratedBox),
         ),
       )

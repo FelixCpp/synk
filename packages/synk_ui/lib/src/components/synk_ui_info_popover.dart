@@ -1,32 +1,32 @@
 import 'dart:math' as math;
 
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-typedef BenchInfoPopoverTriggerBuilder = Widget Function(
+typedef SynkUiInfoPopoverTriggerBuilder = Widget Function(
   BuildContext context,
   MenuController controller,
 );
 
-class const BenchInfoRow({
+class const SynkUiInfoRow({
   required final String label,
   required final String value,
   final bool monospace = false,
 });
 
-class const BenchInfoPopover({
+class const SynkUiInfoPopover({
   super.key,
   required final String title,
-  required final List<BenchInfoRow> rows,
-  required final BenchInfoPopoverTriggerBuilder triggerBuilder,
+  required final List<SynkUiInfoRow> rows,
+  required final SynkUiInfoPopoverTriggerBuilder triggerBuilder,
   final double width = 260.0,
 }) extends StatefulWidget {
   @override
-  State<BenchInfoPopover> createState() => _BenchInfoPopoverState();
+  State<SynkUiInfoPopover> createState() => _SynkUiInfoPopoverState();
 }
 
-class _BenchInfoPopoverState extends State<BenchInfoPopover> {
+class _SynkUiInfoPopoverState extends State<SynkUiInfoPopover> {
   final _controller = MenuController();
 
   @override
@@ -36,13 +36,13 @@ class _BenchInfoPopoverState extends State<BenchInfoPopover> {
       overlayBuilder: (context, info) {
         final anchored = info.anchorRect.right - widget.width;
         final maxLeft = math.max(
-          BenchSpace.s8,
-          info.overlaySize.width - widget.width - BenchSpace.s8,
+          SynkUiSpace.s8,
+          info.overlaySize.width - widget.width - SynkUiSpace.s8,
         );
 
         return Positioned(
-          left: anchored.clamp(BenchSpace.s8, maxLeft),
-          top: info.anchorRect.bottom + BenchSpace.s6,
+          left: anchored.clamp(SynkUiSpace.s8, maxLeft),
+          top: info.anchorRect.bottom + SynkUiSpace.s6,
           child: TapRegion(
             groupId: info.tapRegionGroupId,
             onTapOutside: (_) => _controller.close(),
@@ -69,34 +69,34 @@ class _Panel extends StatelessWidget {
 
   final double width;
   final String title;
-  final List<BenchInfoRow> rows;
+  final List<SynkUiInfoRow> rows;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
 
     return SizedBox(
       width: width,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(BenchRadius.card),
+          borderRadius: BorderRadius.circular(SynkUiRadius.card),
           border: Border.all(
             color: colors.lineStrong,
-            width: BenchSize.hairline,
+            width: SynkUiSize.hairline,
           ),
-          boxShadow: BenchElevation.overlay,
+          boxShadow: SynkUiElevation.overlay,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(BenchSpace.s12),
+          padding: const EdgeInsets.all(SynkUiSpace.s12),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(title, style: context.bench.typography.title),
-              const SizedBox(height: BenchSpace.s8),
-              Container(height: BenchSize.hairline, color: colors.line),
-              const SizedBox(height: BenchSpace.s4),
+              Text(title, style: context.synkUi.typography.title),
+              const SizedBox(height: SynkUiSpace.s8),
+              Container(height: SynkUiSize.hairline, color: colors.line),
+              const SizedBox(height: SynkUiSpace.s4),
               for (final row in rows) _InfoRowTile(row: row),
             ],
           ),
@@ -109,20 +109,20 @@ class _Panel extends StatelessWidget {
 class _InfoRowTile extends StatelessWidget {
   const _InfoRowTile({required this.row});
 
-  final BenchInfoRow row;
+  final SynkUiInfoRow row;
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: BenchSpace.s4),
+      padding: const EdgeInsets.symmetric(vertical: SynkUiSpace.s4),
       child: Row(
         children: [
           Expanded(
             child: Text(row.label, style: theme.typography.secondary),
           ),
-          const SizedBox(width: BenchSpace.s12),
+          const SizedBox(width: SynkUiSpace.s12),
           Text(
             row.value,
             style: row.monospace

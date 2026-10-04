@@ -8,8 +8,8 @@ class const DeviceFrameSurface({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BenchCard(
-      radius: BenchRadius.frame,
+    return SynkUiCard(
+      radius: SynkUiRadius.frame,
       clip: true,
       focused: hasFocus,
       child: child,

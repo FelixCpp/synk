@@ -20,7 +20,7 @@ class const SynkColors._({
   required final Color focusGlow,
 }) {
   factory SynkColors.of(BuildContext context) {
-    final colors = BenchTheme.of(context).colors;
+    final colors = SynkUiTheme.of(context).colors;
 
     return SynkColors._(
       canvas: colors.canvas,

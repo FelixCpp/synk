@@ -1,21 +1,21 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/components/bench_interactive.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/components/synk_ui_interactive.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchIconButton({
+class const SynkUiIconButton({
   super.key,
   required final IconData icon,
   required final VoidCallback? onPressed,
-  final double size = BenchSize.iconButton,
-  final double iconSize = BenchSize.icon,
+  final double size = SynkUiSize.iconButton,
+  final double iconSize = SynkUiSize.icon,
   final Color? color,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
 
-    return BenchInteractive(
+    return SynkUiInteractive(
       onPressed: onPressed,
       builder: (context, states) {
         final disabled = states.contains(WidgetState.disabled);
@@ -34,13 +34,13 @@ class const BenchIconButton({
         };
 
         return AnimatedContainer(
-          duration: BenchMotion.state,
-          curve: BenchMotion.standard,
+          duration: SynkUiMotion.state,
+          curve: SynkUiMotion.standard,
           width: size,
           height: size,
           decoration: BoxDecoration(
             color: background,
-            borderRadius: BorderRadius.circular(BenchRadius.control),
+            borderRadius: BorderRadius.circular(SynkUiRadius.control),
             border: Border.all(
               color: states.contains(WidgetState.focused)
                   ? colors.accent

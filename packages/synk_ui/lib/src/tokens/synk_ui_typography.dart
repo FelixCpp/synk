@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/tokens/bench_colors.dart';
+import 'package:synk_ui/src/tokens/synk_ui_colors.dart';
 import 'package:flutter/widgets.dart';
 
 @immutable
-class const BenchTypography({
+class const SynkUiTypography({
   required final TextStyle display,
   required final TextStyle heading,
   required final TextStyle title,
@@ -12,10 +12,10 @@ class const BenchTypography({
   required final TextStyle mono,
   required final TextStyle microLabel,
 }) {
-  factory BenchTypography.forColors(BenchColors colors) {
+  factory SynkUiTypography.forColors(SynkUiColors colors) {
     const tabular = [FontFeature.tabularFigures()];
 
-    return BenchTypography(
+    return SynkUiTypography(
       display: TextStyle(
         fontFamily: fontFamily,
         fontSize: 24.0,

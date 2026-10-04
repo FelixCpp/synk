@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchShell({
+class const SynkUiShell({
   super.key,
   required final String title,
   required final Widget sidebar,
@@ -13,7 +13,7 @@ class const BenchShell({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
     return ColoredBox(
@@ -22,18 +22,18 @@ class const BenchShell({
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           AnimatedContainer(
-            duration: BenchMotion.move,
-            curve: BenchMotion.emphasized,
-            width: showSidebar ? BenchSize.sidebarWidth : 0.0,
+            duration: SynkUiMotion.move,
+            curve: SynkUiMotion.emphasized,
+            width: showSidebar ? SynkUiSize.sidebarWidth : 0.0,
             child: ClipRect(
               child: OverflowBox(
                 alignment: Alignment.centerLeft,
-                minWidth: BenchSize.sidebarWidth,
-                maxWidth: BenchSize.sidebarWidth,
+                minWidth: SynkUiSize.sidebarWidth,
+                maxWidth: SynkUiSize.sidebarWidth,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: BenchSize.titleStrip),
+                    const SizedBox(height: SynkUiSize.titleStrip),
                     Expanded(child: sidebar),
                   ],
                 ),
@@ -45,22 +45,22 @@ class const BenchShell({
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 SizedBox(
-                  height: BenchSize.titleStrip,
+                  height: SynkUiSize.titleStrip,
                   child: AnimatedPadding(
-                    duration: BenchMotion.move,
-                    curve: BenchMotion.emphasized,
+                    duration: SynkUiMotion.move,
+                    curve: SynkUiMotion.emphasized,
                     padding: EdgeInsets.only(
                       left: showSidebar
-                          ? BenchSpace.s12
-                          : BenchSize.trafficGutter +
-                                (leading == null ? BenchSpace.s12 : 0.0),
-                      right: BenchSpace.s8,
+                          ? SynkUiSpace.s12
+                          : SynkUiSize.trafficGutter +
+                                (leading == null ? SynkUiSpace.s12 : 0.0),
+                      right: SynkUiSpace.s8,
                     ),
                     child: Row(
                       children: [
                         if (leading != null) ...[
                           leading!,
-                          const SizedBox(width: BenchSpace.s8),
+                          const SizedBox(width: SynkUiSpace.s8),
                         ],
                         Expanded(
                           child: Text(
@@ -93,13 +93,13 @@ class _Seam extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
 
     const outer = BorderRadius.only(
-      topLeft: .circular(BenchRadius.card),
+      topLeft: .circular(SynkUiRadius.card),
     );
     const inner = BorderRadius.only(
-      topLeft: .circular(BenchRadius.card - BenchSize.hairline),
+      topLeft: .circular(SynkUiRadius.card - SynkUiSize.hairline),
     );
 
     return DecoratedBox(
@@ -109,8 +109,8 @@ class _Seam extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.only(
-          top: BenchSize.hairline,
-          left: BenchSize.hairline,
+          top: SynkUiSize.hairline,
+          left: SynkUiSize.hairline,
         ),
         child: DecoratedBox(
           decoration: BoxDecoration(

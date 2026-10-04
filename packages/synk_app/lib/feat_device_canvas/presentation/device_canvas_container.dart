@@ -170,7 +170,7 @@ class const _Content({
 class const _NoDevicesMirrored() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const BenchEmptyState(
+    return const SynkUiEmptyState(
       icon: CupertinoIcons.rectangle_stack,
       title: 'Keine Geräte aktiv',
       message: 'Wähle links ein Gerät aus und klicke auf „Verbinden".',

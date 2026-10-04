@@ -70,8 +70,8 @@ Future<SynkColors> _resolve(
   late SynkColors resolved;
 
   await tester.pumpWidget(
-    BenchTheme(
-      data: BenchThemeData.forBrightness(brightness),
+    SynkUiTheme(
+      data: SynkUiThemeData.forBrightness(brightness),
       child: Builder(
         builder: (context) {
           resolved = context.colors;

@@ -12,25 +12,25 @@ void main() {
           pageBuilder: (context, _, _) => builder(context),
         );
       },
-      home: BenchTheme(
-        data: BenchThemeData.dark,
+      home: SynkUiTheme(
+        data: SynkUiThemeData.dark,
         child: Center(child: child),
       ),
     );
   }
 
-  testWidgets('BenchInfoPopover shows title and rows once opened', (
+  testWidgets('SynkUiInfoPopover shows title and rows once opened', (
     tester,
   ) async {
     await tester.pumpWidget(
       buildApp(
-        BenchInfoPopover(
+        SynkUiInfoPopover(
           title: 'Pixel 6',
           rows: const [
-            BenchInfoRow(label: 'Modell', value: 'Pixel 6'),
-            BenchInfoRow(label: 'Seriennummer', value: '18131FDF6002UE'),
+            SynkUiInfoRow(label: 'Modell', value: 'Pixel 6'),
+            SynkUiInfoRow(label: 'Seriennummer', value: '18131FDF6002UE'),
           ],
-          triggerBuilder: (context, controller) => BenchIconButton(
+          triggerBuilder: (context, controller) => SynkUiIconButton(
             icon: CupertinoIcons.info_circle,
             onPressed: controller.open,
           ),
@@ -41,7 +41,7 @@ void main() {
     expect(find.text('Pixel 6'), findsNothing);
     expect(find.text('Modell'), findsNothing);
 
-    await tester.tap(find.byType(BenchIconButton));
+    await tester.tap(find.byType(SynkUiIconButton));
     await tester.pumpAndSettle();
 
     expect(find.text('Pixel 6'), findsWidgets);
@@ -50,13 +50,13 @@ void main() {
     expect(find.text('18131FDF6002UE'), findsOneWidget);
   });
 
-  testWidgets('BenchInfoPopover closes when tapping outside', (tester) async {
+  testWidgets('SynkUiInfoPopover closes when tapping outside', (tester) async {
     await tester.pumpWidget(
       buildApp(
-        BenchInfoPopover(
+        SynkUiInfoPopover(
           title: 'Pixel 6',
-          rows: const [BenchInfoRow(label: 'Modell', value: 'Pixel 6')],
-          triggerBuilder: (context, controller) => BenchIconButton(
+          rows: const [SynkUiInfoRow(label: 'Modell', value: 'Pixel 6')],
+          triggerBuilder: (context, controller) => SynkUiIconButton(
             icon: CupertinoIcons.info_circle,
             onPressed: controller.open,
           ),
@@ -64,7 +64,7 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byType(BenchIconButton));
+    await tester.tap(find.byType(SynkUiIconButton));
     await tester.pumpAndSettle();
     expect(find.text('Modell'), findsOneWidget);
 

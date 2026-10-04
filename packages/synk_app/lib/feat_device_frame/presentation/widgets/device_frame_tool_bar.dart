@@ -39,7 +39,7 @@ class const DeviceFrameToolBar({
           children: [
             _StatusDot(isLive: isLive),
             Expanded(
-              child: BenchTooltip(
+              child: SynkUiTooltip(
                 message: deviceId,
                 child: Align(
                   alignment: .centerLeft,
@@ -87,9 +87,9 @@ class const _Actions({
   Widget build(BuildContext context) {
     return Row(
       children: [
-        BenchTooltip(
+        SynkUiTooltip(
           message: isRecording ? 'Aufnahme beenden' : 'Aufnahme starten',
-          child: BenchIconButton(
+          child: SynkUiIconButton(
             icon: isRecording
                 ? CupertinoIcons.stop_fill
                 : CupertinoIcons.video_camera,
@@ -97,16 +97,16 @@ class const _Actions({
             onPressed: onToggleRecording,
           ),
         ),
-        BenchTooltip(
+        SynkUiTooltip(
           message: 'Screenshot aufnehmen',
-          child: BenchIconButton(
+          child: SynkUiIconButton(
             icon: CupertinoIcons.camera,
             onPressed: onCaptureScreenshot,
           ),
         ),
-        BenchTooltip(
+        SynkUiTooltip(
           message: isMaximized ? 'Vollbild verlassen' : 'Gerät maximieren',
-          child: BenchIconButton(
+          child: SynkUiIconButton(
             icon: isMaximized
                 ? CupertinoIcons.arrow_down_right_arrow_up_left
                 : CupertinoIcons.arrow_up_left_arrow_down_right,
@@ -119,9 +119,9 @@ class const _Actions({
             onShareFile: onShareFile,
             onStandby: onStandby,
           ),
-        BenchTooltip(
+        SynkUiTooltip(
           message: 'Spiegelung beenden',
-          child: BenchIconButton(
+          child: SynkUiIconButton(
             icon: CupertinoIcons.clear,
             onPressed: onClose,
           ),
@@ -138,12 +138,12 @@ class const _OverflowButton({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BenchMenu(
+    return SynkUiMenu(
       width: 190.0,
       itemsBuilder: (context, controller) => [
-        BenchTooltip(
+        SynkUiTooltip(
           message: 'APK auf dem Gerät installieren',
-          child: BenchMenuItem(
+          child: SynkUiMenuItem(
             icon: CupertinoIcons.arrow_down_to_line,
             label: 'APK Installieren',
             onPressed: () {
@@ -152,9 +152,9 @@ class const _OverflowButton({
             },
           ),
         ),
-        BenchTooltip(
+        SynkUiTooltip(
           message: 'Datei auf das Gerät übertragen',
-          child: BenchMenuItem(
+          child: SynkUiMenuItem(
             icon: CupertinoIcons.share,
             label: 'Datei senden',
             onPressed: () {
@@ -163,9 +163,9 @@ class const _OverflowButton({
             },
           ),
         ),
-        BenchTooltip(
+        SynkUiTooltip(
           message: 'Gerät An-/Ausschalten',
-          child: BenchMenuItem(
+          child: SynkUiMenuItem(
             icon: CupertinoIcons.power,
             label: 'Standby',
             onPressed: () {
@@ -175,9 +175,9 @@ class const _OverflowButton({
           ),
         ),
       ],
-      triggerBuilder: (context, controller) => BenchTooltip(
+      triggerBuilder: (context, controller) => SynkUiTooltip(
         message: 'Mehr',
-        child: BenchIconButton(
+        child: SynkUiIconButton(
           icon: CupertinoIcons.ellipsis_vertical,
           onPressed: () =>
               controller.isOpen ? controller.close() : controller.open(),

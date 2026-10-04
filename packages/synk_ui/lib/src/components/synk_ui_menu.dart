@@ -1,37 +1,37 @@
 import 'dart:math' as math;
 
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/components/bench_interactive.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/components/synk_ui_interactive.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-typedef BenchMenuItemsBuilder = List<Widget> Function(
+typedef SynkUiMenuItemsBuilder = List<Widget> Function(
   BuildContext context,
   MenuController controller,
 );
 
-typedef BenchMenuTriggerBuilder = Widget Function(
+typedef SynkUiMenuTriggerBuilder = Widget Function(
   BuildContext context,
   MenuController controller,
 );
 
-enum BenchMenuAlignment {
+enum SynkUiMenuAlignment {
   start,
   end,
 }
 
-class const BenchMenu({
+class const SynkUiMenu({
   super.key,
-  required final BenchMenuItemsBuilder itemsBuilder,
-  required final BenchMenuTriggerBuilder triggerBuilder,
+  required final SynkUiMenuItemsBuilder itemsBuilder,
+  required final SynkUiMenuTriggerBuilder triggerBuilder,
   final double width = 200.0,
-  final BenchMenuAlignment alignment = BenchMenuAlignment.end,
+  final SynkUiMenuAlignment alignment = SynkUiMenuAlignment.end,
 }) extends StatefulWidget {
   @override
-  State<BenchMenu> createState() => _BenchMenuState();
+  State<SynkUiMenu> createState() => _SynkUiMenuState();
 }
 
-class _BenchMenuState extends State<BenchMenu> {
+class _SynkUiMenuState extends State<SynkUiMenu> {
   final _controller = MenuController();
 
   @override
@@ -39,18 +39,18 @@ class _BenchMenuState extends State<BenchMenu> {
     return RawMenuAnchor(
       controller: _controller,
       overlayBuilder: (context, info) {
-        final anchored = widget.alignment == BenchMenuAlignment.end
+        final anchored = widget.alignment == SynkUiMenuAlignment.end
             ? info.anchorRect.right - widget.width
             : info.anchorRect.left;
 
         final maxLeft = math.max(
-          BenchSpace.s8,
-          info.overlaySize.width - widget.width - BenchSpace.s8,
+          SynkUiSpace.s8,
+          info.overlaySize.width - widget.width - SynkUiSpace.s8,
         );
 
         return Positioned(
-          left: anchored.clamp(BenchSpace.s8, maxLeft),
-          top: info.anchorRect.bottom + BenchSpace.s6,
+          left: anchored.clamp(SynkUiSpace.s8, maxLeft),
+          top: info.anchorRect.bottom + SynkUiSpace.s6,
           child: TapRegion(
             groupId: info.tapRegionGroupId,
             onTapOutside: (_) => _controller.close(),
@@ -75,22 +75,22 @@ class _Panel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
 
     return SizedBox(
       width: width,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.surface,
-          borderRadius: BorderRadius.circular(BenchRadius.card),
+          borderRadius: BorderRadius.circular(SynkUiRadius.card),
           border: .all(
             color: colors.lineStrong,
-            width: BenchSize.hairline,
+            width: SynkUiSize.hairline,
           ),
-          boxShadow: BenchElevation.overlay,
+          boxShadow: SynkUiElevation.overlay,
         ),
         child: Padding(
-          padding: const EdgeInsets.all(BenchSpace.s4),
+          padding: const EdgeInsets.all(SynkUiSpace.s4),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -102,7 +102,7 @@ class _Panel extends StatelessWidget {
   }
 }
 
-class const BenchMenuItem({
+class const SynkUiMenuItem({
   super.key,
   required final IconData icon,
   required final String label,
@@ -111,10 +111,10 @@ class const BenchMenuItem({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
-    return BenchInteractive(
+    return SynkUiInteractive(
       onPressed: onPressed,
       builder: (context, states) {
         final highlighted =
@@ -131,17 +131,17 @@ class const BenchMenuItem({
         return DecoratedBox(
           decoration: BoxDecoration(
             color: highlighted ? colors.accent : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(BenchRadius.control),
+            borderRadius: BorderRadius.circular(SynkUiRadius.control),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: BenchSpace.s8,
-              vertical: BenchSpace.s6,
+              horizontal: SynkUiSpace.s8,
+              vertical: SynkUiSpace.s6,
             ),
             child: Row(
-              spacing: BenchSpace.s8,
+              spacing: SynkUiSpace.s8,
               children: [
-                Icon(icon, size: BenchSize.icon, color: foreground),
+                Icon(icon, size: SynkUiSize.icon, color: foreground),
                 Expanded(
                   child: Text(
                     label,
@@ -158,14 +158,14 @@ class const BenchMenuItem({
   }
 }
 
-class const BenchMenuDivider({super.key}) extends StatelessWidget {
+class const SynkUiMenuDivider({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: BenchSpace.s4),
+      padding: const EdgeInsets.symmetric(vertical: SynkUiSpace.s4),
       child: Container(
-        height: BenchSize.hairline,
-        color: context.bench.colors.line,
+        height: SynkUiSize.hairline,
+        color: context.synkUi.colors.line,
       ),
     );
   }

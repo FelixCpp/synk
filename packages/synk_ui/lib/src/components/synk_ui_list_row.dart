@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchListRow({
+class const SynkUiListRow({
   super.key,
   required final Widget leading,
   required final String title,
@@ -14,15 +14,15 @@ class const BenchListRow({
   final VoidCallback? onSecondaryTap,
 }) extends StatefulWidget {
   @override
-  State<BenchListRow> createState() => _BenchListRowState();
+  State<SynkUiListRow> createState() => _SynkUiListRowState();
 }
 
-class _BenchListRowState extends State<BenchListRow> {
+class _SynkUiListRowState extends State<SynkUiListRow> {
   var _hovered = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
     final trailing = widget.trailing;
 
@@ -34,11 +34,11 @@ class _BenchListRowState extends State<BenchListRow> {
         onSecondaryTap: widget.onSecondaryTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
-          duration: BenchMotion.state,
-          curve: BenchMotion.standard,
+          duration: SynkUiMotion.state,
+          curve: SynkUiMotion.standard,
           padding: const EdgeInsets.symmetric(
-            horizontal: BenchSpace.s8,
-            vertical: BenchSpace.s6,
+            horizontal: SynkUiSpace.s8,
+            vertical: SynkUiSpace.s6,
           ),
           decoration: BoxDecoration(
             color: widget.selected
@@ -46,12 +46,12 @@ class _BenchListRowState extends State<BenchListRow> {
                 : _hovered
                 ? colors.hoverOverlay
                 : const Color(0x00000000),
-            borderRadius: BorderRadius.circular(BenchRadius.row),
+            borderRadius: BorderRadius.circular(SynkUiRadius.row),
           ),
           child: Row(
             children: [
               widget.leading,
-              const SizedBox(width: BenchSpace.s8),
+              const SizedBox(width: SynkUiSpace.s8),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,10 +73,10 @@ class _BenchListRowState extends State<BenchListRow> {
                 ),
               ),
               if (trailing != null) ...[
-                const SizedBox(width: BenchSpace.s6),
+                const SizedBox(width: SynkUiSpace.s6),
                 AnimatedOpacity(
-                  duration: BenchMotion.reveal,
-                  curve: BenchMotion.standard,
+                  duration: SynkUiMotion.reveal,
+                  curve: SynkUiMotion.standard,
                   opacity: !widget.revealTrailingOnHover || _hovered
                       ? 1.0
                       : 0.0,

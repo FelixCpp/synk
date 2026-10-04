@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchEmptyState({
+class const SynkUiEmptyState({
   super.key,
   required final IconData icon,
   required final String title,
@@ -12,15 +12,15 @@ class const BenchEmptyState({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final action = this.action;
 
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(BenchSpace.s32),
+        padding: const EdgeInsets.all(SynkUiSpace.s32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          spacing: BenchSpace.s12,
+          spacing: SynkUiSpace.s12,
           children: [
             Icon(icon, size: iconSize, color: theme.colors.textTertiary),
             Text(
@@ -38,7 +38,7 @@ class const BenchEmptyState({
             ),
             if (action != null)
               Padding(
-                padding: const EdgeInsets.only(top: BenchSpace.s4),
+                padding: const EdgeInsets.only(top: SynkUiSpace.s4),
                 child: action,
               ),
           ],

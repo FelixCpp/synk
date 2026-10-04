@@ -42,9 +42,9 @@ class _ThemeModeProviderState extends State<ThemeModeProvider> {
         builder: (context, asyncSnapshot) {
           final themeMode = asyncSnapshot.data;
           if (!asyncSnapshot.hasData || themeMode == null) {
-            return BenchTheme(
-              data: BenchThemeData.dark,
-              child: const Center(child: BenchSpinner()),
+            return SynkUiTheme(
+              data: SynkUiThemeData.dark,
+              child: const Center(child: SynkUiSpinner()),
             );
           }
 

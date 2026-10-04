@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 @immutable
-class const BenchColors({
+class const SynkUiColors({
   required final Color canvas,
   required final Color panel,
   required final Color surface,
@@ -21,7 +21,7 @@ class const BenchColors({
   required final Color warn,
   required final Color error,
 }) {
-  const BenchColors.dark()
+  const SynkUiColors.dark()
     : this(
         canvas: const Color(0xFF14171A),
         panel: const Color(0xFF1B1F24),
@@ -43,7 +43,7 @@ class const BenchColors({
         error: const Color(0xFFE05A4F),
       );
 
-  const BenchColors.light()
+  const SynkUiColors.light()
     : this(
         canvas: const Color(0xFFEFF1F4),
         panel: const Color(0xFFF7F8FA),

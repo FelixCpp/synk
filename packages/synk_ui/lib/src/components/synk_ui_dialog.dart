@@ -1,8 +1,8 @@
-import 'package:synk_ui/src/bench_theme.dart';
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchDialog({
+class const SynkUiDialog({
   super.key,
   required final String title,
   required final String message,
@@ -11,7 +11,7 @@ class const BenchDialog({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
     final icon = this.icon;
 
@@ -21,29 +21,29 @@ class const BenchDialog({
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: colors.surface,
-            borderRadius: BorderRadius.circular(BenchRadius.card),
+            borderRadius: BorderRadius.circular(SynkUiRadius.card),
             border: Border.all(
               color: colors.lineStrong,
-              width: BenchSize.hairline,
+              width: SynkUiSize.hairline,
             ),
-            boxShadow: BenchElevation.modal,
+            boxShadow: SynkUiElevation.modal,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(BenchSpace.s24),
+            padding: const EdgeInsets.all(SynkUiSpace.s24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: BenchSpace.s12,
+              spacing: SynkUiSpace.s12,
               children: [
                 if (icon != null)
                   Icon(icon, size: 28.0, color: colors.textSecondary),
                 Text(title, style: theme.typography.heading),
                 Text(message, style: theme.typography.secondary),
                 Padding(
-                  padding: const EdgeInsets.only(top: BenchSpace.s4),
+                  padding: const EdgeInsets.only(top: SynkUiSpace.s4),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    spacing: BenchSpace.s8,
+                    spacing: SynkUiSpace.s8,
                     children: actions,
                   ),
                 ),
@@ -56,24 +56,24 @@ class const BenchDialog({
   }
 }
 
-Future<T?> showBenchDialog<T>({
+Future<T?> showSynkUiDialog<T>({
   required BuildContext context,
   required WidgetBuilder builder,
   bool barrierDismissible = false,
 }) {
-  final theme = BenchTheme.of(context);
+  final theme = SynkUiTheme.of(context);
 
   return showGeneralDialog<T>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierLabel: barrierDismissible ? 'Dialog' : null,
     barrierColor: theme.colors.canvas.withValues(alpha: 0.55),
-    transitionDuration: BenchMotion.present,
+    transitionDuration: SynkUiMotion.present,
     pageBuilder: (context, animation, secondaryAnimation) => builder(context),
     transitionBuilder: (context, animation, secondaryAnimation, child) {
       final curved = CurvedAnimation(
         parent: animation,
-        curve: BenchMotion.emphasized,
+        curve: SynkUiMotion.emphasized,
       );
 
       return FadeTransition(

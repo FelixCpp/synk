@@ -1,17 +1,17 @@
 import 'dart:math' as math;
 
-import 'package:synk_ui/src/bench_theme.dart';
+import 'package:synk_ui/src/synk_ui_theme.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchSpinner({
+class const SynkUiSpinner({
   final double size = 18.0,
   final Color? color,
 }) extends StatefulWidget {
   @override
-  State<BenchSpinner> createState() => _BenchSpinnerState();
+  State<SynkUiSpinner> createState() => _SynkUiSpinnerState();
 }
 
-class _BenchSpinnerState extends State<BenchSpinner>
+class _SynkUiSpinnerState extends State<SynkUiSpinner>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
@@ -26,7 +26,7 @@ class _BenchSpinnerState extends State<BenchSpinner>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.color ?? context.bench.colors.textSecondary;
+    final color = widget.color ?? context.synkUi.colors.textSecondary;
 
     return SizedBox.square(
       dimension: widget.size,

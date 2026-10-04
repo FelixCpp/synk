@@ -33,13 +33,13 @@ class _NotificationToastState extends State<NotificationToast> {
   @override
   Widget build(BuildContext context) {
     final isSuccess = widget.severity == NotificationSeverity.success;
-    final colors = context.benchTheme.colors;
+    final colors = context.synkUiTheme.colors;
 
     return Positioned(
-      right: BenchSpace.s16,
-      bottom: BenchSpace.s16,
+      right: SynkUiSpace.s16,
+      bottom: SynkUiSpace.s16,
       child: SafeArea(
-        child: BenchToast(
+        child: SynkUiToast(
           icon: isSuccess
               ? CupertinoIcons.checkmark_circle
               : CupertinoIcons.exclamationmark_circle,

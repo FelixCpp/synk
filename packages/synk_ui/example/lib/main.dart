@@ -14,17 +14,17 @@ Future<void> main() async {
     toolbarStyle: NSWindowToolbarStyle.unified,
   );
 
-  runApp(const BenchPreviewApp());
+  runApp(const SynkUiPreviewApp());
 }
 
-class BenchPreviewApp extends StatefulWidget {
-  const BenchPreviewApp({super.key});
+class SynkUiPreviewApp extends StatefulWidget {
+  const SynkUiPreviewApp({super.key});
 
   @override
-  State<BenchPreviewApp> createState() => _BenchPreviewAppState();
+  State<SynkUiPreviewApp> createState() => _SynkUiPreviewAppState();
 }
 
-class _BenchPreviewAppState extends State<BenchPreviewApp> {
+class _SynkUiPreviewAppState extends State<SynkUiPreviewApp> {
   var _brightness = Brightness.dark;
 
   void _toggleBrightness() {
@@ -37,10 +37,10 @@ class _BenchPreviewAppState extends State<BenchPreviewApp> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = BenchThemeData.forBrightness(_brightness);
+    final theme = SynkUiThemeData.forBrightness(_brightness);
 
     return WidgetsApp(
-      title: 'Bench',
+      title: 'Synk UI',
       color: theme.colors.accent,
       debugShowCheckedModeBanner: false,
       pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
@@ -49,7 +49,7 @@ class _BenchPreviewAppState extends State<BenchPreviewApp> {
           pageBuilder: (context, _, _) => builder(context),
         );
       },
-      home: BenchTheme(
+      home: SynkUiTheme(
         data: theme,
         child: DefaultTextStyle(
           style: theme.typography.body,
@@ -67,18 +67,18 @@ class _Preview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
-    return BenchShell(
+    return SynkUiShell(
       title: 'Synk',
       actions: [
-        BenchIconButton(
+        SynkUiIconButton(
           icon: theme.brightness == Brightness.dark
               ? CupertinoIcons.sun_max
               : CupertinoIcons.moon,
           onPressed: onToggleBrightness,
         ),
-        BenchIconButton(
+        SynkUiIconButton(
           icon: CupertinoIcons.gear,
           onPressed: () {},
         ),
@@ -94,25 +94,25 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-            BenchSpace.s16,
-            BenchSpace.s6,
-            BenchSpace.s16,
-            BenchSpace.s8,
+            SynkUiSpace.s16,
+            SynkUiSpace.s6,
+            SynkUiSpace.s16,
+            SynkUiSpace.s8,
           ),
           child: Text('GERÄTE', style: theme.typography.microLabel),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: BenchSpace.s8),
+          padding: const EdgeInsets.symmetric(horizontal: SynkUiSpace.s8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: BenchSpace.s2,
+            spacing: SynkUiSpace.s2,
             children: [
               _DeviceRow(
                 name: 'Pixel 8 Pro',
@@ -150,17 +150,17 @@ class _DeviceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.bench.colors;
+    final colors = context.synkUi.colors;
     final status = isConnected ? colors.live : colors.idle;
 
-    return BenchListRow(
-      leading: BenchStatusTile(
+    return SynkUiListRow(
+      leading: SynkUiStatusTile(
         icon: CupertinoIcons.device_phone_portrait,
         color: status,
       ),
       title: name,
       subtitle: id,
-      trailing: BenchIconButton(
+      trailing: SynkUiIconButton(
         icon: CupertinoIcons.bolt_horizontal,
         color: isConnected ? colors.error : colors.accent,
         onPressed: () {},
@@ -176,14 +176,14 @@ class _Content extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(BenchSpace.s16),
+      padding: const EdgeInsets.all(SynkUiSpace.s16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: BenchSpace.s24,
+        spacing: SynkUiSpace.s24,
         children: [
           Wrap(
-            spacing: BenchSpace.s8,
-            runSpacing: BenchSpace.s8,
+            spacing: SynkUiSpace.s8,
+            runSpacing: SynkUiSpace.s8,
             children: [
               _DeviceTile(name: 'Pixel 8 Pro', isLive: true),
               _DeviceTile(name: 'Galaxy Tab S9', isLive: false),
@@ -212,7 +212,7 @@ class _DeviceTileState extends State<_DeviceTile> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
     return MouseRegion(
@@ -220,26 +220,26 @@ class _DeviceTileState extends State<_DeviceTile> {
       onExit: (_) => setState(() => _hovered = false),
       child: SizedBox(
         width: 172.0,
-        child: BenchCard(
-          radius: BenchRadius.frame,
+        child: SynkUiCard(
+          radius: SynkUiRadius.frame,
           clip: true,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
-                height: BenchSize.deviceToolbar,
+                height: SynkUiSize.deviceToolbar,
                 child: Padding(
                   padding: const EdgeInsets.only(
-                    left: BenchSpace.s12,
-                    right: BenchSpace.s4,
+                    left: SynkUiSpace.s12,
+                    right: SynkUiSpace.s4,
                   ),
                   child: Row(
                     children: [
-                      BenchStatusDot(
+                      SynkUiStatusDot(
                         color: widget.isLive ? colors.live : colors.idle,
                         glow: widget.isLive,
                       ),
-                      const SizedBox(width: BenchSpace.s6),
+                      const SizedBox(width: SynkUiSpace.s6),
                       Expanded(
                         child: Text(
                           widget.name,
@@ -248,15 +248,15 @@ class _DeviceTileState extends State<_DeviceTile> {
                         ),
                       ),
                       AnimatedOpacity(
-                        duration: BenchMotion.reveal,
+                        duration: SynkUiMotion.reveal,
                         opacity: _hovered ? 1.0 : 0.0,
                         child: Row(
                           children: [
-                            BenchIconButton(
+                            SynkUiIconButton(
                               icon: CupertinoIcons.camera,
                               onPressed: () {},
                             ),
-                            BenchIconButton(
+                            SynkUiIconButton(
                               icon:
                                   CupertinoIcons.arrow_up_left_arrow_down_right,
                               onPressed: () {},
@@ -269,7 +269,7 @@ class _DeviceTileState extends State<_DeviceTile> {
                 ),
               ),
               Container(
-                height: BenchSize.hairline,
+                height: SynkUiSize.hairline,
                 color: colors.line,
               ),
               AspectRatio(
@@ -296,7 +296,7 @@ class _MirrorContent extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(14.0, 12.0, 14.0, 0.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: BenchSpace.s16,
+        spacing: SynkUiSpace.s16,
         children: [
           Container(
             height: 3.0,
@@ -309,12 +309,12 @@ class _MirrorContent extends StatelessWidget {
             height: 48.0,
             decoration: BoxDecoration(
               color: const Color(0x0DFFFFFF),
-              borderRadius: BorderRadius.circular(BenchRadius.control),
+              borderRadius: BorderRadius.circular(SynkUiRadius.control),
             ),
           ),
           Wrap(
-            spacing: BenchSpace.s8,
-            runSpacing: BenchSpace.s8,
+            spacing: SynkUiSpace.s8,
+            runSpacing: SynkUiSpace.s8,
             children: [
               for (var i = 0; i < 8; i++)
                 Container(
@@ -322,7 +322,7 @@ class _MirrorContent extends StatelessWidget {
                   height: 26.0,
                   decoration: BoxDecoration(
                     color: const Color(0x0DFFFFFF),
-                    borderRadius: BorderRadius.circular(BenchRadius.row),
+                    borderRadius: BorderRadius.circular(SynkUiRadius.row),
                   ),
                 ),
             ],
@@ -338,59 +338,59 @@ class _Gallery extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: BenchSpace.s12,
+      spacing: SynkUiSpace.s12,
       children: [
         Text('BAUSTEINE', style: theme.typography.microLabel),
         Wrap(
-          spacing: BenchSpace.s8,
-          runSpacing: BenchSpace.s8,
+          spacing: SynkUiSpace.s8,
+          runSpacing: SynkUiSpace.s8,
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
-            BenchButton(label: 'Verbinden', onPressed: () {}),
-            BenchButton(
+            SynkUiButton(label: 'Verbinden', onPressed: () {}),
+            SynkUiButton(
               label: 'Abbrechen',
-              variant: BenchButtonVariant.secondary,
+              variant: SynkUiButtonVariant.secondary,
               onPressed: () {},
             ),
-            BenchButton(
+            SynkUiButton(
               label: 'Trennen',
-              variant: BenchButtonVariant.danger,
+              variant: SynkUiButtonVariant.danger,
               onPressed: () {},
             ),
-            const BenchButton(label: 'Inaktiv', onPressed: null),
-            const SizedBox(width: BenchSpace.s8),
-            BenchTag(label: 'Live', color: colors.live),
-            BenchTag(label: 'Eingefroren', color: colors.warn),
-            BenchTag(label: 'Fehler', color: colors.error),
-            const SizedBox(width: BenchSpace.s8),
-            BenchIconButton(icon: CupertinoIcons.camera, onPressed: () {}),
-            BenchIconButton(
+            const SynkUiButton(label: 'Inaktiv', onPressed: null),
+            const SizedBox(width: SynkUiSpace.s8),
+            SynkUiTag(label: 'Live', color: colors.live),
+            SynkUiTag(label: 'Eingefroren', color: colors.warn),
+            SynkUiTag(label: 'Fehler', color: colors.error),
+            const SizedBox(width: SynkUiSpace.s8),
+            SynkUiIconButton(icon: CupertinoIcons.camera, onPressed: () {}),
+            SynkUiIconButton(
               icon: CupertinoIcons.video_camera,
               onPressed: () {},
             ),
-            const BenchIconButton(icon: CupertinoIcons.clear, onPressed: null),
-            const SizedBox(width: BenchSpace.s8),
-            BenchInfoPopover(
+            const SynkUiIconButton(icon: CupertinoIcons.clear, onPressed: null),
+            const SizedBox(width: SynkUiSpace.s8),
+            SynkUiInfoPopover(
               title: 'Pixel 6',
               rows: const [
-                BenchInfoRow(label: 'Modell', value: 'Pixel 6'),
-                BenchInfoRow(label: 'Hersteller', value: 'Google'),
-                BenchInfoRow(label: 'Android-Version', value: '16'),
-                BenchInfoRow(label: 'SDK-Level', value: '36'),
-                BenchInfoRow(label: 'CPU-Architektur', value: 'arm64-v8a'),
-                BenchInfoRow(label: 'Auflösung', value: '720x1600'),
-                BenchInfoRow(
+                SynkUiInfoRow(label: 'Modell', value: 'Pixel 6'),
+                SynkUiInfoRow(label: 'Hersteller', value: 'Google'),
+                SynkUiInfoRow(label: 'Android-Version', value: '16'),
+                SynkUiInfoRow(label: 'SDK-Level', value: '36'),
+                SynkUiInfoRow(label: 'CPU-Architektur', value: 'arm64-v8a'),
+                SynkUiInfoRow(label: 'Auflösung', value: '720x1600'),
+                SynkUiInfoRow(
                   label: 'Seriennummer',
                   value: '18131FDF6002UE',
                   monospace: true,
                 ),
               ],
-              triggerBuilder: (context, controller) => BenchIconButton(
+              triggerBuilder: (context, controller) => SynkUiIconButton(
                 icon: CupertinoIcons.info_circle,
                 onPressed: () =>
                     controller.isOpen ? controller.close() : controller.open(),
@@ -399,7 +399,7 @@ class _Gallery extends StatelessWidget {
           ],
         ),
         Row(
-          spacing: BenchSpace.s24,
+          spacing: SynkUiSpace.s24,
           children: [
             Text('Fließtext in 13 Punkt.', style: theme.typography.body),
             Text('Sekundär in 12.', style: theme.typography.secondary),

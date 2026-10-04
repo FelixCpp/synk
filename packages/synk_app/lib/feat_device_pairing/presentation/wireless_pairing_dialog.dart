@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<bool?> showWirelessPairingDialog(BuildContext context) {
-  return showBenchDialog<bool>(
+  return showSynkUiDialog<bool>(
     context: context,
     barrierDismissible: true,
     builder: (context) => const WirelessPairingDialog(),
@@ -64,19 +64,19 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
     final colors = theme.colors;
 
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 360.0),
-        child: BenchCard(
-          elevation: BenchElevation.modal,
-          padding: const EdgeInsets.all(BenchSpace.s24),
+        child: SynkUiCard(
+          elevation: SynkUiElevation.modal,
+          padding: const EdgeInsets.all(SynkUiSpace.s24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: BenchSpace.s12,
+            spacing: SynkUiSpace.s12,
             children: [
               Text('Wireless-Gerät koppeln', style: theme.typography.heading),
               Text(
@@ -103,19 +103,19 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
                   style: theme.typography.secondary.copyWith(color: colors.error),
                 ),
               Padding(
-                padding: const EdgeInsets.only(top: BenchSpace.s4),
+                padding: const EdgeInsets.only(top: SynkUiSpace.s4),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
-                  spacing: BenchSpace.s8,
+                  spacing: SynkUiSpace.s8,
                   children: [
-                    BenchButton(
+                    SynkUiButton(
                       label: 'Abbrechen',
-                      variant: BenchButtonVariant.secondary,
+                      variant: SynkUiButtonVariant.secondary,
                       onPressed: _isSubmitting
                           ? null
                           : () => Navigator.of(context).pop(),
                     ),
-                    BenchButton(
+                    SynkUiButton(
                       label: _isSubmitting ? 'Verbinde…' : 'Koppeln',
                       onPressed: _isSubmitting ? null : _submit,
                     ),
@@ -140,14 +140,14 @@ class const _LabeledField({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final theme = context.bench;
+    final theme = context.synkUi;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: BenchSpace.s4,
+      spacing: SynkUiSpace.s4,
       children: [
         Text(label, style: theme.typography.label),
-        BenchTextField(
+        SynkUiTextField(
           controller: controller,
           placeholder: placeholder,
           autofocus: autofocus,

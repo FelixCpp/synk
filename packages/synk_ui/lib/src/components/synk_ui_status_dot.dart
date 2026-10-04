@@ -1,17 +1,17 @@
-import 'package:synk_ui/src/tokens/bench_metrics.dart';
+import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
 
-class const BenchStatusDot({
+class const SynkUiStatusDot({
   super.key,
   required final Color color,
   final bool glow = false,
-  final double size = BenchSize.statusDot,
+  final double size = SynkUiSize.statusDot,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
-      duration: BenchMotion.state,
-      curve: BenchMotion.standard,
+      duration: SynkUiMotion.state,
+      curve: SynkUiMotion.standard,
       width: size,
       height: size,
       decoration: BoxDecoration(

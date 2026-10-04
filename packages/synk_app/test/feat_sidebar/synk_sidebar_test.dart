@@ -79,8 +79,8 @@ Future<void> _pumpSidebar(
   List<AndroidDevice> devices,
 ) async {
   await tester.pumpWidget(
-    BenchTheme(
-      data: BenchThemeData.forBrightness(Brightness.dark),
+    SynkUiTheme(
+      data: SynkUiThemeData.forBrightness(Brightness.dark),
       child: MultiRepositoryProvider(
         providers: [
           RepositoryProvider<NotificationService>(
@@ -123,7 +123,7 @@ void main() {
 
       expect(find.text('Pixel serial-1'), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.bolt_fill), findsOneWidget);
-      expect(find.byType(BenchTag), findsNothing);
+      expect(find.byType(SynkUiTag), findsNothing);
       expect(find.text('NICHT AUTORISIERT'), findsNothing);
     });
 
@@ -139,7 +139,7 @@ void main() {
 
         expect(find.text('Pixel serial-2'), findsOneWidget);
         expect(find.text('NICHT AUTORISIERT'), findsNWidgets(2));
-        expect(find.byType(BenchTag), findsOneWidget);
+        expect(find.byType(SynkUiTag), findsOneWidget);
         expect(find.byIcon(CupertinoIcons.bolt_fill), findsNothing);
         expect(find.byIcon(CupertinoIcons.bolt_slash_fill), findsNothing);
       },

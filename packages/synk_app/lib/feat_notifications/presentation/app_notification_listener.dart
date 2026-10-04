@@ -35,15 +35,15 @@ class const AppNotificationListener({
 }
 
 void _showDialog(BuildContext context, AppNotification notification) {
-  showBenchDialog<void>(
+  showSynkUiDialog<void>(
     context: context,
     builder: (context) {
-      return BenchDialog(
+      return SynkUiDialog(
         icon: CupertinoIcons.exclamationmark_triangle,
         title: 'Fehler',
         message: notification.message,
         actions: [
-          BenchButton(
+          SynkUiButton(
             label: 'OK',
             onPressed: Navigator.of(context).pop,
           ),

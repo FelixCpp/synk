@@ -1,5 +1,5 @@
 name: synk_ui
-description: Bench - the design system of the Synk application.
+description: Synk UI - the design system of the Synk application.
 version: 1.0.0
 publish_to: "none"
 repository: https://github.com/FelixCpp/synk
