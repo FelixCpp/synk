@@ -22,7 +22,7 @@ Future<void> main(List<String> arguments) async {
     'CLASSPATH=/data/local/tmp/device_agent.dex',
     'app_process',
     '/system/bin',
-    'de.deviceviewer.MainKt',
+    'de.synk.MainKt',
   ]);
 
   process.stdout.transform(utf8.decoder).listen(print);

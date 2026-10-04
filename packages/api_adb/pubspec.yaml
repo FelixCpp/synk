@@ -1,7 +1,7 @@
 name: api_adb
-description: An library containing the API for communicating with ADB for the device-viewer application.
+description: An library containing the API for communicating with ADB for the Synk application.
 version: 1.0.0
-repository: https://github.com/FelixCpp/device-viewer
+repository: https://github.com/FelixCpp/synk
 
 environment:
   sdk: ^3.13.4

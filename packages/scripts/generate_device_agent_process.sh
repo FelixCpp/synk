@@ -27,5 +27,5 @@ echo Generating jar file...
 "$sdk_dir/build-tools/$build_tools_version/d8" \
   --release \
   --lib "$sdk_dir/platforms/$platform_version/android.jar" \
-  --output ../device_viewer_app/assets/bundled_files \
+  --output ../synk_app/assets/bundled_files \
   "$AGENT_DIR/build/libs/device_agent-all.jar"

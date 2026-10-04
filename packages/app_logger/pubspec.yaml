@@ -1,8 +1,8 @@
 name: app_logger
-description: Logging for the device-viewer application, including the interactor logging operator.
+description: Logging for the Synk application, including the interactor logging operator.
 version: 1.0.0
 publish_to: "none"
-repository: https://github.com/FelixCpp/device-viewer
+repository: https://github.com/FelixCpp/synk
 
 environment:
   sdk: ^3.13.4

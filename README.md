@@ -1,4 +1,4 @@
-# device-viewer
+# synk
 
 A Vysor-Clone but having modern design written in Dart using Flutter
 
@@ -90,7 +90,7 @@ Ruckelt die Basis, machen Shader es schlimmer. Drei Punkte unabhängig von jeder
 
 ### Umsetzung: Paket statt Streuung
 
-Effekte gehören in ein eigenes, nicht veröffentlichtes Paket (`packages/shader_effects/`, analog zu `api_adb` und `app_logger`) mit generischen Primitiven – Shader-Uhr, `ShaderEffectsScope`, `AmbientBackdrop`, `SdfFocusRing`, `RippleOverlay`. Die Komposition (welche Farben, wo montiert, was ein „Licht" bedeutet) bleibt in der App; das Paket kennt die Device-Viewer-Domäne nicht. Widgets bekommen das `FragmentProgram` injiziert, statt Assets selbst zu laden – kein Asset-Coupling, trivial testbar.
+Effekte gehören in ein eigenes, nicht veröffentlichtes Paket (`packages/shader_effects/`, analog zu `api_adb` und `app_logger`) mit generischen Primitiven – Shader-Uhr, `ShaderEffectsScope`, `AmbientBackdrop`, `SdfFocusRing`, `RippleOverlay`. Die Komposition (welche Farben, wo montiert, was ein „Licht" bedeutet) bleibt in der App; das Paket kennt die Synk-Domäne nicht. Widgets bekommen das `FragmentProgram` injiziert, statt Assets selbst zu laden – kein Asset-Coupling, trivial testbar.
 
 Abgrenzungskriterium: **Ein Effekt gehört ins Paket, wenn sein Entfernen bedeutet, ein Wrapper-Widget zu löschen, und sonst nichts.** Braucht das Entfernen Eingriffe in Layout, State oder Datenfluss, ist es kein Effekt, sondern ein Feature (gilt für Ambilight und Stale-Frame-Veil) und gehört in eine `feat_*`-Struktur. Deren Daten – Frame-Zeitstempel, Latenz, Blockfarben – sind ohnehin für sich nützlich und sollten unabhängig von der Optik existieren.
 

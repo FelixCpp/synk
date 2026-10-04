@@ -1,8 +1,8 @@
 name: bench_ui
-description: Bench - the design system of the device-viewer application.
+description: Bench - the design system of the Synk application.
 version: 1.0.0
 publish_to: "none"
-repository: https://github.com/FelixCpp/device-viewer
+repository: https://github.com/FelixCpp/synk
 
 environment:
   sdk: ^3.13.4

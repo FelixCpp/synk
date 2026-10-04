@@ -70,7 +70,7 @@ class _Preview extends StatelessWidget {
     final theme = context.bench;
 
     return BenchShell(
-      title: 'Device Viewer',
+      title: 'Synk',
       actions: [
         BenchIconButton(
           icon: theme.brightness == Brightness.dark
