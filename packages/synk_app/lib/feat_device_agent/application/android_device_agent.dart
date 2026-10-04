@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:api_adb/api_adb.dart';
+import 'package:synk/feat_device_agent/application/android_audio_transmission.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent_client.dart';
 import 'package:synk/feat_device_agent/application/android_interaction_transmission.dart';
 import 'package:synk/feat_device_agent/application/android_screen_transmission.dart';
@@ -12,6 +13,7 @@ import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart'
 import 'package:synk/feat_device_connections/domain/models/android_device_info.dart';
 import 'package:synk/feat_native_texture/native_texture.dart';
 import 'package:path/path.dart' as path;
+import 'package:rxdart/rxdart.dart';
 
 const _androidDownloadsDirectory = '/sdcard/Download';
 
@@ -19,25 +21,56 @@ class AndroidDeviceAgent(
   final AdbDeviceCommunicator adbCommunicator,
   final AndroidDeviceAgentCommunicator communicator,
   final AndroidScreenTransmission screenTransmission,
+  final AndroidAudioTransmission audioTransmission,
   final AndroidInteractionTransmission interactionTransmission,
 ) implements ScreenCaptureAgent {
   final StreamSubscription<Uint8List> _mirrorSubscription;
+  final StreamSubscription<Uint8List> _audioSubscription;
+
+  late final _screenSize = BehaviorSubject.seeded(
+    interactionTransmission.screenSize,
+  );
+  late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
+
+  var _isAudioMuted = true;
 
   this
     : _mirrorSubscription = screenTransmission.byteStream.listen(
         (bytes) => screenTransmission.texture.upload(bytes),
-      );
+      ),
+      _audioSubscription = audioTransmission.byteStream.listen(
+        (bytes) => screenTransmission.texture.uploadAudio(bytes),
+      ) {
+    _screenSizeSubscription = screenTransmission.texture.screenSizeChanges
+        .listen((size) {
+          interactionTransmission.screenSize = size;
+          _screenSize.add(size);
+        });
+  }
 
   @override
   NativeTextureId get textureId => screenTransmission.texture.id;
   @override
-  DeviceScreenSize get screenSize => interactionTransmission.screenSize;
+  DeviceScreenSize get screenSize => _screenSize.value;
+
+  Stream<DeviceScreenSize> get screenSizeChanges => _screenSize.stream;
+
+  bool get isAudioMuted => _isAudioMuted;
 
   Future<void> dispose() async {
     await _mirrorSubscription.cancel();
+    await _audioSubscription.cancel();
+    await _screenSizeSubscription.cancel();
+    await _screenSize.close();
     await screenTransmission.dispose();
+    await audioTransmission.dispose();
     await interactionTransmission.dispose();
     await communicator.dispose();
+  }
+
+  Future<void> setAudioMuted(bool muted) {
+    _isAudioMuted = muted;
+    return screenTransmission.texture.setAudioMuted(muted);
   }
 
   void simulatePointerEvent(ScrcpyPointerEvent event) {

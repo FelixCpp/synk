@@ -18,10 +18,12 @@ class const ScrcpyServerConnection({
   required final AdbPortForward portForward,
   required final Socket videoSocket,
   required final Stream<Uint8List> videoStream,
+  required final Socket audioSocket,
   required final Socket controlSocket,
 }) {
   Future<void> dispose() async {
     await controlSocket.close();
+    await audioSocket.close();
     await videoSocket.close();
     await portForward.dispose();
     process.kill();
@@ -72,7 +74,8 @@ class ScrcpyServerLauncher {
     scrcpyServerMainClass,
     scrcpyServerVersion,
     'scid=$scid',
-    'audio=false',
+    'audio=true',
+    'audio_codec=raw',
     'control=true',
     'video=true',
     'video_codec=h264',
@@ -81,6 +84,7 @@ class ScrcpyServerLauncher {
     'tunnel_forward=true',
     'raw_stream=true',
     'send_dummy_byte=true',
+    'send_codec_meta=false',
     'cleanup=true',
   ];
 
@@ -96,10 +100,12 @@ class ScrcpyServerLauncher {
     );
 
     _VideoChannel? video;
+    Socket? audioSocket;
     Socket? controlSocket;
 
     try {
       video = await _VideoChannel.connect(portForward, timeout: connectTimeout);
+      audioSocket = await portForward.connect();
       controlSocket = await portForward.connect();
 
       await video.firstVideoByte.timeout(firstVideoByteTimeout);
@@ -109,10 +115,12 @@ class ScrcpyServerLauncher {
         portForward: portForward,
         videoSocket: video.socket,
         videoStream: video.stream,
+        audioSocket: audioSocket,
         controlSocket: controlSocket,
       );
     } catch (_) {
       await controlSocket?.close();
+      audioSocket?.destroy();
       video?.socket.destroy();
       await portForward.dispose();
       rethrow;

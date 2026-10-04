@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_agent/domain/repositories/device_agent_repository.dart';
 import 'package:synk/feat_device_agent/domain/repositories/ios_device_agent_repository.dart';
@@ -27,9 +28,17 @@ class DeviceConnectionsRepositoryImpl({
   final iosDeviceAgentsById = <DeviceId, IosDeviceAgent>{};
   final connectedIds = BehaviorSubject.seeded(<DeviceId>{});
   final connectingIds = BehaviorSubject.seeded(<DeviceId>{});
+  final screenSizes = BehaviorSubject.seeded(<DeviceId, DeviceScreenSize>{});
+  final screenSizeSubscriptions =
+      <DeviceId, StreamSubscription<DeviceScreenSize>>{};
 
   @override
   Future<void> dispose() async {
+    for (final subscription in screenSizeSubscriptions.values) {
+      await subscription.cancel();
+    }
+    screenSizeSubscriptions.clear();
+    await screenSizes.close();
     await agentRepository.dispose();
     await iosAgentRepository.dispose();
   }
@@ -76,13 +85,15 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() {
-    return Rx.combineLatest3(
+    return Rx.combineLatest4(
       pluggedAdbDevicesRepository.observeAdbDevices(),
       pluggedIosDevicesRepository.observeIosDevices(),
       connectedIds,
-      (androidDevices, iosDevices, ids) => (androidDevices, iosDevices, ids),
+      screenSizes,
+      (androidDevices, iosDevices, ids, sizes) =>
+          (androidDevices, iosDevices, ids, sizes),
     ).map((tuple) {
-      final (androidDevices, iosDevices, ids) = tuple;
+      final (androidDevices, iosDevices, ids, sizes) = tuple;
       final androidDevicesById = {
         for (final device in androidDevices) device.id: device,
       };
@@ -92,7 +103,7 @@ class DeviceConnectionsRepositoryImpl({
 
       return [
         for (final id in ids)
-          ?_buildConnection(id, androidDevicesById, iosDevicesById),
+          ?_buildConnection(id, androidDevicesById, iosDevicesById, sizes),
       ];
     });
   }
@@ -101,6 +112,7 @@ class DeviceConnectionsRepositoryImpl({
     DeviceId id,
     Map<DeviceId, AndroidDevice> androidDevicesById,
     Map<DeviceId, IosDevice> iosDevicesById,
+    Map<DeviceId, DeviceScreenSize> sizes,
   ) {
     if (androidDevicesById[id] case final device?) {
       if (androidDeviceAgentsById[id] case final agent?) {
@@ -108,7 +120,7 @@ class DeviceConnectionsRepositoryImpl({
           device: device,
           info: androidDeviceInfos[id]!,
           textureId: agent.textureId,
-          screenSize: agent.screenSize,
+          screenSize: sizes[id] ?? agent.screenSize,
         );
       }
       return null;
@@ -140,6 +152,7 @@ class DeviceConnectionsRepositoryImpl({
         final info = await agent.fetchDeviceInfo();
         androidDeviceAgentsById[device.id] = agent;
         androidDeviceInfos[device.id] = info;
+        _watchScreenSize(device.id, agent);
         _recomputeConnectedIds();
       } catch (_) {
         await agentRepository.cutConnection(device.id);
@@ -154,6 +167,8 @@ class DeviceConnectionsRepositoryImpl({
     await agentRepository.cutConnection(device.id);
     androidDeviceAgentsById.remove(device.id);
     androidDeviceInfos.remove(device.id);
+    await screenSizeSubscriptions.remove(device.id)?.cancel();
+    _forgetScreenSize(device.id);
     _recomputeConnectedIds();
   }
 
@@ -182,6 +197,16 @@ class DeviceConnectionsRepositoryImpl({
     await iosAgentRepository.cutConnection(device.id);
     iosDeviceAgentsById.remove(device.id);
     _recomputeConnectedIds();
+  }
+
+  void _watchScreenSize(DeviceId deviceId, AndroidDeviceAgent agent) {
+    screenSizeSubscriptions[deviceId] = agent.screenSizeChanges.listen(
+      (size) => screenSizes.add({...screenSizes.value, deviceId: size}),
+    );
+  }
+
+  void _forgetScreenSize(DeviceId deviceId) {
+    screenSizes.add({...screenSizes.value}..remove(deviceId));
   }
 
   void _recomputeConnectedIds() {

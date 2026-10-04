@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 class SynkTheme {
@@ -67,8 +69,17 @@ class SynkTheme {
 
   static const deviceFrameWidth = 320.0;
   static const deviceFrameReferenceAspectRatio = 9 / 20;
+  static const deviceFrameChromeHeight =
+      deviceFrameToolBarHeight + deviceFrameControlsBarHeight;
   static const deviceFrameHeight =
-      deviceFrameToolBarHeight +
-      deviceFrameControlsBarHeight +
+      deviceFrameChromeHeight +
       (deviceFrameWidth / deviceFrameReferenceAspectRatio);
+
+  static const deviceFrameMirrorArea =
+      deviceFrameWidth * (deviceFrameWidth / deviceFrameReferenceAspectRatio);
+
+  static Size deviceFrameSizeFor(double aspectRatio) {
+    final mirrorWidth = math.sqrt(deviceFrameMirrorArea * aspectRatio);
+    return Size(mirrorWidth, mirrorWidth / aspectRatio + deviceFrameChromeHeight);
+  }
 }

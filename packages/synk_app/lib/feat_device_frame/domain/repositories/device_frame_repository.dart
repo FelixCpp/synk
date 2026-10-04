@@ -12,6 +12,8 @@ abstract interface class DeviceFrameRepository {
   Future<void> captureScreenshot(DeviceId deviceId);
   Future<bool> startRecording(DeviceId deviceId);
   Future<void> stopRecording(DeviceId deviceId);
+  bool isAudioMuted(DeviceId deviceId);
+  Future<void> setAudioMuted(DeviceId deviceId, bool muted);
   Future<List<DroppedFileOutcome>> handleDroppedFiles(
     DeviceId deviceId,
     List<String> filepaths,

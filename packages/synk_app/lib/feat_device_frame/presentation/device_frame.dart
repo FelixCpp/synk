@@ -87,9 +87,11 @@ class _DeviceFrameState extends State<DeviceFrame>
                     isLive: widget.isLive,
                     isMaximized: widget.isMaximized,
                     isRecording: state.isRecording,
+                    isAudioMuted: state.isAudioMuted,
                     supportsInteraction: widget.supportsInteraction,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
+                    onToggleAudioMute: () => _toggleAudioMute(context),
                     onToggleMaximize: widget.onToggleMaximize,
                     onInstallApk: () => _installApk(context),
                     onShareFile: () => _shareFile(context),
@@ -141,6 +143,10 @@ class _DeviceFrameState extends State<DeviceFrame>
     BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleRecording());
   }
 
+  void _toggleAudioMute(BuildContext context) {
+    BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleAudioMute());
+  }
+
   void _installApk(BuildContext context) {
     BlocProvider.of<DeviceFrameBloc>(context).add(const .onInstallApk());
   }
@@ -174,25 +180,15 @@ class const _FrameLayout({
     );
   }
 
-  static const _chromeHeight =
-      SynkTheme.deviceFrameToolBarHeight +
-      SynkTheme.deviceFrameControlsBarHeight;
-
   Size _frameSizeFor(BoxConstraints constraints, DeviceScreenSize? screenSize) {
+    const chromeHeight = SynkTheme.deviceFrameChromeHeight;
+
     final mirrorSize = _fitToAspectRatio(
-      _aspectRatioOf(screenSize),
-      Size(constraints.maxWidth, constraints.maxHeight - _chromeHeight),
+      deviceAspectRatioOf(screenSize),
+      Size(constraints.maxWidth, constraints.maxHeight - chromeHeight),
     );
 
-    return Size(mirrorSize.width, mirrorSize.height + _chromeHeight);
-  }
-
-  double _aspectRatioOf(DeviceScreenSize? screenSize) {
-    if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
-      return SynkTheme.deviceFrameReferenceAspectRatio;
-    }
-
-    return screenSize.width / screenSize.height;
+    return Size(mirrorSize.width, mirrorSize.height + chromeHeight);
   }
 
   Size _fitToAspectRatio(double aspectRatio, Size available) {
@@ -287,9 +283,11 @@ class const _ToolBar({
   required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
+  required final VoidCallback onToggleAudioMute,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -306,9 +304,11 @@ class const _ToolBar({
         isLive: isLive,
         isMaximized: isMaximized,
         isRecording: isRecording,
+        isAudioMuted: isAudioMuted,
         supportsInteraction: supportsInteraction,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
+        onToggleAudioMute: onToggleAudioMute,
         onToggleMaximize: onToggleMaximize,
         onInstallApk: onInstallApk,
         onShareFile: onShareFile,
@@ -381,3 +381,15 @@ class const _DeviceFrameBlocProvider({
 }
 
 String _heroTagOf(DeviceId deviceId) => 'device-frame-$deviceId';
+
+double deviceAspectRatioOf(DeviceScreenSize? screenSize) {
+  if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
+    return SynkTheme.deviceFrameReferenceAspectRatio;
+  }
+
+  return screenSize.width / screenSize.height;
+}
+
+Size deviceFrameSizeFor(DeviceScreenSize? screenSize) {
+  return SynkTheme.deviceFrameSizeFor(deviceAspectRatioOf(screenSize));
+}

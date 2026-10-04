@@ -9,6 +9,8 @@ import 'package:synk/feat_device_frame/domain/repositories/device_frame_reposito
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/install_apk_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/is_audio_muted_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/share_file_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
@@ -37,6 +39,8 @@ class DeviceFrameBloc({
   final captureScreenshot = CaptureScreenshotInteractor(repository);
   final startRecording = StartRecordingInteractor(repository);
   final stopRecording = StopRecordingInteractor(repository);
+  final setAudioMuted = SetAudioMutedInteractor(repository);
+  final isAudioMuted = IsAudioMutedInteractor(repository);
   final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
   final simulateControlButton = SimulateControlButtonEventInteractor(
     repository,
@@ -50,6 +54,7 @@ class DeviceFrameBloc({
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
     on<_OnToggleRecording>(_onToggleRecording, transformer: sequential());
+    on<_OnToggleAudioMute>(_onToggleAudioMute, transformer: sequential());
     on<_OnFilesDropped>(_onFilesDropped, transformer: sequential());
     on<_OnControlButtonPressed>(
       _onControlButtonPressed,
@@ -61,7 +66,12 @@ class DeviceFrameBloc({
     add(const .onSetup());
   }
 
-  FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceFrameState> emit) {}
+  FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceFrameState> emit) {
+    return isAudioMuted
+        .logger(level: .trace)
+        .after((muted) => emit(state.copyWith(isAudioMuted: muted)))
+        .run(deviceId);
+  }
 
   FutureOr<void> _onKeyEvent(
     _OnKeyEvent event,
@@ -144,6 +154,23 @@ class DeviceFrameBloc({
           ),
         )
         .run(deviceId);
+  }
+
+  FutureOr<void> _onToggleAudioMute(
+    _OnToggleAudioMute event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    final muted = !state.isAudioMuted;
+    emit(state.copyWith(isAudioMuted: muted));
+
+    return setAudioMuted
+        .logger()
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to toggle audio: $e'),
+          ),
+        )
+        .run((deviceId: deviceId, muted: muted));
   }
 
   FutureOr<void> _onFilesDropped(

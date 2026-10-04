@@ -45,6 +45,7 @@ private func makeFormatDescription(sps: [UInt8], pps: [UInt8]) -> CMVideoFormatD
 private final class MirrorTextureSession: NSObject, FlutterTexture {
   let registry: FlutterTextureRegistry
   var textureId: Int64 = -1
+  var onScreenSizeChanged: ((Int, Int) -> Void)?
 
   private var session: VTDecompressionSession?
   private var formatDescription: CMVideoFormatDescription?
@@ -55,6 +56,18 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
   private var latestPixelBuffer: CVPixelBuffer?
 
   private var pendingBuffer = Data()
+
+  // MARK: Audio
+
+  private static let audioSampleRate = 48000.0
+  private static let audioChannelCount: AVAudioChannelCount = 2
+  private static let audioBytesPerFrame = 2 * Int(audioChannelCount)
+
+  private var audioEngine: AVAudioEngine?
+  private var audioPlayerNode: AVAudioPlayerNode?
+  private var audioFormat: AVAudioFormat?
+  private var isAudioMuted = true
+  private var pendingAudioBuffer = Data()
 
   // MARK: Recording
 
@@ -92,6 +105,14 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     bufferLock.lock()
     latestPixelBuffer = nil
     bufferLock.unlock()
+
+    audioPlayerNode?.stop()
+    audioEngine?.stop()
+    audioPlayerNode = nil
+    audioEngine = nil
+    audioFormat = nil
+    pendingAudioBuffer.removeAll()
+    isAudioMuted = true
 
     if isRecording || isRecordingArmed {
       assetWriterInput?.markAsFinished()
@@ -167,6 +188,71 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     input.append(sampleBuffer)
   }
 
+  // MARK: Audio playback
+
+  func setAudioMuted(_ muted: Bool) {
+    isAudioMuted = muted
+    if muted {
+      audioPlayerNode?.stop()
+      pendingAudioBuffer.removeAll()
+    }
+  }
+
+  func feedAudioChunk(_ chunk: Data) {
+    guard !isAudioMuted else { return }
+
+    let format = ensureAudioEngine()
+    pendingAudioBuffer.append(chunk)
+
+    let frameCount = pendingAudioBuffer.count / Self.audioBytesPerFrame
+    guard frameCount > 0 else { return }
+
+    let byteCount = frameCount * Self.audioBytesPerFrame
+    guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frameCount)) else {
+      pendingAudioBuffer.removeSubrange(0..<byteCount)
+      return
+    }
+    buffer.frameLength = AVAudioFrameCount(frameCount)
+
+    pendingAudioBuffer.subdata(in: 0..<byteCount).withUnsafeBytes { raw in
+      if let source = raw.baseAddress, let destination = buffer.int16ChannelData?[0] {
+        memcpy(destination, source, byteCount)
+      }
+    }
+    pendingAudioBuffer.removeSubrange(0..<byteCount)
+
+    guard let engine = audioEngine, let playerNode = audioPlayerNode else { return }
+    if !engine.isRunning {
+      try? engine.start()
+    }
+    playerNode.scheduleBuffer(buffer)
+    if !playerNode.isPlaying {
+      playerNode.play()
+    }
+  }
+
+  private func ensureAudioEngine() -> AVAudioFormat {
+    if let audioFormat { return audioFormat }
+
+    let format = AVAudioFormat(
+      commonFormat: .pcmFormatInt16,
+      sampleRate: Self.audioSampleRate,
+      channels: Self.audioChannelCount,
+      interleaved: true
+    )!
+
+    let engine = AVAudioEngine()
+    let playerNode = AVAudioPlayerNode()
+    engine.attach(playerNode)
+    engine.connect(playerNode, to: engine.mainMixerNode, format: format)
+
+    audioFormat = format
+    audioEngine = engine
+    audioPlayerNode = playerNode
+
+    return format
+  }
+
   // MARK: Incremental Annex-B parsing
 
   func feedVideoChunk(_ chunk: Data) {
@@ -229,13 +315,22 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
   }
 
   private func tryCreateSession() {
-    guard session == nil, let sps = pendingSPS, let pps = pendingPPS else { return }
-    guard let formatDescription = makeFormatDescription(sps: [UInt8](sps), pps: [UInt8](pps)) else {
+    guard let sps = pendingSPS, let pps = pendingPPS else { return }
+    guard let newFormatDescription = makeFormatDescription(sps: [UInt8](sps), pps: [UInt8](pps)) else {
       NSLog("MirrorTextureSession: failed to build format description")
       return
     }
-    self.formatDescription = formatDescription
-    createSession(formatDescription: formatDescription)
+
+    if let formatDescription, CMFormatDescriptionEqual(formatDescription, otherFormatDescription: newFormatDescription) {
+      return
+    }
+
+    if let session {
+      VTDecompressionSessionInvalidate(session)
+    }
+    session = nil
+    formatDescription = newFormatDescription
+    createSession(formatDescription: newFormatDescription)
   }
 
   // MARK: VideoToolbox
@@ -261,7 +356,11 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
 
     if status != noErr {
       NSLog("MirrorTextureSession: VTDecompressionSessionCreate failed: \(status)")
+      return
     }
+
+    let dimensions = CMVideoFormatDescriptionGetDimensions(formatDescription)
+    onScreenSizeChanged?(Int(dimensions.width), Int(dimensions.height))
   }
 
   private func decode(nal: Data, isKeyframe: Bool) {
@@ -375,6 +474,7 @@ private func screenMirrorDecompressionCallback(
 /// can mirror at once - the plugin itself is just a session directory.
 public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
   private let registry: FlutterTextureRegistry
+  private let screenSizeStream = ScreenSizeStreamHandler()
 
   private let sessionsLock = NSLock()
   private var sessions: [Int64: MirrorTextureSession] = [:]
@@ -387,16 +487,26 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
     let instance = ScreenMirrorPlugin(registry: registrar.textures)
     registrar.addMethodCallDelegate(instance, channel: channel)
 
-    // Raw binary channel for video chunks - avoids per-chunk method-call/
+    FlutterEventChannel(
+      name: "dev.synk/screen_mirror/screen_size",
+      binaryMessenger: registrar.messenger
+    ).setStreamHandler(instance.screenSizeStream)
+
+    // Raw binary channels for media chunks - avoids per-chunk method-call/
     // standard-codec overhead at video bitrate/frequency. Each message is
     // prefixed with an 8-byte big-endian texture id so it can be routed to
     // the right session without a per-session channel.
     registrar.messenger.setMessageHandlerOnChannel(
       "dev.synk/screen_mirror/video_chunk"
     ) { data, reply in
-      if let data {
-        instance.feedVideoChunk(data)
-      }
+      instance.route(data) { session, chunk in session.feedVideoChunk(chunk) }
+      reply(nil)
+    }
+
+    registrar.messenger.setMessageHandlerOnChannel(
+      "dev.synk/screen_mirror/audio_chunk"
+    ) { data, reply in
+      instance.route(data) { session, chunk in session.feedAudioChunk(chunk) }
       reply(nil)
     }
   }
@@ -412,6 +522,9 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
       let session = MirrorTextureSession(registry: registry)
       let textureId = registry.register(session)
       session.textureId = textureId
+      session.onScreenSizeChanged = { [weak self] width, height in
+        self?.screenSizeStream.send(textureId: textureId, width: width, height: height)
+      }
 
       sessionsLock.lock()
       sessions[textureId] = session
@@ -448,6 +561,17 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
       session.stopRecording { success in
         result(success)
       }
+    case "setAudioMuted":
+      guard let textureId = textureId(from: call), let session = session(for: textureId) else {
+        result(FlutterError(code: "invalid_args", message: "textureId is required", details: nil))
+        return
+      }
+      guard let args = call.arguments as? [String: Any], let muted = args["muted"] as? Bool else {
+        result(FlutterError(code: "invalid_args", message: "muted is required", details: nil))
+        return
+      }
+      session.setAudioMuted(muted)
+      result(nil)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -473,15 +597,41 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
     registry.unregisterTexture(textureId)
   }
 
-  private func feedVideoChunk(_ data: Data) {
-    guard data.count > 8 else { return }
+  fileprivate func route(_ data: Data?, to feed: (MirrorTextureSession, Data) -> Void) {
+    guard let data, data.count > 8 else { return }
 
     var textureId: Int64 = 0
     for offset in 0..<8 {
       textureId = (textureId << 8) | Int64(data[data.startIndex + offset])
     }
 
-    let payload = data.subdata(in: (data.startIndex + 8)..<data.endIndex)
-    session(for: textureId)?.feedVideoChunk(payload)
+    guard let session = session(for: textureId) else { return }
+    feed(session, data.subdata(in: (data.startIndex + 8)..<data.endIndex))
+  }
+}
+
+// MARK: - Screen size events
+
+private final class ScreenSizeStreamHandler: NSObject, FlutterStreamHandler {
+  private var sink: FlutterEventSink?
+
+  func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+    sink = eventSink
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    sink = nil
+    return nil
+  }
+
+  func send(textureId: Int64, width: Int, height: Int) {
+    DispatchQueue.main.async { [weak self] in
+      self?.sink?([
+        "textureId": textureId,
+        "width": width,
+        "height": height,
+      ])
+    }
   }
 }

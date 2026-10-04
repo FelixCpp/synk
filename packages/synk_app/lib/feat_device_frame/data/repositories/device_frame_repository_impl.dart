@@ -177,6 +177,21 @@ class const DeviceFrameRepositoryImpl({
   }
 
   @override
+  bool isAudioMuted(DeviceId deviceId) {
+    return repository.getAndroidDeviceAgent(deviceId)?.isAudioMuted ?? true;
+  }
+
+  @override
+  Future<void> setAudioMuted(DeviceId deviceId, bool muted) async {
+    final agent = repository.getAndroidDeviceAgent(deviceId);
+    if (agent == null) {
+      return;
+    }
+
+    await agent.setAudioMuted(muted);
+  }
+
+  @override
   Future<List<DroppedFileOutcome>> handleDroppedFiles(
     DeviceId deviceId,
     List<String> filepaths,

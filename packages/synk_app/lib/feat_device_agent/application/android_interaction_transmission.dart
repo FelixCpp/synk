@@ -201,12 +201,15 @@ mixin _ClipboardEventSimulator on _InteractionTransmission {
 
 class AndroidInteractionTransmission({
   @override required final Socket socket,
-  @override required final DeviceScreenSize screenSize,
+  required final DeviceScreenSize initialScreenSize,
 }) with
     _InteractionTransmission,
     _KeyEventSimulator,
     _PointerEventSimulator,
     _ClipboardEventSimulator {
+  @override
+  late DeviceScreenSize screenSize = initialScreenSize;
+
   this {
     _listenForDeviceMessages();
   }

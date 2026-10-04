@@ -11,9 +11,11 @@ class const DeviceFrameToolBar({
   required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
+  required final VoidCallback onToggleAudioMute,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -55,9 +57,11 @@ class const DeviceFrameToolBar({
             _Actions(
               isMaximized: isMaximized,
               isRecording: isRecording,
+              isAudioMuted: isAudioMuted,
               supportsInteraction: supportsInteraction,
               onCaptureScreenshot: onCaptureScreenshot,
               onToggleRecording: onToggleRecording,
+              onToggleAudioMute: onToggleAudioMute,
               onToggleMaximize: onToggleMaximize,
               onClose: onClose,
               onInstallApk: onInstallApk,
@@ -74,9 +78,11 @@ class const DeviceFrameToolBar({
 class const _Actions({
   required final bool isMaximized,
   required final bool isRecording,
+  required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
+  required final VoidCallback onToggleAudioMute,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
   required final VoidCallback onInstallApk,
@@ -97,6 +103,16 @@ class const _Actions({
             onPressed: onToggleRecording,
           ),
         ),
+        if (supportsInteraction)
+          SynkUiTooltip(
+            message: isAudioMuted ? 'Audio aktivieren' : 'Audio stummschalten',
+            child: SynkUiIconButton(
+              icon: isAudioMuted
+                  ? CupertinoIcons.speaker_slash_fill
+                  : CupertinoIcons.speaker_2_fill,
+              onPressed: onToggleAudioMute,
+            ),
+          ),
         SynkUiTooltip(
           message: 'Screenshot aufnehmen',
           child: SynkUiIconButton(

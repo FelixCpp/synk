@@ -9,8 +9,8 @@ Stand: 2026-09-29. Aktuell basiert das Screen-Mirroring auf scrcpy (USB/ADB) mit
 ### Bare-Minimum-Lücken
 
 - [x] **Recording** – Aufnahme des gespiegelten Streams per `AVAssetWriter` (`ScreenMirrorPlugin.swift`), zapft dieselben CMSampleBuffer ab, die auch an VideoToolbox zum Decodieren gehen.
-- [ ] **Audio** – Server wird mit `audio=false` gestartet (`feat_device_agent/data/datasources/scrcpy_server_launcher.dart`). scrcpy unterstützt Audio-Forwarding seit v2.0, fehlt hier nur Flag + Playback-Handling.
-- [ ] **Kabelloses Pairing (WLAN)** – kein `adb pair`/`adb connect`/TCP-IP-Handling vorhanden, aktuell nur USB-Geräte über `adb devices`.
+- [x] **Audio** – Audio-Forwarding über einen dritten scrcpy-Socket (`audio_codec=raw`), Playback via `AVAudioEngine` in `ScreenMirrorPlugin.swift`. Standardmäßig stummgeschaltet, Mute-Button in der Toolbar.
+- [x] **Kabelloses Pairing (WLAN)** – `adb pair`/`adb connect` über `WirelessPairingDialog` und `connect_wirelessly_interactor.dart`.
 - [x] **Clipboard-Sync** – kein Copy/Paste zwischen Mac und Gerät.
 - [x] **Datei-/APK-Übertragung** – kein Drag&Drop, kein „APK installieren“, kein Dateibrowser.
 - [x] **Hardware-Buttons** – Back/Home/Recent-Apps, Power, Volume fehlen in der Toolbar (aktuell nur Screenshot, Maximieren, Schließen).
@@ -22,6 +22,10 @@ Stand: 2026-09-29. Aktuell basiert das Screen-Mirroring auf scrcpy (USB/ADB) mit
 - Keine Geräte-Rotation-Kontrolle (nur was das Gerät selbst sendet).
 - Kein „Always on Top“ fürs Fenster.
 - Kein Multi-Geräte-Broadcast (gleiche Eingabe an mehrere Geräte gleichzeitig senden).
+
+### Vertagte Ideen
+
+- **Freier Drag-Space statt Grid** – Geräte frei im Canvas positionieren (Pan/Zoom, Z-Order, persistierte Positionen) statt Auto-Layout im `ReflowGrid`. Stand 2026-10-05 bewusst verschoben: der Auslöser war die unbrauchbare Landscape-Darstellung, die aber nicht am Grid lag, sondern an fixer Zellgröße – gelöst über `SynkTheme.deviceFrameSizeFor`, das die Kachel nach Geräte-Seitenverhältnis bei konstanter Fläche bemisst (ein gedrehtes Gerät behält seine Kachel, nur hochkant/quer getauscht). Kosten eines Drag-Space: der Nutzer muss Layout selbst pflegen, Reflow-Animation und Hero-Maximieren müssten neu gedacht werden. Alternative mit mehr Hebel für denselben Zweck: pro Gerät ein eigenes, resizebares macOS-Fenster (der Weg von Vysor und scrcpy).
 
 ### Priorisierungsvorschlag
 
@@ -35,16 +39,16 @@ Stand: 2026-09-30. Die Android-Pipeline basiert darauf, per ADB eine eigene Serv
 
 ### Vergleich Android (Ist-Zustand) vs. iOS (realistisch)
 
-| Feature | Android (jetzt) | iOS (realistisch) |
-| --- | --- | --- |
-| Geräte-Discovery | `adb track-devices` | kein ADB-Äquivalent; `usbmuxd`-Protokoll (z. B. über `libimobiledevice`) |
-| Bildschirm-Mirroring | eigener Server streamt H264 über Socket | `AVFoundation`/`CoreMediaIO` captured Gerät als Kamera (wie QuickTime „Movie Recording"), liefert fertige `CMSampleBuffer` – kein eigener H264-Decoder nötig |
-| Touch-/Key-Injection | InputManager-Reflection im eigenen Server | keine offizielle Möglichkeit; einzig praktikabler Weg ist `WebDriverAgent`/XCTest-UI-Automation über eine signierte, auf dem Gerät installierte Companion-App – fragil, braucht Dev-Account + Codesigning/Provisioning |
-| Clipboard-Sync | Custom-Protokoll im eigenen Server | kein Public API; nur über denselben WDA-Umweg oder gar nicht |
-| Datei-Transfer | `adb push` | AFC-Protokoll (libimobiledevice), stark sandboxed |
-| App-Install | `pm install` | braucht gültig signierte/provisionierte IPA, kein freies Sideloading |
-| Screenshot | RPC an eigenen Server | benötigt gemountetes Developer-Disk-Image, wechselt mit jeder iOS-Version |
-| Recording | `AVAssetWriter` zapft den Decode-Stream ab | bei AVCaptureSession-Ansatz eher einfacher als bei Android, da Sample Buffer direkt vorliegen |
+| Feature              | Android (jetzt)                            | iOS (realistisch)                                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Geräte-Discovery     | `adb track-devices`                        | kein ADB-Äquivalent; `usbmuxd`-Protokoll (z. B. über `libimobiledevice`)                                                                                                                                               |
+| Bildschirm-Mirroring | eigener Server streamt H264 über Socket    | `AVFoundation`/`CoreMediaIO` captured Gerät als Kamera (wie QuickTime „Movie Recording"), liefert fertige `CMSampleBuffer` – kein eigener H264-Decoder nötig                                                           |
+| Touch-/Key-Injection | InputManager-Reflection im eigenen Server  | keine offizielle Möglichkeit; einzig praktikabler Weg ist `WebDriverAgent`/XCTest-UI-Automation über eine signierte, auf dem Gerät installierte Companion-App – fragil, braucht Dev-Account + Codesigning/Provisioning |
+| Clipboard-Sync       | Custom-Protokoll im eigenen Server         | kein Public API; nur über denselben WDA-Umweg oder gar nicht                                                                                                                                                           |
+| Datei-Transfer       | `adb push`                                 | AFC-Protokoll (libimobiledevice), stark sandboxed                                                                                                                                                                      |
+| App-Install          | `pm install`                               | braucht gültig signierte/provisionierte IPA, kein freies Sideloading                                                                                                                                                   |
+| Screenshot           | RPC an eigenen Server                      | benötigt gemountetes Developer-Disk-Image, wechselt mit jeder iOS-Version                                                                                                                                              |
+| Recording            | `AVAssetWriter` zapft den Decode-Stream ab | bei AVCaptureSession-Ansatz eher einfacher als bei Android, da Sample Buffer direkt vorliegen                                                                                                                          |
 
 ### Priorisierungsvorschlag
 

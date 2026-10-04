@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 typedef ReflowGridItemBuilder<T> = Widget Function(
@@ -7,14 +9,15 @@ typedef ReflowGridItemBuilder<T> = Widget Function(
 
 typedef ReflowGridKeyOf<T> = Object Function(T item);
 
+typedef ReflowGridCellSizeOf<T> = Size Function(T item);
+
 class ReflowGrid<T> extends StatefulWidget {
   const ReflowGrid({
     super.key,
     required this.items,
     required this.itemBuilder,
     required this.keyOf,
-    required this.cellWidth,
-    required this.cellHeight,
+    required this.cellSizeOf,
     this.mainAxisSpacing = 0,
     this.crossAxisSpacing = 0,
     this.duration = const Duration(milliseconds: 300),
@@ -27,12 +30,12 @@ class ReflowGrid<T> extends StatefulWidget {
   final ReflowGridItemBuilder<T> itemBuilder;
   final ReflowGridKeyOf<T> keyOf;
 
-  /// Every cell gets exactly this size, regardless of window size or how
-  /// many items there are - so a tile never grows or shrinks just because
-  /// another device connected or disconnected elsewhere in the grid. More
-  /// items past what fits simply wrap onto further rows, which scroll.
-  final double cellWidth;
-  final double cellHeight;
+  /// A cell's size depends on its item alone, never on the window or on how
+  /// many other items there are - so a tile never grows or shrinks just
+  /// because another device connected or disconnected elsewhere in the grid.
+  /// Items flow left to right and wrap onto further rows, which scroll; each
+  /// row is as tall as the tallest cell in it.
+  final ReflowGridCellSizeOf<T> cellSizeOf;
 
   final double mainAxisSpacing;
   final double crossAxisSpacing;
@@ -50,6 +53,20 @@ class _ExitingEntry<T> {
 
   final T item;
   final int slot;
+}
+
+class _Cell<T> {
+  _Cell({
+    required this.key,
+    required this.item,
+    required this.rect,
+    required this.isExiting,
+  });
+
+  final Object key;
+  final T item;
+  final Rect rect;
+  final bool isExiting;
 }
 
 class _ReflowGridState<T> extends State<ReflowGrid<T>> {
@@ -89,70 +106,97 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
     setState(() => _exiting.remove(key));
   }
 
-  Rect _slotRect(int slot, int columns) {
-    final row = slot ~/ columns;
-    final col = slot % columns;
-    return Rect.fromLTWH(
-      col * (widget.cellWidth + widget.crossAxisSpacing),
-      row * (widget.cellHeight + widget.mainAxisSpacing),
-      widget.cellWidth,
-      widget.cellHeight,
-    );
+  List<({Object key, T item, bool isExiting})> _orderedItems() {
+    final ordered = [
+      for (final item in widget.items)
+        (key: widget.keyOf(item), item: item, isExiting: false),
+    ];
+
+    final exiting = _exiting.entries.toList()
+      ..sort((a, b) => a.value.slot.compareTo(b.value.slot));
+
+    for (final entry in exiting) {
+      ordered.insert(
+        entry.value.slot.clamp(0, ordered.length),
+        (key: entry.key, item: entry.value.item, isExiting: true),
+      );
+    }
+
+    return ordered;
+  }
+
+  List<_Cell<T>> _layout(double maxWidth) {
+    final cells = <_Cell<T>>[];
+
+    var rowTop = 0.0;
+    var rowHeight = 0.0;
+    var x = 0.0;
+
+    for (final entry in _orderedItems()) {
+      final size = widget.cellSizeOf(entry.item);
+      final width = math.min(size.width, maxWidth);
+
+      if (x > 0 && x + width > maxWidth) {
+        rowTop += rowHeight + widget.mainAxisSpacing;
+        rowHeight = 0.0;
+        x = 0.0;
+      }
+
+      cells.add(
+        _Cell(
+          key: entry.key,
+          item: entry.item,
+          rect: Rect.fromLTWH(x, rowTop, width, size.height),
+          isExiting: entry.isExiting,
+        ),
+      );
+
+      x += width + widget.crossAxisSpacing;
+      rowHeight = math.max(rowHeight, size.height);
+    }
+
+    return cells;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
-        final columns =
-            ((viewportConstraints.maxWidth + widget.crossAxisSpacing) /
-                    (widget.cellWidth + widget.crossAxisSpacing))
-                .floor()
-                .clamp(1, 1 << 30);
-
-        final children = <Widget>[
-          for (var slot = 0; slot < widget.items.length; slot++)
-            _buildPresentItem(context, slot, columns),
-          for (final entry in _exiting.entries)
-            _buildExitingItem(context, entry.key, entry.value, columns),
-        ];
-
-        final lastSlot = [
-          widget.items.length - 1,
-          for (final entry in _exiting.values) entry.slot,
-        ].reduce((a, b) => a > b ? a : b);
-
-        final rowCount = lastSlot < 0 ? 0 : (lastSlot ~/ columns) + 1;
-        final totalHeight = rowCount == 0
-            ? 0.0
-            : rowCount * widget.cellHeight +
-                  (rowCount - 1) * widget.mainAxisSpacing;
+        final cells = _layout(viewportConstraints.maxWidth);
+        final totalHeight = cells.fold(
+          0.0,
+          (height, cell) => math.max(height, cell.rect.bottom),
+        );
 
         return SingleChildScrollView(
           controller: widget.scrollController,
           padding: widget.padding,
           child: SizedBox(
             height: totalHeight,
-            child: Stack(children: children),
+            child: Stack(
+              children: [
+                for (final cell in cells)
+                  if (cell.isExiting)
+                    _buildExitingCell(context, cell)
+                  else
+                    _buildPresentCell(context, cell),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildPresentItem(BuildContext context, int slot, int columns) {
-    final item = widget.items[slot];
-    final key = widget.keyOf(item);
-    final rect = _slotRect(slot, columns);
-
+  Widget _buildPresentCell(BuildContext context, _Cell<T> cell) {
     return AnimatedPositioned(
-      key: ValueKey(key),
+      key: ValueKey(cell.key),
       duration: widget.duration,
       curve: widget.curve,
-      left: rect.left,
-      top: rect.top,
-      width: rect.width,
-      height: rect.height,
+      left: cell.rect.left,
+      top: cell.rect.top,
+      width: cell.rect.width,
+      height: cell.rect.height,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
         duration: widget.duration,
@@ -160,34 +204,27 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
         builder: (context, scale, child) {
           return Transform.scale(scale: scale, child: child);
         },
-        child: widget.itemBuilder(context, item),
+        child: widget.itemBuilder(context, cell.item),
       ),
     );
   }
 
-  Widget _buildExitingItem(
-    BuildContext context,
-    Object key,
-    _ExitingEntry<T> entry,
-    int columns,
-  ) {
-    final rect = _slotRect(entry.slot, columns);
-
+  Widget _buildExitingCell(BuildContext context, _Cell<T> cell) {
     return Positioned(
-      key: ValueKey(('exiting', key)),
-      left: rect.left,
-      top: rect.top,
-      width: rect.width,
-      height: rect.height,
+      key: ValueKey(('exiting', cell.key)),
+      left: cell.rect.left,
+      top: cell.rect.top,
+      width: cell.rect.width,
+      height: cell.rect.height,
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 1, end: 0),
         duration: widget.duration,
         curve: widget.curve,
-        onEnd: () => _removeExiting(key),
+        onEnd: () => _removeExiting(cell.key),
         builder: (context, scale, child) {
           return Transform.scale(scale: scale, child: child);
         },
-        child: widget.itemBuilder(context, entry.item),
+        child: widget.itemBuilder(context, cell.item),
       ),
     );
   }

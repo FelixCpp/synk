@@ -64,24 +64,13 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
   }
 
   Future<void> _openMaximized(BuildContext context, CanvasDevice device) async {
-    final maximizedDevice = device.when(
-      connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
-          MaximizedDevice(
-            deviceId: device.id,
-            modelName: device.modelName,
-            isLive: isConnected,
-            textureId: textureId,
-            screenSize: screenSize,
-            supportsInteraction: supportsInteraction,
-          ),
-      connecting: (device, supportsInteraction) => MaximizedDevice(
-        deviceId: device.id,
-        modelName: device.modelName,
-        isLive: false,
-        textureId: null,
-        screenSize: null,
-        supportsInteraction: supportsInteraction,
-      ),
+    final maximizedDevice = MaximizedDevice(
+      deviceId: device.device.id,
+      modelName: device.device.modelName,
+      isLive: device.isConnected,
+      textureId: device.textureId,
+      screenSize: device.screenSize,
+      supportsInteraction: device.supportsInteraction,
     );
 
     final route = PageRouteBuilder<void>(
@@ -130,29 +119,16 @@ class const _Content({
         mainAxisSpacing: SynkTheme.verticalComponentSpacingMedium,
         crossAxisSpacing: SynkTheme.horizontalComponentSpacingMedium,
         items: state.devices,
-        cellWidth: SynkTheme.deviceFrameWidth,
-        cellHeight: SynkTheme.deviceFrameHeight,
+        cellSizeOf: (item) => deviceFrameSizeFor(item.screenSize),
         duration: const Duration(milliseconds: 150),
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
           return DeviceFrame(
             deviceId: item.device.id,
             modelName: item.device.modelName,
-            isLive: item.when(
-              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
-                  isConnected,
-              connecting: (device, supportsInteraction) => false,
-            ),
-            textureId: item.when(
-              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
-                  textureId,
-              connecting: (device, supportsInteraction) => null,
-            ),
-            screenSize: item.when(
-              connected: (device, isConnected, textureId, screenSize, supportsInteraction) =>
-                  screenSize,
-              connecting: (device, supportsInteraction) => null,
-            ),
+            isLive: item.isConnected,
+            textureId: item.textureId,
+            screenSize: item.screenSize,
             supportsInteraction: item.supportsInteraction,
             isMaximized: false,
             onToggleMaximize: () => onMaximize(item),

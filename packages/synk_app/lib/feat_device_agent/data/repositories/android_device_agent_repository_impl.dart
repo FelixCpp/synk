@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:api_adb/api_adb.dart';
+import 'package:synk/feat_device_agent/application/android_audio_transmission.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent_client.dart';
 import 'package:synk/feat_device_agent/application/android_interaction_transmission.dart';
@@ -65,9 +66,13 @@ class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
           portForward: scrcpy.portForward,
           texture: texture,
         ),
+        AndroidAudioTransmission(
+          socket: scrcpy.audioSocket,
+          byteStream: scrcpy.audioSocket,
+        ),
         AndroidInteractionTransmission(
           socket: scrcpy.controlSocket,
-          screenSize: screenSize,
+          initialScreenSize: screenSize,
         ),
       );
 
