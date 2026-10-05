@@ -53,6 +53,7 @@ class AndroidDeviceAgent(
   @override
   DeviceScreenSize get screenSize => _screenSize.value;
 
+  @override
   Stream<DeviceScreenSize> get screenSizeChanges => _screenSize.stream;
 
   bool get isAudioMuted => _isAudioMuted;

@@ -131,7 +131,7 @@ class DeviceConnectionsRepositoryImpl({
         return DeviceConnection.ios(
           device: device,
           textureId: agent.textureId,
-          screenSize: agent.screenSize,
+          screenSize: sizes[id] ?? agent.screenSize,
         );
       }
     }
@@ -183,6 +183,7 @@ class DeviceConnectionsRepositoryImpl({
       final agent = await iosAgentRepository.establishConnection(device.id);
       try {
         iosDeviceAgentsById[device.id] = agent;
+        _watchScreenSize(device.id, agent);
         _recomputeConnectedIds();
       } catch (_) {
         await iosAgentRepository.cutConnection(device.id);
@@ -196,10 +197,12 @@ class DeviceConnectionsRepositoryImpl({
   Future<void> _disconnectIos(IosDevice device) async {
     await iosAgentRepository.cutConnection(device.id);
     iosDeviceAgentsById.remove(device.id);
+    await screenSizeSubscriptions.remove(device.id)?.cancel();
+    _forgetScreenSize(device.id);
     _recomputeConnectedIds();
   }
 
-  void _watchScreenSize(DeviceId deviceId, AndroidDeviceAgent agent) {
+  void _watchScreenSize(DeviceId deviceId, ScreenCaptureAgent agent) {
     screenSizeSubscriptions[deviceId] = agent.screenSizeChanges.listen(
       (size) => screenSizes.add({...screenSizes.value, deviceId: size}),
     );

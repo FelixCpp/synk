@@ -27,6 +27,7 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
 {
   let registry: FlutterTextureRegistry
   var textureId: Int64 = -1
+  var onScreenSizeChanged: ((Int, Int) -> Void)?
   private(set) var dimensions: CMVideoDimensions?
 
   private let captureSession = AVCaptureSession()
@@ -140,24 +141,29 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
   ) {
     guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
 
+    let frameDimensions = CMVideoDimensions(
+      width: Int32(CVPixelBufferGetWidth(pixelBuffer)),
+      height: Int32(CVPixelBufferGetHeight(pixelBuffer))
+    )
+
     bufferLock.lock()
     latestPixelBuffer = pixelBuffer
     var resolvedHandler: ((CMVideoDimensions?) -> Void)?
-    var resolvedDimensions: CMVideoDimensions?
-    if dimensions == nil {
-      let newDimensions = CMVideoDimensions(
-        width: Int32(CVPixelBufferGetWidth(pixelBuffer)),
-        height: Int32(CVPixelBufferGetHeight(pixelBuffer))
-      )
-      dimensions = newDimensions
-      resolvedDimensions = newDimensions
+    let didChangeDimensions =
+      dimensions?.width != frameDimensions.width
+      || dimensions?.height != frameDimensions.height
+    if didChangeDimensions {
+      dimensions = frameDimensions
       resolvedHandler = firstFrameHandler
       firstFrameHandler = nil
     }
     bufferLock.unlock()
 
-    if let resolvedHandler {
-      DispatchQueue.main.async { resolvedHandler(resolvedDimensions) }
+    if didChangeDimensions {
+      DispatchQueue.main.async { [weak self] in
+        resolvedHandler?(frameDimensions)
+        self?.onScreenSizeChanged?(Int(frameDimensions.width), Int(frameDimensions.height))
+      }
     }
 
     appendToRecording(
@@ -253,6 +259,7 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
 @available(macOS 14.0, *)
 public class IosMirrorPlugin: NSObject, FlutterPlugin {
   private let registry: FlutterTextureRegistry
+  private let screenSizeStream = IosScreenSizeStreamHandler()
 
   private let sessionsLock = NSLock()
   private var sessions: [Int64: IosMirrorSession] = [:]
@@ -266,6 +273,11 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
     )
     let instance = IosMirrorPlugin(registry: registrar.textures)
     registrar.addMethodCallDelegate(instance, channel: channel)
+
+    FlutterEventChannel(
+      name: "dev.synk/ios_mirror/screen_size",
+      binaryMessenger: registrar.messenger
+    ).setStreamHandler(instance.screenSizeStream)
   }
 
   init(registry: FlutterTextureRegistry) {
@@ -348,6 +360,9 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
 
     let textureId = registry.register(session)
     session.textureId = textureId
+    session.onScreenSizeChanged = { [weak self] width, height in
+      self?.screenSizeStream.send(textureId: textureId, width: width, height: height)
+    }
 
     sessionsLock.lock()
     sessions[textureId] = session
@@ -403,7 +418,32 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
     let session = sessions.removeValue(forKey: textureId)
     sessionsLock.unlock()
 
+    session?.onScreenSizeChanged = nil
     session?.stop()
     registry.unregisterTexture(textureId)
+  }
+}
+
+private final class IosScreenSizeStreamHandler: NSObject, FlutterStreamHandler {
+  private var sink: FlutterEventSink?
+
+  func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
+    sink = eventSink
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    sink = nil
+    return nil
+  }
+
+  func send(textureId: Int64, width: Int, height: Int) {
+    DispatchQueue.main.async { [weak self] in
+      self?.sink?([
+        "textureId": textureId,
+        "width": width,
+        "height": height,
+      ])
+    }
   }
 }

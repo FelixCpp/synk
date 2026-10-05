@@ -1,5 +1,11 @@
+import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:flutter/services.dart';
+
+typedef IosMirrorScreenSize = ({
+  NativeTextureId textureId,
+  DeviceScreenSize size,
+});
 
 class IosMirrorStartResult {
   const IosMirrorStartResult({
@@ -15,6 +21,24 @@ class IosMirrorStartResult {
 
 class IosMirrorChannel {
   static const _channel = MethodChannel('dev.synk/ios_mirror');
+  static const _screenSizeChannel = EventChannel(
+    'dev.synk/ios_mirror/screen_size',
+  );
+
+  static final _screenSizeEvents = _screenSizeChannel.receiveBroadcastStream();
+
+  Stream<IosMirrorScreenSize> get screenSizeChanges {
+    return _screenSizeEvents.map((event) {
+      final args = event as Map<Object?, Object?>;
+      return (
+        textureId: NativeTextureId(args['textureId']! as int),
+        size: DeviceScreenSize(
+          width: args['width']! as int,
+          height: args['height']! as int,
+        ),
+      );
+    });
+  }
 
   Future<IosMirrorStartResult> startMirror(String deviceId) async {
     final result = await _channel.invokeMapMethod<String, Object?>(

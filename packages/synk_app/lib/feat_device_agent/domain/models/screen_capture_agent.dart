@@ -6,6 +6,7 @@ import 'package:synk/feat_mirror_session/mirror_session.dart';
 abstract interface class ScreenCaptureAgent {
   NativeTextureId get textureId;
   DeviceScreenSize get screenSize;
+  Stream<DeviceScreenSize> get screenSizeChanges;
 
   Future<Uint8List> captureScreenshot();
   Future<void> startRecording(String path);
