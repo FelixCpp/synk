@@ -1,13 +1,22 @@
 name: Release macOS App
 
-# Builds a macOS .dmg from packages/synk_app and attaches it to a GitHub Release
-# whenever a tag matching "v*" (e.g. v1.0.0) is pushed.
+# Manually triggered release: you provide a version number, the workflow bumps
+# packages/synk_app/pubspec.yaml, builds the macOS app, packages it as a .dmg,
+# creates (and pushes) the matching git tag, and publishes a GitHub Release
+# with the .dmg attached.
 
 on:
-  push:
-    tags:
-      - "v*"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 1.2.3 (without a leading "v")'
+        required: true
+        type: string
+      prerelease:
+        description: "Mark the GitHub Release as a pre-release"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -20,8 +29,26 @@ jobs:
         working-directory: packages/synk_app
 
     steps:
+      - name: Validate version input
+        run: |
+          version="${{ inputs.version }}"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Version '$version' must look like 1.2.3 (no leading 'v', no suffixes)."
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check tag does not already exist
+        run: |
+          tag="v${{ inputs.version }}"
+          if git ls-remote --tags origin | grep -q "refs/tags/${tag}$"; then
+            echo "::error::Tag ${tag} already exists."
+            exit 1
+          fi
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -39,20 +66,19 @@ jobs:
       - name: Run tests
         run: flutter test
 
+      - name: Bump pubspec version
+        run: |
+          version="${{ inputs.version }}"
+          build_number="${{ github.run_number }}"
+          sed -i '' -E "s/^version: .+$/version: ${version}+${build_number}/" pubspec.yaml
+          grep "^version:" pubspec.yaml
+
       - name: Build macOS release
         run: flutter build macos --release
 
-      - name: Determine version
-        id: version
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            echo "version=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=dev-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Package DMG
         run: |
+          tag="v${{ inputs.version }}"
           APP_PATH="build/macos/Build/Products/Release/synk.app"
           STAGING_DIR="$(mktemp -d)/dmg"
           mkdir -p "$STAGING_DIR"
@@ -63,17 +89,30 @@ jobs:
             -volname "synk" \
             -srcfolder "$STAGING_DIR" \
             -ov -format UDZO \
-            synk-macos.dmg
+            "synk-macos-${tag}.dmg"
+
+      - name: Commit version bump and create tag
+        run: |
+          tag="v${{ inputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: release ${tag}"
+          git tag -a "${tag}" -m "Release ${tag}"
+          git push origin HEAD:${{ github.ref_name }}
+          git push origin "${tag}"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: synk-macos-${{ steps.version.outputs.version }}
-          path: packages/synk_app/synk-macos.dmg
+          name: synk-macos-v${{ inputs.version }}
+          path: packages/synk_app/synk-macos-v${{ inputs.version }}.dmg
 
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: packages/synk_app/synk-macos.dmg
+          tag_name: v${{ inputs.version }}
+          name: synk v${{ inputs.version }}
+          prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
+          files: packages/synk_app/synk-macos-v${{ inputs.version }}.dmg

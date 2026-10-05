@@ -67,8 +67,10 @@ companion app driven via `WebDriverAgent`/XCTest — a separate, much larger pro
    - Right-click (or Control-click) `synk.app` → **Open** → confirm **Open** in the dialog, **or**
    - Run `xattr -dr com.apple.quarantine /Applications/synk.app` in Terminal once after installing.
 
-New DMG builds are produced automatically by CI for every tagged release (see
-[`.github/workflows/release.yml`](.github/workflows/release.yml)).
+New releases are built on demand via the [`Release macOS App`](.github/workflows/release.yml) GitHub
+Actions workflow: trigger it manually from the **Actions** tab with a version number (e.g. `1.2.3`), and
+it bumps `pubspec.yaml`, builds the app, creates the `v1.2.3` tag, and publishes the GitHub Release with
+the `.dmg` attached — no local tagging needed.
 
 ### Option 2: Build from source
 
