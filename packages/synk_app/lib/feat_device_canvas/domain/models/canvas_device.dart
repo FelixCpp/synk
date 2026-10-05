@@ -1,5 +1,5 @@
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 

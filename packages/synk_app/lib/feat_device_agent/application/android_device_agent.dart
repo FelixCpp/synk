@@ -11,7 +11,7 @@ import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/scrcpy_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
 import 'package:synk/feat_device_connections/domain/models/android_device_info.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:path/path.dart' as path;
 import 'package:rxdart/rxdart.dart';
 
@@ -20,6 +20,7 @@ const _androidDownloadsDirectory = '/sdcard/Download';
 class AndroidDeviceAgent(
   final AdbDeviceCommunicator adbCommunicator,
   final AndroidDeviceAgentCommunicator communicator,
+  final MirrorSession session,
   final AndroidScreenTransmission screenTransmission,
   final AndroidAudioTransmission audioTransmission,
   final AndroidInteractionTransmission interactionTransmission,
@@ -36,20 +37,19 @@ class AndroidDeviceAgent(
 
   this
     : _mirrorSubscription = screenTransmission.byteStream.listen(
-        (bytes) => screenTransmission.texture.upload(bytes),
+        (bytes) => session.uploadVideo(bytes),
       ),
       _audioSubscription = audioTransmission.byteStream.listen(
-        (bytes) => screenTransmission.texture.uploadAudio(bytes),
+        (bytes) => session.uploadAudio(bytes),
       ) {
-    _screenSizeSubscription = screenTransmission.texture.screenSizeChanges
-        .listen((size) {
-          interactionTransmission.screenSize = size;
-          _screenSize.add(size);
-        });
+    _screenSizeSubscription = session.screenSizeChanges.listen((size) {
+      interactionTransmission.screenSize = size;
+      _screenSize.add(size);
+    });
   }
 
   @override
-  NativeTextureId get textureId => screenTransmission.texture.id;
+  NativeTextureId get textureId => session.textureId;
   @override
   DeviceScreenSize get screenSize => _screenSize.value;
 
@@ -65,12 +65,13 @@ class AndroidDeviceAgent(
     await screenTransmission.dispose();
     await audioTransmission.dispose();
     await interactionTransmission.dispose();
+    await session.dispose();
     await communicator.dispose();
   }
 
   Future<void> setAudioMuted(bool muted) {
     _isAudioMuted = muted;
-    return screenTransmission.texture.setAudioMuted(muted);
+    return session.setAudioMuted(muted);
   }
 
   void simulatePointerEvent(ScrcpyPointerEvent event) {
@@ -127,11 +128,11 @@ class AndroidDeviceAgent(
 
   @override
   Future<void> startRecording(String path) {
-    return screenTransmission.texture.startRecording(path);
+    return session.startRecording(path);
   }
 
   @override
   Future<bool> stopRecording() {
-    return screenTransmission.texture.stopRecording();
+    return session.stopRecording();
   }
 }

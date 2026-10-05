@@ -1,4 +1,4 @@
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:flutter/services.dart';
 
 class IosMirrorStartResult {

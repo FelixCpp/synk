@@ -10,7 +10,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection.dar
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_state.dart';

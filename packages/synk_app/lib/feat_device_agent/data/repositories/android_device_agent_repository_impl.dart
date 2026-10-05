@@ -13,7 +13,7 @@ import 'package:synk/feat_device_agent/data/datasources/scrcpy_server_launcher.d
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/domain/repositories/device_agent_repository.dart';
 import 'package:synk/feat_device_connections/application/scrcpy/scrcpy_constants.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
 
 class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
@@ -40,7 +40,7 @@ class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
 
     AndroidDeviceAgentCommunicator? agentCommunicator;
     ScrcpyServerConnection? scrcpyServer;
-    NativeTexture? texture;
+    MirrorSession? session;
 
     try {
       await Future.wait([
@@ -54,17 +54,17 @@ class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
 
       final scrcpy = scrcpyServer!;
       final screenSize = await _fetchScreenSize(communicator);
-      texture = await NativeTexture.create();
+      session = await MirrorSession.create();
 
       final agent = AndroidDeviceAgent(
         communicator,
         agentCommunicator!,
+        session,
         AndroidScreenTransmission(
           socket: scrcpy.videoSocket,
           byteStream: scrcpy.videoStream,
           process: scrcpy.process,
           portForward: scrcpy.portForward,
-          texture: texture,
         ),
         AndroidAudioTransmission(
           socket: scrcpy.audioSocket,
@@ -88,7 +88,7 @@ class AndroidDeviceAgentRepositoryImpl(final AdbApi api)
 
       await agentCommunicator?.dispose();
       await scrcpyServer?.dispose();
-      await texture?.dispose();
+      await session?.dispose();
       rethrow;
     }
   }

@@ -10,7 +10,7 @@ import 'package:synk/feat_device_frame/presentation/widgets/device_frame_pointer
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_surface.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_tool_bar.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_screen_mirror.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';

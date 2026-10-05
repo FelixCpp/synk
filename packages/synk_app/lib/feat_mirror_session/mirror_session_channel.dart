@@ -1,15 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_native_texture/native_texture.dart';
+import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:flutter/services.dart';
 
-typedef NativeTextureScreenSize = ({
+typedef MirrorSessionScreenSize = ({
   NativeTextureId textureId,
   DeviceScreenSize size,
 });
 
-class const NativeTextureChannel._() {
+class const MirrorSessionChannel._() {
   static const _methodChannel = MethodChannel('dev.synk/screen_mirror');
   static const _videoChunkChannel = BasicMessageChannel<ByteData?>(
     'dev.synk/screen_mirror/video_chunk',
@@ -25,7 +25,7 @@ class const NativeTextureChannel._() {
 
   static final _screenSizeEvents = _screenSizeChannel.receiveBroadcastStream();
 
-  static Stream<NativeTextureScreenSize> get screenSizeChanges {
+  static Stream<MirrorSessionScreenSize> get screenSizeChanges {
     return _screenSizeEvents.map((event) {
       final args = event as Map<Object?, Object?>;
       return (
@@ -38,19 +38,22 @@ class const NativeTextureChannel._() {
     });
   }
 
-  static Future<NativeTextureId> createTexture() {
+  static Future<NativeTextureId> createSession() {
     return _methodChannel
         .invokeMethod<int>('createTexture')
         .then((value) => NativeTextureId(value!));
   }
 
-  static Future<void> destroyTexture(NativeTextureId textureId) {
+  static Future<void> destroySession(NativeTextureId textureId) {
     return _methodChannel.invokeMethod('destroyTexture', {
       'textureId': textureId.value,
     });
   }
 
-  static Future<void> sendChunk(NativeTextureId textureId, Uint8List chunk) {
+  static Future<void> sendVideoChunk(
+    NativeTextureId textureId,
+    Uint8List chunk,
+  ) {
     return _send(_videoChunkChannel, textureId, chunk);
   }
 
