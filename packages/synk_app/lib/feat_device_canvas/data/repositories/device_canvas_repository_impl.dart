@@ -25,6 +25,7 @@ class DeviceCanvasRepositoryImpl(
             CanvasDevice.connecting(
               device: device,
               supportsInteraction: device is AndroidDevice,
+              supportsDeviceActions: device is AndroidDevice,
             ),
 
         for (final connection in connected)
@@ -33,7 +34,8 @@ class DeviceCanvasRepositoryImpl(
             isConnected: true,
             textureId: connection.textureId,
             screenSize: connection.screenSize,
-            supportsInteraction: connection.device is AndroidDevice,
+            supportsInteraction: connection.supportsInteraction,
+            supportsDeviceActions: connection.device is AndroidDevice,
           ),
       ];
     });

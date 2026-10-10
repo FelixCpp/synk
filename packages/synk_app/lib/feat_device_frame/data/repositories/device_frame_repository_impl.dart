@@ -1,6 +1,7 @@
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
+import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/domain/models/control_button_type.dart';
 import 'package:synk/feat_device_frame/domain/models/dropped_file_outcome.dart';
@@ -14,95 +15,74 @@ class const DeviceFrameRepositoryImpl({
   required final DeviceConnectionsRepository repository,
 }) implements DeviceFrameRepository {
   @override
-  Future<void> simulateKeyEvent(DeviceId deviceId, ScrcpyKeyEvent event) async {
-    final agent = repository.getAndroidDeviceAgent(deviceId);
+  Future<void> simulateKeyEvent(DeviceId deviceId, DeviceKeyEvent event) async {
+    final shortcut = _clipboardShortcutOf(event);
+    if (shortcut == null) {
+      await repository.getInteractionAgent(deviceId)?.simulateKeyEvent(event);
+      return;
+    }
+
+    if (event.type != .down) {
+      return;
+    }
+
+    final agent = repository.getClipboardAgent(deviceId);
     if (agent == null) {
       return;
     }
 
-    final isMetaKeyDown = (event.metaState & ScrcpyKeyMetaState.metaOn) != 0;
-    final isCopyEvent = isMetaKeyDown && event.keyCode == .copy;
-    final isPasteEvent = isMetaKeyDown && event.keyCode == .paste;
-
-    if (isCopyEvent) {
-      if (event.type == .down) {
-        await _copyFromDevice(agent);
-      }
-
-      return;
-    }
-
-    if (isPasteEvent) {
-      if (event.type == .down) {
-        await _pasteToDevice(agent);
-      }
-
-      return;
-    }
-
-    agent.simulateKeyEvent(event);
+    await switch (shortcut) {
+      .copyFromDevice => _copyFromDevice(agent),
+      .pasteToDevice => _pasteToDevice(agent),
+    };
   }
 
-  Future<void> _copyFromDevice(AndroidDeviceAgent agent) async {
+  Future<void> _copyFromDevice(ClipboardAgent agent) async {
     final text = await agent.readDeviceClipboardContent();
+    if (text.isEmpty) {
+      return;
+    }
+
     await Clipboard.setData(ClipboardData(text: text));
   }
 
-  Future<void> _pasteToDevice(AndroidDeviceAgent agent) async {
+  Future<void> _pasteToDevice(ClipboardAgent agent) async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text == null) {
       return;
     }
 
-    agent.setDeviceClipboardContent(text);
+    await agent.setDeviceClipboardContent(text);
   }
 
   @override
-  void simulatePointerEvent(DeviceId deviceId, ScrcpyPointerEvent event) {
-    final agent = repository.getAndroidDeviceAgent(deviceId);
-    if (agent == null) {
-      return;
-    }
-
-    if (event.type == .down) {
-      wakeup(agent);
-    }
-
-    agent.simulatePointerEvent(event);
+  Future<void> simulatePointerEvent(
+    DeviceId deviceId,
+    DevicePointerEvent event,
+  ) async {
+    await repository.getInteractionAgent(deviceId)?.simulatePointerEvent(event);
   }
 
   @override
-  void simulateControlButtonEvent(DeviceId deviceId, ControlButtonType type) {
-    final agent = repository.getAndroidDeviceAgent(deviceId);
-    if (agent == null) {
-      return;
-    }
+  Future<void> simulatePinchEvent(DeviceId deviceId, PinchEvent event) async {
+    await repository.getInteractionAgent(deviceId)?.simulatePinchEvent(event);
+  }
 
-    final ScrcpyKeyCode keyCode = switch (type) {
+  @override
+  Future<void> simulateControlButtonEvent(
+    DeviceId deviceId,
+    ControlButtonType type,
+  ) async {
+    final DeviceControlAction action = switch (type) {
       .back => .back,
       .home => .home,
       .appSwitch => .appSwitch,
-      .power => .power,
+      .power => .standby,
     };
 
-    _pressKey(agent, keyCode);
-  }
-
-  void wakeup(AndroidDeviceAgent agent) {
-    _pressKey(agent, .wakeup);
-  }
-
-  void _pressKey(AndroidDeviceAgent agent, ScrcpyKeyCode keyCode) {
-    for (final type in [ScrcpyKeyEventType.down, ScrcpyKeyEventType.up]) {
-      agent.simulateKeyEvent(
-        ScrcpyKeyEvent(
-          keyCode: keyCode,
-          metaState: .none,
-          type: type,
-        ),
-      );
-    }
+    final agent = repository.getInteractionAgent(deviceId);
+    await agent?.simulateControlAction(action);
   }
 
   @override
@@ -243,4 +223,21 @@ class const DeviceFrameRepositoryImpl({
     final outcomes = await handleDroppedFiles(deviceId, [file.path]);
     return outcomes.isEmpty ? null : outcomes.first;
   }
+}
+
+enum _ClipboardShortcut {
+  copyFromDevice,
+  pasteToDevice,
+}
+
+_ClipboardShortcut? _clipboardShortcutOf(DeviceKeyEvent event) {
+  if (!event.isMetaPressed) {
+    return null;
+  }
+
+  return switch (event.key) {
+    LogicalKeyboardKey.keyC => .copyFromDevice,
+    LogicalKeyboardKey.keyV => .pasteToDevice,
+    _ => null,
+  };
 }

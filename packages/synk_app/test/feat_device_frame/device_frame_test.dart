@@ -5,6 +5,8 @@ import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
@@ -271,6 +273,7 @@ Future<SynkColors> _pumpFrame(
                         textureId: const NativeTextureId(1),
                         screenSize: screenSize,
                         supportsInteraction: supportsInteraction,
+                        supportsDeviceActions: supportsInteraction,
                         isMaximized: isMaximized,
                         onToggleMaximize: () {},
                         onClose: () {},
@@ -298,6 +301,12 @@ class _OfflineConnections implements DeviceConnectionsRepository {
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+  @override
+  InteractionAgent? getInteractionAgent(DeviceId id) => null;
+
+  @override
+  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
 
   @override
   Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();

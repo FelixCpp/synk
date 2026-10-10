@@ -24,6 +24,7 @@ class const DeviceFrame({
   required final NativeTextureId? textureId,
   required final DeviceScreenSize? screenSize,
   required final bool supportsInteraction,
+  required final bool supportsDeviceActions,
   required final bool isMaximized,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
@@ -69,7 +70,7 @@ class _DeviceFrameState extends State<DeviceFrame>
       child: _DeviceFrameBlocProvider(
         deviceId: widget.deviceId,
         builder: (context, state) => _FrameDropTarget(
-          enabled: widget.supportsInteraction,
+          enabled: widget.supportsDeviceActions,
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
@@ -89,6 +90,7 @@ class _DeviceFrameState extends State<DeviceFrame>
                     isRecording: state.isRecording,
                     isAudioMuted: state.isAudioMuted,
                     supportsInteraction: widget.supportsInteraction,
+                    supportsDeviceActions: widget.supportsDeviceActions,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
                     onToggleAudioMute: () => _toggleAudioMute(context),
@@ -285,6 +287,7 @@ class const _ToolBar({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
+  required final bool supportsDeviceActions,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -306,6 +309,7 @@ class const _ToolBar({
         isRecording: isRecording,
         isAudioMuted: isAudioMuted,
         supportsInteraction: supportsInteraction,
+        supportsDeviceActions: supportsDeviceActions,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
         onToggleAudioMute: onToggleAudioMute,

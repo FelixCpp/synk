@@ -30,7 +30,8 @@ and gets out of your way otherwise.
 Android support is implemented via a small server pushed to the device over ADB (based on
 [scrcpy](https://github.com/Genymobile/scrcpy)'s approach), which grants raw H264 streaming, input
 injection and clipboard access. Apple does not allow running an equivalent helper binary with elevated
-privileges on iOS without a jailbreak, so iOS support is intentionally **view-only** for now:
+privileges on iOS without a jailbreak, so the iOS side is assembled from what macOS itself offers —
+which by now covers mirroring, screenshots, clipboard and touch, but not file transfer or app install:
 
 | Feature                | Android             | iOS                         |
 | ----------------------- | :------------------: | :--------------------------: |
@@ -38,16 +39,30 @@ privileges on iOS without a jailbreak, so iOS support is intentionally **view-on
 | Screen mirroring        | ✅                   | ✅ (via `AVFoundation`/`CoreMediaIO`) |
 | Screenshot               | ✅                   | ✅                           |
 | Screen recording         | ✅                   | ✅                           |
-| Mouse / keyboard input   | ✅                   | ❌ (no public API)           |
-| Clipboard sync           | ✅                   | ❌                           |
-| File / APK transfer      | ✅                   | ❌                           |
-| Hardware buttons         | ✅                   | ❌                           |
+| Mouse input / gestures   | ✅                   | ✅ (via `CoreDevice` HID)    |
+| Keyboard input           | ✅                   | ❌ (not yet, see below)      |
+| Clipboard sync           | ✅                   | ✅ (text, via `devicectl`)   |
+| File / APK transfer      | ✅                   | ❌ (no user-visible target) |
+| Hardware buttons         | ✅                   | ❌ (not yet, see below)      |
 | Wireless connection      | ✅ (Wi-Fi pairing)   | ❌ (USB only)                |
 | Audio forwarding         | ✅                   | ❌                           |
 
-Interaction on iOS (touch/key injection, clipboard, file transfer) would require a signed, provisioned
-companion app driven via `WebDriverAgent`/XCTest — a separate, much larger project. See
-[`docs/ROADMAP.md`](docs/ROADMAP.md) for the full reasoning and prioritization.
+Most iOS gaps above are roadmap items rather than platform walls. Screenshots and clipboard sync go
+through Xcode's `devicectl`, the former at the device's native resolution, the latter on the same ⌘C/⌘V
+shortcuts as Android (text only for now). Touch and gestures go over the same private `CoreDevice` HID
+channel that Xcode's own Device Hub uses — no companion app on the device, no entitlement on the Mac:
+tap, drag, the navigation bar below the frame (which iOS gets as edge swipes), and pinch-to-zoom from a
+trackpad. Keyboard input, the hardware buttons and the scroll wheel sit on that same channel and are
+simply not wired up yet.
+
+Two things are genuinely out of reach. File transfer: `devicectl` can only reach an app's own container
+or a scratch area no one can see on the device, so there is no iOS counterpart to dropping a file and
+finding it on the phone. And app install, which needs a properly signed and provisioned IPA.
+
+iOS interaction needs Xcode installed, plus a paired device with Developer Mode enabled — mirroring
+alone works without either, and a device that only mirrors stays view-only in the UI instead of
+swallowing your clicks.
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the evidence, the open questions and the prioritization.
 
 ## Requirements
 

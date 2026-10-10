@@ -5,9 +5,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
+import 'package:synk/feat_device_agent/domain/models/scrcpy_key_input.dart';
 
 mixin _InteractionTransmission {
   Socket get socket;
@@ -59,7 +59,7 @@ mixin _PointerEventSimulator on _InteractionTransmission {
   static const androidNoButton = 0;
 
   void simulatePointerEvent({
-    required ScrcpyPointerEventType type,
+    required DevicePointerEventType type,
     required double normalizedPointerX,
     required double normalizedPointerY,
   }) {

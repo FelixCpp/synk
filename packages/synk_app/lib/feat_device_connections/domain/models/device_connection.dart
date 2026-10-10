@@ -13,11 +13,13 @@ sealed class DeviceConnection with _$DeviceConnection {
     required AndroidDeviceInfo info,
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
+    required bool supportsInteraction,
   }) = _AndroidDeviceConnection;
 
   const factory DeviceConnection.ios({
     required PluggedDevice device,
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
+    required bool supportsInteraction,
   }) = _IosDeviceConnection;
 }

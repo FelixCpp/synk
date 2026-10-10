@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CanvasDevice {
 
- PluggedDevice get device; bool get supportsInteraction;
+ PluggedDevice get device; bool get supportsInteraction; bool get supportsDeviceActions;
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $CanvasDeviceCopyWith<CanvasDevice> get copyWith => _$CanvasDeviceCopyWithImpl<C
 @override
 bool operator ==(Object other) {
   final _this = this as CanvasDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CanvasDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction)&&(identical(other.supportsDeviceActions, _this.supportsDeviceActions) || other.supportsDeviceActions == _this.supportsDeviceActions));
 }
 
 
 @override
 int get hashCode {
   final _this = this as CanvasDevice;
-  return Object.hash(runtimeType,_this.device,_this.supportsInteraction);
+  return Object.hash(runtimeType,_this.device,_this.supportsInteraction,_this.supportsDeviceActions);
 }
 
 @override
 String toString() {
   final _this = this as CanvasDevice;
-  return 'CanvasDevice(device: ${_this.device}, supportsInteraction: ${_this.supportsInteraction})';
+  return 'CanvasDevice(device: ${_this.device}, supportsInteraction: ${_this.supportsInteraction}, supportsDeviceActions: ${_this.supportsDeviceActions})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $CanvasDeviceCopyWith<$Res>  {
   factory $CanvasDeviceCopyWith(CanvasDevice value, $Res Function(CanvasDevice) _then) = _$CanvasDeviceCopyWithImpl;
 @useResult
 $Res call({
- PluggedDevice device, bool supportsInteraction
+ PluggedDevice device, bool supportsInteraction, bool supportsDeviceActions
 });
 
 
@@ -68,10 +68,11 @@ class _$CanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? supportsInteraction = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? supportsInteraction = null,Object? supportsDeviceActions = null,}) {
   return _then(_self.copyWith(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsDeviceActions: null == supportsDeviceActions ? _self.supportsDeviceActions : supportsDeviceActions // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -157,11 +158,11 @@ return connecting(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  connected,TResult Function( PluggedDevice device,  bool supportsInteraction)?  connecting,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsDeviceActions)?  connected,TResult Function( PluggedDevice device,  bool supportsInteraction,  bool supportsDeviceActions)?  connecting,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ConnectedCanvasDevice() when connected != null:
-return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction);case _ConnectingCanvasDevice() when connecting != null:
-return connecting(_that.device,_that.supportsInteraction);case _:
+return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsDeviceActions);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that.device,_that.supportsInteraction,_that.supportsDeviceActions);case _:
   return orElse();
 
 }
@@ -179,11 +180,11 @@ return connecting(_that.device,_that.supportsInteraction);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)  connected,required TResult Function( PluggedDevice device,  bool supportsInteraction)  connecting,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsDeviceActions)  connected,required TResult Function( PluggedDevice device,  bool supportsInteraction,  bool supportsDeviceActions)  connecting,}) {final _that = this;
 switch (_that) {
 case _ConnectedCanvasDevice():
-return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction);case _ConnectingCanvasDevice():
-return connecting(_that.device,_that.supportsInteraction);}
+return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsDeviceActions);case _ConnectingCanvasDevice():
+return connecting(_that.device,_that.supportsInteraction,_that.supportsDeviceActions);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -197,11 +198,11 @@ return connecting(_that.device,_that.supportsInteraction);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  connected,TResult? Function( PluggedDevice device,  bool supportsInteraction)?  connecting,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PluggedDevice device,  bool isConnected,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsDeviceActions)?  connected,TResult? Function( PluggedDevice device,  bool supportsInteraction,  bool supportsDeviceActions)?  connecting,}) {final _that = this;
 switch (_that) {
 case _ConnectedCanvasDevice() when connected != null:
-return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction);case _ConnectingCanvasDevice() when connecting != null:
-return connecting(_that.device,_that.supportsInteraction);case _:
+return connected(_that.device,_that.isConnected,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsDeviceActions);case _ConnectingCanvasDevice() when connecting != null:
+return connecting(_that.device,_that.supportsInteraction,_that.supportsDeviceActions);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return connecting(_that.device,_that.supportsInteraction);case _:
 
 
 class _ConnectedCanvasDevice implements CanvasDevice {
-  const _ConnectedCanvasDevice({required this.device, required this.isConnected, required this.textureId, required this.screenSize, required this.supportsInteraction});
+  const _ConnectedCanvasDevice({required this.device, required this.isConnected, required this.textureId, required this.screenSize, required this.supportsInteraction, required this.supportsDeviceActions});
   
 
 @override final  PluggedDevice device;
@@ -221,6 +222,7 @@ class _ConnectedCanvasDevice implements CanvasDevice {
  final  NativeTextureId textureId;
  final  DeviceScreenSize screenSize;
 @override final  bool supportsInteraction;
+@override final  bool supportsDeviceActions;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -232,18 +234,18 @@ _$ConnectedCanvasDeviceCopyWith<_ConnectedCanvasDevice> get copyWith => __$Conne
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectedCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectedCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction)&&(identical(other.supportsDeviceActions, supportsDeviceActions) || other.supportsDeviceActions == supportsDeviceActions));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,isConnected,textureId,screenSize,supportsInteraction);
+    return Object.hash(runtimeType,device,isConnected,textureId,screenSize,supportsInteraction,supportsDeviceActions);
 }
 
 @override
 String toString() {
-    return 'CanvasDevice.connected(device: $device, isConnected: $isConnected, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction)';
+    return 'CanvasDevice.connected(device: $device, isConnected: $isConnected, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction, supportsDeviceActions: $supportsDeviceActions)';
 }
 
 
@@ -254,7 +256,7 @@ abstract mixin class _$ConnectedCanvasDeviceCopyWith<$Res> implements $CanvasDev
   factory _$ConnectedCanvasDeviceCopyWith(_ConnectedCanvasDevice value, $Res Function(_ConnectedCanvasDevice) _then) = __$ConnectedCanvasDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, bool isConnected, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction
+ PluggedDevice device, bool isConnected, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, bool supportsDeviceActions
 });
 
 
@@ -271,13 +273,14 @@ class __$ConnectedCanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? supportsDeviceActions = null,}) {
   return _then(_ConnectedCanvasDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
 as bool,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
 as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsDeviceActions: null == supportsDeviceActions ? _self.supportsDeviceActions : supportsDeviceActions // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -298,11 +301,12 @@ $DeviceScreenSizeCopyWith<$Res> get screenSize {
 
 
 class _ConnectingCanvasDevice implements CanvasDevice {
-  const _ConnectingCanvasDevice({required this.device, required this.supportsInteraction});
+  const _ConnectingCanvasDevice({required this.device, required this.supportsInteraction, required this.supportsDeviceActions});
   
 
 @override final  PluggedDevice device;
 @override final  bool supportsInteraction;
+@override final  bool supportsDeviceActions;
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -314,18 +318,18 @@ _$ConnectingCanvasDeviceCopyWith<_ConnectingCanvasDevice> get copyWith => __$Con
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectingCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ConnectingCanvasDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction)&&(identical(other.supportsDeviceActions, supportsDeviceActions) || other.supportsDeviceActions == supportsDeviceActions));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,supportsInteraction);
+    return Object.hash(runtimeType,device,supportsInteraction,supportsDeviceActions);
 }
 
 @override
 String toString() {
-    return 'CanvasDevice.connecting(device: $device, supportsInteraction: $supportsInteraction)';
+    return 'CanvasDevice.connecting(device: $device, supportsInteraction: $supportsInteraction, supportsDeviceActions: $supportsDeviceActions)';
 }
 
 
@@ -336,7 +340,7 @@ abstract mixin class _$ConnectingCanvasDeviceCopyWith<$Res> implements $CanvasDe
   factory _$ConnectingCanvasDeviceCopyWith(_ConnectingCanvasDevice value, $Res Function(_ConnectingCanvasDevice) _then) = __$ConnectingCanvasDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, bool supportsInteraction
+ PluggedDevice device, bool supportsInteraction, bool supportsDeviceActions
 });
 
 
@@ -353,10 +357,11 @@ class __$ConnectingCanvasDeviceCopyWithImpl<$Res>
 
 /// Create a copy of CanvasDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? supportsInteraction = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? supportsInteraction = null,Object? supportsDeviceActions = null,}) {
   return _then(_ConnectingCanvasDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsDeviceActions: null == supportsDeviceActions ? _self.supportsDeviceActions : supportsDeviceActions // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

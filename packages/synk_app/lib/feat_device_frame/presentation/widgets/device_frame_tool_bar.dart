@@ -13,6 +13,7 @@ class const DeviceFrameToolBar({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
+  required final bool supportsDeviceActions,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -59,6 +60,7 @@ class const DeviceFrameToolBar({
               isRecording: isRecording,
               isAudioMuted: isAudioMuted,
               supportsInteraction: supportsInteraction,
+              supportsDeviceActions: supportsDeviceActions,
               onCaptureScreenshot: onCaptureScreenshot,
               onToggleRecording: onToggleRecording,
               onToggleAudioMute: onToggleAudioMute,
@@ -80,6 +82,7 @@ class const _Actions({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
+  required final bool supportsDeviceActions,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -103,7 +106,7 @@ class const _Actions({
             onPressed: onToggleRecording,
           ),
         ),
-        if (supportsInteraction)
+        if (supportsDeviceActions)
           SynkUiTooltip(
             message: isAudioMuted ? 'Audio aktivieren' : 'Audio stummschalten',
             child: SynkUiIconButton(
@@ -129,8 +132,10 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        if (supportsInteraction)
+        if (supportsInteraction || supportsDeviceActions)
           _OverflowButton(
+            supportsInteraction: supportsInteraction,
+            supportsDeviceActions: supportsDeviceActions,
             onInstallApk: onInstallApk,
             onShareFile: onShareFile,
             onStandby: onStandby,
@@ -148,6 +153,8 @@ class const _Actions({
 }
 
 class const _OverflowButton({
+  required final bool supportsInteraction,
+  required final bool supportsDeviceActions,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
   required final VoidCallback onStandby,
@@ -157,39 +164,42 @@ class const _OverflowButton({
     return SynkUiMenu(
       width: 190.0,
       itemsBuilder: (context, controller) => [
-        SynkUiTooltip(
-          message: 'APK auf dem Gerät installieren',
-          child: SynkUiMenuItem(
-            icon: CupertinoIcons.arrow_down_to_line,
-            label: 'APK Installieren',
-            onPressed: () {
-              controller.close();
-              onInstallApk();
-            },
+        if (supportsDeviceActions) ...[
+          SynkUiTooltip(
+            message: 'APK auf dem Gerät installieren',
+            child: SynkUiMenuItem(
+              icon: CupertinoIcons.arrow_down_to_line,
+              label: 'APK Installieren',
+              onPressed: () {
+                controller.close();
+                onInstallApk();
+              },
+            ),
           ),
-        ),
-        SynkUiTooltip(
-          message: 'Datei auf das Gerät übertragen',
-          child: SynkUiMenuItem(
-            icon: CupertinoIcons.share,
-            label: 'Datei senden',
-            onPressed: () {
-              controller.close();
-              onShareFile();
-            },
+          SynkUiTooltip(
+            message: 'Datei auf das Gerät übertragen',
+            child: SynkUiMenuItem(
+              icon: CupertinoIcons.share,
+              label: 'Datei senden',
+              onPressed: () {
+                controller.close();
+                onShareFile();
+              },
+            ),
           ),
-        ),
-        SynkUiTooltip(
-          message: 'Gerät An-/Ausschalten',
-          child: SynkUiMenuItem(
-            icon: CupertinoIcons.power,
-            label: 'Standby',
-            onPressed: () {
-              controller.close();
-              onStandby();
-            },
+        ],
+        if (supportsInteraction)
+          SynkUiTooltip(
+            message: 'Gerät An-/Ausschalten',
+            child: SynkUiMenuItem(
+              icon: CupertinoIcons.power,
+              label: 'Standby',
+              onPressed: () {
+                controller.close();
+                onStandby();
+              },
+            ),
           ),
-        ),
       ],
       triggerBuilder: (context, controller) => SynkUiTooltip(
         message: 'Mehr',

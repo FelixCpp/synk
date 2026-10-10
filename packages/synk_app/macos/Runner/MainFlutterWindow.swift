@@ -17,6 +17,9 @@ class MainFlutterWindow: NSWindow {
         with: flutterViewController.registrar(forPlugin: "IosMirrorPlugin")
       )
     }
+    IosHidPlugin.register(
+      with: flutterViewController.registrar(forPlugin: "IosHidPlugin")
+    )
     IosDeviceDiscoveryPlugin.register(
       with: flutterViewController.registrar(forPlugin: "IosDeviceDiscoveryPlugin")
     )

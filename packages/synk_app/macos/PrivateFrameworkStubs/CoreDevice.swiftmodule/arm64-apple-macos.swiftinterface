@@ -1,0 +1,229 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.4 (swiftlang-6.4.0.34.1 clang-2100.3.34.1)
+// swift-module-flags: -target arm64-apple-macos27.0 -enable-library-evolution -swift-version 5 -module-name CoreDevice
+import CoreDeviceProtocols
+import CoreGraphics
+import Foundation
+import Swift
+import _Concurrency
+
+public struct Capability {
+}
+
+public protocol DeviceCapabilityProtocol {
+}
+
+public protocol DeviceCapability {
+  associatedtype ProtocolType
+  associatedtype ImplType
+  static var capability: CoreDevice.Capability { get }
+}
+
+public struct CapabilityStaticMember<T> {
+}
+
+public struct HIDDeviceCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = Swift.Never
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+public struct DigitizerHIDCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = any CoreDevice.HIDDigitizer
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T : CoreDevice.DeviceCapability {
+  public static var hid: CoreDevice.CapabilityStaticMember<CoreDevice.HIDDeviceCapability>.Type { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T == CoreDevice.HIDDeviceCapability {
+  public static var digitizer: CoreDevice.CapabilityStaticMember<CoreDevice.DigitizerHIDCapability> { get }
+}
+
+public struct DigitizerPoint {
+  public init(x: CoreGraphics.CGFloat, y: CoreGraphics.CGFloat)
+  public var x: Swift.Double { get }
+  public var y: Swift.Double { get }
+}
+
+public enum DigitizerEventType {
+  case start
+  case position
+  case end
+}
+
+public enum DigitizerEdge {
+  case none
+  case top
+  case bottom
+  case left
+  case right
+}
+
+public enum DigitizerTarget {
+  case mainScreen
+  case display1
+  case display2
+}
+
+public protocol HIDDigitizer : CoreDevice.DeviceCapabilityProtocol {
+  func send(pointOne: CoreDevice.DigitizerPoint, pointTwo: CoreDevice.DigitizerPoint?, eventType: CoreDevice.DigitizerEventType, edge: CoreDevice.DigitizerEdge, target: CoreDevice.DigitizerTarget) throws
+  func sendBarrier()
+}
+
+public struct KeyboardHIDCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = any CoreDevice.HIDKeyboard
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+public struct ButtonHIDCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = any CoreDevice.HIDButton
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T == CoreDevice.HIDDeviceCapability {
+  public static var keyboard: CoreDevice.CapabilityStaticMember<CoreDevice.KeyboardHIDCapability> { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T == CoreDevice.HIDDeviceCapability {
+  public static var button: CoreDevice.CapabilityStaticMember<CoreDevice.ButtonHIDCapability> { get }
+}
+
+public enum HIDButtonState {
+  case down
+  case up
+  public var rawValue: Swift.UInt8 { get }
+}
+
+public struct HIDKeyboardUsageCode {
+  public init(rawValue: Swift.UInt16)
+  public var rawValue: Swift.UInt16 { get }
+}
+
+public protocol HIDUsageCodeProtocol {
+}
+
+public protocol HIDUsagePageProtocol {
+  associatedtype Code : CoreDevice.HIDUsageCodeProtocol
+  static var usagePage: Swift.UInt16 { get }
+}
+
+public struct HIDUsageStaticMember<T> {
+}
+
+public struct HIDUsageCode<Page> : CoreDevice.HIDUsageCodeProtocol where Page : CoreDevice.HIDUsagePageProtocol {
+  public init(_ page: Page.Type, _ usageCode: Swift.Int)
+  public var usagePage: Swift.UInt16 { get }
+  public var usageCode: Swift.UInt16 { get }
+}
+
+public struct ConsumerPage : CoreDevice.HIDUsagePageProtocol {
+  public typealias Code = CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage>
+  public static var usagePage: Swift.UInt16 { get }
+}
+
+extension CoreDevice.HIDUsageStaticMember where T : CoreDevice.HIDUsagePageProtocol {
+  public static var consumer: CoreDevice.HIDUsageStaticMember<CoreDevice.ConsumerPage> { get }
+}
+
+extension CoreDevice.HIDUsageCode where Page == CoreDevice.ConsumerPage {
+  public static var sleepWake: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var power: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var home: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var menu: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var siri: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var snapshot: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var volumeIncrement: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+  public static var volumeDecrement: CoreDevice.HIDUsageCode<CoreDevice.ConsumerPage> { get }
+}
+
+public struct ScrollHIDCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = any CoreDevice.HIDScroll
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T == CoreDevice.HIDDeviceCapability {
+  public static var scroll: CoreDevice.CapabilityStaticMember<CoreDevice.ScrollHIDCapability> { get }
+}
+
+public struct ScrollPoint {
+  public init<T>(x: T, y: T, z: T) where T : Swift.BinaryFloatingPoint
+  public var x: Swift.Double { get }
+  public var y: Swift.Double { get }
+  public var z: Swift.Double { get }
+  public var description: Swift.String { get }
+}
+
+public struct ScrollPhase {
+  public init(rawValue: Swift.UInt16)
+  public var rawValue: Swift.UInt16 { get }
+  public var description: Swift.String { get }
+}
+
+public struct ScrollMomentum {
+  public init(rawValue: Swift.UInt8)
+  public var rawValue: Swift.UInt8 { get }
+  public var description: Swift.String { get }
+}
+
+public enum ScrollTarget {
+  case dial
+  case digitalCrown
+  public init?(rawValue: Swift.UInt)
+  public var rawValue: Swift.UInt { get }
+}
+
+public protocol HIDScroll : CoreDevice.DeviceCapabilityProtocol {
+  func send(point: CoreDevice.ScrollPoint, phase: CoreDevice.ScrollPhase, momentum: CoreDevice.ScrollMomentum, target: CoreDevice.ScrollTarget) throws
+  func sendBarrier()
+}
+
+public protocol HIDKeyboard : CoreDevice.DeviceCapabilityProtocol {
+  func send(key: CoreDevice.HIDKeyboardUsageCode, state: CoreDevice.HIDButtonState) throws
+  func sendBarrier()
+}
+
+public protocol HIDButton : CoreDevice.DeviceCapabilityProtocol {
+  func sendButton<Page>(page: CoreDevice.HIDUsageStaticMember<Page>, code: CoreDevice.HIDUsageCode<Page>, state: CoreDevice.HIDButtonState) throws where Page : CoreDevice.HIDUsagePageProtocol
+  func sendCustomButton(usagePage: Swift.Int, usageCode: Swift.Int, state: CoreDevice.HIDButtonState) throws
+  func sendBarrier()
+}
+
+public protocol CoreDeviceServiceConnection {
+}
+
+public struct CoreDeviceService {
+  public static var sharedConnection: any CoreDevice.CoreDeviceServiceConnection { get }
+}
+
+public struct DevicePreparedness {
+  public init(rawValue: Swift.Int)
+  public var rawValue: Swift.Int { get }
+}
+
+public struct UsageAssertionOptions {
+  public init(requiredPreparedness: CoreDevice.DevicePreparedness)
+}
+
+public class DeviceUsageAssertion {
+  final public var identifier: Foundation.UUID { get }
+  public func releaseAssertion()
+}
+
+public class RemoteDevice {
+  public var deviceIdentifier: Foundation.UUID { get }
+  public var deviceInfo: CoreDeviceProtocols.DeviceInfo { get }
+  public func getImplementation<T>(for member: CoreDevice.CapabilityStaticMember<T>) async throws -> T.ProtocolType where T : CoreDevice.DeviceCapability
+  final public func acquireDeviceUsageAssertion(withReason reason: Swift.String, options: CoreDevice.UsageAssertionOptions) async throws -> CoreDevice.DeviceUsageAssertion
+}
+
+public class DeviceManager {
+  public init(serviceConnection: any CoreDevice.CoreDeviceServiceConnection)
+  public var devices: [Foundation.UUID : CoreDevice.RemoteDevice] { get }
+  public func awaitFullInitialization() async
+}

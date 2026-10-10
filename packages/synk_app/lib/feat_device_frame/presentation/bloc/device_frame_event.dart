@@ -7,10 +7,16 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onToggleRecording() = _OnToggleRecording;
   const factory DeviceFrameEvent.onToggleAudioMute() = _OnToggleAudioMute;
   const factory DeviceFrameEvent.onPointerEvent(
-    ScrcpyPointerEventType type,
+    DevicePointerEventType type,
     double normalizedPointerX,
     double normalizedPointerY,
   ) = _OnPointerEvent;
+  const factory DeviceFrameEvent.onPinchEvent(
+    DevicePointerEventType type,
+    double centerX,
+    double centerY,
+    double spread,
+  ) = _OnPinchEvent;
   const factory DeviceFrameEvent.onKeyEvent(KeyEvent keyEvent) = _OnKeyEvent;
   const factory DeviceFrameEvent.onFilesDropped(List<String> filepaths) =
       _OnFilesDropped;

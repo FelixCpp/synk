@@ -23,7 +23,8 @@ class const MaximizedDeviceRepositoryImpl({
             isLive: true,
             textureId: connection.textureId,
             screenSize: connection.screenSize,
-            supportsInteraction: connection.device is AndroidDevice,
+            supportsInteraction: connection.supportsInteraction,
+            supportsDeviceActions: connection.device is AndroidDevice,
           );
         }
 
@@ -37,6 +38,7 @@ class const MaximizedDeviceRepositoryImpl({
             textureId: null,
             screenSize: null,
             supportsInteraction: device is AndroidDevice,
+            supportsDeviceActions: device is AndroidDevice,
           );
         }
 

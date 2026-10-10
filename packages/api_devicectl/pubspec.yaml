@@ -1,0 +1,11 @@
+name: api_devicectl
+description: An library containing the API for communicating with Xcode's devicectl for the Synk application.
+version: 1.0.0
+repository: https://github.com/FelixCpp/synk
+
+environment:
+  sdk: ^3.13.4
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

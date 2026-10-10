@@ -13,11 +13,13 @@ sealed class CanvasDevice with _$CanvasDevice {
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
     required bool supportsInteraction,
+    required bool supportsDeviceActions,
   }) = _ConnectedCanvasDevice;
 
   const factory CanvasDevice.connecting({
     required PluggedDevice device,
     required bool supportsInteraction,
+    required bool supportsDeviceActions,
   }) = _ConnectingCanvasDevice;
 }
 

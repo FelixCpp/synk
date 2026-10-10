@@ -1,0 +1,3 @@
+FRAMEWORK_SEARCH_PATHS[arch=arm64] = $(inherited) /Library/Developer/PrivateFrameworks
+SWIFT_INCLUDE_PATHS[arch=arm64] = $(inherited) $(SRCROOT)/PrivateFrameworkStubs
+OTHER_LDFLAGS[arch=arm64] = $(inherited) -weak_framework CoreDevice

@@ -6,10 +6,13 @@ import 'package:synk/feat_device_agent/application/android_audio_transmission.da
 import 'package:synk/feat_device_agent/application/android_device_agent_client.dart';
 import 'package:synk/feat_device_agent/application/android_interaction_transmission.dart';
 import 'package:synk/feat_device_agent/application/android_screen_transmission.dart';
+import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/scrcpy_key_input.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
 import 'package:synk/feat_device_connections/domain/models/android_device_info.dart';
 import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:path/path.dart' as path;
@@ -24,7 +27,7 @@ class AndroidDeviceAgent(
   final AndroidScreenTransmission screenTransmission,
   final AndroidAudioTransmission audioTransmission,
   final AndroidInteractionTransmission interactionTransmission,
-) implements ScreenCaptureAgent {
+) implements ScreenCaptureAgent, ClipboardAgent, InteractionAgent {
   final StreamSubscription<Uint8List> _mirrorSubscription;
   final StreamSubscription<Uint8List> _audioSubscription;
 
@@ -50,6 +53,7 @@ class AndroidDeviceAgent(
 
   @override
   NativeTextureId get textureId => session.textureId;
+
   @override
   DeviceScreenSize get screenSize => _screenSize.value;
 
@@ -75,7 +79,26 @@ class AndroidDeviceAgent(
     return session.setAudioMuted(muted);
   }
 
-  void simulatePointerEvent(ScrcpyPointerEvent event) {
+  @override
+  Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
+    final keyCode = scrcpyKeyCodeOf(event.key);
+    if (keyCode == null) {
+      return;
+    }
+
+    interactionTransmission.simulateKeyEvent(
+      keyCode: keyCode,
+      type: scrcpyKeyEventTypeOf(event.type),
+      metaState: scrcpyMetaStateOf(event.modifiers),
+    );
+  }
+
+  @override
+  Future<void> simulatePointerEvent(DevicePointerEvent event) async {
+    if (event.type == .down) {
+      _pressKey(.wakeup);
+    }
+
     interactionTransmission.simulatePointerEvent(
       type: event.type,
       normalizedPointerX: event.normalizedPointerX,
@@ -83,18 +106,35 @@ class AndroidDeviceAgent(
     );
   }
 
-  void simulateKeyEvent(ScrcpyKeyEvent event) {
-    interactionTransmission.simulateKeyEvent(
-      keyCode: event.keyCode,
-      type: event.type,
-      metaState: event.metaState,
-    );
+  @override
+  Future<void> simulatePinchEvent(PinchEvent event) async {}
+
+  @override
+  Future<void> simulateControlAction(DeviceControlAction action) async {
+    _pressKey(switch (action) {
+      .back => .back,
+      .home => .home,
+      .appSwitch => .appSwitch,
+      .standby => .power,
+    });
   }
 
-  void setDeviceClipboardContent(String clipboard) {
+  void _pressKey(ScrcpyKeyCode keyCode) {
+    for (final type in [ScrcpyKeyEventType.down, ScrcpyKeyEventType.up]) {
+      interactionTransmission.simulateKeyEvent(
+        keyCode: keyCode,
+        type: type,
+        metaState: .none,
+      );
+    }
+  }
+
+  @override
+  Future<void> setDeviceClipboardContent(String clipboard) async {
     interactionTransmission.setClipboard(text: clipboard);
   }
 
+  @override
   Future<String> readDeviceClipboardContent() {
     return interactionTransmission.getClipboard();
   }
@@ -106,11 +146,12 @@ class AndroidDeviceAgent(
   Future<void> pushFile(String localFilepath) {
     return adbCommunicator.pushFile(
       localFilepath: localFilepath,
-      remoteFilepath: '$_androidDownloadsDirectory/${path.basename(localFilepath)}',
+      remoteFilepath:
+          '$_androidDownloadsDirectory/${path.basename(localFilepath)}',
     );
   }
 
-  Future<AndroidDeviceInfo> fetchDeviceInfo() async {
+  Future<AndroidDeviceInfo> fetchAndroidDeviceInfo() async {
     final response = await communicator.fetchInfo();
 
     return AndroidDeviceInfo(

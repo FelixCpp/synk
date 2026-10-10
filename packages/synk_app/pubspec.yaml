@@ -16,6 +16,8 @@ dependencies:
 
   api_adb:
     path: ../api_adb/
+  api_devicectl:
+    path: ../api_devicectl/
   synk_ui:
     path: ../synk_ui/
   app_logger:

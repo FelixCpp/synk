@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/scrcpy_pointer_action.dart';
+import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_frame/domain/models/control_button_type.dart';
 import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
@@ -14,6 +15,7 @@ import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interacto
 import 'package:synk/feat_device_frame/domain/usecases/share_file_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
@@ -36,6 +38,7 @@ class DeviceFrameBloc({
 }) extends Bloc<DeviceFrameEvent, DeviceFrameState> {
   final simulateKeyEvent = SimulateKeyEventInteractor(repository);
   final simulatePointerEvent = SimulatePointerEventInteractor(repository);
+  final simulatePinchEvent = SimulatePinchEventInteractor(repository);
   final captureScreenshot = CaptureScreenshotInteractor(repository);
   final startRecording = StartRecordingInteractor(repository);
   final stopRecording = StopRecordingInteractor(repository);
@@ -52,6 +55,7 @@ class DeviceFrameBloc({
     on<_OnSetup>(_onSetup);
     on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
+    on<_OnPinchEvent>(_onPinchEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
     on<_OnToggleRecording>(_onToggleRecording, transformer: sequential());
     on<_OnToggleAudioMute>(_onToggleAudioMute, transformer: sequential());
@@ -77,7 +81,7 @@ class DeviceFrameBloc({
     _OnKeyEvent event,
     Emitter<DeviceFrameState> emit,
   ) async {
-    final keyEvent = event.keyEvent.toKeyEvent();
+    final keyEvent = event.keyEvent.toDeviceKeyEvent();
     if (keyEvent == null) {
       return;
     }
@@ -96,7 +100,7 @@ class DeviceFrameBloc({
     _OnPointerEvent event,
     Emitter<DeviceFrameState> emit,
   ) async {
-    final pointerEvent = ScrcpyPointerEvent(
+    final pointerEvent = DevicePointerEvent(
       type: event.type,
       normalizedPointerX: event.normalizedPointerX,
       normalizedPointerY: event.normalizedPointerY,
@@ -110,6 +114,27 @@ class DeviceFrameBloc({
           ),
         )
         .run((deviceId: deviceId, pointerEvent: pointerEvent));
+  }
+
+  FutureOr<void> _onPinchEvent(
+    _OnPinchEvent event,
+    Emitter<DeviceFrameState> emit,
+  ) async {
+    final PinchEvent pinchEvent = (
+      type: event.type,
+      centerX: event.centerX,
+      centerY: event.centerY,
+      spread: event.spread,
+    );
+
+    await simulatePinchEvent
+        .logger(level: .trace)
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to simulate pinch gesture: $e'),
+          ),
+        )
+        .run((deviceId: deviceId, pinchEvent: pinchEvent));
   }
 
   FutureOr<void> _onCaptureScreenshot(
@@ -280,75 +305,45 @@ class DeviceFrameBloc({
 }
 
 extension on KeyEvent {
-  static final _androidKeyByLogicalKey = Map.fromEntries(
-    kAndroidToLogicalKey.entries.map(
-      (entry) => MapEntry(entry.value, ScrcpyKeyCode(entry.key)),
-    ),
-  );
-
-  ScrcpyKeyEvent? toKeyEvent() {
-    final androidKey = _androidKeyByLogicalKey[logicalKey];
-    if (androidKey == null) {
-      return null;
-    }
-
-    final type = toKeyType();
-    if (type == null) {
-      return null;
-    }
-
-    final hardwareKeyboard = HardwareKeyboard.instance;
-    final metaState = resolveMetaState(hardwareKeyboard);
-
-    return .new(
-      keyCode: androidKey,
-      type: type,
-      metaState: metaState,
-    );
-  }
-
-  ScrcpyKeyEventType? toKeyType() {
-    return switch (this) {
+  DeviceKeyEvent? toDeviceKeyEvent() {
+    final DeviceKeyEventType? type = switch (this) {
       KeyDownEvent() => .down,
       KeyRepeatEvent() => .repeat,
       KeyUpEvent() => .up,
       _ => null,
     };
-  }
 
-  ScrcpyKeyMetaState resolveMetaState(HardwareKeyboard keyboard) {
-    var metaState = ScrcpyKeyMetaState.none.value;
-
-    for (final key in keyboard.logicalKeysPressed) {
-      metaState |= switch (key) {
-        LogicalKeyboardKey.shiftLeft =>
-          ScrcpyKeyMetaState.shiftLeftOn | ScrcpyKeyMetaState.shiftOn,
-        LogicalKeyboardKey.shiftRight =>
-          ScrcpyKeyMetaState.shiftRightOn | ScrcpyKeyMetaState.shiftOn,
-        LogicalKeyboardKey.controlLeft =>
-          ScrcpyKeyMetaState.ctrlLeftOn | ScrcpyKeyMetaState.ctrlOn,
-        LogicalKeyboardKey.controlRight =>
-          ScrcpyKeyMetaState.ctrlRightOn | ScrcpyKeyMetaState.ctrlOn,
-        LogicalKeyboardKey.altLeft =>
-          ScrcpyKeyMetaState.altLeftOn | ScrcpyKeyMetaState.altOn,
-        LogicalKeyboardKey.altRight =>
-          ScrcpyKeyMetaState.altRightOn | ScrcpyKeyMetaState.altOn,
-        LogicalKeyboardKey.metaLeft =>
-          ScrcpyKeyMetaState.metaLeftOn | ScrcpyKeyMetaState.metaOn,
-        LogicalKeyboardKey.metaRight =>
-          ScrcpyKeyMetaState.metaRightOn | ScrcpyKeyMetaState.metaOn,
-        _ => ScrcpyKeyMetaState.none,
-      };
+    if (type == null) {
+      return null;
     }
 
-    for (final lockMode in keyboard.lockModesEnabled) {
-      metaState |= switch (lockMode) {
-        .capsLock => ScrcpyKeyMetaState.capsLockOn,
-        .numLock => ScrcpyKeyMetaState.numLockOn,
-        .scrollLock => ScrcpyKeyMetaState.scrollLockOn,
-      };
-    }
-
-    return ScrcpyKeyMetaState(metaState);
+    return .new(
+      key: logicalKey,
+      type: type,
+      modifiers: _pressedModifiers(HardwareKeyboard.instance),
+    );
   }
+}
+
+Set<DeviceKeyModifier> _pressedModifiers(HardwareKeyboard keyboard) {
+  return {
+    for (final key in keyboard.logicalKeysPressed)
+      ?switch (key) {
+        LogicalKeyboardKey.shiftLeft => DeviceKeyModifier.shiftLeft,
+        LogicalKeyboardKey.shiftRight => DeviceKeyModifier.shiftRight,
+        LogicalKeyboardKey.controlLeft => DeviceKeyModifier.controlLeft,
+        LogicalKeyboardKey.controlRight => DeviceKeyModifier.controlRight,
+        LogicalKeyboardKey.altLeft => DeviceKeyModifier.altLeft,
+        LogicalKeyboardKey.altRight => DeviceKeyModifier.altRight,
+        LogicalKeyboardKey.metaLeft => DeviceKeyModifier.metaLeft,
+        LogicalKeyboardKey.metaRight => DeviceKeyModifier.metaRight,
+        _ => null,
+      },
+    for (final lockMode in keyboard.lockModesEnabled)
+      switch (lockMode) {
+        .capsLock => DeviceKeyModifier.capsLock,
+        .numLock => DeviceKeyModifier.numLock,
+        .scrollLock => DeviceKeyModifier.scrollLock,
+      },
+  };
 }

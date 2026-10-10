@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_agent/domain/repositories/device_agent_repository.dart';
 import 'package:synk/feat_device_agent/domain/repositories/ios_device_agent_repository.dart';
@@ -121,6 +123,7 @@ class DeviceConnectionsRepositoryImpl({
           info: androidDeviceInfos[id]!,
           textureId: agent.textureId,
           screenSize: sizes[id] ?? agent.screenSize,
+          supportsInteraction: true,
         );
       }
       return null;
@@ -132,6 +135,7 @@ class DeviceConnectionsRepositoryImpl({
           device: device,
           textureId: agent.textureId,
           screenSize: sizes[id] ?? agent.screenSize,
+          supportsInteraction: agent.supportsInteraction,
         );
       }
     }
@@ -149,7 +153,7 @@ class DeviceConnectionsRepositoryImpl({
     try {
       final agent = await agentRepository.establishConnection(device.id);
       try {
-        final info = await agent.fetchDeviceInfo();
+        final info = await agent.fetchAndroidDeviceInfo();
         androidDeviceAgentsById[device.id] = agent;
         androidDeviceInfos[device.id] = info;
         _watchScreenSize(device.id, agent);
@@ -232,5 +236,24 @@ class DeviceConnectionsRepositoryImpl({
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) {
     return androidDeviceAgentsById[id] ?? iosDeviceAgentsById[id];
+  }
+
+  @override
+  ClipboardAgent? getClipboardAgent(DeviceId id) {
+    return androidDeviceAgentsById[id] ?? iosDeviceAgentsById[id];
+  }
+
+  @override
+  InteractionAgent? getInteractionAgent(DeviceId id) {
+    if (androidDeviceAgentsById[id] case final agent?) {
+      return agent;
+    }
+
+    final agent = iosDeviceAgentsById[id];
+    if (agent == null || !agent.supportsInteraction) {
+      return null;
+    }
+
+    return agent;
   }
 }
