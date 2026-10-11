@@ -1,5 +1,6 @@
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
 import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
@@ -15,14 +16,18 @@ part 'sidebar_state.dart';
 part 'sidebar_event.dart';
 
 class SidebarBloc(
-  final SidebarRepository repository,
-  final ToggleConnectionInteractor toggleConnection,
+  final SidebarRepository sidebarRepository,
+  final DeviceConnectionsRepository deviceConnectionsRepository,
   final NotificationService notifications,
 ) extends Bloc<SidebarEvent, SidebarState> {
+  final toggleConnection = ToggleConnectionInteractor(
+    deviceConnectionsRepository,
+  );
+
   this : super(SidebarState.initial()) {
     on<_OnSetup>((event, emit) {
       return emit.forEach(
-        repository.observeDevices(),
+        sidebarRepository.observeDevices(),
         onData: (devices) {
           return state.copyWith(devices: devices);
         },

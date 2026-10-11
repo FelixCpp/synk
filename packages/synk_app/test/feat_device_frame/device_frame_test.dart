@@ -4,17 +4,16 @@ import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_mirror_session/mirror_session.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
@@ -300,8 +299,6 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   @override
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 
-  @override
-  IosDeviceAgent? getIosDeviceAgent(DeviceId id) => null;
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
@@ -315,14 +312,17 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   @override
   ClipboardAgent? getClipboardAgent(DeviceId id) => null;
 
-  @override
-  Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
 
   @override
-  Future<bool> isConnected(DeviceId id) async => false;
+  bool isConnected(DeviceId id) => false;
+
+  @override
+  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
+    return Stream.value(const {});
+  }
 
   @override
   Future<void> toggleConnection(PluggedDevice device) async {}

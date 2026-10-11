@@ -1,20 +1,18 @@
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_state.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
-import 'package:synk/feat_plugged_devices/ios/domain/models/ios_device.dart';
 import 'package:synk/feat_plugged_devices/ios/domain/repositories/plugged_ios_devices_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:flutter/cupertino.dart';
@@ -43,12 +41,13 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   Future<void> dispose() async {}
 
   @override
-  Future<bool> isConnected(DeviceId id) async => false;
+  bool isConnected(DeviceId id) => false;
 
   @override
-  Stream<List<PluggedDevice>> observeConnectingDevices() => Stream.value(
-    const [],
-  );
+  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
+    return Stream.value(const {});
+  }
+
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => Stream.value(
@@ -58,8 +57,6 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   @override
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 
-  @override
-  IosDeviceAgent? getIosDeviceAgent(DeviceId id) => null;
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
@@ -152,14 +149,14 @@ void main() {
         ]);
 
         expect(find.text('Pixel serial-2'), findsOneWidget);
-        expect(find.text('NICHT AUTORISIERT'), findsNWidgets(2));
         expect(find.byType(SynkUiTag), findsOneWidget);
+        expect(find.text('NICHT AUTORISIERT'), findsOneWidget);
         expect(find.byIcon(CupertinoIcons.bolt_fill), findsNothing);
         expect(find.byIcon(CupertinoIcons.bolt_slash_fill), findsNothing);
       },
     );
 
-    testWidgets('separates authorized and unauthorized devices', (
+    testWidgets('lists authorized and unauthorized devices together', (
       tester,
     ) async {
       await _pumpSidebar(tester, [
@@ -172,7 +169,7 @@ void main() {
 
       expect(find.text('Pixel serial-3'), findsOneWidget);
       expect(find.text('Pixel serial-4'), findsOneWidget);
-      expect(find.text('NICHT AUTORISIERT'), findsNWidgets(2));
+      expect(find.byType(SynkUiTag), findsOneWidget);
       expect(find.byIcon(CupertinoIcons.bolt_fill), findsOneWidget);
     });
   });

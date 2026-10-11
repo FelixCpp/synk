@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:synk/feat_plugged_devices/ios/data/datasources/ios_device_discovery_channel.dart';
 import 'package:synk/feat_plugged_devices/ios/data/models/ios_device_dto.dart';
 import 'package:synk/feat_plugged_devices/ios/data/repositories/plugged_ios_devices_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/ios/domain/models/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

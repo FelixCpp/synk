@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SidebarDevice {
 
- PluggedDevice get device; bool get isConnected;
+ PluggedDevice get device; SidebarDeviceState get state;
 /// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SidebarDeviceCopyWith<SidebarDevice> get copyWith => _$SidebarDeviceCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as SidebarDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.isConnected, _this.isConnected) || other.isConnected == _this.isConnected));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDevice&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.state, _this.state) || other.state == _this.state));
 }
 
 
 @override
 int get hashCode {
   final _this = this as SidebarDevice;
-  return Object.hash(runtimeType,_this.device,_this.isConnected);
+  return Object.hash(runtimeType,_this.device,_this.state);
 }
 
 @override
 String toString() {
   final _this = this as SidebarDevice;
-  return 'SidebarDevice(device: ${_this.device}, isConnected: ${_this.isConnected})';
+  return 'SidebarDevice(device: ${_this.device}, state: ${_this.state})';
 }
 
 
@@ -51,11 +51,11 @@ abstract mixin class $SidebarDeviceCopyWith<$Res>  {
   factory $SidebarDeviceCopyWith(SidebarDevice value, $Res Function(SidebarDevice) _then) = _$SidebarDeviceCopyWithImpl;
 @useResult
 $Res call({
- PluggedDevice device, bool isConnected
+ PluggedDevice device, SidebarDeviceState state
 });
 
 
-
+$PluggedDeviceCopyWith<$Res> get device;$SidebarDeviceStateCopyWith<$Res> get state;
 
 }
 /// @nodoc
@@ -68,14 +68,32 @@ class _$SidebarDeviceCopyWithImpl<$Res>
 
 /// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? isConnected = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? state = null,}) {
   return _then(SidebarDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as PluggedDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
-as bool,
+as PluggedDevice,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as SidebarDeviceState,
   ));
 }
-
+/// Create a copy of SidebarDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of SidebarDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SidebarDeviceStateCopyWith<$Res> get state {
+  
+  return $SidebarDeviceStateCopyWith<$Res>(_self.state, (value) {
+    return _then(_self.copyWith(state: value));
+  });
+}
 }
 
 
@@ -154,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PluggedDevice device,  bool isConnected)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PluggedDevice device,  SidebarDeviceState state)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SidebarDevice() when $default != null:
-return $default(_that.device,_that.isConnected);case _:
+return $default(_that.device,_that.state);case _:
   return orElse();
 
 }
@@ -175,10 +193,10 @@ return $default(_that.device,_that.isConnected);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PluggedDevice device,  bool isConnected)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PluggedDevice device,  SidebarDeviceState state)  $default,) {final _that = this;
 switch (_that) {
 case _SidebarDevice():
-return $default(_that.device,_that.isConnected);}
+return $default(_that.device,_that.state);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +210,10 @@ return $default(_that.device,_that.isConnected);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PluggedDevice device,  bool isConnected)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PluggedDevice device,  SidebarDeviceState state)?  $default,) {final _that = this;
 switch (_that) {
 case _SidebarDevice() when $default != null:
-return $default(_that.device,_that.isConnected);case _:
+return $default(_that.device,_that.state);case _:
   return null;
 
 }
@@ -207,11 +225,11 @@ return $default(_that.device,_that.isConnected);case _:
 
 
 class _SidebarDevice implements SidebarDevice {
-  const _SidebarDevice({required this.device, required this.isConnected});
+  const _SidebarDevice({required this.device, required this.state});
   
 
 @override final  PluggedDevice device;
-@override final  bool isConnected;
+@override final  SidebarDeviceState state;
 
 /// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -223,18 +241,18 @@ _$SidebarDeviceCopyWith<_SidebarDevice> get copyWith => __$SidebarDeviceCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SidebarDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.isConnected, isConnected) || other.isConnected == isConnected));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SidebarDevice&&(identical(other.device, device) || other.device == device)&&(identical(other.state, state) || other.state == state));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,isConnected);
+    return Object.hash(runtimeType,device,state);
 }
 
 @override
 String toString() {
-    return 'SidebarDevice(device: $device, isConnected: $isConnected)';
+    return 'SidebarDevice(device: $device, state: $state)';
 }
 
 
@@ -245,11 +263,11 @@ abstract mixin class _$SidebarDeviceCopyWith<$Res> implements $SidebarDeviceCopy
   factory _$SidebarDeviceCopyWith(_SidebarDevice value, $Res Function(_SidebarDevice) _then) = __$SidebarDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, bool isConnected
+ PluggedDevice device, SidebarDeviceState state
 });
 
 
-
+@override $PluggedDeviceCopyWith<$Res> get device;@override $SidebarDeviceStateCopyWith<$Res> get state;
 
 }
 /// @nodoc
@@ -262,15 +280,33 @@ class __$SidebarDeviceCopyWithImpl<$Res>
 
 /// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isConnected = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? state = null,}) {
   return _then(_SidebarDevice(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as PluggedDevice,isConnected: null == isConnected ? _self.isConnected : isConnected // ignore: cast_nullable_to_non_nullable
-as bool,
+as PluggedDevice,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
+as SidebarDeviceState,
   ));
 }
 
-
+/// Create a copy of SidebarDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of SidebarDevice
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SidebarDeviceStateCopyWith<$Res> get state {
+  
+  return $SidebarDeviceStateCopyWith<$Res>(_self.state, (value) {
+    return _then(_self.copyWith(state: value));
+  });
+}
 }
 
 // dart format on

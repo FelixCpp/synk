@@ -1,7 +1,7 @@
 import 'package:synk/conversions/adb_device_dto.dart';
 import 'package:synk/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device.dart';
 import 'package:synk/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
+import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:rxdart/rxdart.dart';
 
 class PluggedAdbDevicesRepositoryImpl(

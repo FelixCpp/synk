@@ -1,5 +1,5 @@
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/ios/domain/models/ios_device.dart';
+import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 
 class IosDeviceDto {
   const IosDeviceDto({

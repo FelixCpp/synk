@@ -13,6 +13,7 @@ import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/ios_touch_gesture.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_mirror_session/mirror_session.dart';
@@ -355,8 +356,6 @@ class _ConnectionsWithInteraction(final InteractionAgent? agent)
   @override
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 
-  @override
-  IosDeviceAgent? getIosDeviceAgent(DeviceId id) => null;
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
@@ -366,14 +365,17 @@ class _ConnectionsWithInteraction(final InteractionAgent? agent)
 
   AudioAgent? getAudioAgent(DeviceId id) => null;
 
-  @override
-  Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
 
   @override
-  Future<bool> isConnected(DeviceId id) async => false;
+  bool isConnected(DeviceId id) => false;
+
+  @override
+  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
+    return Stream.value(const {});
+  }
 
   @override
   Future<void> toggleConnection(PluggedDevice device) async {}

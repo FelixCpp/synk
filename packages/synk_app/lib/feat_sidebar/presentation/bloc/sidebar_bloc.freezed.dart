@@ -513,7 +513,7 @@ $Res call({
 });
 
 
-
+$PluggedDeviceCopyWith<$Res> get device;
 
 }
 /// @nodoc
@@ -533,7 +533,16 @@ as PluggedDevice,
   ));
 }
 
-
+/// Create a copy of SidebarEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}
 }
 
 // dart format on

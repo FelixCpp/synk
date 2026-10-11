@@ -55,7 +55,7 @@ $Res call({
 });
 
 
-$DeviceScreenSizeCopyWith<$Res> get screenSize;
+$PluggedDeviceCopyWith<$Res> get device;$DeviceScreenSizeCopyWith<$Res> get screenSize;
 
 }
 /// @nodoc
@@ -79,6 +79,15 @@ as bool,
   ));
 }
 /// Create a copy of DeviceConnection
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -271,7 +280,7 @@ $Res call({
 });
 
 
-$AndroidDeviceInfoCopyWith<$Res> get info;@override $DeviceScreenSizeCopyWith<$Res> get screenSize;
+@override $PluggedDeviceCopyWith<$Res> get device;$AndroidDeviceInfoCopyWith<$Res> get info;@override $DeviceScreenSizeCopyWith<$Res> get screenSize;
 
 }
 /// @nodoc
@@ -297,6 +306,15 @@ as bool,
 }
 
 /// Create a copy of DeviceConnection
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -366,7 +384,7 @@ $Res call({
 });
 
 
-@override $DeviceScreenSizeCopyWith<$Res> get screenSize;
+@override $PluggedDeviceCopyWith<$Res> get device;@override $DeviceScreenSizeCopyWith<$Res> get screenSize;
 
 }
 /// @nodoc
@@ -391,6 +409,15 @@ as bool,
 }
 
 /// Create a copy of DeviceConnection
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PluggedDeviceCopyWith<$Res> get device {
+  
+  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
+    return _then(_self.copyWith(device: value));
+  });
+}/// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

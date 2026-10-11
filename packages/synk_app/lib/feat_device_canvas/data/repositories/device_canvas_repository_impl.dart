@@ -17,7 +17,7 @@ class DeviceCanvasRepositoryImpl(
             textureId: connection.textureId,
             screenSize: connection.screenSize,
             supportsInteraction: connection.supportsInteraction,
-            supportsDeviceActions: false, // TODO(Felix): Implement
+            supportsDeviceActions: connection.device.supportsDeviceActions,
             supportsAudio: connection.supportsAudio,
           ),
       ];

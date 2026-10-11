@@ -5,7 +5,7 @@ import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
 import 'package:api_adb/api_adb.dart';
 import 'package:synk/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
 import 'package:synk/feat_plugged_devices/adb/data/repositories/plugged_adb_devices_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device.dart';
+import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
