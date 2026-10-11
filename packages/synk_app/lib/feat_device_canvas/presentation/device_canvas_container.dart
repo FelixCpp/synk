@@ -67,7 +67,6 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
     final maximizedDevice = MaximizedDevice(
       deviceId: device.device.id,
       modelName: device.device.modelName,
-      isLive: device.isConnected,
       textureId: device.textureId,
       screenSize: device.screenSize,
       supportsInteraction: device.supportsInteraction,
@@ -128,7 +127,6 @@ class const _Content({
           return DeviceFrame(
             deviceId: item.device.id,
             modelName: item.device.modelName,
-            isLive: item.isConnected,
             textureId: item.textureId,
             screenSize: item.screenSize,
             supportsInteraction: item.supportsInteraction,

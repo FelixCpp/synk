@@ -27,7 +27,10 @@ void main() {
       final landscapeTile = deviceFrameSizeFor(landscape);
 
       expect(landscapeTile.width, greaterThan(landscapeTile.height));
-      expect(landscapeTile.width, closeTo(portraitTile.height - SynkTheme.deviceFrameChromeHeight, 0.01));
+      expect(
+        landscapeTile.width,
+        closeTo(portraitTile.height - SynkTheme.deviceFrameChromeHeight, 0.01),
+      );
       expect(
         landscapeTile.height - SynkTheme.deviceFrameChromeHeight,
         closeTo(portraitTile.width, 0.01),
@@ -49,14 +52,6 @@ void main() {
           reason: '$size does not get its fair share of canvas',
         );
       }
-    });
-
-    test('falls back to the reference shape while a device is connecting', () {
-      expect(deviceFrameSizeFor(null).width, closeTo(SynkTheme.deviceFrameWidth, 0.01));
-      expect(
-        deviceFrameSizeFor(const DeviceScreenSize(width: 0, height: 0)).width,
-        closeTo(SynkTheme.deviceFrameWidth, 0.01),
-      );
     });
   });
 }

@@ -151,19 +151,22 @@ void main() {
       );
     });
 
-    testWidgets('hides interaction-only controls for a non-interactive device', (
-      tester,
-    ) async {
-      await _pumpFrame(
+    testWidgets(
+      'hides interaction-only controls for a non-interactive device',
+      (
         tester,
-        _referenceScreenSize,
-        supportsInteraction: false,
-      );
+      ) async {
+        await _pumpFrame(
+          tester,
+          _referenceScreenSize,
+          supportsInteraction: false,
+        );
 
-      expect(find.byIcon(CupertinoIcons.home), findsNothing);
-      expect(find.byIcon(CupertinoIcons.ellipsis_vertical), findsNothing);
-      expect(_screenshotIcon(), findsOneWidget);
-    });
+        expect(find.byIcon(CupertinoIcons.home), findsNothing);
+        expect(find.byIcon(CupertinoIcons.ellipsis_vertical), findsNothing);
+        expect(_screenshotIcon(), findsOneWidget);
+      },
+    );
 
     testWidgets('forwards keystrokes only while focused', (tester) async {
       final reachedTheCanvas = <KeyEvent>[];
@@ -270,7 +273,6 @@ Future<SynkColors> _pumpFrame(
                       child: DeviceFrame(
                         deviceId: _device.id,
                         modelName: _device.modelName,
-                        isLive: true,
                         textureId: const NativeTextureId(1),
                         screenSize: screenSize,
                         supportsInteraction: supportsInteraction,
@@ -304,9 +306,7 @@ class _OfflineConnections implements DeviceConnectionsRepository {
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
 
-
   @override
-
   AudioAgent? getAudioAgent(DeviceId id) => null;
 
   @override

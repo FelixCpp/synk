@@ -10,42 +10,25 @@ class const MaximizedDeviceRepositoryImpl({
 }) implements MaximizedDeviceRepository {
   @override
   Stream<MaximizedDevice?> observeDevice(DeviceId deviceId) {
-    return Rx.combineLatest2(
-      connectionsRepository.observeConnectingDevices(),
-      connectionsRepository.observeDeviceConnections(),
-      (connecting, connected) {
-        for (final connection in connected) {
-          if (connection.device.id != deviceId) continue;
+    return connectionsRepository.observeDeviceConnections().mapNotNull(
+      (connections) {
+        final connection = connections
+            .where((connection) => connection.device.id == deviceId)
+            .firstOrNull;
 
-          return MaximizedDevice(
-            deviceId: deviceId,
-            modelName: connection.device.modelName,
-            isLive: true,
-            textureId: connection.textureId,
-            screenSize: connection.screenSize,
-            supportsInteraction: connection.supportsInteraction,
-            supportsDeviceActions: connection.device is AndroidDevice,
-            supportsAudio: connection.supportsAudio,
-          );
+        if (connection == null) {
+          return null;
         }
 
-        for (final device in connecting) {
-          if (device.id != deviceId) continue;
-
-          return MaximizedDevice(
-            deviceId: deviceId,
-            modelName: device.modelName,
-            isLive: false,
-            textureId: null,
-            screenSize: null,
-            supportsInteraction: device is AndroidDevice,
-            supportsDeviceActions: device is AndroidDevice,
-            // Not known before the stream is negotiated.
-            supportsAudio: false,
-          );
-        }
-
-        return null;
+        return MaximizedDevice(
+          deviceId: connection.device.id,
+          modelName: connection.device.modelName,
+          textureId: connection.textureId,
+          screenSize: connection.screenSize,
+          supportsInteraction: connection.supportsInteraction,
+          supportsDeviceActions: connection.device is AndroidDevice,
+          supportsAudio: connection.supportsAudio,
+        );
       },
     ).distinct();
   }

@@ -10,9 +10,8 @@ sealed class MaximizedDevice with _$MaximizedDevice {
   const factory MaximizedDevice({
     required DeviceId deviceId,
     required String modelName,
-    required bool isLive,
-    required NativeTextureId? textureId,
-    required DeviceScreenSize? screenSize,
+    required NativeTextureId textureId,
+    required DeviceScreenSize screenSize,
     required bool supportsInteraction,
     required bool supportsDeviceActions,
     required bool supportsAudio,

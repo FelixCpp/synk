@@ -8,7 +8,6 @@ class const DeviceFrameToolBar({
   super.key,
   required final DeviceId deviceId,
   required final String modelName,
-  required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
@@ -41,7 +40,7 @@ class const DeviceFrameToolBar({
         child: Row(
           spacing: SynkTheme.horizontalComponentSpacingSmall,
           children: [
-            _StatusDot(isLive: isLive),
+            _StatusDot(isLive: true), // TODO(Felix): Maybe remove this?
             Expanded(
               child: SynkUiTooltip(
                 message: deviceId,

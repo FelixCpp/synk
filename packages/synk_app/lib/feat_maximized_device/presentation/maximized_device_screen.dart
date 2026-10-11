@@ -82,7 +82,6 @@ class const _Content({
             child: DeviceFrame(
               deviceId: device.deviceId,
               modelName: device.modelName,
-              isLive: device.isLive,
               textureId: device.textureId,
               screenSize: device.screenSize,
               supportsInteraction: device.supportsInteraction,

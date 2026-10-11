@@ -20,9 +20,8 @@ class const DeviceFrame({
   super.key,
   required final DeviceId deviceId,
   required final String modelName,
-  required final bool isLive,
-  required final NativeTextureId? textureId,
-  required final DeviceScreenSize? screenSize,
+  required final NativeTextureId textureId,
+  required final DeviceScreenSize screenSize,
   required final bool supportsInteraction,
   required final bool supportsDeviceActions,
   required final bool supportsAudio,
@@ -86,7 +85,6 @@ class _DeviceFrameState extends State<DeviceFrame>
                   _ToolBar(
                     deviceId: widget.deviceId,
                     modelName: widget.modelName,
-                    isLive: widget.isLive,
                     isMaximized: widget.isMaximized,
                     isRecording: state.isRecording,
                     isAudioMuted: state.isAudioMuted,
@@ -162,7 +160,7 @@ class _DeviceFrameState extends State<DeviceFrame>
 
 class const _FrameLayout({
   required final DeviceId deviceId,
-  required final DeviceScreenSize? screenSize,
+  required final DeviceScreenSize screenSize,
   required final bool isMaximized,
   required final Widget child,
 }) extends StatelessWidget {
@@ -184,7 +182,7 @@ class const _FrameLayout({
     );
   }
 
-  Size _frameSizeFor(BoxConstraints constraints, DeviceScreenSize? screenSize) {
+  Size _frameSizeFor(BoxConstraints constraints, DeviceScreenSize screenSize) {
     const chromeHeight = SynkTheme.deviceFrameChromeHeight;
 
     final mirrorSize = _fitToAspectRatio(
@@ -284,7 +282,6 @@ class const _FrameSurface({
 class const _ToolBar({
   required final DeviceId deviceId,
   required final String modelName,
-  required final bool isLive,
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
@@ -307,7 +304,6 @@ class const _ToolBar({
       child: DeviceFrameToolBar(
         deviceId: deviceId,
         modelName: modelName,
-        isLive: isLive,
         isMaximized: isMaximized,
         isRecording: isRecording,
         isAudioMuted: isAudioMuted,
@@ -328,7 +324,7 @@ class const _ToolBar({
 }
 
 class const _ScreenMirror({
-  required final NativeTextureId? textureId,
+  required final NativeTextureId textureId,
   required final String modelName,
   required final bool hasFocus,
   required final Animation<double> flash,
@@ -390,14 +386,17 @@ class const _DeviceFrameBlocProvider({
 
 String _heroTagOf(DeviceId deviceId) => 'device-frame-$deviceId';
 
-double deviceAspectRatioOf(DeviceScreenSize? screenSize) {
-  if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
-    return SynkTheme.deviceFrameReferenceAspectRatio;
-  }
-
+double deviceAspectRatioOf(DeviceScreenSize screenSize) {
   return screenSize.width / screenSize.height;
+
+  // if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
+  //   return SynkTheme.deviceFrameReferenceAspectRatio;
+  // }
+  //
+  //
+  // return screenSize.width / screenSize.height;
 }
 
-Size deviceFrameSizeFor(DeviceScreenSize? screenSize) {
+Size deviceFrameSizeFor(DeviceScreenSize screenSize) {
   return SynkTheme.deviceFrameSizeFor(deviceAspectRatioOf(screenSize));
 }
