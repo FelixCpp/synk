@@ -1,0 +1,6 @@
+// Makes the stub header importable from Swift as a plain module, so the Runner
+// needs no bridging header. Wired up in Runner/Configs/PrivateFrameworks.xcconfig.
+module AVConferenceStubs {
+  header "AVConferenceStubs.h"
+  export *
+}

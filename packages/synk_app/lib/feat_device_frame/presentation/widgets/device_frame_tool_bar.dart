@@ -14,6 +14,7 @@ class const DeviceFrameToolBar({
   required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final bool supportsDeviceActions,
+  required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -61,6 +62,7 @@ class const DeviceFrameToolBar({
               isAudioMuted: isAudioMuted,
               supportsInteraction: supportsInteraction,
               supportsDeviceActions: supportsDeviceActions,
+              supportsAudio: supportsAudio,
               onCaptureScreenshot: onCaptureScreenshot,
               onToggleRecording: onToggleRecording,
               onToggleAudioMute: onToggleAudioMute,
@@ -83,6 +85,7 @@ class const _Actions({
   required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final bool supportsDeviceActions,
+  required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -106,7 +109,7 @@ class const _Actions({
             onPressed: onToggleRecording,
           ),
         ),
-        if (supportsDeviceActions)
+        if (supportsAudio)
           SynkUiTooltip(
             message: isAudioMuted ? 'Audio aktivieren' : 'Audio stummschalten',
             child: SynkUiIconButton(

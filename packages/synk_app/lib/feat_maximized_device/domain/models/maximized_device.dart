@@ -15,5 +15,6 @@ sealed class MaximizedDevice with _$MaximizedDevice {
     required DeviceScreenSize? screenSize,
     required bool supportsInteraction,
     required bool supportsDeviceActions,
+    required bool supportsAudio,
   }) = _MaximizedDevice;
 }

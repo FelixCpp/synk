@@ -5,7 +5,8 @@ import 'dart:typed_data';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk/feat_device_agent/data/datasources/ios_hid_channel.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_mirror_channel.dart';
+import 'package:synk/feat_device_agent/data/datasources/ios_mirror_transport.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
@@ -20,24 +21,29 @@ import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
 import 'package:rxdart/rxdart.dart';
 
 class IosDeviceAgent(
-  final IosMirrorChannel channel,
+  final IosMirrorTransport transport,
   final IosHidChannel hidChannel,
   final DevicectlApi devicectl,
   final DeviceId deviceId,
   @override final NativeTextureId textureId,
   final DeviceScreenSize initialScreenSize,
   final bool supportsInteraction,
-) implements ScreenCaptureAgent, ClipboardAgent, InteractionAgent {
+) implements ScreenCaptureAgent, ClipboardAgent, InteractionAgent, AudioAgent {
   late final _screenSize = BehaviorSubject.seeded(initialScreenSize);
-  late final StreamSubscription<IosMirrorScreenSize> _screenSizeSubscription;
+  late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
 
   var _activeEdge = IosTouchEdge.none;
+  var _isAudioMuted = true;
 
   this {
-    _screenSizeSubscription = channel.screenSizeChanges
-        .where((event) => event.textureId == textureId)
-        .listen((event) => _screenSize.add(event.size));
+    _screenSizeSubscription = transport
+        .screenSizeChanges(textureId)
+        .listen(_screenSize.add);
   }
+
+  /// Whether this connection carries the device's audio at all — only the
+  /// CoreDevice media stream does.
+  bool get supportsAudio => transport.supportsAudio;
 
   @override
   DeviceScreenSize get screenSize => _screenSize.value;
@@ -56,7 +62,7 @@ class IosDeviceAgent(
         stackTrace: stackTrace,
       );
 
-      return channel.captureScreenshot(textureId);
+      return transport.captureScreenshot(textureId);
     }
   }
 
@@ -77,6 +83,19 @@ class IosDeviceAgent(
   }
 
   @override
+  bool get isAudioMuted => _isAudioMuted;
+
+  @override
+  Future<void> setAudioMuted(bool muted) async {
+    if (!transport.supportsAudio) {
+      return;
+    }
+
+    await transport.setAudioMuted(textureId, muted);
+    _isAudioMuted = muted;
+  }
+
+  @override
   Future<String> readDeviceClipboardContent() {
     return devicectl.readPasteboard(deviceId: deviceId);
   }
@@ -88,12 +107,12 @@ class IosDeviceAgent(
 
   @override
   Future<void> startRecording(String filepath) {
-    return channel.startRecording(textureId, filepath);
+    return transport.startRecording(textureId, filepath);
   }
 
   @override
   Future<bool> stopRecording() {
-    return channel.stopRecording(textureId);
+    return transport.stopRecording(textureId);
   }
 
   @override
@@ -111,7 +130,7 @@ class IosDeviceAgent(
   }
 
   @override
-  Future<void> simulatePointerEvent(DevicePointerEvent event) {
+  Future<void> simulatePointerEvent(DevicePointerEvent event) async {
     if (event.type == .down) {
       _activeEdge = iosTouchEdgeAtPointerDown(
         event.normalizedPointerX,
@@ -119,25 +138,49 @@ class IosDeviceAgent(
       );
     }
 
-    return hidChannel.sendTouch(
-      deviceId: deviceId,
-      point: (x: event.normalizedPointerX, y: event.normalizedPointerY),
-      phase: iosTouchPhaseOf(event.type),
-      edge: _activeEdge,
+    _fireAndForget(
+      hidChannel.sendTouch(
+        deviceId: deviceId,
+        point: (x: event.normalizedPointerX, y: event.normalizedPointerY),
+        phase: iosTouchPhaseOf(event.type),
+        edge: _activeEdge,
+      ),
     );
   }
 
   @override
-  Future<void> simulatePinchEvent(PinchEvent event) {
+  Future<void> simulatePinchEvent(PinchEvent event) async {
     final leftX = _clampedToScreen(event.centerX - event.spread);
     final rightX = _clampedToScreen(event.centerX + event.spread);
 
-    return hidChannel.sendTouch(
-      deviceId: deviceId,
-      point: (x: leftX, y: event.centerY),
-      secondPoint: (x: rightX, y: event.centerY),
-      phase: iosTouchPhaseOf(event.type),
-      edge: .none,
+    _fireAndForget(
+      hidChannel.sendTouch(
+        deviceId: deviceId,
+        point: (x: leftX, y: event.centerY),
+        secondPoint: (x: rightX, y: event.centerY),
+        phase: iosTouchPhaseOf(event.type),
+        edge: .none,
+      ),
+    );
+  }
+
+  /// Sends a touch without waiting for the device to confirm it.
+  ///
+  /// The HID API carries no timestamp, so iOS reads a touch as having happened
+  /// when it arrives. Awaiting each sample would put a channel round trip
+  /// between two positions of the same drag, and the device would take that
+  /// delay for the finger moving slowly — a fast flick would arrive stretched
+  /// out and barely fling at all. The Android path does the same thing for the
+  /// same reason, over its scrcpy socket.
+  void _fireAndForget(Future<void> send) {
+    unawaited(
+      send.onError((error, stackTrace) {
+        appLogger.w(
+          'Failed to send a touch to $deviceId',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
     );
   }
 
@@ -167,7 +210,7 @@ class IosDeviceAgent(
       );
     }
 
-    await channel.stopMirror(textureId);
+    await transport.stopMirror(textureId);
   }
 }
 

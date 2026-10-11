@@ -25,6 +25,7 @@ class const MaximizedDeviceRepositoryImpl({
             screenSize: connection.screenSize,
             supportsInteraction: connection.supportsInteraction,
             supportsDeviceActions: connection.device is AndroidDevice,
+            supportsAudio: connection.supportsAudio,
           );
         }
 
@@ -39,6 +40,8 @@ class const MaximizedDeviceRepositoryImpl({
             screenSize: null,
             supportsInteraction: device is AndroidDevice,
             supportsDeviceActions: device is AndroidDevice,
+            // Not known before the stream is negotiated.
+            supportsAudio: false,
           );
         }
 

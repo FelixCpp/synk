@@ -14,12 +14,14 @@ sealed class CanvasDevice with _$CanvasDevice {
     required DeviceScreenSize screenSize,
     required bool supportsInteraction,
     required bool supportsDeviceActions,
+    required bool supportsAudio,
   }) = _ConnectedCanvasDevice;
 
   const factory CanvasDevice.connecting({
     required PluggedDevice device,
     required bool supportsInteraction,
     required bool supportsDeviceActions,
+    required bool supportsAudio,
   }) = _ConnectingCanvasDevice;
 }
 

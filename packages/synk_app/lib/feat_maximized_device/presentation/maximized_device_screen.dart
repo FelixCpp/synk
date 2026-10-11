@@ -87,6 +87,7 @@ class const _Content({
               screenSize: device.screenSize,
               supportsInteraction: device.supportsInteraction,
               supportsDeviceActions: device.supportsDeviceActions,
+              supportsAudio: device.supportsAudio,
               isMaximized: true,
               onToggleMaximize: minimize,
               onClose: onClose,

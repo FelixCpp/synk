@@ -72,6 +72,7 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
       screenSize: device.screenSize,
       supportsInteraction: device.supportsInteraction,
       supportsDeviceActions: device.supportsDeviceActions,
+      supportsAudio: device.supportsAudio,
     );
 
     final route = PageRouteBuilder<void>(
@@ -132,6 +133,7 @@ class const _Content({
             screenSize: item.screenSize,
             supportsInteraction: item.supportsInteraction,
             supportsDeviceActions: item.supportsDeviceActions,
+            supportsAudio: item.supportsAudio,
             isMaximized: false,
             onToggleMaximize: () => onMaximize(item),
             onClose: () {

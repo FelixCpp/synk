@@ -23,6 +23,9 @@
 /* Begin PBXBuildFile section */
 		0A9FBA475180D25247E7318A /* IosMirrorPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEA38AE84DF15FC61330B76 /* IosMirrorPlugin.swift */; };
 		7B1C4A3F90D24F118A5E6C22 /* IosHidPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B1C4A3E90D24F118A5E6C21 /* IosHidPlugin.swift */; };
+		A1B2C3D403E24F118A5E6C36 /* MediaStreamRtp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D403E24F118A5E6C35 /* MediaStreamRtp.swift */; };
+		A1B2C3D402E24F118A5E6C34 /* CoreDeviceMediaStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D402E24F118A5E6C33 /* CoreDeviceMediaStream.swift */; };
+		A1B2C3D401E24F118A5E6C32 /* IosMediaStreamPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D401E24F118A5E6C31 /* IosMediaStreamPlugin.swift */; };
 		331C80D8294CF71000263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C80D7294CF71000263BE5 /* RunnerTests.swift */; };
 		335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */; };
 		33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC10F02044A3C60003C045 /* AppDelegate.swift */; };
@@ -67,6 +70,9 @@
 /* Begin PBXFileReference section */
 		2DEA38AE84DF15FC61330B76 /* IosMirrorPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosMirrorPlugin.swift; sourceTree = "<group>"; };
 		7B1C4A3E90D24F118A5E6C21 /* IosHidPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosHidPlugin.swift; sourceTree = "<group>"; };
+		A1B2C3D403E24F118A5E6C35 /* MediaStreamRtp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaStreamRtp.swift; sourceTree = "<group>"; };
+		A1B2C3D402E24F118A5E6C33 /* CoreDeviceMediaStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDeviceMediaStream.swift; sourceTree = "<group>"; };
+		A1B2C3D401E24F118A5E6C31 /* IosMediaStreamPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosMediaStreamPlugin.swift; sourceTree = "<group>"; };
 		7B1C4A4090D24F118A5E6C23 /* PrivateFrameworks.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = PrivateFrameworks.xcconfig; sourceTree = "<group>"; };
 		331C80D5294CF71000263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
@@ -196,6 +202,9 @@
 				40CE63086323272CFA024A8A /* ScreenMirrorPlugin.swift */,
 				2DEA38AE84DF15FC61330B76 /* IosMirrorPlugin.swift */,
 				7B1C4A3E90D24F118A5E6C21 /* IosHidPlugin.swift */,
+				A1B2C3D403E24F118A5E6C35 /* MediaStreamRtp.swift */,
+				A1B2C3D402E24F118A5E6C33 /* CoreDeviceMediaStream.swift */,
+				A1B2C3D401E24F118A5E6C31 /* IosMediaStreamPlugin.swift */,
 				6DD6D93AB6BAA5330E3F92DB /* IosDeviceDiscoveryPlugin.swift */,
 				33E51913231747F40026EE4D /* DebugProfile.entitlements */,
 				33E51914231749380026EE4D /* Release.entitlements */,
@@ -387,6 +396,9 @@
 				A0E0C4F68A504B6233D6603D /* ScreenMirrorPlugin.swift in Sources */,
 				0A9FBA475180D25247E7318A /* IosMirrorPlugin.swift in Sources */,
 				7B1C4A3F90D24F118A5E6C22 /* IosHidPlugin.swift in Sources */,
+				A1B2C3D403E24F118A5E6C36 /* MediaStreamRtp.swift in Sources */,
+				A1B2C3D402E24F118A5E6C34 /* CoreDeviceMediaStream.swift in Sources */,
+				A1B2C3D401E24F118A5E6C32 /* IosMediaStreamPlugin.swift in Sources */,
 				54EFA722B2785F45534057C1 /* IosDeviceDiscoveryPlugin.swift in Sources */,
 				33CC10F12044A3C60003C045 /* AppDelegate.swift in Sources */,
 				335BBD1B22A9A15E00E9071D /* GeneratedPluginRegistrant.swift in Sources */,
@@ -504,7 +516,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -587,7 +599,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -637,7 +649,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;

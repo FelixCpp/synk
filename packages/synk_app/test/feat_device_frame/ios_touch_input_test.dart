@@ -3,6 +3,8 @@ import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
 import 'package:synk/feat_device_agent/data/datasources/ios_hid_channel.dart';
 import 'package:synk/feat_device_agent/data/datasources/ios_mirror_channel.dart';
+import 'package:synk/feat_device_agent/data/datasources/ios_mirror_transport.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
@@ -118,7 +120,7 @@ void main() {
       );
 
       agent = IosDeviceAgent(
-        IosMirrorChannel(),
+        IosCaptureSessionTransport(IosMirrorChannel(), null),
         IosHidChannel(),
         DevicectlApi(),
         _deviceId,
@@ -358,6 +360,11 @@ class _ConnectionsWithInteraction(final InteractionAgent? agent)
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+
+  @override
+
+  AudioAgent? getAudioAgent(DeviceId id) => null;
 
   @override
   Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();

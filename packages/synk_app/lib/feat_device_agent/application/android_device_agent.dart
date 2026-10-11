@@ -6,6 +6,7 @@ import 'package:synk/feat_device_agent/application/android_audio_transmission.da
 import 'package:synk/feat_device_agent/application/android_device_agent_client.dart';
 import 'package:synk/feat_device_agent/application/android_interaction_transmission.dart';
 import 'package:synk/feat_device_agent/application/android_screen_transmission.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
@@ -27,7 +28,7 @@ class AndroidDeviceAgent(
   final AndroidScreenTransmission screenTransmission,
   final AndroidAudioTransmission audioTransmission,
   final AndroidInteractionTransmission interactionTransmission,
-) implements ScreenCaptureAgent, ClipboardAgent, InteractionAgent {
+) implements ScreenCaptureAgent, ClipboardAgent, InteractionAgent, AudioAgent {
   final StreamSubscription<Uint8List> _mirrorSubscription;
   final StreamSubscription<Uint8List> _audioSubscription;
 
@@ -60,6 +61,7 @@ class AndroidDeviceAgent(
   @override
   Stream<DeviceScreenSize> get screenSizeChanges => _screenSize.stream;
 
+  @override
   bool get isAudioMuted => _isAudioMuted;
 
   Future<void> dispose() async {
@@ -74,6 +76,7 @@ class AndroidDeviceAgent(
     await communicator.dispose();
   }
 
+  @override
   Future<void> setAudioMuted(bool muted) {
     _isAudioMuted = muted;
     return session.setAudioMuted(muted);

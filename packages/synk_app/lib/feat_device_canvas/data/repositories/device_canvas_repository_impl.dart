@@ -26,6 +26,8 @@ class DeviceCanvasRepositoryImpl(
               device: device,
               supportsInteraction: device is AndroidDevice,
               supportsDeviceActions: device is AndroidDevice,
+              // Not known before the stream is negotiated.
+              supportsAudio: false,
             ),
 
         for (final connection in connected)
@@ -36,6 +38,7 @@ class DeviceCanvasRepositoryImpl(
             screenSize: connection.screenSize,
             supportsInteraction: connection.supportsInteraction,
             supportsDeviceActions: connection.device is AndroidDevice,
+            supportsAudio: connection.supportsAudio,
           ),
       ];
     });

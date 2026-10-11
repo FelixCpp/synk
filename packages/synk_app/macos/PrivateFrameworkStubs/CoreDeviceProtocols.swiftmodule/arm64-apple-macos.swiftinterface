@@ -6,4 +6,5 @@ import Swift
 public struct DeviceInfo {
   public var udid: Swift.String? { get }
   public var serialNumber: Swift.String? { get }
+  public var tunnelIPAddressString: Swift.String? { get }
 }

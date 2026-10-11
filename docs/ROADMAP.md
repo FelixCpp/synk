@@ -39,12 +39,15 @@ Stand: 2026-09-30. Die Android-Pipeline basiert darauf, per ADB eine eigene Serv
 
 > **Teil-Korrektur 2026-10-09:** Für Touch-/Key-Injection gilt der letzte Satz nicht mehr – Apple liefert diesen Kanal inzwischen selbst mit, ohne eigene Binary auf dem Gerät. Siehe [Input-Injection via CoreDevice-HID](#input-injection-via-coredevice-hid). Clipboard, Datei-Transfer und App-Install bleiben davon unberührt.
 
+> **Teil-Korrektur 2026-10-10:** Dasselbe gilt für Bildschirm *und* Ton. CoreDevice bringt einen Medienstrom mit, den das Gerät selbst sendet – kabellos tragfähig und mit Systemton. Siehe [Kabellose Spiegelung und Audio via CoreDevice-Medienstrom](#kabellose-spiegelung-und-audio-via-coredevice-medienstrom). Damit bleibt als echte Plattformgrenze nur noch der App-Install.
+
 ### Vergleich Android (Ist-Zustand) vs. iOS (realistisch)
 
 | Feature              | Android (jetzt)                            | iOS (realistisch)                                                                                                                                                                                                      |
 | -------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Geräte-Discovery     | `adb track-devices`                        | kein ADB-Äquivalent; `usbmuxd`-Protokoll (z. B. über `libimobiledevice`)                                                                                                                                               |
-| Bildschirm-Mirroring | eigener Server streamt H264 über Socket    | `AVFoundation`/`CoreMediaIO` captured Gerät als Kamera (wie QuickTime „Movie Recording"), liefert fertige `CMSampleBuffer` – kein eigener H264-Decoder nötig                                                           |
+| Bildschirm-Mirroring | eigener Server streamt H264 über Socket    | **zwei Wege umgesetzt:** CoreDevice-Medienstrom (Gerät sendet HEVC per RTP, trägt auch kabellos und bringt Ton mit) mit `AVFoundation`/`CoreMediaIO` als Rückfall (captured Gerät als Kamera, USB-only, stumm)        |
+| Audio-Forwarding     | dritter scrcpy-Socket, `audio_codec=raw`   | **umgesetzt** über einen zweiten CoreDevice-Medienstrom (`.audioSystemOutput`), AAC-ELD 48 kHz stereo                                                                                                                 |
 | Touch-/Key-Injection | InputManager-Reflection im eigenen Server  | **Touch und Gesten umgesetzt** über CoreDevice-HID (`com.apple.coredevice.feature.remote.hid.digitizer`): Tap, Drag, Navigationsleiste als Kantenwische und Trackpad-Pinch, ohne Companion-App auf dem Gerät. Keys (`.hid.keyboard`), Hardware-Tasten (`.hid.button`) und Mausrad (`.hid.scroll`) hängen am selben Muster und sind ungeprüft – eigener Abschnitt unten |
 | Clipboard-Sync       | Custom-Protokoll im eigenen Server         | **umgesetzt** über `devicectl device pasteboard` – `copy`/`paste` für Text; `monitor` und `sync-with-host` (bidirektional) bleiben als Option                                      |
 | Datei-Transfer       | `adb push`                                 | `devicectl device copy` läuft, erreicht aber nur App-Container und Scratch-Bereiche – kein nutzersichtbares Ziel und damit kein Gegenstück zum Android-Feature (eigener Abschnitt unten)                      |
@@ -54,7 +57,7 @@ Stand: 2026-09-30. Die Android-Pipeline basiert darauf, per ADB eine eigene Serv
 
 ### Priorisierungsvorschlag
 
-1. **View-only-Mirroring** (Screen sehen, ggf. aufnehmen) – via `AVCaptureSession`/`CoreMediaIO`, technisch überschaubar und eher weniger Aufwand als der bestehende Android-Videopfad, da kein eigener NAL-Parser/Decoder nötig ist.
+1. **Mirroring** – **erledigt, auf zwei Unterbauten.** Zuerst view-only über `AVCaptureSession`/`CoreMediaIO` (USB-only, stumm), inzwischen bevorzugt über den CoreDevice-Medienstrom: das Gerät sendet HEVC per RTP, trägt auch kabellos und bringt den Systemton mit. Die Capture-Session bleibt als Rückfall, weil sie jedes vertraute Gerät erreicht und keinen Developer Mode braucht. Eigener Abschnitt unten.
 2. **Alles, was `devicectl` schon kann** – Screenshot und Clipboard-Sync sind erledigt. Datei-Transfer und Display-Infos waren der Rest und haben sich bei der Probe weitgehend aufgelöst, siehe eigener Abschnitt; dieser Punkt ist damit abgeschlossen. Shell-out auf ein CLI, also dasselbe Muster wie der ADB-Pfad (`connect_wirelessly_interactor.dart`, `ScrcpyServerLauncher`). Billigster Posten mit dem größten Sprung in der Feature-Tabelle und nach Punkt 1 als Nächstes dran.
 3. **Input-Injection** über CoreDevice-HID – Touch und Gesten sind **erledigt** und in der App verdrahtet. Offen ist der Rest derselben Familie: Keys, Mausrad und Hardware-Tasten, jeweils am selben Muster und ohne Zugangsproblem. Eigener Abschnitt unten.
 4. **App-Install** bleibt der teure Rest: `devicectl device install` existiert, scheitert aber an der signierten/provisionierten IPA. Daran ändert kein Unterbau etwas.
@@ -102,9 +105,81 @@ Geprüft an iPhone 15 (iPhone15,4) mit iOS 26.6.2 (23G90) gegen `devicectl` 642.
 
 **Nachgeprüft auf iOS 27.0.1 (24A446), 2026-10-09:** unverändert. Weiterhin 65 Capabilities, weiterhin kein `screenrecording`, derselbe Fehler bei `screen-record`. Auch die HID- und Video-Capabilities sind Zeichen für Zeichen dieselben wie unter 26.6.2. Das ist also kein Bug einer 26.x-Version, sondern Absicht – ein iOS-Update ist kein Hebel für diesen Posten, und erneutes Nachprüfen bei künftigen Point-Releases lohnt nicht.
 
-#### Nebenbefund: CoreDevice kann den Schirm wohl auch kabellos
+#### Kabellose Spiegelung und Audio via CoreDevice-Medienstrom
 
-Das Testgerät war über `localNetwork` verbunden, nicht über USB, und meldet `com.apple.coredevice.feature.viewdevicescreen`, `.startmediastream`, `.startvideooutput` und `.startaudiooutput`. Das ist der Unterbau von Xcodes Device-Hub-Live-View – und ein Hinweis, dass Mirroring und Audio-Forwarding über CoreDevice auch kabellos gehen könnten, wo der heutige AVFoundation-Pfad USB voraussetzt. Eigene Frage, eigener Aufwand, aber die Tabellenzeilen „Wireless connection" und „Audio forwarding" hängen daran.
+**Umgesetzt und am Gerät verifiziert (2026-10-10).** Das Gerät sendet seinen
+Bildschirm und seinen Systemton selbst an den Mac, über denselben
+CoreDevice-Tunnel, der auch kabellos trägt. Code und Reproduktionsschritte:
+[`docs/spikes/ios-mediastream/`](spikes/ios-mediastream/README.md). Damit fällt
+die letzte Zeile aus der Feature-Tabelle, die noch als Plattformgrenze galt –
+Audio ist auf iOS **nur** so zu holen.
+
+**Die Aufwandsschätzung von vorher war falsch, und zwar in beide Richtungen.**
+Die alte Notiz nahm an, AVConference müsse als „zweites, deutlich größeres
+privates Framework" angesteuert werden, weil DeviceHub es linkt und CoreDevice
+nicht. Richtig ist:
+
+- AVConference ist **Objective-C**, nicht Swift. Es braucht keine
+  `.swiftinterface`-Rekonstruktion, sondern eine gewöhnliche
+  Header-Deklaration, und alles ist per Laufzeit-Reflexion nachlesbar.
+- Gebraucht wird davon **nur der Negotiator** – eine Klasse, fünf Methoden.
+  CoreDevice liefert die Optionen dazu sogar selbst
+  (`MediaStreamFunctions.getNegotiatorOptions(for:)`).
+- Die „undurchsichtigen Blobs" sind nur Angebot und Antwort. Danach schickt das
+  Gerät **rohes, unverschlüsseltes RTP** an eine Adresse, die man ihm nennt
+  (`receiverIP`/`receiverPort` in der `StartRequest`). Die Verhandlung meldet
+  SRTP-Cipher-Suite 0.
+- Der Empfang braucht AVConference deshalb **gar nicht**. Video ist HEVC nach
+  RFC 7798, Audio AAC-ELD 48 kHz stereo – beides mit VideoToolbox bzw.
+  AudioConverter zu dekodieren, also derselbe Werkzeugkasten wie im
+  Android-Pfad.
+
+Der Versuch, stattdessen AVConferences eigene Empfangsseite zu benutzen
+(`AVCVideoStream` plus `AVCVideoDataOutput`), ist eine Sackgasse und braucht
+nicht wiederholt zu werden: ausserhalb des eigenen Prozesses kommen die
+`nw_parameters` ohne Protokoll-Stack bei `avconferenced` an („Data mode 0
+unrecognized"), und mit `kAVCMediaStreamOptionRunInProcess` baut der Strom
+zwar, aber `AVCVideoDataOutput` scheitert, weil es die prozessübergreifende
+Image-Queue braucht.
+
+**Einbau.** `IosMediaStreamPlugin` liegt neben `IosMirrorPlugin` und beantwortet
+dieselben Methodennamen; `IosMirrorTransport` ist die Naht dazwischen. Das
+Repository bevorzugt den Medienstrom und fällt auf die Capture-Session zurück –
+die erreicht jedes vertraute Gerät, braucht aber USB und hat keinen Ton. Audio
+hängt an der neuen Abstraktion `AudioAgent`, die Android und iOS gemeinsam
+implementieren; der Mute-Knopf in der Toolbar hing vorher an „ist Android" und
+hängt jetzt an `supportsAudio`.
+
+**Drei Fallen, die Zeit gekostet haben** (Details im Spike-README):
+
+- `clientSessionID` und die `callID` müssen als **UUID** in die Optionen, nicht
+  als String. Sonst antwortet das Gerät mit „Missing ClientName, CallID, or
+  ClientSessionID", obwohl die Schlüsselnamen stimmen.
+- **RTCP ist Pflicht.** Ohne Receiver Reports liest Apples Sender die Stille als
+  zusammenbrechende Verbindung, fährt die Bitrate herunter – das Bild zerfällt
+  sichtbar in Blöcke – und stellt schliesslich ein. Mit Reports hält die
+  Bildrate bei 53–63 fps.
+- **`timeout` in der `StartRequest` ist eine harte Frist, kein Idle-Timeout.**
+  Die naheliegenden 30 s lassen die Spiegelung mitten im Betrieb nach einer
+  halben Minute stehenbleiben. synk bittet um 24 Stunden.
+
+**Verifiziert** am iPhone 15 mit iOS 27.0.1, ad-hoc signiert und ohne jedes
+Entitlement: 1184×2576 bei 53–63 fps über 90 s ohne Paketverlust oder
+Dekodierfehler, Speicher flach bei 47 MiB, und Audio mit echtem Ton
+gegengeprüft (Spitzenamplitude 0,000 bei Stille, 0,825 während VoiceOver
+sprach).
+
+**Offen:** der kabellose Fall selbst. Alle Messungen liefen über einen
+CoreDevice-Tunnel, dessen Unterbau zu diesem Zeitpunkt USB war. Der Code
+unterscheidet das nicht – er nimmt die utun-Adresse, die CoreDevice
+bereitstellt – aber gemessen ist es nicht. Ebenfalls offen: die Bitrate liegt
+mit 0,7–2,5 Mbit/s deutlich unter der ausgehandelten Obergrenze von 6 Mbit/s.
+Das ist Apples Ratensteuerung, nicht unsere Grenze;
+`-[AVCMediaStreamNegotiator overrideMaxBandwidth:foveationIsSupported:]` wäre
+der Hebel, falls die Qualität nicht reicht.
+
+Die Capability `.audioOutput` bleibt kein Ersatz – ihr `AudioOutputProtocol`
+steuert die Lautstärke *des Geräts*, es leitet keinen Ton zum Mac.
 
 ### Datei-Transfer und Display-Infos: Befund 2026-10-09
 

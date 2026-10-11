@@ -17,6 +17,9 @@ class MainFlutterWindow: NSWindow {
         with: flutterViewController.registrar(forPlugin: "IosMirrorPlugin")
       )
     }
+    IosMediaStreamPlugin.register(
+      with: flutterViewController.registrar(forPlugin: "IosMediaStreamPlugin")
+    )
     IosHidPlugin.register(
       with: flutterViewController.registrar(forPlugin: "IosHidPlugin")
     )

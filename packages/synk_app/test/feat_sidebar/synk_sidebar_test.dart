@@ -1,6 +1,7 @@
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
@@ -62,6 +63,11 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+
+  @override
+
+  AudioAgent? getAudioAgent(DeviceId id) => null;
 
   @override
   InteractionAgent? getInteractionAgent(DeviceId id) => null;

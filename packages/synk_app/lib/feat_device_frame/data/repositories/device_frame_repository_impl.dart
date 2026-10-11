@@ -1,3 +1,4 @@
+import 'package:app_logger/app_logger.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
@@ -32,13 +33,20 @@ class const DeviceFrameRepositoryImpl({
     }
 
     await switch (shortcut) {
-      .copyFromDevice => _copyFromDevice(agent),
-      .pasteToDevice => _pasteToDevice(agent),
+      .copyFromDevice => _copyFromDevice(deviceId, agent),
+      .pasteToDevice => _pasteToDevice(deviceId, agent),
     };
   }
 
-  Future<void> _copyFromDevice(ClipboardAgent agent) async {
-    final text = await agent.readDeviceClipboardContent();
+  Future<void> _copyFromDevice(DeviceId deviceId, ClipboardAgent agent) async {
+    final String text;
+    try {
+      text = await agent.readDeviceClipboardContent();
+    } on Object catch (error, stackTrace) {
+      _logUnreachableClipboard(deviceId, error, stackTrace);
+      return;
+    }
+
     if (text.isEmpty) {
       return;
     }
@@ -46,14 +54,30 @@ class const DeviceFrameRepositoryImpl({
     await Clipboard.setData(ClipboardData(text: text));
   }
 
-  Future<void> _pasteToDevice(ClipboardAgent agent) async {
+  Future<void> _pasteToDevice(DeviceId deviceId, ClipboardAgent agent) async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text == null) {
       return;
     }
 
-    await agent.setDeviceClipboardContent(text);
+    try {
+      await agent.setDeviceClipboardContent(text);
+    } on Object catch (error, stackTrace) {
+      _logUnreachableClipboard(deviceId, error, stackTrace);
+    }
+  }
+
+  void _logUnreachableClipboard(
+    DeviceId deviceId,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    appLogger.w(
+      'No clipboard sync for $deviceId; swallowing the shortcut',
+      error: error,
+      stackTrace: stackTrace,
+    );
   }
 
   @override
@@ -158,12 +182,12 @@ class const DeviceFrameRepositoryImpl({
 
   @override
   bool isAudioMuted(DeviceId deviceId) {
-    return repository.getAndroidDeviceAgent(deviceId)?.isAudioMuted ?? true;
+    return repository.getAudioAgent(deviceId)?.isAudioMuted ?? true;
   }
 
   @override
   Future<void> setAudioMuted(DeviceId deviceId, bool muted) async {
-    final agent = repository.getAndroidDeviceAgent(deviceId);
+    final agent = repository.getAudioAgent(deviceId);
     if (agent == null) {
       return;
     }

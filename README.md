@@ -18,7 +18,8 @@ and gets out of your way otherwise.
 - **Screenshots** of the mirrored screen, saved straight to disk
 - **Screen recording** of the mirrored stream
 - **Audio forwarding** from the device to your Mac (muted by default, toggle in the toolbar)
-- **Wireless pairing** for Android over Wi-Fi (`adb pair` / `adb connect`), no cable required after setup
+- **Wireless mirroring**: Wi-Fi pairing for Android (`adb pair` / `adb connect`), and for iOS over
+  Xcode's device tunnel — no cable required after setup
 - **Clipboard sync** between Mac and device
 - **File & APK transfer** via drag & drop, including one-click APK installs
 - **Hardware buttons** in the toolbar: Back, Home, Recent Apps, Power, Volume
@@ -36,7 +37,7 @@ which by now covers mirroring, screenshots, clipboard and touch, but not file tr
 | Feature                | Android             | iOS                         |
 | ----------------------- | :------------------: | :--------------------------: |
 | Device discovery        | ✅ via ADB           | ✅ via `usbmuxd`            |
-| Screen mirroring        | ✅                   | ✅ (via `AVFoundation`/`CoreMediaIO`) |
+| Screen mirroring        | ✅                   | ✅ (via `CoreDevice`, `AVFoundation` fallback) |
 | Screenshot               | ✅                   | ✅                           |
 | Screen recording         | ✅                   | ✅                           |
 | Mouse input / gestures   | ✅                   | ✅ (via `CoreDevice` HID)    |
@@ -44,10 +45,16 @@ which by now covers mirroring, screenshots, clipboard and touch, but not file tr
 | Clipboard sync           | ✅                   | ✅ (text, via `devicectl`)   |
 | File / APK transfer      | ✅                   | ❌ (no user-visible target) |
 | Hardware buttons         | ✅                   | ❌ (not yet, see below)      |
-| Wireless connection      | ✅ (Wi-Fi pairing)   | ❌ (USB only)                |
-| Audio forwarding         | ✅                   | ❌                           |
+| Wireless connection      | ✅ (Wi-Fi pairing)   | ✅ (via `CoreDevice` tunnel) |
+| Audio forwarding         | ✅                   | ✅ (system audio, AAC-ELD)   |
 
-Most iOS gaps above are roadmap items rather than platform walls. Screenshots and clipboard sync go
+Mirroring an iOS device has two paths. The preferred one asks the device to send its own screen and
+system audio as RTP over Xcode's `CoreDevice` tunnel — the same mechanism Xcode's Device Hub uses. That
+carries sound, and because the tunnel also runs over Wi-Fi it does not need the cable. Where it is
+unavailable, synk falls back to capturing the device as a camera through `AVFoundation`/`CoreMediaIO`,
+which reaches any trusted device but needs USB and is silent.
+
+Most remaining iOS gaps are roadmap items rather than platform walls. Screenshots and clipboard sync go
 through Xcode's `devicectl`, the former at the device's native resolution, the latter on the same ⌘C/⌘V
 shortcuts as Android (text only for now). Touch and gestures go over the same private `CoreDevice` HID
 channel that Xcode's own Device Hub uses — no companion app on the device, no entitlement on the Mac:
@@ -66,10 +73,16 @@ See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the evidence, the open questions an
 
 ## Requirements
 
-- macOS 13 or later (Apple Silicon & Intel both supported via a universal binary)
+- macOS 14 or later (Apple Silicon & Intel both supported via a universal binary)
 - [ADB](https://developer.android.com/tools/adb) available on your `$PATH` for Android devices
   (ships bundled with the app; a system install is only needed for advanced debugging)
 - USB debugging enabled on the Android device, or Developer Mode + pairing for iOS devices
+- Xcode installed for everything on iOS beyond basic mirroring: screenshots and clipboard go through its
+  `devicectl`, touch, keyboard and standby through its private CoreDevice framework, and so do wireless
+  mirroring and audio. Verified against Xcode 27. All of that additionally needs Apple Silicon, because
+  those frameworks ship arm64-only; without them iOS mirroring falls back to USB-only and silent
+- No particular iOS version — synk installs nothing on the phone. Verified on iOS 26.6.2 and 27.0.1,
+  where the capabilities the device offers are identical
 
 ## Installation
 

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
@@ -124,6 +125,7 @@ class DeviceConnectionsRepositoryImpl({
           textureId: agent.textureId,
           screenSize: sizes[id] ?? agent.screenSize,
           supportsInteraction: true,
+          supportsAudio: true,
         );
       }
       return null;
@@ -136,6 +138,7 @@ class DeviceConnectionsRepositoryImpl({
           textureId: agent.textureId,
           screenSize: sizes[id] ?? agent.screenSize,
           supportsInteraction: agent.supportsInteraction,
+          supportsAudio: agent.supportsAudio,
         );
       }
     }
@@ -241,6 +244,22 @@ class DeviceConnectionsRepositoryImpl({
   @override
   ClipboardAgent? getClipboardAgent(DeviceId id) {
     return androidDeviceAgentsById[id] ?? iosDeviceAgentsById[id];
+  }
+
+  @override
+  AudioAgent? getAudioAgent(DeviceId id) {
+    if (androidDeviceAgentsById[id] case final agent?) {
+      return agent;
+    }
+
+    // A mirrored iOS device only carries audio over the CoreDevice media
+    // stream; the capture-session fallback has nothing to mute.
+    final agent = iosDeviceAgentsById[id];
+    if (agent == null || !agent.supportsAudio) {
+      return null;
+    }
+
+    return agent;
   }
 
   @override

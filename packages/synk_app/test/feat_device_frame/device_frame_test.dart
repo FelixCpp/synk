@@ -5,6 +5,7 @@ import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
@@ -274,6 +275,7 @@ Future<SynkColors> _pumpFrame(
                         screenSize: screenSize,
                         supportsInteraction: supportsInteraction,
                         supportsDeviceActions: supportsInteraction,
+                        supportsAudio: supportsInteraction,
                         isMaximized: isMaximized,
                         onToggleMaximize: () {},
                         onClose: () {},
@@ -301,6 +303,11 @@ class _OfflineConnections implements DeviceConnectionsRepository {
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+
+  @override
+
+  AudioAgent? getAudioAgent(DeviceId id) => null;
 
   @override
   InteractionAgent? getInteractionAgent(DeviceId id) => null;

@@ -227,3 +227,122 @@ public class DeviceManager {
   public var devices: [Foundation.UUID : CoreDevice.RemoteDevice] { get }
   public func awaitFullInitialization() async
 }
+
+// MARK: - Media stream (wireless mirroring and system audio)
+//
+// `CodableValue` must stay an enum with at least one declared case: declaring
+// it with none makes Swift treat it as uninhabited and drop everything that
+// follows as unreachable. The case below is never constructed — construction
+// would bake in a tag index, which is the one layout assumption these stubs
+// avoid. Values are only ever made through `init?(_:)`.
+public enum CodableValue {
+  case _neverConstructed(Swift.String)
+  public init?(_ value: Any)
+  public func unwrappedValue() -> Any
+}
+
+public struct MediaStreamSupportedFeatures {
+  public init(rawValue: Swift.UInt64)
+  public var rawValue: Swift.UInt64 { get }
+  public var description: Swift.String { get }
+  public static var current: CoreDevice.MediaStreamSupportedFeatures { get }
+  public static var primaryDisplayMirroredOutput: CoreDevice.MediaStreamSupportedFeatures { get }
+  public static var systemAudioOutput: CoreDevice.MediaStreamSupportedFeatures { get }
+}
+
+public struct DeviceMediaStream {
+  public struct SupportInfo {
+    public var supportedFeatures: Swift.UInt64 { get }
+    public var supportedFeaturesDescription: Swift.String { get }
+  }
+  public struct SupportInfoResponse {
+    public var device: CoreDevice.DeviceMediaStream.SupportInfo { get }
+    public var client: CoreDevice.DeviceMediaStream.SupportInfo { get }
+    public var common: CoreDevice.DeviceMediaStream.SupportInfo { get }
+  }
+}
+
+extension CoreDevice.DeviceMediaStream {
+  public static var kAVCMediaStreamInitOptions: Swift.String { get }
+  public static var kAVCMediaStreamOptionClientName: Swift.String { get }
+  public static var kAVCMediaStreamOptionClientSessionID: Swift.String { get }
+
+  public enum StreamType : Swift.String {
+    case audio
+    case video
+  }
+  public enum Direction : Swift.String {
+    case input
+    case output
+  }
+  public enum Source {
+    case videoPrimaryDisplay
+    case videoFromDisplayID(Swift.UInt32)
+    case videoSecondaryVirtualDisplay(CoreGraphics.CGSize)
+    case videoVirtualExternalDisplay(CoreGraphics.CGSize)
+    case audioSystemOutput
+    public var description: Swift.String { get }
+  }
+  public struct NetworkInfo {
+    public init(ipv6Address: Swift.String, port: Swift.UInt16)
+    public var ipv6Address: Swift.String { get }
+    public var port: Swift.UInt16 { get }
+  }
+  public struct MediaStreamConfig {
+    public var CustomWidth: Swift.UInt { get }
+    public var CustomHeight: Swift.UInt { get }
+    public var Framerate: Swift.UInt { get }
+    public var IsltrpEnabled: Swift.Bool { get }
+    public var TilesPerFrame: Swift.UInt { get }
+    public var KeyFrameInterval: Swift.UInt { get }
+    public var VideoStreamMode: Swift.Int { get }
+    public var RxCodecFeatureListString: Swift.String { get }
+    public var TxCodecFeatureListString: Swift.String { get }
+    public var RXMaxBitrate: Swift.UInt { get }
+    public var RXMinBitrate: Swift.UInt { get }
+    public var TxPayloadType: Swift.UInt { get }
+    public var RxPayloadType: Swift.UInt { get }
+    public var SRTPCipherSuite: Swift.Int { get }
+    public var SRTCPCipherSuite: Swift.Int { get }
+    public var LocalSSRC: Swift.UInt32 { get }
+    public var RemoteSSRC: Swift.UInt32 { get }
+    public var RTCPEnabled: Swift.Bool { get }
+    public var RTCPRemotePort: Swift.UInt16 { get }
+    public var RTCPSendInterval: Swift.Double { get }
+    public var RTCPTimeoutEnabled: Swift.Bool { get }
+    public var RTCPTimeoutInterval: Swift.Double { get }
+    public var RTPTimeoutEnabled: Swift.Bool { get }
+    public var RTPTimeoutInterval: Swift.Double { get }
+  }
+  public struct ConnectionInfo {
+    public var receiver: CoreDevice.DeviceMediaStream.NetworkInfo { get }
+    public var sender: CoreDevice.DeviceMediaStream.NetworkInfo { get }
+    public var type: CoreDevice.DeviceMediaStream.StreamType { get }
+    public var source: CoreDevice.DeviceMediaStream.Source? { get set }
+    public var timeout: Swift.UInt { get }
+    public var streamConfig: CoreDevice.DeviceMediaStream.MediaStreamConfig { get }
+  }
+  public struct StartRequest {
+    public init(timeout: Swift.UInt, type: CoreDevice.DeviceMediaStream.StreamType, direction: CoreDevice.DeviceMediaStream.Direction, negotiatorOffer: Foundation.Data, clientSupportedFeatures: Swift.UInt64, receiverIP: Swift.String?, receiverPort: Swift.UInt16?, options: [Swift.String : CoreDevice.CodableValue])
+  }
+  public struct StartResponse {
+    public var connection: CoreDevice.DeviceMediaStream.ConnectionInfo { get }
+    public var negotiatorAnswer: Foundation.Data { get }
+  }
+  public struct StopRequest {
+    public init(stopAll: Swift.Bool, identifiers: [Swift.UInt32]?)
+  }
+  public struct StopResponse {
+    public var stoppedStreams: [Swift.UInt32]? { get }
+  }
+}
+
+public struct MediaStreamFunctions {
+  public static func getNegotiatorOptions(for deviceInfo: CoreDeviceProtocols.DeviceInfo) -> [Swift.String : Swift.Sendable]
+}
+
+extension CoreDevice.RemoteDevice {
+  final public var mediaStreamSupportInfo: CoreDevice.DeviceMediaStream.SupportInfoResponse { get async throws }
+  final public func startMediaStream(with request: CoreDevice.DeviceMediaStream.StartRequest) async throws -> CoreDevice.DeviceMediaStream.StartResponse
+  final public func stopMediaStream(with request: CoreDevice.DeviceMediaStream.StopRequest) async throws -> CoreDevice.DeviceMediaStream.StopResponse
+}

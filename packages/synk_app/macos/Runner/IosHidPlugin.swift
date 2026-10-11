@@ -33,6 +33,11 @@ private let isCoreDeviceAvailable: Bool = {
     private let managerLock = NSLock()
     private var managerTask: Task<DeviceManager, Never>?
 
+    /// The newest position of a drag that has not reached the device yet, per
+    /// device. Only one is kept: see `sendTouch`.
+    private let pendingLock = NSLock()
+    private var pendingMove: [String: PendingMove] = [:]
+
     private var digitizers: [String: any HIDDigitizer] = [:]
     private var assertions: [String: DeviceUsageAssertion] = [:]
     private var keyboards: [String: any HIDKeyboard] = [:]
@@ -89,6 +94,10 @@ private let isCoreDeviceAvailable: Bool = {
     }
 
     func release(udid: String) {
+      pendingLock.lock()
+      pendingMove.removeValue(forKey: udid)
+      pendingLock.unlock()
+
       queue.async {
         self.digitizers.removeValue(forKey: udid)
         self.keyboards.removeValue(forKey: udid)
@@ -119,26 +128,93 @@ private let isCoreDeviceAvailable: Bool = {
 
     // MARK: - Sending
 
+    /// Queues a touch for the device. Nothing waits for it to arrive.
+    ///
+    /// Positions of a drag are coalesced: while one is still waiting to be
+    /// sent, a newer one replaces it instead of queueing behind it. Without
+    /// that, a drag the queue cannot keep up with would be replayed to the
+    /// device stretched out and late — and because the HID API carries no
+    /// timestamp, the device would read that pacing as the finger's speed.
+    /// Starts and ends are never dropped; they flush whatever position is
+    /// pending first so the order of the gesture survives.
+    ///
+    /// Each report still ends in a barrier, which the device needs to receive
+    /// it at all. Nothing on the channel waits for that any more, so its cost
+    /// shows up as backpressure here rather than as a stretched gesture there.
     func sendTouch(
       udid: String,
       pointOne: DigitizerPoint,
       pointTwo: DigitizerPoint?,
       eventType: DigitizerEventType,
-      edge: DigitizerEdge,
-      completion: @escaping (Error?) -> Void
+      edge: DigitizerEdge
     ) {
-      queue.async {
-        completion(
-          self.withDigitizer(udid) { digitizer in
-            try self.emit(
-              digitizer,
-              pointOne: pointOne,
-              pointTwo: pointTwo,
-              eventType: eventType,
-              edge: edge
-            )
-          })
+      guard eventType == .position else {
+        // Claimed here rather than inside the block: a position queued after
+        // this start or end must not be pulled in front of it.
+        pendingLock.lock()
+        let preceding = pendingMove.removeValue(forKey: udid)
+        pendingLock.unlock()
+
+        queue.async {
+          if let preceding { self.emitPendingMove(preceding, udid: udid) }
+          self.report(
+            self.withDigitizer(udid) { digitizer in
+              try self.emit(
+                digitizer,
+                pointOne: pointOne,
+                pointTwo: pointTwo,
+                eventType: eventType,
+                edge: edge
+              )
+            }, udid: udid)
+        }
+        return
       }
+
+      pendingLock.lock()
+      let alreadyQueued = pendingMove[udid] != nil
+      pendingMove[udid] = PendingMove(pointOne: pointOne, pointTwo: pointTwo, edge: edge)
+      pendingLock.unlock()
+
+      // A drain is already on its way and will pick up the newer position.
+      if alreadyQueued { return }
+      queue.async { self.flushPendingMove(udid) }
+    }
+
+    /// Sends whatever position is pending, if a start or an end has not
+    /// already claimed it.
+    private func flushPendingMove(_ udid: String) {
+      pendingLock.lock()
+      let move = pendingMove.removeValue(forKey: udid)
+      pendingLock.unlock()
+
+      guard let move else { return }
+      emitPendingMove(move, udid: udid)
+    }
+
+    private func emitPendingMove(_ move: PendingMove, udid: String) {
+      report(
+        withDigitizer(udid) { digitizer in
+          try self.emit(
+            digitizer,
+            pointOne: move.pointOne,
+            pointTwo: move.pointTwo,
+            eventType: .position,
+            edge: move.edge
+          )
+        }, udid: udid)
+    }
+
+    /// Nothing is waiting on a touch any more, so a failure is logged rather
+    /// than handed back through the channel.
+    private func report(_ error: Error?, udid: String) {
+      guard let error else { return }
+      logger.error(
+        """
+        Cannot send a touch to \(udid, privacy: .public): \
+        \(error.localizedDescription, privacy: .public)
+        """
+      )
     }
 
     func sendSwipe(
@@ -258,8 +334,23 @@ private let isCoreDeviceAvailable: Bool = {
         edge: edge,
         target: .mainScreen
       )
+
+
+      // Every report needs this, not just the last of a gesture: without it
+      // the touch does not reach the device at all. It costs a wait, but no
+      // longer a visible one — the channel no longer blocks on it, and a drag
+      // that outruns this queue loses stale positions to coalescing instead
+      // of arriving stretched out.
       digitizer.sendBarrier()
     }
+  }
+
+  /// One drag position waiting its turn.
+  @available(macOS 14.0, *)
+  private struct PendingMove {
+    let pointOne: DigitizerPoint
+    let pointTwo: DigitizerPoint?
+    let edge: DigitizerEdge
   }
 
   @available(macOS 14.0, *)
@@ -373,9 +464,14 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
         pointOne: pointOne,
         pointTwo: Self.point(from: arguments, prefix: "second"),
         eventType: eventType,
-        edge: Self.edge(named: arguments["edge"] as? String),
-        completion: Self.completion(result)
+        edge: Self.edge(named: arguments["edge"] as? String)
       )
+
+      // Answered straight away, on the thread the call arrived on. Every other
+      // reply here hops through the main queue, which also carries a texture
+      // notification per decoded frame — so a touch acknowledged that way
+      // would be paced by the video, not by the hand that made it.
+      result(nil)
     }
 
     @available(macOS 14.0, *)

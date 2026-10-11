@@ -1,0 +1,7 @@
+v=0
+o=- 0 0 IN IP4 127.0.0.1
+s=synk
+c=IN IP4 127.0.0.1
+t=0 0
+m=video 5004 RTP/AVP 100
+a=rtpmap:100 H265/90000

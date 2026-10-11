@@ -1,3 +1,15 @@
+// Apple's private CoreDevice and AVConference, reached through the stub
+// interfaces in PrivateFrameworkStubs. See that directory's README.
+//
+// Everything is scoped to arm64: CoreDevice ships only an arm64e slice and
+// only from macOS 14, so an x86_64 link would fail hard. The Swift sources
+// behind these flags are guarded with `#if arch(arm64)` to match.
 FRAMEWORK_SEARCH_PATHS[arch=arm64] = $(inherited) /Library/Developer/PrivateFrameworks
 SWIFT_INCLUDE_PATHS[arch=arm64] = $(inherited) $(SRCROOT)/PrivateFrameworkStubs
-OTHER_LDFLAGS[arch=arm64] = $(inherited) -weak_framework CoreDevice
+
+// AVConference is Objective-C, so its stub is a clang module rather than a
+// .swiftinterface. Only the *linker* learns about
+// /System/Library/PrivateFrameworks: putting it on the header search path
+// would shadow the SDK's Network.framework with a headerless copy.
+OTHER_SWIFT_FLAGS[arch=arm64] = $(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/PrivateFrameworkStubs/AVConferenceStubs/module.modulemap
+OTHER_LDFLAGS[arch=arm64] = $(inherited) -weak_framework CoreDevice -Xlinker -F -Xlinker /System/Library/PrivateFrameworks -weak_framework AVConference

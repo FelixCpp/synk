@@ -10,6 +10,8 @@ hier, sondern dort, wo die App sie benutzt:
 [`packages/synk_app/macos/PrivateFrameworkStubs/`](../../../packages/synk_app/macos/PrivateFrameworkStubs/README.md).
 Dieses CLI baut gegen dieselbe Kopie und ist damit die Handprobe für sie – wenn
 `./build.sh` durchläuft und ein Tap ankommt, trägt der Stub auch in der App.
+Dasselbe Muster für Bildschirm und Ton steht in
+[`../ios-mediastream/`](../ios-mediastream/README.md).
 
 ```sh
 ./build.sh

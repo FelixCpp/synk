@@ -14,6 +14,7 @@ sealed class DeviceConnection with _$DeviceConnection {
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
     required bool supportsInteraction,
+    required bool supportsAudio,
   }) = _AndroidDeviceConnection;
 
   const factory DeviceConnection.ios({
@@ -21,5 +22,6 @@ sealed class DeviceConnection with _$DeviceConnection {
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
     required bool supportsInteraction,
+    required bool supportsAudio,
   }) = _IosDeviceConnection;
 }

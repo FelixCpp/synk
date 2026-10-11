@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceConnection {
 
- PluggedDevice get device; NativeTextureId get textureId; DeviceScreenSize get screenSize; bool get supportsInteraction;
+ PluggedDevice get device; NativeTextureId get textureId; DeviceScreenSize get screenSize; bool get supportsInteraction; bool get supportsAudio;
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $DeviceConnectionCopyWith<DeviceConnection> get copyWith => _$DeviceConnectionCo
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceConnection;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceConnection&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceConnection&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction)&&(identical(other.supportsAudio, _this.supportsAudio) || other.supportsAudio == _this.supportsAudio));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DeviceConnection;
-  return Object.hash(runtimeType,_this.device,_this.textureId,_this.screenSize,_this.supportsInteraction);
+  return Object.hash(runtimeType,_this.device,_this.textureId,_this.screenSize,_this.supportsInteraction,_this.supportsAudio);
 }
 
 @override
 String toString() {
   final _this = this as DeviceConnection;
-  return 'DeviceConnection(device: ${_this.device}, textureId: ${_this.textureId}, screenSize: ${_this.screenSize}, supportsInteraction: ${_this.supportsInteraction})';
+  return 'DeviceConnection(device: ${_this.device}, textureId: ${_this.textureId}, screenSize: ${_this.screenSize}, supportsInteraction: ${_this.supportsInteraction}, supportsAudio: ${_this.supportsAudio})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $DeviceConnectionCopyWith<$Res>  {
   factory $DeviceConnectionCopyWith(DeviceConnection value, $Res Function(DeviceConnection) _then) = _$DeviceConnectionCopyWithImpl;
 @useResult
 $Res call({
- PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction
+ PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, bool supportsAudio
 });
 
 
@@ -68,12 +68,13 @@ class _$DeviceConnectionCopyWithImpl<$Res>
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? supportsAudio = null,}) {
   return _then(_self.copyWith(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
 as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsAudio: null == supportsAudio ? _self.supportsAudio : supportsAudio // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -168,11 +169,11 @@ return ios(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  android,TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  ios,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)?  android,TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)?  ios,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AndroidDeviceConnection() when android != null:
-return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction);case _IosDeviceConnection() when ios != null:
-return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction);case _:
+return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);case _IosDeviceConnection() when ios != null:
+return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);case _:
   return orElse();
 
 }
@@ -190,11 +191,11 @@ return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteracti
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)  android,required TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)  ios,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)  android,required TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)  ios,}) {final _that = this;
 switch (_that) {
 case _AndroidDeviceConnection():
-return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction);case _IosDeviceConnection():
-return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction);}
+return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);case _IosDeviceConnection():
+return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -208,11 +209,11 @@ return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteracti
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  android,TResult? Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction)?  ios,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( PluggedDevice device,  AndroidDeviceInfo info,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)?  android,TResult? Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  bool supportsAudio)?  ios,}) {final _that = this;
 switch (_that) {
 case _AndroidDeviceConnection() when android != null:
-return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction);case _IosDeviceConnection() when ios != null:
-return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction);case _:
+return android(_that.device,_that.info,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);case _IosDeviceConnection() when ios != null:
+return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.supportsAudio);case _:
   return null;
 
 }
@@ -224,7 +225,7 @@ return ios(_that.device,_that.textureId,_that.screenSize,_that.supportsInteracti
 
 
 class _AndroidDeviceConnection implements DeviceConnection {
-  const _AndroidDeviceConnection({required this.device, required this.info, required this.textureId, required this.screenSize, required this.supportsInteraction});
+  const _AndroidDeviceConnection({required this.device, required this.info, required this.textureId, required this.screenSize, required this.supportsInteraction, required this.supportsAudio});
   
 
 @override final  PluggedDevice device;
@@ -232,6 +233,7 @@ class _AndroidDeviceConnection implements DeviceConnection {
 @override final  NativeTextureId textureId;
 @override final  DeviceScreenSize screenSize;
 @override final  bool supportsInteraction;
+@override final  bool supportsAudio;
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
@@ -243,18 +245,18 @@ _$AndroidDeviceConnectionCopyWith<_AndroidDeviceConnection> get copyWith => __$A
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.info, info) || other.info == info)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AndroidDeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.info, info) || other.info == info)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction)&&(identical(other.supportsAudio, supportsAudio) || other.supportsAudio == supportsAudio));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,info,textureId,screenSize,supportsInteraction);
+    return Object.hash(runtimeType,device,info,textureId,screenSize,supportsInteraction,supportsAudio);
 }
 
 @override
 String toString() {
-    return 'DeviceConnection.android(device: $device, info: $info, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction)';
+    return 'DeviceConnection.android(device: $device, info: $info, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction, supportsAudio: $supportsAudio)';
 }
 
 
@@ -265,7 +267,7 @@ abstract mixin class _$AndroidDeviceConnectionCopyWith<$Res> implements $DeviceC
   factory _$AndroidDeviceConnectionCopyWith(_AndroidDeviceConnection value, $Res Function(_AndroidDeviceConnection) _then) = __$AndroidDeviceConnectionCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, AndroidDeviceInfo info, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction
+ PluggedDevice device, AndroidDeviceInfo info, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, bool supportsAudio
 });
 
 
@@ -282,13 +284,14 @@ class __$AndroidDeviceConnectionCopyWithImpl<$Res>
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? info = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? info = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? supportsAudio = null,}) {
   return _then(_AndroidDeviceConnection(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,info: null == info ? _self.info : info // ignore: cast_nullable_to_non_nullable
 as AndroidDeviceInfo,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
 as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsAudio: null == supportsAudio ? _self.supportsAudio : supportsAudio // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -318,13 +321,14 @@ $DeviceScreenSizeCopyWith<$Res> get screenSize {
 
 
 class _IosDeviceConnection implements DeviceConnection {
-  const _IosDeviceConnection({required this.device, required this.textureId, required this.screenSize, required this.supportsInteraction});
+  const _IosDeviceConnection({required this.device, required this.textureId, required this.screenSize, required this.supportsInteraction, required this.supportsAudio});
   
 
 @override final  PluggedDevice device;
 @override final  NativeTextureId textureId;
 @override final  DeviceScreenSize screenSize;
 @override final  bool supportsInteraction;
+@override final  bool supportsAudio;
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
@@ -336,18 +340,18 @@ _$IosDeviceConnectionCopyWith<_IosDeviceConnection> get copyWith => __$IosDevice
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IosDeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IosDeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction)&&(identical(other.supportsAudio, supportsAudio) || other.supportsAudio == supportsAudio));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,textureId,screenSize,supportsInteraction);
+    return Object.hash(runtimeType,device,textureId,screenSize,supportsInteraction,supportsAudio);
 }
 
 @override
 String toString() {
-    return 'DeviceConnection.ios(device: $device, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction)';
+    return 'DeviceConnection.ios(device: $device, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction, supportsAudio: $supportsAudio)';
 }
 
 
@@ -358,7 +362,7 @@ abstract mixin class _$IosDeviceConnectionCopyWith<$Res> implements $DeviceConne
   factory _$IosDeviceConnectionCopyWith(_IosDeviceConnection value, $Res Function(_IosDeviceConnection) _then) = __$IosDeviceConnectionCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction
+ PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, bool supportsAudio
 });
 
 
@@ -375,12 +379,13 @@ class __$IosDeviceConnectionCopyWithImpl<$Res>
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? supportsAudio = null,}) {
   return _then(_IosDeviceConnection(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
 as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
 as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
+as bool,supportsAudio: null == supportsAudio ? _self.supportsAudio : supportsAudio // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

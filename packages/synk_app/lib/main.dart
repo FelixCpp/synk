@@ -4,6 +4,7 @@ import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk/feat_device_agent/data/datasources/ios_hid_channel.dart';
+import 'package:synk/feat_device_agent/data/datasources/ios_media_stream_channel.dart';
 import 'package:synk/feat_device_agent/data/datasources/ios_mirror_channel.dart';
 import 'package:synk/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
 import 'package:synk/feat_device_agent/data/repositories/ios_device_agent_repository_impl.dart';
@@ -94,6 +95,7 @@ Future<void> main() async {
               pluggedIosDevicesRepository: RepositoryProvider.of(context),
               iosAgentRepository: IosDeviceAgentRepositoryImpl(
                 IosMirrorChannel(),
+                IosMediaStreamChannel(),
                 IosHidChannel(),
                 RepositoryProvider.of(context),
               ),

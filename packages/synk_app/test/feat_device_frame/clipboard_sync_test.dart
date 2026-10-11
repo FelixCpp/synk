@@ -1,5 +1,6 @@
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
+import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
@@ -128,6 +129,22 @@ void main() {
       },
     );
 
+    test('stays quiet when the device has no clipboard to reach', () async {
+      agent.isReachable = false;
+      hostClipboard = 'keep me';
+
+      await repository.simulateKeyEvent(
+        _deviceId,
+        _shortcut(LogicalKeyboardKey.keyC),
+      );
+      await repository.simulateKeyEvent(
+        _deviceId,
+        _shortcut(LogicalKeyboardKey.keyV),
+      );
+
+      expect(hostClipboard, 'keep me');
+    });
+
     test('ignores the keys without the meta modifier', () async {
       agent.content = 'from the device';
 
@@ -145,15 +162,24 @@ void main() {
 class _FakeClipboardAgent implements ClipboardAgent {
   String content = '';
   int reads = 0;
+  bool isReachable = true;
 
   @override
   Future<String> readDeviceClipboardContent() async {
     reads++;
+    if (!isReachable) {
+      throw Exception('no pasteboard on this device');
+    }
+
     return content;
   }
 
   @override
   Future<void> setDeviceClipboardContent(String clipboard) async {
+    if (!isReachable) {
+      throw Exception('no pasteboard on this device');
+    }
+
     content = clipboard;
   }
 }
@@ -174,6 +200,11 @@ class _ConnectionsWithClipboard(final ClipboardAgent agent)
 
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+
+
+  @override
+
+  AudioAgent? getAudioAgent(DeviceId id) => null;
 
   @override
   Stream<List<PluggedDevice>> observeConnectingDevices() => const .empty();
