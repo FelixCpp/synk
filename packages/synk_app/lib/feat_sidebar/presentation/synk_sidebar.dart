@@ -113,7 +113,7 @@ class const _SectionHeader({
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(
+      padding: const .only(
         left: 4.0,
         top: SynkTheme.verticalComponentSpacingSmall,
       ),
@@ -121,7 +121,7 @@ class const _SectionHeader({
         title,
         style: context.typo.caption2.copyWith(
           color: context.colors.secondaryLabel,
-          fontWeight: .w600,
+          fontWeight: .w800,
           letterSpacing: 0.8,
         ),
       ),
@@ -151,16 +151,16 @@ class const _DeviceEntryFrame({
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.colors.card,
-        borderRadius: BorderRadius.circular(
+        borderRadius: .circular(
           SynkTheme.smallCornerRadius,
         ),
-        border: Border.all(
+        border: .all(
           color: context.colors.divider,
           width: SynkTheme.hairlineThickness,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const .all(8.0),
         child: Row(
           spacing: SynkTheme.horizontalComponentSpacingMedium,
           children: [
@@ -180,13 +180,11 @@ class const _LeadingDeviceFrameIcon({required final Color statusColor})
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(
-          SynkTheme.smallCornerRadius,
-        ),
+        borderRadius: .circular(SynkTheme.smallCornerRadius),
         color: statusColor.withAlpha(38),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(9.0),
+        padding: const .all(9.0),
         child: Icon(
           CupertinoIcons.device_phone_portrait,
           size: 18.0,
@@ -227,8 +225,9 @@ class const _DisconnectedDeviceEntry({
       ),
       trailing: _ConnectButton(
         onPressed: () {
-          BlocProvider.of<SidebarBloc>(context)
-              .add(SidebarEvent.onConnect(pluggedDevice));
+          BlocProvider.of<SidebarBloc>(context).add(
+            .onConnect(pluggedDevice),
+          );
         },
       ),
     );

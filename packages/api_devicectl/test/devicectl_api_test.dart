@@ -74,6 +74,42 @@ void main() {
       ]);
     });
 
+    test(
+      'inserts the dash IOKit omits from a compact 24-char UDID',
+      () async {
+        final script = _writeFakeXcrun(directory, exitCode: 0);
+        final api = DevicectlApi(xcrunPath: script.path);
+
+        await api.captureScreenshot(
+          deviceId: '000081200009555001C2601E',
+          destination: '/tmp/shot.png',
+        );
+
+        expect(
+          _loggedArguments(directory),
+          containsAllInOrder(['--device', '00008120-0009555001C2601E']),
+        );
+      },
+    );
+
+    test(
+      'leaves identifiers that are not a compact UDID untouched',
+      () async {
+        final script = _writeFakeXcrun(directory, exitCode: 0);
+        final api = DevicectlApi(xcrunPath: script.path);
+
+        await api.captureScreenshot(
+          deviceId: 'some-device',
+          destination: '/tmp/shot.png',
+        );
+
+        expect(
+          _loggedArguments(directory),
+          containsAllInOrder(['--device', 'some-device']),
+        );
+      },
+    );
+
     test('throws with the process output when devicectl fails', () async {
       final script = _writeFakeXcrun(
         directory,

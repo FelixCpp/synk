@@ -12,6 +12,9 @@ private let logger = Logger(subsystem: "dev.synk", category: "ios_hid")
 private let coreDeviceBinaryPath =
   "/Library/Developer/PrivateFrameworks/CoreDevice.framework/Versions/A/CoreDevice"
 
+private let devicectlBinaryPath =
+  "/Library/Developer/PrivateFrameworks/CoreDevice.framework/Versions/A/Resources/bin/devicectl"
+
 private let isCoreDeviceAvailable: Bool = {
   #if arch(arm64)
     guard #available(macOS 14.0, *) else { return false }
@@ -42,6 +45,27 @@ private let isCoreDeviceAvailable: Bool = {
     private var assertions: [String: DeviceUsageAssertion] = [:]
     private var keyboards: [String: any HIDKeyboard] = [:]
     private var buttons: [String: any HIDButton] = [:]
+
+    /// The device's last known *compositor* rotation, in degrees (0/90/180/
+    /// 270). The digitizer sits below the rotation iOS applies to the
+    /// mirrored image, so a touch coordinate coming from the (already
+    /// rotated) mirrored frame needs to be rotated back onto the device's
+    /// native, portrait frame before it reaches the digitizer. Defaults to 0
+    /// (portrait, the native frame itself), so a device we have not yet heard
+    /// a rotation for is left untransformed.
+    ///
+    /// Deliberately sourced from `devicectl device info displays` (the same
+    /// data Apple's own CLI reports) rather than from CoreDevice's
+    /// `OrientationControl`: the latter reflects the physical *sensor*
+    /// reading, which can diverge from the actual on-screen rotation
+    /// whenever the frontmost app/screen does not support the device's
+    /// current physical orientation (e.g. a portrait-only screen with the
+    /// device held sideways) — exactly the situation that caused touches to
+    /// be mismapped.
+    private var rotations: [String: Int] = [:]
+    private var screenAwake: [String: Bool] = [:]
+    private let refreshLock = NSLock()
+    private var refreshing = Set<String>()
 
     // MARK: - Connection
 
@@ -90,6 +114,8 @@ private let isCoreDeviceAvailable: Bool = {
       }
       logger.info("Touch input ready for \(udid, privacy: .public)")
 
+      refreshOrientation(udid: udid)
+
       return true
     }
 
@@ -102,8 +128,105 @@ private let isCoreDeviceAvailable: Bool = {
         self.digitizers.removeValue(forKey: udid)
         self.keyboards.removeValue(forKey: udid)
         self.buttons.removeValue(forKey: udid)
+        self.rotations.removeValue(forKey: udid)
+        self.screenAwake.removeValue(forKey: udid)
         self.assertions.removeValue(forKey: udid)?.releaseAssertion()
       }
+    }
+
+    /// Re-reads the device's current (compositor) rotation and caches it for
+    /// the next touches. Called once a connection is prepared, and again
+    /// whenever the mirrored frame's size changes — the only signal a
+    /// rotation gives us, since the digitizer itself carries no orientation.
+    ///
+    /// Shells out to `devicectl`, which takes ~200ms: cheap enough for this
+    /// refresh-on-event cadence, but far too slow to call per touch.
+    func refreshOrientation(udid: String) {
+      refreshLock.lock()
+      let alreadyRunning = !refreshing.insert(udid).inserted
+      refreshLock.unlock()
+      if alreadyRunning { return }
+
+      Task.detached(priority: .utility) {
+        defer {
+          self.refreshLock.lock()
+          self.refreshing.remove(udid)
+          self.refreshLock.unlock()
+        }
+        guard let state = Self.queryDisplayState(udid: udid) else { return }
+        self.queue.async {
+          // A release in the meantime must not be resurrected by a late result.
+          guard self.digitizers[udid] != nil else { return }
+          self.rotations[udid] = state.rotation
+          self.screenAwake[udid] = state.awake
+        }
+      }
+    }
+
+    /// Reads the real, on-screen rotation of the device's primary display by
+    /// asking `devicectl` directly, returned as degrees (0/90/180/270).
+    /// Returns `nil` if `devicectl` fails or its output cannot be parsed.
+    private static func queryDisplayState(udid: String) -> (rotation: Int, awake: Bool)? {
+      let process = Process()
+      process.executableURL = URL(fileURLWithPath: devicectlBinaryPath)
+      process.arguments = [
+        "device", "info", "displays",
+        "--device", Self.devicectlIdentifier(udid),
+        "--json-output", "-",
+      ]
+
+      let outputPipe = Pipe()
+      process.standardOutput = outputPipe
+      process.standardError = Pipe()
+
+      do {
+        try process.run()
+      } catch {
+        logger.error(
+          "devicectl failed to launch for \(udid, privacy: .public): \(error, privacy: .public)")
+        return nil
+      }
+
+      let data = outputPipe.fileHandleForReading.readDataToEndOfFile()
+      process.waitUntilExit()
+
+      guard process.terminationStatus == 0 else {
+        logger.info(
+          "devicectl exited \(process.terminationStatus, privacy: .public) for \(udid, privacy: .public); keeping last known rotation"
+        )
+        return nil
+      }
+
+      guard
+        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+        let result = json["result"] as? [String: Any],
+        let displays = result["displays"] as? [[String: Any]]
+      else { return nil }
+
+      let display = displays.first { ($0["primary"] as? Bool) == true } ?? displays.first
+      guard let rotationString = display?["currentOrientation"] as? String else { return nil }
+
+      let rotation: Int
+      switch rotationString {
+      case "rot0": rotation = 0
+      case "rot90": rotation = 90
+      case "rot180": rotation = 180
+      case "rot270": rotation = 270
+      default: return nil
+      }
+
+      let backlight = (result["backlightState"] as? String)?.lowercased() ?? "activeon"
+      let asleep = backlight.contains("off")
+      logger.info("Backlight of \(udid, privacy: .public): \(backlight, privacy: .public)")
+      return (rotation, !asleep)
+    }
+
+    /// `devicectl` wants the dashed form (`00008120-0009555001C2601E`); the id
+    /// that reaches us has the dash stripped.
+    private static func devicectlIdentifier(_ value: String) -> String {
+      let compact = value.replacingOccurrences(of: "-", with: "").uppercased()
+      guard compact.count == 24 else { return value }
+      return "\(compact.prefix(8))-\(compact.dropFirst(8))"
     }
 
     private static func canonicalUDID(_ value: String) -> String {
@@ -156,11 +279,13 @@ private let isCoreDeviceAvailable: Bool = {
         pendingLock.unlock()
 
         queue.async {
+          if eventType == .start { self.wakeIfAsleep(udid: udid) }
           if let preceding { self.emitPendingMove(preceding, udid: udid) }
           self.report(
             self.withDigitizer(udid) { digitizer in
               try self.emit(
                 digitizer,
+                udid: udid,
                 pointOne: pointOne,
                 pointTwo: pointTwo,
                 eventType: eventType,
@@ -197,6 +322,7 @@ private let isCoreDeviceAvailable: Bool = {
         withDigitizer(udid) { digitizer in
           try self.emit(
             digitizer,
+            udid: udid,
             pointOne: move.pointOne,
             pointTwo: move.pointTwo,
             eventType: .position,
@@ -228,7 +354,8 @@ private let isCoreDeviceAvailable: Bool = {
       queue.async {
         completion(
           self.withDigitizer(udid) { digitizer in
-            try self.emit(digitizer, pointOne: from, pointTwo: nil, eventType: .start, edge: edge)
+            try self.emit(
+              digitizer, udid: udid, pointOne: from, pointTwo: nil, eventType: .start, edge: edge)
 
             for step in 1...swipeSteps {
               Thread.sleep(forTimeInterval: swipeStepDuration)
@@ -236,6 +363,7 @@ private let isCoreDeviceAvailable: Bool = {
               let progress = Double(step) / Double(swipeSteps)
               try self.emit(
                 digitizer,
+                udid: udid,
                 pointOne: from.interpolated(to: to, at: progress),
                 pointTwo: nil,
                 eventType: .position,
@@ -244,7 +372,8 @@ private let isCoreDeviceAvailable: Bool = {
             }
 
             if hold > 0 { Thread.sleep(forTimeInterval: hold) }
-            try self.emit(digitizer, pointOne: to, pointTwo: nil, eventType: .end, edge: edge)
+            try self.emit(
+              digitizer, udid: udid, pointOne: to, pointTwo: nil, eventType: .end, edge: edge)
           })
       }
     }
@@ -269,6 +398,24 @@ private let isCoreDeviceAvailable: Bool = {
         } catch {
           completion(error)
         }
+      }
+    }
+
+    /// Presses sleep/wake when the last polled backlight state says the screen
+    /// is off, so a touch on a sleeping device wakes it like on Android.
+    /// Must run on `queue`.
+    private func wakeIfAsleep(udid: String) {
+      guard screenAwake[udid] == false, let button = buttons[udid] else { return }
+      screenAwake[udid] = true
+
+      do {
+        try button.sendCustomButton(usagePage: 0x0c, usageCode: 0x30, state: .down)
+        button.sendBarrier()
+        Thread.sleep(forTimeInterval: 0.08)
+        try button.sendCustomButton(usagePage: 0x0c, usageCode: 0x30, state: .up)
+        button.sendBarrier()
+      } catch {
+        logger.error("Failed to wake \(udid, privacy: .public): \(error, privacy: .public)")
       }
     }
 
@@ -322,16 +469,20 @@ private let isCoreDeviceAvailable: Bool = {
 
     private func emit(
       _ digitizer: any HIDDigitizer,
+      udid: String,
       pointOne: DigitizerPoint,
       pointTwo: DigitizerPoint?,
       eventType: DigitizerEventType,
       edge: DigitizerEdge
     ) throws {
+      let rotation = rotations[udid] ?? 0
+      let nativeOne = Self.nativePoint(pointOne, for: rotation)
+
       try digitizer.send(
-        pointOne: pointOne,
-        pointTwo: pointTwo,
+        pointOne: nativeOne,
+        pointTwo: pointTwo.map { Self.nativePoint($0, for: rotation) },
         eventType: eventType,
-        edge: edge,
+        edge: Self.nativeEdge(edge, for: rotation),
         target: .mainScreen
       )
 
@@ -342,6 +493,64 @@ private let isCoreDeviceAvailable: Bool = {
       // that outruns this queue loses stale positions to coalescing instead
       // of arriving stretched out.
       digitizer.sendBarrier()
+    }
+
+    /// Maps a point from the mirrored (already rotated) frame back onto the
+    /// device's native, portrait frame, which is what the digitizer expects
+    /// regardless of the device's current rotation. `rotation` is the real
+    /// compositor rotation in degrees (0/90/180/270), as reported by
+    /// `devicectl`; it corresponds to UIDeviceOrientation's `landscapeRight`
+    /// at 90° and `landscapeLeft` at 270°. Empirically confirmed against the
+    /// real device (see ROADMAP.md).
+    private static func nativePoint(
+      _ point: DigitizerPoint, for rotation: Int
+    ) -> DigitizerPoint {
+      switch rotation {
+      case 90:
+        return DigitizerPoint(x: point.y, y: 1 - point.x)
+      case 270:
+        return DigitizerPoint(x: 1 - point.y, y: point.x)
+      case 180:
+        return DigitizerPoint(x: 1 - point.x, y: 1 - point.y)
+      default:
+        return point
+      }
+    }
+
+    /// Rotates an edge the same way `nativePoint` rotates a point, so a
+    /// control-action swipe (e.g. bringing up the home indicator) still
+    /// reaches for the correct physical edge of the device.
+    private static func nativeEdge(
+      _ edge: DigitizerEdge, for rotation: Int
+    ) -> DigitizerEdge {
+      switch rotation {
+      case 90:
+        switch edge {
+        case .none: return .none
+        case .top: return .left
+        case .left: return .bottom
+        case .bottom: return .right
+        case .right: return .top
+        }
+      case 270:
+        switch edge {
+        case .none: return .none
+        case .top: return .right
+        case .right: return .bottom
+        case .bottom: return .left
+        case .left: return .top
+        }
+      case 180:
+        switch edge {
+        case .none: return .none
+        case .top: return .bottom
+        case .bottom: return .top
+        case .left: return .right
+        case .right: return .left
+        }
+      default:
+        return edge
+      }
     }
   }
 
@@ -413,6 +622,9 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
         prepareInput(deviceId: deviceId, result: result)
       case "releaseInput":
         (injector as? IosHidInjector)?.release(udid: deviceId)
+        result(nil)
+      case "refreshOrientation":
+        (injector as? IosHidInjector)?.refreshOrientation(udid: deviceId)
         result(nil)
       case "sendTouch":
         sendTouch(deviceId: deviceId, arguments: arguments, result: result)

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
@@ -18,6 +17,7 @@ import 'package:synk/feat_device_agent/domain/models/ios_touch_gesture.dart';
 import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
 import 'package:synk/feat_mirror_session/mirror_session.dart';
 import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 
 class IosDeviceAgent(
@@ -32,17 +32,44 @@ class IosDeviceAgent(
   late final _screenSize = BehaviorSubject.seeded(initialScreenSize);
   late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
 
+  Timer? _orientationPoll;
   var _activeEdge = IosTouchEdge.none;
   var _isAudioMuted = true;
 
   this {
-    _screenSizeSubscription = transport
-        .screenSizeChanges(textureId)
-        .listen(_screenSize.add);
+    _screenSizeSubscription = transport.screenSizeChanges(textureId).listen((
+      size,
+    ) {
+      _screenSize.add(size);
+      _refreshOrientation();
+    });
+
+    _refreshOrientation();
+
+    if (supportsInteraction) {
+      _orientationPoll = Timer.periodic(
+        const Duration(seconds: 1),
+        (_) => _refreshOrientation(),
+      );
+    }
   }
 
-  /// Whether this connection carries the device's audio at all — only the
-  /// CoreDevice media stream does.
+  void _refreshOrientation() {
+    if (!supportsInteraction) {
+      return;
+    }
+
+    unawaited(
+      hidChannel.refreshOrientation(deviceId).onError((error, stackTrace) {
+        appLogger.w(
+          'Failed to refresh the orientation of $deviceId',
+          error: error,
+          stackTrace: stackTrace,
+        );
+      }),
+    );
+  }
+
   bool get supportsAudio => transport.supportsAudio;
 
   @override
@@ -101,8 +128,40 @@ class IosDeviceAgent(
   }
 
   @override
-  Future<void> setDeviceClipboardContent(String clipboard) {
-    return devicectl.writePasteboard(deviceId: deviceId, text: clipboard);
+  Future<void> setDeviceClipboardContent(String clipboard) async {
+    await devicectl.writePasteboard(deviceId: deviceId, text: clipboard);
+    await _simulatePasteKeystroke();
+  }
+
+  Future<void> _simulatePasteKeystroke() async {
+    if (!supportsInteraction) {
+      return;
+    }
+
+    final usageCode = iosKeyUsageOf(LogicalKeyboardKey.keyV);
+    if (usageCode == null) {
+      return;
+    }
+
+    try {
+      await hidChannel.sendKey(
+        deviceId: deviceId,
+        usageCode: usageCode,
+        isDown: true,
+      );
+      await hidChannel.sendKey(
+        deviceId: deviceId,
+        usageCode: usageCode,
+        isDown: false,
+      );
+    } on Object catch (error, stackTrace) {
+      appLogger.w(
+        'Pasted onto the pasteboard of $deviceId but could not trigger the '
+        'on-device paste',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
   }
 
   @override
@@ -164,14 +223,6 @@ class IosDeviceAgent(
     );
   }
 
-  /// Sends a touch without waiting for the device to confirm it.
-  ///
-  /// The HID API carries no timestamp, so iOS reads a touch as having happened
-  /// when it arrives. Awaiting each sample would put a channel round trip
-  /// between two positions of the same drag, and the device would take that
-  /// delay for the finger moving slowly — a fast flick would arrive stretched
-  /// out and barely fling at all. The Android path does the same thing for the
-  /// same reason, over its scrcpy socket.
   void _fireAndForget(Future<void> send) {
     unawaited(
       send.onError((error, stackTrace) {
@@ -197,6 +248,7 @@ class IosDeviceAgent(
   }
 
   Future<void> dispose() async {
+    _orientationPoll?.cancel();
     await _screenSizeSubscription.cancel();
     await _screenSize.close();
 

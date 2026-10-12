@@ -104,7 +104,7 @@ class const _Content({
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+      behavior: .opaque,
       onTap: () => FocusScope.of(context).unfocus(),
       child: state.devices.isEmpty
           ? const _NoDevicesMirrored()

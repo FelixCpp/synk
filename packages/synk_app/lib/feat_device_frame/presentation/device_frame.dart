@@ -112,15 +112,15 @@ class _DeviceFrameState extends State<DeviceFrame>
                   ),
                   if (widget.supportsInteraction)
                     _ControlsBar(
-                      onBackPressed: () {
-                        _pressControlButton(context, .back);
-                      },
+                      onBackPressed: widget.supportsDeviceActions
+                          ? () => _pressControlButton(context, .back)
+                          : null,
                       onHomePressed: () {
                         _pressControlButton(context, .home);
                       },
-                      onAppSwitchPressed: () {
-                        _pressControlButton(context, .appSwitch);
-                      },
+                      onAppSwitchPressed: widget.supportsDeviceActions
+                          ? () => _pressControlButton(context, .appSwitch)
+                          : null,
                     ),
                 ],
               ),
@@ -343,9 +343,9 @@ class const _ScreenMirror({
 }
 
 class const _ControlsBar({
-  required final VoidCallback onBackPressed,
+  final VoidCallback? onBackPressed,
   required final VoidCallback onHomePressed,
-  required final VoidCallback onAppSwitchPressed,
+  final VoidCallback? onAppSwitchPressed,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

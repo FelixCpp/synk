@@ -68,6 +68,29 @@ struct Tool {
         do { _ = try await dev.getImplementation(for: .hid.button); print("  button:    ok") }
         catch { print("  button:    \((error as NSError).localizedDescription)") }
 
+      case "orient":
+        let control = try await dev.getImplementation(for: .orientationControl)
+        let info = try await control.currentDeviceOrientation()
+        print("currentDeviceOrientation: \(info.currentDeviceOrientation)")
+        print("currentDeviceNonFlatOrientation: \(info.currentDeviceNonFlatOrientation)")
+        print("currentDeviceOrientationLocked: \(info.currentDeviceOrientationLocked)")
+
+      case "setorient":
+        let name = args[1]
+        let target: DeviceOrientation
+        switch name {
+        case "portrait": target = .portrait
+        case "portraitUpsideDown": target = .portraitUpsideDown
+        case "landscapeLeft": target = .landscapeLeft
+        case "landscapeRight": target = .landscapeRight
+        case "faceUp": target = .faceUp
+        case "faceDown": target = .faceDown
+        default: print("unknown orientation: \(name)"); return
+        }
+        let control = try await dev.getImplementation(for: .orientationControl)
+        let info = try await control.changeDeviceOrientation(target)
+        print("changeDeviceOrientation(\(name)) -> currentDeviceOrientation: \(info.currentDeviceOrientation), nonFlat: \(info.currentDeviceNonFlatOrientation)")
+
       case "scroll":
         let dy = Double(args[1])!
         let target = ScrollTarget(rawValue: UInt(args.count > 2 ? args[2] : "0")!)!

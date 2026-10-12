@@ -18,6 +18,12 @@ class IosHidChannel {
     return _channel.invokeMethod('releaseInput', {'deviceId': deviceId.value});
   }
 
+  Future<void> refreshOrientation(DeviceId deviceId) {
+    return _channel.invokeMethod('refreshOrientation', {
+      'deviceId': deviceId.value,
+    });
+  }
+
   Future<void> sendTouch({
     required DeviceId deviceId,
     required IosTouchPoint point,

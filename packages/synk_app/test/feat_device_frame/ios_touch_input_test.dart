@@ -96,7 +96,7 @@ void main() {
     late List<MethodCall> calls;
     late IosDeviceAgent agent;
 
-    setUp(() {
+    setUp(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
       calls = [];
 
@@ -129,6 +129,12 @@ void main() {
         const DeviceScreenSize(width: 1179, height: 2556),
         true,
       );
+
+      // The constructor fires an unawaited orientation refresh so a device
+      // that is already in landscape when mirroring starts is handled
+      // correctly. Let it settle before each test records its own calls.
+      await pumpEventQueue();
+      calls.clear();
     });
 
     tearDown(() {
@@ -290,6 +296,97 @@ void main() {
     });
   });
 
+  group('orientation refresh', () {
+    late List<MethodCall> calls;
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      calls = [];
+
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_hid'),
+        (call) async {
+          calls.add(call);
+          return call.method == 'prepareInput' ? true : null;
+        },
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_mirror/screen_size'),
+        (call) async => null,
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_mirror'),
+        (call) async => null,
+      );
+    });
+
+    tearDown(() {
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_hid'),
+        null,
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_mirror/screen_size'),
+        null,
+      );
+      messenger.setMockMethodCallHandler(
+        const MethodChannel('dev.synk/ios_mirror'),
+        null,
+      );
+    });
+
+    test(
+      'is requested as soon as a device that takes input connects, so a '
+      'device already in landscape is handled from the first touch',
+      () async {
+        IosDeviceAgent(
+          IosCaptureSessionTransport(IosMirrorChannel(), null),
+          IosHidChannel(),
+          DevicectlApi(),
+          _deviceId,
+          const NativeTextureId(1),
+          const DeviceScreenSize(width: 1179, height: 2556),
+          true,
+        );
+
+        await pumpEventQueue();
+
+        expect(
+          calls.map((call) => call.method),
+          contains('refreshOrientation'),
+        );
+        expect(
+          calls
+              .firstWhere((call) => call.method == 'refreshOrientation')
+              .arguments['deviceId'],
+          _deviceId.value,
+        );
+      },
+    );
+
+    test('is not requested for a device that takes no input', () async {
+      IosDeviceAgent(
+        IosCaptureSessionTransport(IosMirrorChannel(), null),
+        IosHidChannel(),
+        DevicectlApi(),
+        _deviceId,
+        const NativeTextureId(1),
+        const DeviceScreenSize(width: 1179, height: 2556),
+        false,
+      );
+
+      await pumpEventQueue();
+
+      expect(calls, isEmpty);
+    });
+  });
+
   group('the frame repository', () {
     test('turns a control button into the matching device action', () async {
       final agent = _RecordingInteractionAgent();
@@ -356,15 +453,11 @@ class _ConnectionsWithInteraction(final InteractionAgent? agent)
   @override
   AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
 
-
   @override
   ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
 
-
   @override
-
   AudioAgent? getAudioAgent(DeviceId id) => null;
-
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();

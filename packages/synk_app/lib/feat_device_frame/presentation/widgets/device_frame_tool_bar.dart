@@ -38,38 +38,49 @@ class const DeviceFrameToolBar({
       child: Padding(
         padding: SynkTheme.deviceFrameToolBarPadding,
         child: Row(
+          mainAxisAlignment: .spaceBetween,
           spacing: SynkTheme.horizontalComponentSpacingSmall,
           children: [
-            _StatusDot(isLive: true), // TODO(Felix): Maybe remove this?
             Expanded(
-              child: SynkUiTooltip(
-                message: deviceId,
-                child: Align(
-                  alignment: .centerLeft,
-                  child: Text(
-                    modelName,
-                    style: context.typo.headline,
-                    overflow: .ellipsis,
-                    maxLines: 1,
+              child: Row(
+                spacing: SynkTheme.horizontalComponentSpacingSmall,
+                children: [
+                  _StatusDot(isLive: true), // TODO(Felix): Maybe remove this?
+                  Flexible(
+                    child: SynkUiTooltip(
+                      message: deviceId,
+                      child: Text(
+                        modelName,
+                        style: context.typo.headline,
+                        overflow: .ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-            _Actions(
-              isMaximized: isMaximized,
-              isRecording: isRecording,
-              isAudioMuted: isAudioMuted,
-              supportsInteraction: supportsInteraction,
-              supportsDeviceActions: supportsDeviceActions,
-              supportsAudio: supportsAudio,
-              onCaptureScreenshot: onCaptureScreenshot,
-              onToggleRecording: onToggleRecording,
-              onToggleAudioMute: onToggleAudioMute,
-              onToggleMaximize: onToggleMaximize,
-              onClose: onClose,
-              onInstallApk: onInstallApk,
-              onShareFile: onShareFile,
-              onStandby: onStandby,
+            // Scales the actions down in a narrow frame instead of overflowing.
+            Flexible(
+              child: FittedBox(
+                fit: .scaleDown,
+                child: _Actions(
+                  isMaximized: isMaximized,
+                  isRecording: isRecording,
+                  isAudioMuted: isAudioMuted,
+                  supportsInteraction: supportsInteraction,
+                  supportsDeviceActions: supportsDeviceActions,
+                  supportsAudio: supportsAudio,
+                  onCaptureScreenshot: onCaptureScreenshot,
+                  onToggleRecording: onToggleRecording,
+                  onToggleAudioMute: onToggleAudioMute,
+                  onToggleMaximize: onToggleMaximize,
+                  onClose: onClose,
+                  onInstallApk: onInstallApk,
+                  onShareFile: onShareFile,
+                  onStandby: onStandby,
+                ),
+              ),
             ),
           ],
         ),
@@ -108,16 +119,6 @@ class const _Actions({
             onPressed: onToggleRecording,
           ),
         ),
-        if (supportsAudio)
-          SynkUiTooltip(
-            message: isAudioMuted ? 'Audio aktivieren' : 'Audio stummschalten',
-            child: SynkUiIconButton(
-              icon: isAudioMuted
-                  ? CupertinoIcons.speaker_slash_fill
-                  : CupertinoIcons.speaker_2_fill,
-              onPressed: onToggleAudioMute,
-            ),
-          ),
         SynkUiTooltip(
           message: 'Screenshot aufnehmen',
           child: SynkUiIconButton(
@@ -134,10 +135,13 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        if (supportsInteraction || supportsDeviceActions)
+        if (supportsInteraction || supportsDeviceActions || isAudioMuted)
           _OverflowButton(
+            supportsAudio: supportsAudio,
+            isAudioMuted: isAudioMuted,
             supportsInteraction: supportsInteraction,
             supportsDeviceActions: supportsDeviceActions,
+            onToggleAudioMute: onToggleAudioMute,
             onInstallApk: onInstallApk,
             onShareFile: onShareFile,
             onStandby: onStandby,
@@ -155,8 +159,11 @@ class const _Actions({
 }
 
 class const _OverflowButton({
+  required final bool supportsAudio,
+  required final bool isAudioMuted,
   required final bool supportsInteraction,
   required final bool supportsDeviceActions,
+  required final VoidCallback onToggleAudioMute,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
   required final VoidCallback onStandby,
@@ -190,6 +197,17 @@ class const _OverflowButton({
             ),
           ),
         ],
+        if (supportsAudio)
+          SynkUiTooltip(
+            message: isAudioMuted ? 'Ton ein' : 'Ton aus',
+            child: SynkUiMenuItem(
+              icon: isAudioMuted
+                  ? CupertinoIcons.speaker_slash_fill
+                  : CupertinoIcons.speaker_2_fill,
+              label: isAudioMuted ? 'Ton ein' : 'Ton aus',
+              onPressed: onToggleAudioMute,
+            ),
+          ),
         if (supportsInteraction)
           SynkUiTooltip(
             message: 'Gerät An-/Ausschalten',

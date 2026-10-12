@@ -93,6 +93,46 @@ extension CoreDevice.CapabilityStaticMember where T == CoreDevice.HIDDeviceCapab
   public static var button: CoreDevice.CapabilityStaticMember<CoreDevice.ButtonHIDCapability> { get }
 }
 
+// MARK: - Device orientation (needed to keep the digitizer, which sits below
+// the rotation applied to the mirrored image, in the device's native frame)
+
+public struct OrientationControlCapability : CoreDevice.DeviceCapability {
+  public typealias ProtocolType = any CoreDevice.OrientationControl
+  public typealias ImplType = Swift.Never
+  public static var capability: CoreDevice.Capability { get }
+}
+
+extension CoreDevice.CapabilityStaticMember where T : CoreDevice.DeviceCapability {
+  public static var orientationControl: CoreDevice.CapabilityStaticMember<CoreDevice.OrientationControlCapability> { get }
+}
+
+public enum DeviceOrientation {
+  case unknown
+  case portrait
+  case portraitUpsideDown
+  case landscapeLeft
+  case landscapeRight
+  case faceUp
+  case faceDown
+}
+
+public enum DeviceOrientationRotationDirection {
+  case left
+  case right
+}
+
+public struct OrientationInfo {
+  public var currentDeviceOrientation: CoreDevice.DeviceOrientation { get }
+  public var currentDeviceNonFlatOrientation: CoreDevice.DeviceOrientation { get }
+  public var currentDeviceOrientationLocked: Swift.Bool { get }
+}
+
+public protocol OrientationControl : CoreDevice.DeviceCapabilityProtocol {
+  func currentDeviceOrientation() async throws -> CoreDevice.OrientationInfo
+  func changeDeviceOrientation(_ orientation: CoreDevice.DeviceOrientation) async throws -> CoreDevice.OrientationInfo
+  func rotate(direction: CoreDevice.DeviceOrientationRotationDirection) async throws -> CoreDevice.OrientationInfo
+}
+
 public enum HIDButtonState {
   case down
   case up

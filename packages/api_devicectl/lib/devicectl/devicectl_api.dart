@@ -22,7 +22,7 @@ class DevicectlApi({final String xcrunPath = defaultXcrunPath}) {
       'capture',
       'screenshot',
       '--device',
-      deviceId,
+      _normalizedDeviceId(deviceId),
       '--destination',
       destination,
       '--timeout',
@@ -48,7 +48,7 @@ class DevicectlApi({final String xcrunPath = defaultXcrunPath}) {
       'pasteboard',
       'paste',
       '--device',
-      deviceId,
+      _normalizedDeviceId(deviceId),
       '--timeout',
       '${timeout.inSeconds}',
       '--quiet',
@@ -78,7 +78,7 @@ class DevicectlApi({final String xcrunPath = defaultXcrunPath}) {
       'pasteboard',
       'copy',
       '--device',
-      deviceId,
+      _normalizedDeviceId(deviceId),
       '--timeout',
       '${timeout.inSeconds}',
       '--quiet',
@@ -92,6 +92,24 @@ class DevicectlApi({final String xcrunPath = defaultXcrunPath}) {
       );
     }
   }
+}
+
+final _compactUdidPattern = RegExp(r'^[0-9A-Fa-f]{24}$');
+
+/// `devicectl` rejects a device identifier that doesn't match CoreDevice's
+/// UDID formatting — `XXXXXXXX-XXXXXXXXXXXXXXXX` for modern (A12+) devices.
+///
+/// IOKit, which is how synk discovers plugged-in iPhones over USB, reports
+/// that same UDID without the dash. Passing it straight through makes every
+/// `devicectl` call fail with "device not found", so it's reinserted here —
+/// the one place every `devicectl` invocation funnels through — rather than
+/// in each caller.
+String _normalizedDeviceId(String deviceId) {
+  if (!_compactUdidPattern.hasMatch(deviceId)) {
+    return deviceId;
+  }
+
+  return '${deviceId.substring(0, 8)}-${deviceId.substring(8)}';
 }
 
 String _describeOutput(ProcessResult process) {
