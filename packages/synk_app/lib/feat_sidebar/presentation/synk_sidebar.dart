@@ -7,6 +7,7 @@ import 'package:synk/feat_sidebar/data/repositories/sidebar_repository_impl.dart
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
+import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -43,7 +44,8 @@ class const _Content({required final SidebarState state})
         crossAxisAlignment: .stretch,
         spacing: SynkTheme.verticalComponentSpacingMedium,
         children: [
-          _ConnectWirelessDeviceButton(),
+          if (context.read<ToolAvailability>().isAdbAvailable)
+            const _ConnectWirelessDeviceButton(),
           _SectionHeader(title: "VERBUNDENE GERÄTE"),
           if (state.devices.isEmpty)
             const _NoDevicesPlugged()

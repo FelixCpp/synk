@@ -1,3 +1,4 @@
+import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
@@ -6,10 +7,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<bool?> showWirelessPairingDialog(BuildContext context) {
+  // The dialog route lives above the providers of the calling context.
+  final adbApi = RepositoryProvider.of<AdbApi>(context);
+
   return showSynkUiDialog<bool>(
     context: context,
     barrierDismissible: true,
-    builder: (context) => const WirelessPairingDialog(),
+    builder: (context) => RepositoryProvider.value(
+      value: adbApi,
+      child: const WirelessPairingDialog(),
+    ),
   );
 }
 
@@ -37,7 +44,9 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
     final code = _codeController.text.trim();
 
     if (hostPort.isEmpty || code.isEmpty) {
-      setState(() => _errorMessage = 'Bitte IP-Adresse, Port und Code angeben.');
+      setState(
+        () => _errorMessage = 'Bitte IP-Adresse, Port und Code angeben.',
+      );
       return;
     }
 
@@ -100,7 +109,9 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
               if (_errorMessage != null)
                 Text(
                   _errorMessage!,
-                  style: theme.typography.secondary.copyWith(color: colors.error),
+                  style: theme.typography.secondary.copyWith(
+                    color: colors.error,
+                  ),
                 ),
               Padding(
                 padding: const EdgeInsets.only(top: SynkUiSpace.s4),

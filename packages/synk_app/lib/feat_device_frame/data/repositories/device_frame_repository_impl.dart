@@ -1,9 +1,13 @@
+import 'dart:io';
+
+import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
 import 'package:synk/feat_device_frame/domain/models/control_button_type.dart';
 import 'package:synk/feat_device_frame/domain/models/dropped_file_outcome.dart';
 import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
@@ -16,59 +20,69 @@ class const DeviceFrameRepositoryImpl({
   required final DeviceConnectionsRepository repository,
 }) implements DeviceFrameRepository {
   @override
-  Future<void> simulateKeyEvent(DeviceId deviceId, DeviceKeyEvent event) async {
+  Future<ClipboardSyncFailure?> simulateKeyEvent(
+    DeviceId deviceId,
+    DeviceKeyEvent event,
+  ) async {
     final shortcut = _clipboardShortcutOf(event);
     if (shortcut == null) {
       await repository.getInteractionAgent(deviceId)?.simulateKeyEvent(event);
-      return;
+      return null;
     }
 
     if (event.type != .down) {
-      return;
+      return null;
     }
 
     final agent = repository.getClipboardAgent(deviceId);
     if (agent == null) {
-      return;
+      return null;
     }
 
-    await switch (shortcut) {
+    return switch (shortcut) {
       .copyFromDevice => _copyFromDevice(deviceId, agent),
       .pasteToDevice => _pasteToDevice(deviceId, agent),
     };
   }
 
-  Future<void> _copyFromDevice(DeviceId deviceId, ClipboardAgent agent) async {
+  Future<ClipboardSyncFailure?> _copyFromDevice(
+    DeviceId deviceId,
+    ClipboardAgent agent,
+  ) async {
     final String text;
     try {
       text = await agent.readDeviceClipboardContent();
     } on Object catch (error, stackTrace) {
-      _logUnreachableClipboard(deviceId, error, stackTrace);
-      return;
+      return _unreachableClipboard(deviceId, error, stackTrace);
     }
 
     if (text.isEmpty) {
-      return;
+      return null;
     }
 
     await Clipboard.setData(ClipboardData(text: text));
+    return null;
   }
 
-  Future<void> _pasteToDevice(DeviceId deviceId, ClipboardAgent agent) async {
+  Future<ClipboardSyncFailure?> _pasteToDevice(
+    DeviceId deviceId,
+    ClipboardAgent agent,
+  ) async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
     if (text == null) {
-      return;
+      return null;
     }
 
     try {
       await agent.setDeviceClipboardContent(text);
+      return null;
     } on Object catch (error, stackTrace) {
-      _logUnreachableClipboard(deviceId, error, stackTrace);
+      return _unreachableClipboard(deviceId, error, stackTrace);
     }
   }
 
-  void _logUnreachableClipboard(
+  ClipboardSyncFailure _unreachableClipboard(
     DeviceId deviceId,
     Object error,
     StackTrace stackTrace,
@@ -78,6 +92,11 @@ class const DeviceFrameRepositoryImpl({
       error: error,
       stackTrace: stackTrace,
     );
+
+    return switch (error) {
+      DevicectlCommandException() || ProcessException() => .toolUnavailable,
+      _ => .deviceUnreachable,
+    };
   }
 
   @override

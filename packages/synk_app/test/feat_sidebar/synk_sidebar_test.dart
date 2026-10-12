@@ -1,3 +1,4 @@
+import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_agent/application/android_device_agent.dart';
 import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
@@ -96,6 +97,12 @@ Future<void> _pumpSidebar(
         providers: [
           RepositoryProvider<NotificationService>(
             create: (context) => NotificationService(),
+          ),
+          RepositoryProvider.value(
+            value: const ToolAvailability(
+              isAdbAvailable: true,
+              isDevicectlAvailable: true,
+            ),
           ),
           RepositoryProvider<PluggedAdbDevicesRepository>(
             create: (context) => FakeAdbDevicesRepository(devices),

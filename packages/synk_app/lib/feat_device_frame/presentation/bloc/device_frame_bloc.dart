@@ -88,6 +88,24 @@ class DeviceFrameBloc({
 
     return simulateKeyEvent
         .logger(level: .trace)
+        .after((failure) {
+          if (failure == null) {
+            return;
+          }
+
+          notifications.notify(
+            .new(
+              message: switch (failure) {
+                .toolUnavailable =>
+                  'Zwischenablage nicht verfügbar: Xcode (devicectl) lässt '
+                      'sich nicht ausführen oder das Gerät ist nicht '
+                      'erreichbar.',
+                .deviceUnreachable =>
+                  'Die Zwischenablage des Geräts ist nicht erreichbar.',
+              },
+            ),
+          );
+        })
         .intercept(
           (e) => notifications.notify(
             .new(message: 'Failed to simulate key stroke: $e'),
