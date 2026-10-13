@@ -142,6 +142,9 @@ class _RecordingInteractionAgent implements InteractionDeviceAgent {
   Future<void> simulatePinchEvent(PinchEvent event) async {}
 
   @override
+  Set<DeviceNavigation> get supportedNavigations => const {};
+
+  @override
   Future<void> navigate(DeviceNavigation navigation) async {}
 
   @override

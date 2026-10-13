@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 class const DeviceFrameControls({
   super.key,
   final VoidCallback? onBackPressed,
-  required final VoidCallback onHomePressed,
+  final VoidCallback? onHomePressed,
   final VoidCallback? onAppLibraryPressed,
 }) extends StatelessWidget {
   @override
@@ -28,15 +28,16 @@ class const DeviceFrameControls({
                   onPressed: onBackPressed,
                 ),
               ),
-            SynkUiTooltip(
-              message: 'Home',
-              child: SynkUiIconButton(
-                icon: CupertinoIcons.home,
-                size: 38.0,
-                iconSize: 20.0,
-                onPressed: onHomePressed,
+            if (onHomePressed != null)
+              SynkUiTooltip(
+                message: 'Home',
+                child: SynkUiIconButton(
+                  icon: CupertinoIcons.home,
+                  size: 38.0,
+                  iconSize: 20.0,
+                  onPressed: onHomePressed,
+                ),
               ),
-            ),
             if (onAppLibraryPressed != null)
               SynkUiTooltip(
                 message: 'Übersicht',

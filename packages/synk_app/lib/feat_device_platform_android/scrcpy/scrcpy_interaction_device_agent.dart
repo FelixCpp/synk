@@ -54,6 +54,11 @@ class ScrcpyInteractionDeviceAgent({
   Future<void> simulatePinchEvent(PinchEvent event) async {}
 
   @override
+  Set<DeviceNavigation> get supportedNavigations {
+    return const {.back, .home, .appSwitch};
+  }
+
+  @override
   Future<void> navigate(DeviceNavigation navigation) async {
     _pressKey(switch (navigation) {
       .back => .back,

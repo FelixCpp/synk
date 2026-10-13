@@ -3,6 +3,7 @@ import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
@@ -272,7 +273,10 @@ Future<SynkColors> _pumpFrame(
                         textureId: const NativeTextureId(1),
                         screenSize: screenSize,
                         supportsInteraction: supportsInteraction,
-                        supportsDeviceActions: supportsInteraction,
+                        navigations: supportsInteraction
+                            ? DeviceNavigation.values.toSet()
+                            : const {},
+                        supportsFileTransfer: supportsInteraction,
                         supportsAudio: supportsInteraction,
                         isMaximized: isMaximized,
                         onToggleMaximize: () {},

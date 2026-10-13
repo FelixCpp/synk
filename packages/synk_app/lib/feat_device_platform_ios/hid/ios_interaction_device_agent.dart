@@ -102,7 +102,16 @@ class IosInteractionDeviceAgent({
   }
 
   @override
+  Set<DeviceNavigation> get supportedNavigations {
+    return const {.home};
+  }
+
+  @override
   Future<void> navigate(DeviceNavigation navigation) async {
+    if (!supportedNavigations.contains(navigation)) {
+      return;
+    }
+
     await hidChannel.sendSwipe(
       deviceId: deviceId,
       swipe: iosSwipeForNavigation(navigation),

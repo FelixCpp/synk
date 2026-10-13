@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
 import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
@@ -187,31 +188,36 @@ void main() {
   });
 
   group('navigating an iOS agent', () {
-    test('swipes in from the edge the navigation belongs to', () async {
+    test('offers home only', () async {
+      final agent = await buildAgent();
+
+      expect(agent.interaction!.supportedNavigations, {DeviceNavigation.home});
+    });
+
+    test('swipes up from the bottom edge for home', () async {
       final agent = await buildAgent();
       callsOn('dev.synk/ios_hid').clear();
 
       await agent.interaction!.navigate(.home);
-      await agent.interaction!.navigate(.back);
-
-      final swipes = callsOn(
-        'dev.synk/ios_hid',
-      ).where((call) => call.method == 'sendSwipe');
-
-      expect(swipes.map((call) => call.arguments['edge']), ['bottom', 'left']);
-    });
-
-    test('holds the swipe for the app switcher', () async {
-      final agent = await buildAgent();
-      callsOn('dev.synk/ios_hid').clear();
-
-      await agent.interaction!.navigate(.appSwitch);
 
       final swipe = callsOn(
         'dev.synk/ios_hid',
       ).singleWhere((call) => call.method == 'sendSwipe');
 
-      expect(swipe.arguments['holdMs'], greaterThan(0));
+      expect(swipe.arguments['edge'], 'bottom');
+    });
+
+    test('ignores a navigation it does not offer', () async {
+      final agent = await buildAgent();
+      callsOn('dev.synk/ios_hid').clear();
+
+      await agent.interaction!.navigate(.back);
+      await agent.interaction!.navigate(.appSwitch);
+
+      expect(
+        callsOn('dev.synk/ios_hid').where((call) => call.method == 'sendSwipe'),
+        isEmpty,
+      );
     });
   });
 

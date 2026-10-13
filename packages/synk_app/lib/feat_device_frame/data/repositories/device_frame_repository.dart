@@ -18,12 +18,12 @@ import 'package:path/path.dart' as path;
 class const DeviceFrameRepository({
   required final DeviceConnectionsRepository repository,
 }) {
-  /// Returns the reason a clipboard shortcut could not be served, if any.
   Future<ClipboardSyncFailure?> simulateKeyEvent(
     DeviceId deviceId,
     DeviceKeyEvent event,
   ) async {
     final shortcut = _clipboardShortcutOf(event);
+
     if (shortcut == null) {
       await repository.getAgent(deviceId)?.interaction?.simulateKeyEvent(event);
       return null;

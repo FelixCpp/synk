@@ -12,7 +12,7 @@ class const DeviceFrameToolBar({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
-  required final bool supportsDeviceActions,
+  required final bool supportsFileTransfer,
   required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
@@ -69,7 +69,7 @@ class const DeviceFrameToolBar({
                   isRecording: isRecording,
                   isAudioMuted: isAudioMuted,
                   supportsInteraction: supportsInteraction,
-                  supportsDeviceActions: supportsDeviceActions,
+                  supportsFileTransfer: supportsFileTransfer,
                   supportsAudio: supportsAudio,
                   onCaptureScreenshot: onCaptureScreenshot,
                   onToggleRecording: onToggleRecording,
@@ -94,7 +94,7 @@ class const _Actions({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
-  required final bool supportsDeviceActions,
+  required final bool supportsFileTransfer,
   required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
@@ -135,12 +135,12 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        if (supportsInteraction || supportsDeviceActions || isAudioMuted)
+        if (supportsInteraction || supportsFileTransfer || isAudioMuted)
           _OverflowButton(
             supportsAudio: supportsAudio,
             isAudioMuted: isAudioMuted,
             supportsInteraction: supportsInteraction,
-            supportsDeviceActions: supportsDeviceActions,
+            supportsFileTransfer: supportsFileTransfer,
             onToggleAudioMute: onToggleAudioMute,
             onInstallApk: onInstallApk,
             onShareFile: onShareFile,
@@ -162,7 +162,7 @@ class const _OverflowButton({
   required final bool supportsAudio,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
-  required final bool supportsDeviceActions,
+  required final bool supportsFileTransfer,
   required final VoidCallback onToggleAudioMute,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -173,7 +173,7 @@ class const _OverflowButton({
     return SynkUiMenu(
       width: 190.0,
       itemsBuilder: (context, controller) => [
-        if (supportsDeviceActions) ...[
+        if (supportsFileTransfer) ...[
           SynkUiTooltip(
             message: 'APK auf dem Gerät installieren',
             child: SynkUiMenuItem(

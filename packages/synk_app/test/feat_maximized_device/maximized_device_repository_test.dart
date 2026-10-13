@@ -77,7 +77,8 @@ DeviceConnection _connection(String id) {
     textureId: const NativeTextureId(1),
     screenSize: const DeviceScreenSize(width: 1179, height: 2556),
     supportsInteraction: true,
-    supportsDeviceActions: false,
+    navigations: const {.home},
+    supportsFileTransfer: false,
     supportsAudio: false,
   );
 }

@@ -23,7 +23,8 @@ class const DeviceFrame({
   required final NativeTextureId textureId,
   required final DeviceScreenSize screenSize,
   required final bool supportsInteraction,
-  required final bool supportsDeviceActions,
+  required final Set<DeviceNavigation> navigations,
+  required final bool supportsFileTransfer,
   required final bool supportsAudio,
   required final bool isMaximized,
   required final VoidCallback onToggleMaximize,
@@ -70,7 +71,7 @@ class _DeviceFrameState extends State<DeviceFrame>
       child: _DeviceFrameBlocProvider(
         deviceId: widget.deviceId,
         builder: (context, state) => _FrameDropTarget(
-          enabled: widget.supportsDeviceActions,
+          enabled: widget.supportsFileTransfer,
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
@@ -89,7 +90,7 @@ class _DeviceFrameState extends State<DeviceFrame>
                     isRecording: state.isRecording,
                     isAudioMuted: state.isAudioMuted,
                     supportsInteraction: widget.supportsInteraction,
-                    supportsDeviceActions: widget.supportsDeviceActions,
+                    supportsFileTransfer: widget.supportsFileTransfer,
                     supportsAudio: widget.supportsAudio,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
@@ -98,9 +99,9 @@ class _DeviceFrameState extends State<DeviceFrame>
                     onInstallApk: () => _installApk(context),
                     onShareFile: () => _shareFile(context),
                     onStandby: () {
-                      BlocProvider.of<DeviceFrameBloc>(
-                        context,
-                      ).add(const .onPowerButtonPressed());
+                      BlocProvider.of<DeviceFrameBloc>(context).add(
+                        const .onPowerButtonPressed(),
+                      );
                     },
                     onClose: widget.onClose,
                   ),
@@ -112,17 +113,14 @@ class _DeviceFrameState extends State<DeviceFrame>
                       flash: _screenshotFlash,
                     ),
                   ),
-                  if (widget.supportsInteraction)
+                  if (widget.navigations.isNotEmpty)
                     _ControlsBar(
-                      onBackPressed: widget.supportsDeviceActions
-                          ? () => _navigate(context, .back)
-                          : null,
-                      onHomePressed: () {
-                        _navigate(context, .home);
-                      },
-                      onAppSwitchPressed: widget.supportsDeviceActions
-                          ? () => _navigate(context, .appSwitch)
-                          : null,
+                      onBackPressed: _navigationCallback(context, .back),
+                      onHomePressed: _navigationCallback(context, .home),
+                      onAppSwitchPressed: _navigationCallback(
+                        context,
+                        .appSwitch,
+                      ),
                     ),
                 ],
               ),
@@ -133,8 +131,17 @@ class _DeviceFrameState extends State<DeviceFrame>
     );
   }
 
-  void _navigate(BuildContext context, DeviceNavigation navigation) {
-    BlocProvider.of<DeviceFrameBloc>(context).add(.onNavigate(navigation));
+  VoidCallback? _navigationCallback(
+    BuildContext context,
+    DeviceNavigation navigation,
+  ) {
+    if (!widget.navigations.contains(navigation)) {
+      return null;
+    }
+
+    return () {
+      BlocProvider.of<DeviceFrameBloc>(context).add(.onNavigate(navigation));
+    };
   }
 
   void _captureScreenshot(BuildContext context) {
@@ -287,7 +294,7 @@ class const _ToolBar({
   required final bool isRecording,
   required final bool isAudioMuted,
   required final bool supportsInteraction,
-  required final bool supportsDeviceActions,
+  required final bool supportsFileTransfer,
   required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
@@ -309,7 +316,7 @@ class const _ToolBar({
         isRecording: isRecording,
         isAudioMuted: isAudioMuted,
         supportsInteraction: supportsInteraction,
-        supportsDeviceActions: supportsDeviceActions,
+        supportsFileTransfer: supportsFileTransfer,
         supportsAudio: supportsAudio,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
@@ -345,7 +352,7 @@ class const _ScreenMirror({
 
 class const _ControlsBar({
   final VoidCallback? onBackPressed,
-  required final VoidCallback onHomePressed,
+  final VoidCallback? onHomePressed,
   final VoidCallback? onAppSwitchPressed,
 }) extends StatelessWidget {
   @override
@@ -389,13 +396,6 @@ String _heroTagOf(DeviceId deviceId) => 'device-frame-$deviceId';
 
 double deviceAspectRatioOf(DeviceScreenSize screenSize) {
   return screenSize.width / screenSize.height;
-
-  // if (screenSize == null || screenSize.width <= 0 || screenSize.height <= 0) {
-  //   return SynkTheme.deviceFrameReferenceAspectRatio;
-  // }
-  //
-  //
-  // return screenSize.width / screenSize.height;
 }
 
 Size deviceFrameSizeFor(DeviceScreenSize screenSize) {

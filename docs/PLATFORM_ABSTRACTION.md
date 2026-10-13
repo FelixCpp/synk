@@ -59,6 +59,8 @@ abstract interface class DeviceAgent {
   ihren eigenen Typ mit (`AndroidDevice`, `IosDevice`) und kann dort eigene Felder halten.
 - **Navigation und Power-Knopf sind getrennt:** `navigate(DeviceNavigation)` für Back, Home und
   App-Switch, `pressPowerButton()` für den Hardware-Knopf.
+- **Welche Navigationen ein Gerät anbietet, sagt es selbst:**
+  `InteractionDeviceAgent.supportedNavigations`. Android meldet alle drei, iOS nur Home.
 
 ## Verzeichnisse
 
@@ -98,8 +100,10 @@ Innerhalb einer Plattform ist nach Backend gruppiert, nicht nach Schicht.
   `Map<DeviceId, DeviceAgent>`. Verbinden läuft über die meldende Plattform, Trennen über
   `agent.dispose()`.
 - **`DeviceConnection`** ist das eine Modell für ein verbundenes Gerät. Canvas, maximierte Ansicht
-  und `DeviceFrame` benutzen es direkt; die Flags `supportsInteraction`, `supportsDeviceActions`
-  und `supportsAudio` leiten sich aus den Fähigkeiten des Agents ab.
+  und `DeviceFrame` benutzen es direkt; `supportsInteraction`, `navigations`, `supportsFileTransfer`
+  und `supportsAudio` leiten sich aus den Fähigkeiten des Agents ab. Die Navigationsleiste zeigt
+  genau die Buttons aus `navigations`; `supportsFileTransfer` schaltet Drop-Ziel, APK-Installation
+  und „Datei senden".
 - **`DeviceFrameRepository`** holt sich den Agent über `getAgent(deviceId)` und ruft die
   Fähigkeiten auf.
 
@@ -125,10 +129,9 @@ Solange das Backend die bestehenden Fähigkeits-Interfaces bedient, bleibt die A
 
 - **Am Gerät prüfen.** Der Umbau ist durch Tests abgedeckt, aber noch nicht mit einem Android- und
   einem iOS-Gerät durchgespielt.
-- **`supportsDeviceActions` ist weiter überladen.** Das Flag hängt an `fileTransfer != null` und
-  blendet damit auf iOS auch Back und App-Switch aus, obwohl `IosInteractionDeviceAgent` alle drei
-  Navigationen kann. Die Buttons freizugeben ist eine sichtbare Verhaltensänderung; die
-  distanzabhängige Wisch-Physik ist noch nicht am Gerät nachgefühlt.
+- **iOS bietet nur Home an.** Die Wischgesten für Back und App-Switch existieren in
+  `iosSwipeForNavigation`, ihre distanzabhängige Physik ist aber noch nicht am Gerät nachgefühlt.
+  Freigeben heißt, sie in `IosInteractionDeviceAgent.supportedNavigations` aufzunehmen.
 - **`ConnectionFailure.connectionRefused` wird nicht mehr erzeugt.** Jeder Fehlschlag ist `unknown`.
 - **`IosMediaStreamTransport` ist unbenutzt.** Im Einsatz ist nur `IosCaptureSessionTransport`.
 - **`DeviceForm` (Telefon/Tablet)** für Sidebar-Icon und Texte ist nicht umgesetzt.

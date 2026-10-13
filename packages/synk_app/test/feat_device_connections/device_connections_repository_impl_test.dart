@@ -6,6 +6,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection_sta
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
 import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
@@ -119,7 +120,7 @@ void main() {
   group('DeviceConnectionsRepositoryImpl.observeDeviceConnections', () {
     test('offers what the agent of a connection can do', () async {
       android.onConnect = (_) async => FakeDeviceAgent(
-        interaction: _NoInteraction(),
+        interaction: _HomeOnlyInteraction(),
       );
       final device = await plugInto(android, 'android-1');
 
@@ -130,7 +131,8 @@ void main() {
       expect(connection.device, device);
       expect(connection.supportsInteraction, isTrue);
       expect(connection.supportsAudio, isFalse);
-      expect(connection.supportsDeviceActions, isFalse);
+      expect(connection.navigations, {DeviceNavigation.home});
+      expect(connection.supportsFileTransfer, isFalse);
     });
 
     test('follows the screen size of a connected device', () async {
@@ -276,7 +278,10 @@ AndroidDevice _buildDevice(String id) {
 
 class _MarkerException implements Exception {}
 
-class _NoInteraction implements InteractionDeviceAgent {
+class _HomeOnlyInteraction implements InteractionDeviceAgent {
+  @override
+  Set<DeviceNavigation> get supportedNavigations => const {.home};
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

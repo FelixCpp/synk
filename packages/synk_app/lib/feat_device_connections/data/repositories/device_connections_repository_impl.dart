@@ -131,7 +131,8 @@ class DeviceConnectionsRepositoryImpl({
       textureId: agent.textureId,
       screenSize: sizes[device.id] ?? agent.screenSize,
       supportsInteraction: agent.interaction != null,
-      supportsDeviceActions: agent.fileTransfer != null,
+      navigations: agent.interaction?.supportedNavigations ?? const {},
+      supportsFileTransfer: agent.fileTransfer != null,
       supportsAudio: agent.audio != null,
     );
   }
