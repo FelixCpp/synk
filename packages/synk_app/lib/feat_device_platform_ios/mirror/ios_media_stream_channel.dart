@@ -14,14 +14,6 @@ class const IosMediaStreamStartResult({
   required final bool hasAudio,
 });
 
-/// The CoreDevice media stream: the device sends its own screen and system
-/// audio as RTP.
-///
-/// Only the audio half is in use. Its video decodes into a picture that drifts
-/// apart and never recovers — the encoder predicts from long-term reference
-/// pictures and expects an RTCP acknowledgement that is not implemented, and it
-/// sends no keyframes to heal the drift. The screen therefore comes from
-/// [IosMirrorChannel]; see `docs/spikes/ios-mediastream/README.md`.
 class IosMediaStreamChannel {
   static const _channel = MethodChannel('dev.synk/ios_media_stream');
   static const _screenSizeChannel = EventChannel(
@@ -43,7 +35,6 @@ class IosMediaStreamChannel {
     });
   }
 
-  /// Whether this Mac has the private frameworks the path needs at all.
   Future<bool> isAvailable() async {
     final available = await _channel.invokeMethod<bool>('isAvailable');
     return available ?? false;
@@ -95,10 +86,6 @@ class IosMediaStreamChannel {
     });
   }
 
-  /// Starts only the system-audio stream, without mirroring the screen.
-  ///
-  /// The picture comes from the AVFoundation capture session, which carries no
-  /// sound. This is what puts the sound back alongside it.
   Future<int> startAudio(String deviceId) async {
     final result = await _channel.invokeMapMethod<String, Object?>(
       'startAudio',

@@ -1,26 +1,15 @@
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class IosDeviceDto {
-  const IosDeviceDto({
-    required this.serialNumber,
-    required this.productName,
-  });
+part 'ios_device_dto.freezed.dart';
+part 'ios_device_dto.g.dart';
 
-  factory IosDeviceDto.fromMap(Map<Object?, Object?> map) {
-    return IosDeviceDto(
-      serialNumber: map['id'] as String,
-      productName: map['productName'] as String?,
-    );
-  }
+@freezed
+sealed class IosDeviceDto with _$IosDeviceDto {
+  const factory IosDeviceDto({
+    @JsonKey(name: 'id') required String serialNumber,
+    required String? productName,
+  }) = _IosDeviceDto;
 
-  final String serialNumber;
-  final String? productName;
-
-  IosDevice toDomain() {
-    return IosDevice(
-      id: DeviceId(serialNumber),
-      modelName: productName ?? 'Unbekanntes Gerät',
-    );
-  }
+  factory IosDeviceDto.fromJson(Map<String, dynamic> json) =>
+      _$IosDeviceDtoFromJson(json);
 }

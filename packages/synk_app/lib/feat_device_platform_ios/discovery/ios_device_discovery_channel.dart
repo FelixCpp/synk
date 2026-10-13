@@ -13,11 +13,11 @@ class IosDeviceDiscoveryChannel {
     return _eventChannel
         .receiveBroadcastStream()
         .map((event) {
-          final map = event as Map<Object?, Object?>;
+          final map = Map<String, dynamic>.from(event as Map);
 
           switch (map['type']) {
             case 'attached':
-              final dto = IosDeviceDto.fromMap(map);
+              final dto = IosDeviceDto.fromJson(map);
               devicesById[dto.serialNumber] = dto;
             case 'detached':
               devicesById.remove(map['id'] as String);

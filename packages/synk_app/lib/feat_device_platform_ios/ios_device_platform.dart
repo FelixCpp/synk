@@ -4,6 +4,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/ios_device_session.dart';
@@ -23,14 +24,11 @@ class IosDevicePlatform({
   final Stream<List<PluggedDevice>> _devices;
 
   this
-    : _devices = discoveryChannel.observeDevices().map<List<PluggedDevice>>((
-        dtos,
-      ) {
-        return dtos.map((dto) => dto.toDomain()).toList();
-      }).shareValue();
+    : _devices = discoveryChannel
+          .observeDevices()
+          .map((dtos) => dtos.map((dto) => dto.toDomain()).toList())
+          .shareValue();
 
-  /// Mirroring and input need no external tool. devicectl only backs the
-  /// clipboard and the preferred screenshot path, and both degrade without it.
   @override
   Set<ExternalTool> getToolRequirements() {
     return const {};
@@ -67,8 +65,6 @@ class IosDevicePlatform({
   @override
   Future<void> dispose() async {}
 
-  /// Audio needs CoreDevice, which needs Developer Mode and Xcode. Where that
-  /// is missing the device is mirrored without sound rather than not at all.
   Future<IosAudioSideCar?> _startAudio(DeviceId deviceId) async {
     try {
       final sessionId = await mediaStreamChannel.startAudio(deviceId);

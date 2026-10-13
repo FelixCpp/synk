@@ -5,16 +5,7 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 
-/// How a mirrored iOS screen reaches the host.
-///
-/// The screen comes from the AVFoundation capture session over USB. The
-/// CoreDevice media stream can carry it too, and over Wi-Fi at that, but its
-/// picture drifts apart within seconds and never recovers, so only its audio
-/// is used — see [IosMediaStreamChannel]. The session talks to whichever
-/// transport the repository managed to start, so it does not have to know
-/// which.
 abstract interface class IosMirrorTransport {
-  /// Whether this transport can forward the device's audio at all.
   bool get supportsAudio;
 
   Stream<DeviceScreenSize> screenSizeChanges(NativeTextureId textureId);
@@ -25,7 +16,6 @@ abstract interface class IosMirrorTransport {
   Future<void> stopMirror(NativeTextureId textureId);
 }
 
-/// Mirroring over CoreDevice — wireless capable, with system audio.
 class const IosMediaStreamTransport(
   final IosMediaStreamChannel channel,
   final bool deviceHasAudio,
@@ -66,7 +56,6 @@ class const IosMediaStreamTransport(
   }
 }
 
-/// A started audio-only CoreDevice stream, riding alongside a capture session.
 class const IosAudioSideCar(
   final IosMediaStreamChannel channel,
   final int sessionId,
@@ -78,11 +67,6 @@ class const IosAudioSideCar(
   Future<void> stop() => channel.stopAudio(sessionId);
 }
 
-/// Mirroring through an AVFoundation capture session — USB only, and silent on
-/// its own, but it reaches every trusted device and its picture is stable.
-///
-/// [audio] is the separately negotiated CoreDevice audio stream where one could
-/// be started; without it the connection is simply mute.
 class const IosCaptureSessionTransport(
   final IosMirrorChannel channel,
   final IosAudioSideCar? audio,
@@ -119,8 +103,6 @@ class const IosCaptureSessionTransport(
 
   @override
   Future<void> stopMirror(NativeTextureId textureId) async {
-    // The audio stream outlives a failed teardown of the picture, so stop it
-    // first and regardless.
     await audio?.stop();
     await channel.stopMirror(textureId);
   }
