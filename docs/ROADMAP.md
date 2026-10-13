@@ -1,6 +1,7 @@
 # Roadmap & Design Notes
 
 > Internal planning notes (German). See the [README](../README.md) for the user-facing project overview.
+> Plattform-Architektur und Umbauplan für neue Gerätetypen: [PLATFORM_ABSTRACTION.md](PLATFORM_ABSTRACTION.md).
 
 ## Roadmap: Vysor-Feature-Parität
 
