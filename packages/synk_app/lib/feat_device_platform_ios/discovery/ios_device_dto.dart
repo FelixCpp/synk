@@ -1,4 +1,4 @@
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 
 class IosDeviceDto {

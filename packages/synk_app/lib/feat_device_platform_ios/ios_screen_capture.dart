@@ -3,17 +3,16 @@ import 'dart:typed_data';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
-import 'package:synk/feat_device_platform/application/agents/screen_capture_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
-class const IosScreenCaptureDeviceAgent({
+class const IosScreenCapture({
   required final IosMirrorTransport transport,
   required final DevicectlApi devicectl,
   required final DeviceId deviceId,
   required final NativeTextureId textureId,
-}) implements ScreenCaptureDeviceAgent {
+}) implements DeviceScreenCapture {
   @override
   Future<Uint8List> captureScreenshot() async {
     try {

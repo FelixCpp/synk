@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
 part 'ios_device.freezed.dart';

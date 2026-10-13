@@ -1,16 +1,15 @@
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:flutter/services.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/application/agents/clipboard_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
-class const IosClipboardDeviceAgent({
+class const IosClipboard({
   required final DevicectlApi devicectl,
   required final DeviceId deviceId,
-  required final InteractionDeviceAgent? interaction,
-}) implements ClipboardDeviceAgent {
+  required final DeviceInteraction? interaction,
+}) implements DeviceClipboard {
   @override
   Future<String> getClipboard() {
     return devicectl.readPasteboard(deviceId: deviceId);

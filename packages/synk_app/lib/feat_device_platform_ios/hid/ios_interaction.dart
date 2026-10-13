@@ -1,23 +1,20 @@
 import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hardware_button.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_key_input.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
-class IosInteractionDeviceAgent({
+class IosInteraction({
   required final IosHidChannel hidChannel,
   required final DeviceId deviceId,
   required Stream<DeviceScreenSize> screenSizeChanges,
-}) implements InteractionDeviceAgent {
+}) implements DeviceInteraction {
   late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
   late final Timer _orientationPoll;
 

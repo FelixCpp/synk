@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:synk/feat_device_platform/application/agents/audio_device_agent.dart';
-import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_session.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_mirror.dart';
 
-class ScrcpyAudioDeviceAgent({
-  required final ScrcpySession session,
+class ScrcpyAudio({
+  required final ScrcpyMirror mirror,
   required Stream<Uint8List> byteStream,
-}) implements AudioDeviceAgent {
+}) implements DeviceAudio {
   late final StreamSubscription<Uint8List> _subscription;
 
   var _isAudioMuted = true;
 
   this {
-    _subscription = byteStream.listen((bytes) => session.uploadAudio(bytes));
+    _subscription = byteStream.listen((bytes) => mirror.uploadAudio(bytes));
   }
 
   Future<void> dispose() async {
@@ -26,6 +26,6 @@ class ScrcpyAudioDeviceAgent({
   @override
   Future<void> setAudioMuted(bool muted) async {
     _isAudioMuted = muted;
-    await session.setAudioMuted(muted);
+    await mirror.setAudioMuted(muted);
   }
 }

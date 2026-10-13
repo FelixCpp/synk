@@ -1,16 +1,11 @@
-import 'package:synk/feat_device_platform/application/device_agent.dart';
-import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
-import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rxdart/rxdart.dart';
@@ -141,9 +136,6 @@ AndroidDevice _buildAndroidDevice(
 }
 
 class _FakeConnections implements DeviceConnectionsRepository {
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
-
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
     return _devices;

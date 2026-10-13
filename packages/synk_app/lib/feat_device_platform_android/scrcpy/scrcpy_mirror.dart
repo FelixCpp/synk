@@ -1,17 +1,17 @@
 import 'dart:typed_data';
 
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_channel.dart';
 
-class const ScrcpySession._({required final NativeTextureId textureId}) {
-  static Future<ScrcpySession> create() async {
-    final textureId = await ScrcpyChannel.createSession();
+class const ScrcpyMirror._({required final NativeTextureId textureId}) {
+  static Future<ScrcpyMirror> create() async {
+    final textureId = await ScrcpyChannel.createMirror();
     return ._(textureId: textureId);
   }
 
   Future<void> dispose() async {
-    await ScrcpyChannel.destroySession(textureId);
+    await ScrcpyChannel.destroyMirror(textureId);
   }
 
   Future<void> uploadVideo(Uint8List chunk) async {

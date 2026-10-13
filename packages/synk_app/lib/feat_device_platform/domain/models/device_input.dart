@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'device_key_event.freezed.dart';
+part 'device_input.freezed.dart';
 
 enum DeviceKeyEventType {
   down,
@@ -36,4 +36,32 @@ extension DeviceKeyEventModifiers on DeviceKeyEvent {
   bool get isMetaPressed =>
       modifiers.contains(DeviceKeyModifier.metaLeft) ||
       modifiers.contains(DeviceKeyModifier.metaRight);
+}
+
+enum DevicePointerEventType {
+  down,
+  up,
+  move,
+}
+
+@freezed
+sealed class DevicePointerEvent with _$DevicePointerEvent {
+  const factory DevicePointerEvent({
+    required DevicePointerEventType type,
+    required double normalizedPointerX,
+    required double normalizedPointerY,
+  }) = _DevicePointerEvent;
+}
+
+typedef PinchEvent = ({
+  DevicePointerEventType type,
+  double centerX,
+  double centerY,
+  double spread,
+});
+
+enum DeviceNavigation {
+  back,
+  home,
+  appSwitch,
 }

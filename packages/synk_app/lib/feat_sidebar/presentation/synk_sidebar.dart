@@ -1,6 +1,6 @@
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_pairing/presentation/wireless_pairing_dialog.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';

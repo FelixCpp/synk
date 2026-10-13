@@ -1,6 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 
 part 'scrcpy_key_input.freezed.dart';
 

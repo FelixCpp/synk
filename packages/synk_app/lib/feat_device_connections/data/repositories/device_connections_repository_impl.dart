@@ -3,23 +3,18 @@ import 'dart:async';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
-import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DeviceConnectionsRepositoryImpl({
   required final List<DevicePlatform> platforms,
 }) implements DeviceConnectionsRepository {
-  final agentsById = <DeviceId, DeviceAgent>{};
+  final sessionsById = <DeviceId, DeviceSession>{};
   final connectionStates = BehaviorSubject.seeded(
     <DeviceId, DeviceConnectionState>{},
   );
-  final screenSizes = BehaviorSubject.seeded(<DeviceId, DeviceScreenSize>{});
-  final screenSizeSubscriptions =
-      <DeviceId, StreamSubscription<DeviceScreenSize>>{};
 
   var _platformsByDeviceId = <DeviceId, DevicePlatform>{};
   late final StreamSubscription<List<List<PluggedDevice>>>
@@ -41,17 +36,12 @@ class DeviceConnectionsRepositoryImpl({
   @override
   Future<void> dispose() async {
     await pluggedDeviceSubscription.cancel();
-    for (final subscription in screenSizeSubscriptions.values) {
-      await subscription.cancel();
-    }
-    screenSizeSubscriptions.clear();
-    await screenSizes.close();
     await connectionStates.close();
 
-    for (final agent in agentsById.values) {
-      await agent.dispose();
+    for (final session in sessionsById.values) {
+      await session.dispose();
     }
-    agentsById.clear();
+    sessionsById.clear();
 
     for (final platform in platforms) {
       await platform.dispose();
@@ -65,12 +55,7 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   bool isConnected(DeviceId id) {
-    return agentsById.containsKey(id);
-  }
-
-  @override
-  DeviceAgent? getAgent(DeviceId id) {
-    return agentsById[id];
+    return sessionsById.containsKey(id);
   }
 
   @override
@@ -94,16 +79,35 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() {
-    return Rx.combineLatest3(
+    return Rx.combineLatest2(
       observePluggedDevices(),
       connectionStates,
-      screenSizes,
-      (devices, states, sizes) => [
+      (devices, states) => [
         for (final device in devices)
-          if (states[device.id] is ConnectionStateConnected)
-            ?_buildConnection(device, sizes),
+          if (sessionsById[device.id] case final session?)
+            _observeConnection(device, session),
       ],
-    );
+    ).switchMap((connections) {
+      if (connections.isEmpty) {
+        return Stream.value(const []);
+      }
+
+      return Rx.combineLatestList(connections);
+    });
+  }
+
+  /// A connection follows the screen size of its session, e.g. on rotation.
+  Stream<DeviceConnection> _observeConnection(
+    PluggedDevice device,
+    DeviceSession session,
+  ) {
+    return session.screenSizeChanges.map((screenSize) {
+      return DeviceConnection(
+        device: device,
+        session: session,
+        screenSize: screenSize,
+      );
+    });
   }
 
   /// One list per entry of [platforms], in the same order.
@@ -117,26 +121,6 @@ class DeviceConnectionsRepositoryImpl({
     ]);
   }
 
-  DeviceConnection? _buildConnection(
-    PluggedDevice device,
-    Map<DeviceId, DeviceScreenSize> sizes,
-  ) {
-    final agent = agentsById[device.id];
-    if (agent == null) {
-      return null;
-    }
-
-    return DeviceConnection(
-      device: device,
-      textureId: agent.textureId,
-      screenSize: sizes[device.id] ?? agent.screenSize,
-      supportsInteraction: agent.interaction != null,
-      navigations: agent.interaction?.supportedNavigations ?? const {},
-      supportsFileTransfer: agent.fileTransfer != null,
-      supportsAudio: agent.audio != null,
-    );
-  }
-
   Future<void> _connect(PluggedDevice device) async {
     final platform = _platformsByDeviceId[device.id];
     if (platform == null) {
@@ -147,9 +131,8 @@ class DeviceConnectionsRepositoryImpl({
     _setState(device.id, const DeviceConnectionState.connecting());
 
     try {
-      final agent = await platform.connect(device.id);
-      agentsById[device.id] = agent;
-      _watchScreenSize(device.id, agent);
+      final session = await platform.connect(device.id);
+      sessionsById[device.id] = session;
       _setState(device.id, const DeviceConnectionState.connected());
     } catch (_) {
       _setState(
@@ -161,9 +144,7 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   Future<void> _disconnect(PluggedDevice device) async {
-    await agentsById.remove(device.id)?.dispose();
-    await screenSizeSubscriptions.remove(device.id)?.cancel();
-    _forgetScreenSize(device.id);
+    await sessionsById.remove(device.id)?.dispose();
     _setState(device.id, const DeviceConnectionState.disconnected());
   }
 
@@ -201,14 +182,4 @@ class DeviceConnectionsRepositoryImpl({
     ConnectionStateConnecting() => false,
     ConnectionStateConnected() => false,
   };
-
-  void _watchScreenSize(DeviceId deviceId, DeviceAgent agent) {
-    screenSizeSubscriptions[deviceId] = agent.screenSizeChanges.listen(
-      (size) => screenSizes.add({...screenSizes.value, deviceId: size}),
-    );
-  }
-
-  void _forgetScreenSize(DeviceId deviceId) {
-    screenSizes.add({...screenSizes.value}..remove(deviceId));
-  }
 }

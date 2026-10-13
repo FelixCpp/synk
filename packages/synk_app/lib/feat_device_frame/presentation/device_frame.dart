@@ -1,7 +1,8 @@
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
@@ -10,22 +11,15 @@ import 'package:synk/feat_device_frame/presentation/widgets/device_frame_pointer
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_surface.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_tool_bar.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_screen_mirror.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class const DeviceFrame({
   super.key,
-  required final DeviceId deviceId,
-  required final String modelName,
-  required final NativeTextureId textureId,
-  required final DeviceScreenSize screenSize,
-  required final bool supportsInteraction,
-  required final Set<DeviceNavigation> navigations,
-  required final bool supportsFileTransfer,
-  required final bool supportsAudio,
+  required final DeviceConnection connection,
   required final bool isMaximized,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
@@ -53,7 +47,9 @@ class _DeviceFrameState extends State<DeviceFrame>
         ),
       );
 
-  late final focusNode = FocusNode(debugLabel: '${widget.deviceId}');
+  late final focusNode = FocusNode(
+    debugLabel: '${widget.connection.device.id}',
+  );
 
   @override
   void dispose() {
@@ -64,14 +60,18 @@ class _DeviceFrameState extends State<DeviceFrame>
 
   @override
   Widget build(BuildContext context) {
+    final connection = widget.connection;
+
     return _FrameLayout(
-      deviceId: widget.deviceId,
-      screenSize: widget.screenSize,
+      deviceId: connection.device.id,
+      screenSize: connection.screenSize,
       isMaximized: widget.isMaximized,
       child: _DeviceFrameBlocProvider(
-        deviceId: widget.deviceId,
+        // A reconnect brings a new session, and with it a new bloc.
+        key: ObjectKey(connection.session),
+        connection: connection,
         builder: (context, state) => _FrameDropTarget(
-          enabled: widget.supportsFileTransfer,
+          enabled: connection.supportsFileTransfer,
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
@@ -84,14 +84,10 @@ class _DeviceFrameState extends State<DeviceFrame>
               child: Column(
                 children: [
                   _ToolBar(
-                    deviceId: widget.deviceId,
-                    modelName: widget.modelName,
+                    connection: connection,
                     isMaximized: widget.isMaximized,
                     isRecording: state.isRecording,
                     isAudioMuted: state.isAudioMuted,
-                    supportsInteraction: widget.supportsInteraction,
-                    supportsFileTransfer: widget.supportsFileTransfer,
-                    supportsAudio: widget.supportsAudio,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
                     onToggleAudioMute: () => _toggleAudioMute(context),
@@ -107,13 +103,13 @@ class _DeviceFrameState extends State<DeviceFrame>
                   ),
                   Expanded(
                     child: _ScreenMirror(
-                      textureId: widget.textureId,
-                      modelName: widget.modelName,
+                      textureId: connection.textureId,
+                      modelName: connection.device.modelName,
                       hasFocus: focusNode.hasFocus,
                       flash: _screenshotFlash,
                     ),
                   ),
-                  if (widget.navigations.isNotEmpty)
+                  if (connection.navigations.isNotEmpty)
                     _ControlsBar(
                       onBackPressed: _navigationCallback(context, .back),
                       onHomePressed: _navigationCallback(context, .home),
@@ -135,7 +131,7 @@ class _DeviceFrameState extends State<DeviceFrame>
     BuildContext context,
     DeviceNavigation navigation,
   ) {
-    if (!widget.navigations.contains(navigation)) {
+    if (!widget.connection.navigations.contains(navigation)) {
       return null;
     }
 
@@ -288,14 +284,10 @@ class const _FrameSurface({
 }
 
 class const _ToolBar({
-  required final DeviceId deviceId,
-  required final String modelName,
+  required final DeviceConnection connection,
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
-  required final bool supportsInteraction,
-  required final bool supportsFileTransfer,
-  required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -310,14 +302,10 @@ class const _ToolBar({
     return SizedBox(
       height: SynkTheme.deviceFrameToolBarHeight,
       child: DeviceFrameToolBar(
-        deviceId: deviceId,
-        modelName: modelName,
+        connection: connection,
         isMaximized: isMaximized,
         isRecording: isRecording,
         isAudioMuted: isAudioMuted,
-        supportsInteraction: supportsInteraction,
-        supportsFileTransfer: supportsFileTransfer,
-        supportsAudio: supportsAudio,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
         onToggleAudioMute: onToggleAudioMute,
@@ -372,16 +360,17 @@ class const _ControlsBar({
 }
 
 class const _DeviceFrameBlocProvider({
-  required final DeviceId deviceId,
+  super.key,
+  required final DeviceConnection connection,
   required final BlocWidgetBuilder<DeviceFrameState> builder,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<DeviceFrameBloc>(
       create: (context) => DeviceFrameBloc(
-        deviceId: deviceId,
         repository: DeviceFrameRepository(
-          repository: RepositoryProvider.of(context),
+          deviceId: connection.device.id,
+          session: connection.session,
         ),
         notifications: RepositoryProvider.of(context),
       ),

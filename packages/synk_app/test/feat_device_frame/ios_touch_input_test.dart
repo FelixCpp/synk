@@ -1,27 +1,18 @@
 import 'package:api_devicectl/api_devicectl.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
-import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
-import 'package:synk/feat_device_platform_ios/ios_device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform_ios/ios_device_session.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
-import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/fake_device_agent.dart';
+import '../support/fake_device_session.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -89,10 +80,10 @@ void main() {
     });
   });
 
-  group('the iOS agent', () {
+  group('the iOS session', () {
     late List<MethodCall> calls;
-    late IosDeviceAgent deviceAgent;
-    late InteractionDeviceAgent agent;
+    late IosDeviceSession session;
+    late DeviceInteraction interaction;
 
     setUp(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -118,7 +109,7 @@ void main() {
         (call) async => null,
       );
 
-      deviceAgent = IosDeviceAgent(
+      session = IosDeviceSession(
         transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
@@ -128,7 +119,7 @@ void main() {
         supportsInteraction: true,
       );
 
-      agent = deviceAgent.interaction!;
+      interaction = session.interaction!;
 
       // The constructor fires an unawaited orientation refresh so a device
       // that is already in landscape when mirroring starts is handled
@@ -156,8 +147,8 @@ void main() {
     });
 
     test('sends a tap as a start and an end at the same point', () async {
-      await agent.simulatePointerEvent(_pointer(.down, 0.4, 0.6));
-      await agent.simulatePointerEvent(_pointer(.up, 0.4, 0.6));
+      await interaction.simulatePointerEvent(_pointer(.down, 0.4, 0.6));
+      await interaction.simulatePointerEvent(_pointer(.up, 0.4, 0.6));
 
       expect(calls.map((call) => call.method), ['sendTouch', 'sendTouch']);
       expect(calls.first.arguments['phase'], 'start');
@@ -168,7 +159,7 @@ void main() {
     });
 
     test('keeps a single finger out of the two-finger path', () async {
-      await agent.simulatePointerEvent(_pointer(.down, 0.5, 0.5));
+      await interaction.simulatePointerEvent(_pointer(.down, 0.5, 0.5));
 
       expect(calls.single.arguments.containsKey('secondX'), isFalse);
     });
@@ -176,9 +167,9 @@ void main() {
     test(
       'holds the edge of a gesture from its first event to its last',
       () async {
-        await agent.simulatePointerEvent(_pointer(.down, 0.5, 1.0));
-        await agent.simulatePointerEvent(_pointer(.move, 0.5, 0.7));
-        await agent.simulatePointerEvent(_pointer(.up, 0.5, 0.35));
+        await interaction.simulatePointerEvent(_pointer(.down, 0.5, 1.0));
+        await interaction.simulatePointerEvent(_pointer(.move, 0.5, 0.7));
+        await interaction.simulatePointerEvent(_pointer(.up, 0.5, 0.35));
 
         expect(
           calls.map((call) => call.arguments['edge']),
@@ -192,11 +183,11 @@ void main() {
     );
 
     test('starts the next gesture with a fresh edge', () async {
-      await agent.simulatePointerEvent(_pointer(.down, 0.5, 1.0));
-      await agent.simulatePointerEvent(_pointer(.up, 0.5, 0.4));
+      await interaction.simulatePointerEvent(_pointer(.down, 0.5, 1.0));
+      await interaction.simulatePointerEvent(_pointer(.up, 0.5, 0.4));
       calls.clear();
 
-      await agent.simulatePointerEvent(_pointer(.down, 0.5, 0.5));
+      await interaction.simulatePointerEvent(_pointer(.down, 0.5, 0.5));
 
       expect(calls.single.arguments['edge'], 'none');
     });
@@ -204,7 +195,7 @@ void main() {
     test(
       'scripts a navigation as one swipe, not as single events',
       () async {
-        await agent.navigate(.home);
+        await interaction.navigate(.home);
 
         expect(calls.single.method, 'sendSwipe');
         expect(calls.single.arguments['edge'], 'bottom');
@@ -213,7 +204,7 @@ void main() {
     );
 
     test('presses the sleep button for power, rather than swiping', () async {
-      await agent.pressPowerButton();
+      await interaction.pressPowerButton();
 
       expect(calls.single.method, 'pressButton');
       expect(calls.single.arguments['usagePage'], 0x0c);
@@ -221,7 +212,7 @@ void main() {
     });
 
     test('spreads a pinch into two fingers around its center', () async {
-      await agent.simulatePinchEvent((
+      await interaction.simulatePinchEvent((
         type: DevicePointerEventType.move,
         centerX: 0.5,
         centerY: 0.5,
@@ -240,7 +231,7 @@ void main() {
     test(
       'keeps both fingers on screen when the pinch opens too wide',
       () async {
-        await agent.simulatePinchEvent((
+        await interaction.simulatePinchEvent((
           type: DevicePointerEventType.move,
           centerX: 0.5,
           centerY: 0.5,
@@ -253,14 +244,14 @@ void main() {
     );
 
     test('sends a keystroke as a HID usage code, down then up', () async {
-      await agent.simulateKeyEvent(
+      await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
           key: LogicalKeyboardKey.keyA,
           type: DeviceKeyEventType.down,
           modifiers: {},
         ),
       );
-      await agent.simulateKeyEvent(
+      await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
           key: LogicalKeyboardKey.keyA,
           type: DeviceKeyEventType.up,
@@ -275,7 +266,7 @@ void main() {
     });
 
     test('says nothing for a key the keyboard page has no code for', () async {
-      await agent.simulateKeyEvent(
+      await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
           key: LogicalKeyboardKey.gameButtonA,
           type: DeviceKeyEventType.down,
@@ -287,7 +278,7 @@ void main() {
     });
 
     test('releases the device input when it shuts down', () async {
-      await deviceAgent.dispose();
+      await session.dispose();
 
       expect(
         calls.map((call) => call.method),
@@ -345,7 +336,7 @@ void main() {
       'is requested as soon as a device that takes input connects, so a '
       'device already in landscape is handled from the first touch',
       () async {
-        IosDeviceAgent(
+        IosDeviceSession(
           transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
           hidChannel: IosHidChannel(),
           devicectl: DevicectlApi(),
@@ -371,7 +362,7 @@ void main() {
     );
 
     test('is not requested for a device that takes no input', () async {
-      IosDeviceAgent(
+      IosDeviceSession(
         transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
@@ -389,40 +380,41 @@ void main() {
 
   group('the frame repository', () {
     test('passes navigation and the power button on to the device', () async {
-      final agent = _RecordingInteractionAgent();
+      final interaction = _RecordingInteraction();
       final repository = DeviceFrameRepository(
-        repository: _ConnectionsWithInteraction(agent),
+        deviceId: _deviceId,
+        session: FakeDeviceSession(interaction: interaction),
       );
 
-      await repository.navigate(_deviceId, .back);
-      await repository.navigate(_deviceId, .home);
-      await repository.navigate(_deviceId, .appSwitch);
-      await repository.pressPowerButton(_deviceId);
+      await repository.navigate(.back);
+      await repository.navigate(.home);
+      await repository.navigate(.appSwitch);
+      await repository.pressPowerButton();
 
-      expect(agent.navigations, [
+      expect(interaction.navigations, [
         DeviceNavigation.back,
         DeviceNavigation.home,
         DeviceNavigation.appSwitch,
       ]);
-      expect(agent.powerButtonPresses, 1);
+      expect(interaction.powerButtonPresses, 1);
     });
 
     test('drops input for a device that does not take any', () async {
       final repository = DeviceFrameRepository(
-        repository: _ConnectionsWithInteraction(null),
+        deviceId: _deviceId,
+        session: FakeDeviceSession(),
       );
 
       await repository.simulatePointerEvent(
-        _deviceId,
         _pointer(.down, 0.5, 0.5),
       );
-      await repository.navigate(_deviceId, .home);
-      await repository.pressPowerButton(_deviceId);
+      await repository.navigate(.home);
+      await repository.pressPowerButton();
     });
   });
 }
 
-class _RecordingInteractionAgent implements InteractionDeviceAgent {
+class _RecordingInteraction implements DeviceInteraction {
   final navigations = <DeviceNavigation>[];
   var powerButtonPresses = 0;
   final pointerEvents = <DevicePointerEvent>[];
@@ -450,33 +442,4 @@ class _RecordingInteractionAgent implements InteractionDeviceAgent {
   Future<void> pressPowerButton() async {
     powerButtonPresses++;
   }
-}
-
-class _ConnectionsWithInteraction(final InteractionDeviceAgent? agent)
-    implements DeviceConnectionsRepository {
-  @override
-  DeviceAgent? getAgent(DeviceId id) =>
-      agent == null ? null : FakeDeviceAgent(interaction: agent);
-
-  @override
-  Stream<List<PluggedDevice>> observePluggedDevices() {
-    return Stream.value(const []);
-  }
-
-  @override
-  Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
-
-  @override
-  bool isConnected(DeviceId id) => false;
-
-  @override
-  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
-    return Stream.value(const {});
-  }
-
-  @override
-  Future<void> toggleConnection(PluggedDevice device) async {}
-
-  @override
-  Future<void> dispose() async {}
 }

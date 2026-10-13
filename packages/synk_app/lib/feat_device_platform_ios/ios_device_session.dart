@@ -3,23 +3,17 @@ import 'dart:async';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:synk/feat_device_platform/application/agents/audio_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/clipboard_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/file_transfer_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/screen_capture_device_agent.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
-import 'package:synk/feat_device_platform_ios/devicectl/ios_clipboard_device_agent.dart';
+import 'package:synk/feat_device_platform_ios/devicectl/ios_clipboard.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
-import 'package:synk/feat_device_platform_ios/hid/ios_interaction_device_agent.dart';
-import 'package:synk/feat_device_platform_ios/ios_screen_capture_device_agent.dart';
-import 'package:synk/feat_device_platform_ios/mirror/ios_audio_device_agent.dart';
+import 'package:synk/feat_device_platform_ios/hid/ios_interaction.dart';
+import 'package:synk/feat_device_platform_ios/ios_screen_capture.dart';
+import 'package:synk/feat_device_platform_ios/mirror/ios_audio.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
-class IosDeviceAgent({
+class IosDeviceSession({
   required final IosMirrorTransport transport,
   required final IosHidChannel hidChannel,
   required final DevicectlApi devicectl,
@@ -30,9 +24,9 @@ class IosDeviceAgent({
   /// Whether the HID session behind [hidChannel] could be prepared. Without
   /// it the device is mirrored view-only.
   required bool supportsInteraction,
-}) implements DeviceAgent {
-  final IosInteractionDeviceAgent? _interaction = supportsInteraction
-      ? IosInteractionDeviceAgent(
+}) implements DeviceSession {
+  final IosInteraction? _interaction = supportsInteraction
+      ? IosInteraction(
           hidChannel: hidChannel,
           deviceId: deviceId,
           screenSizeChanges: transport.screenSizeChanges(textureId),
@@ -41,11 +35,11 @@ class IosDeviceAgent({
 
   /// The capture session is silent; sound only exists where the CoreDevice
   /// audio stream could be started beside it.
-  final IosAudioDeviceAgent? _audio = transport.supportsAudio
-      ? IosAudioDeviceAgent(transport: transport, textureId: textureId)
+  final IosAudio? _audio = transport.supportsAudio
+      ? IosAudio(transport: transport, textureId: textureId)
       : null;
 
-  final _screenCapture = IosScreenCaptureDeviceAgent(
+  final _screenCapture = IosScreenCapture(
     transport: transport,
     devicectl: devicectl,
     deviceId: deviceId,
@@ -53,11 +47,11 @@ class IosDeviceAgent({
   );
 
   final _screenSize = BehaviorSubject.seeded(initialScreenSize);
-  late final IosClipboardDeviceAgent _clipboard;
+  late final IosClipboard _clipboard;
   late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
 
   this {
-    _clipboard = IosClipboardDeviceAgent(
+    _clipboard = IosClipboard(
       devicectl: devicectl,
       deviceId: deviceId,
       interaction: _interaction,
@@ -74,19 +68,19 @@ class IosDeviceAgent({
   Stream<DeviceScreenSize> get screenSizeChanges => _screenSize.stream;
 
   @override
-  AudioDeviceAgent? get audio => _audio;
+  DeviceAudio? get audio => _audio;
 
   @override
-  ClipboardDeviceAgent? get clipboard => _clipboard;
+  DeviceClipboard? get clipboard => _clipboard;
 
   @override
-  InteractionDeviceAgent? get interaction => _interaction;
+  DeviceInteraction? get interaction => _interaction;
 
   @override
-  ScreenCaptureDeviceAgent? get screenCapture => _screenCapture;
+  DeviceScreenCapture? get screenCapture => _screenCapture;
 
   @override
-  FileTransferDeviceAgent? get fileTransfer => null;
+  DeviceFileTransfer? get fileTransfer => null;
 
   @override
   Future<void> dispose() async {

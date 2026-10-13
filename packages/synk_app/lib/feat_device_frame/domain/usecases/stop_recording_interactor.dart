@@ -1,13 +1,13 @@
 import 'dart:async';
 
+import 'package:dartz/dartz.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 class const StopRecordingInteractor(final DeviceFrameRepository repository)
-    implements ParameterizedInteractor<DeviceId> {
+    implements Interactor {
   @override
-  FutureOr<void> getOrThrow(DeviceId input) {
-    return repository.stopRecording(input);
+  FutureOr<void> getOrThrow(Unit input) {
+    return repository.stopRecording();
   }
 }

@@ -1,19 +1,15 @@
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 
 class const DeviceFrameToolBar({
   super.key,
-  required final DeviceId deviceId,
-  required final String modelName,
+  required final DeviceConnection connection,
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
-  required final bool supportsInteraction,
-  required final bool supportsFileTransfer,
-  required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -48,9 +44,9 @@ class const DeviceFrameToolBar({
                   _StatusDot(isLive: true), // TODO(Felix): Maybe remove this?
                   Flexible(
                     child: SynkUiTooltip(
-                      message: deviceId,
+                      message: connection.device.id,
                       child: Text(
-                        modelName,
+                        connection.device.modelName,
                         style: context.typo.headline,
                         overflow: .ellipsis,
                         maxLines: 1,
@@ -65,12 +61,10 @@ class const DeviceFrameToolBar({
               child: FittedBox(
                 fit: .scaleDown,
                 child: _Actions(
+                  connection: connection,
                   isMaximized: isMaximized,
                   isRecording: isRecording,
                   isAudioMuted: isAudioMuted,
-                  supportsInteraction: supportsInteraction,
-                  supportsFileTransfer: supportsFileTransfer,
-                  supportsAudio: supportsAudio,
                   onCaptureScreenshot: onCaptureScreenshot,
                   onToggleRecording: onToggleRecording,
                   onToggleAudioMute: onToggleAudioMute,
@@ -90,12 +84,10 @@ class const DeviceFrameToolBar({
 }
 
 class const _Actions({
+  required final DeviceConnection connection,
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
-  required final bool supportsInteraction,
-  required final bool supportsFileTransfer,
-  required final bool supportsAudio,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
@@ -135,12 +127,12 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        if (supportsInteraction || supportsFileTransfer || isAudioMuted)
+        if (connection.supportsInteraction ||
+            connection.supportsFileTransfer ||
+            isAudioMuted)
           _OverflowButton(
-            supportsAudio: supportsAudio,
+            connection: connection,
             isAudioMuted: isAudioMuted,
-            supportsInteraction: supportsInteraction,
-            supportsFileTransfer: supportsFileTransfer,
             onToggleAudioMute: onToggleAudioMute,
             onInstallApk: onInstallApk,
             onShareFile: onShareFile,
@@ -159,10 +151,8 @@ class const _Actions({
 }
 
 class const _OverflowButton({
-  required final bool supportsAudio,
+  required final DeviceConnection connection,
   required final bool isAudioMuted,
-  required final bool supportsInteraction,
-  required final bool supportsFileTransfer,
   required final VoidCallback onToggleAudioMute,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -173,7 +163,7 @@ class const _OverflowButton({
     return SynkUiMenu(
       width: 190.0,
       itemsBuilder: (context, controller) => [
-        if (supportsFileTransfer) ...[
+        if (connection.supportsFileTransfer) ...[
           SynkUiTooltip(
             message: 'APK auf dem Gerät installieren',
             child: SynkUiMenuItem(
@@ -197,7 +187,7 @@ class const _OverflowButton({
             ),
           ),
         ],
-        if (supportsAudio)
+        if (connection.supportsAudio)
           SynkUiTooltip(
             message: isAudioMuted ? 'Ton ein' : 'Ton aus',
             child: SynkUiMenuItem(
@@ -208,7 +198,7 @@ class const _OverflowButton({
               onPressed: onToggleAudioMute,
             ),
           ),
-        if (supportsInteraction)
+        if (connection.supportsInteraction)
           SynkUiTooltip(
             message: 'Gerät An-/Ausschalten',
             child: SynkUiMenuItem(

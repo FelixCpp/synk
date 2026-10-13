@@ -4,7 +4,9 @@ import 'dart:io';
 
 import 'package:api_adb/api_adb.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_agent_client.dart';
-import 'package:synk/feat_device_platform_android/device_agent/dex_file_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 
 class const DeviceAgentStartupException({required final String message})
     implements Exception {
@@ -13,7 +15,7 @@ class const DeviceAgentStartupException({required final String message})
 }
 
 class const DeviceAgentLauncher._() {
-  static final _dexFilepathProvider = getDexFilepathProvider();
+  static final _dexFilepath = _dexFilepathProvider();
   static const mainClass = 'de.synk.MainKt';
   static const _remoteDexPath = '/data/local/tmp/device_agent.dex';
   static const _devicePort = 27183;
@@ -24,7 +26,7 @@ class const DeviceAgentLauncher._() {
     Duration startupTimeout = const Duration(seconds: 30),
   }) async {
     await communicator.pushFile(
-      localFilepath: await _dexFilepathProvider(),
+      localFilepath: await _dexFilepath(),
       remoteFilepath: _remoteDexPath,
     );
 
@@ -95,4 +97,28 @@ class const DeviceAgentLauncher._() {
 
     return listening.future;
   }
+}
+
+Future<String> Function() _dexFilepathProvider() {
+  String? dexFilepath;
+
+  return () async {
+    if (dexFilepath case String dexPath) {
+      return dexPath;
+    }
+
+    final dexFile = await rootBundle.load('assets/bundled_files/classes.dex');
+    final tempDir = await getTemporaryDirectory();
+    final location = path.join(tempDir.path, 'device_agent.dex');
+    final file = await File(location).create(recursive: true);
+
+    final bytes = dexFile.buffer.asUint8List(
+      dexFile.offsetInBytes,
+      dexFile.lengthInBytes,
+    );
+
+    await file.writeAsBytes(bytes);
+
+    return dexFilepath = file.path;
+  };
 }

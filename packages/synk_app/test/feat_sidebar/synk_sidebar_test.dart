@@ -1,16 +1,12 @@
-import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,9 +15,6 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   FakeDeviceConnectionsRepository(this.devices);
 
   final List<PluggedDevice> devices;
-
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
 
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {

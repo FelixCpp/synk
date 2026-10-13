@@ -1,10 +1,8 @@
-import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
@@ -61,9 +59,6 @@ Future<void> _pumpCanvas(
 }
 
 class _FakeConnections implements DeviceConnectionsRepository {
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
-
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
     return Stream.value(const []);

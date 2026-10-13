@@ -1,25 +1,20 @@
-import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_device_session.dart';
 
 void main() {
   group('DeviceFrame', () {
@@ -233,9 +228,6 @@ Future<SynkColors> _pumpFrame(
   await tester.pumpWidget(
     MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<DeviceConnectionsRepository>.value(
-          value: _OfflineConnections(),
-        ),
         RepositoryProvider<NotificationService>(
           create: (_) => NotificationService(),
           dispose: (service) => service.dispose(),
@@ -268,16 +260,21 @@ Future<SynkColors> _pumpFrame(
                       width: SynkTheme.deviceFrameWidth,
                       height: SynkTheme.deviceFrameHeight,
                       child: DeviceFrame(
-                        deviceId: _device.id,
-                        modelName: _device.modelName,
-                        textureId: const NativeTextureId(1),
-                        screenSize: screenSize,
-                        supportsInteraction: supportsInteraction,
-                        navigations: supportsInteraction
-                            ? DeviceNavigation.values.toSet()
-                            : const {},
-                        supportsFileTransfer: supportsInteraction,
-                        supportsAudio: supportsInteraction,
+                        connection: DeviceConnection(
+                          device: _device,
+                          session: supportsInteraction
+                              ? FakeDeviceSession(
+                                  interaction: FakeInteraction(
+                                    supportedNavigations: DeviceNavigation
+                                        .values
+                                        .toSet(),
+                                  ),
+                                  fileTransfer: const FakeFileTransfer(),
+                                  audio: FakeAudio(),
+                                )
+                              : FakeDeviceSession(),
+                          screenSize: screenSize,
+                        ),
                         isMaximized: isMaximized,
                         onToggleMaximize: () {},
                         onClose: () {},
@@ -294,33 +291,6 @@ Future<SynkColors> _pumpFrame(
   );
 
   return colors;
-}
-
-class _OfflineConnections implements DeviceConnectionsRepository {
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
-
-  @override
-  Stream<List<PluggedDevice>> observePluggedDevices() {
-    return Stream.value(const []);
-  }
-
-  @override
-  Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();
-
-  @override
-  bool isConnected(DeviceId id) => false;
-
-  @override
-  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
-    return Stream.value(const {});
-  }
-
-  @override
-  Future<void> toggleConnection(PluggedDevice device) async {}
-
-  @override
-  Future<void> dispose() async {}
 }
 
 Finder _screenshotIcon() => find.byWidgetPredicate(

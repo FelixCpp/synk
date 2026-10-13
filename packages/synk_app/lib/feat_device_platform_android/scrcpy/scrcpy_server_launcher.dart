@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:api_adb/api_adb.dart';
-import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_constants.dart';
-import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_server_file_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+
+const scrcpyServerVersion = '4.1';
+const scrcpyServerRemotePath = '/data/local/tmp/scrcpy-server.jar';
+const scrcpyServerMainClass = 'com.genymobile.scrcpy.Server';
+const scrcpySocketNamePrefix = 'scrcpy';
 
 class const ScrcpyVideoStreamException({required final String message})
     implements Exception {
@@ -31,7 +36,7 @@ class const ScrcpyServerConnection({
 }
 
 class ScrcpyServerLauncher {
-  static final _serverFilepathProvider = getScrcpyServerFilepathProvider();
+  static final _serverFilepathProvider = _scrcpyServerFilepathProvider();
   static final _random = Random();
 
   static Future<ScrcpyServerConnection> launch(
@@ -211,4 +216,30 @@ class const _VideoChannel({
       }
     }
   }
+}
+
+Future<String> Function() _scrcpyServerFilepathProvider() {
+  String? jarFilepath;
+
+  return () async {
+    if (jarFilepath case String jarPath) {
+      return jarPath;
+    }
+
+    final jarFile = await rootBundle.load(
+      'assets/bundled_files/scrcpy-server.jar',
+    );
+    final tempDir = await getTemporaryDirectory();
+    final location = path.join(tempDir.path, 'scrcpy-server.jar');
+    final file = await File(location).create(recursive: true);
+
+    final bytes = jarFile.buffer.asUint8List(
+      jarFile.offsetInBytes,
+      jarFile.lengthInBytes,
+    );
+
+    await file.writeAsBytes(bytes);
+
+    return jarFilepath = file.path;
+  };
 }

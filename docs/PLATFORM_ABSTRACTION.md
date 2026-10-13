@@ -25,64 +25,72 @@ abstract interface class DevicePlatform {
   Set<ExternalTool> getToolRequirements();
   Stream<List<PluggedDevice>> observeDevices();
 
-  /// Der Agent besitzt die Verbindung; dispose() trennt sie.
-  Future<DeviceAgent> connect(DeviceId deviceId);
+  /// Die Session besitzt die Verbindung; dispose() trennt sie.
+  Future<DeviceSession> connect(DeviceId deviceId);
   Future<void> dispose();
 }
 
-/// Einer pro verbundenem Gerät.
-abstract interface class DeviceAgent {
+/// Eine pro verbundenem Gerät.
+abstract interface class DeviceSession {
   NativeTextureId get textureId;
   DeviceScreenSize get screenSize;
   Stream<DeviceScreenSize> get screenSizeChanges;
 
-  AudioDeviceAgent? get audio;
-  ClipboardDeviceAgent? get clipboard;
-  ScreenCaptureDeviceAgent? get screenCapture;
-  InteractionDeviceAgent? get interaction;
-  FileTransferDeviceAgent? get fileTransfer;
+  DeviceAudio? get audio;
+  DeviceClipboard? get clipboard;
+  DeviceScreenCapture? get screenCapture;
+  DeviceInteraction? get interaction;
+  DeviceFileTransfer? get fileTransfer;
 
   Future<void> dispose();
 }
 ```
 
 - **Fähigkeiten sind nullable Getter.** Was ein Gerät nicht kann, ist `null`; der Compiler erzwingt
-  die Prüfung beim Aufrufer (`agent.interaction?.simulateKeyEvent(...)`).
+  die Prüfung beim Aufrufer (`session.interaction?.simulateKeyEvent(...)`).
 - **Laufzeitfakten entscheidet die Plattform beim Verbinden.** iOS liefert `interaction` nur, wenn
   die HID-Session vorbereitet werden konnte, und `audio` nur, wenn der CoreDevice-Audiostream neben
   der Capture-Session läuft. Die App-Schicht enthält dafür keine Sonderfälle mehr.
-- **Der Agent implementiert die Fähigkeiten nicht selbst.** Er setzt Teile zusammen, die je ein
+- **Die Session implementiert die Fähigkeiten nicht selbst.** Sie setzt Teile zusammen, die je ein
   Interface erfüllen, und kümmert sich um Bildschirmgröße und `dispose()`.
-- **Die Plattform führt keine Agent-Liste.** `connect()` baut die Ressourcen und räumt bei einem
-  Fehlschlag auf; danach gehört die Verbindung dem Agent.
+- **Die Plattform führt keine Session-Liste.** `connect()` baut die Ressourcen und räumt bei einem
+  Fehlschlag auf; danach gehört die Verbindung der Session.
 - **`PluggedDevice` ist ein Interface** (`id`, `modelName`, `isAuthorized`). Jede Plattform bringt
   ihren eigenen Typ mit (`AndroidDevice`, `IosDevice`) und kann dort eigene Felder halten.
 - **Navigation und Power-Knopf sind getrennt:** `navigate(DeviceNavigation)` für Back, Home und
   App-Switch, `pressPowerButton()` für den Hardware-Knopf.
 - **Welche Navigationen ein Gerät anbietet, sagt es selbst:**
-  `InteractionDeviceAgent.supportedNavigations`. Android meldet alle drei, iOS nur Home.
+  `DeviceInteraction.supportedNavigations`. Android meldet alle drei, iOS nur Home.
+
+## Begriffe
+
+- **Session** (`DeviceSession`): ein verbundenes Gerät.
+- **Fähigkeit** (`DeviceInteraction`, `DeviceAudio`, …): was eine Session kann.
+- **Agent**: ausschließlich der eigene dex-Prozess auf dem Android-Gerät
+  (`DeviceAgentLauncher`, `AndroidDeviceAgentCommunicator`).
 
 ## Verzeichnisse
 
 ```
 feat_device_platform/           Interfaces und gemeinsame Modelle
-  application/                  DevicePlatform, DeviceAgent, agents/ (Fähigkeits-Interfaces)
-  domain/models/                DeviceId, PluggedDevice, DeviceScreenSize, NativeTextureId,
-                                DeviceKeyEvent, DevicePointerEvent, PinchEvent, DeviceNavigation
+  application/                  device_platform.dart, device_session.dart (Session, Fähigkeiten,
+                                NativeTextureId)
+  domain/models/                plugged_device.dart (mit DeviceId), device_input.dart (Key-,
+                                Pointer-, Pinch-Events, DeviceNavigation), device_screen_size.dart
 
 feat_device_platform_android/
   android_device_platform.dart  connect(), observeDevices()
-  android_device_agent.dart
-  android_screen_capture_device_agent.dart
+  android_device_session.dart
+  android_screen_capture.dart
   discovery/                    AndroidDevice, Zustand/Verbindungsart, DTO-Umwandlung
-  scrcpy/                       Server-Start, Session/Channel, Interaktion, Audio, Key-/Pointer-Modelle
+  scrcpy/                       Server-Start, ScrcpyMirror/Channel, Interaktion, Audio, Key-/Pointer-Modelle
   device_agent/                 eigener Agent (dex): Start, Client, Protobuf, AndroidDeviceInfo
   adb/                          Dateitransfer
 
 feat_device_platform_ios/
   ios_device_platform.dart
-  ios_device_agent.dart
-  ios_screen_capture_device_agent.dart
+  ios_device_session.dart
+  ios_screen_capture.dart
   discovery/                    IosDevice, Discovery-Channel, DTO
   mirror/                       Capture-Session, Media-Stream, Transport, Audio
   hid/                          HID-Channel, Touch-/Key-/Button-Modelle, Interaktion
@@ -97,20 +105,20 @@ Innerhalb einer Plattform ist nach Backend gruppiert, nicht nach Schicht.
   die `ToolAvailability` erfüllt.
 - **`DeviceConnectionsRepositoryImpl`** bekommt diese Liste. Es führt die Geräte aller Plattformen
   zusammen, merkt sich, welche Plattform welches Gerät gemeldet hat, und hält eine einzige
-  `Map<DeviceId, DeviceAgent>`. Verbinden läuft über die meldende Plattform, Trennen über
-  `agent.dispose()`.
-- **`DeviceConnection`** ist das eine Modell für ein verbundenes Gerät. Canvas, maximierte Ansicht
-  und `DeviceFrame` benutzen es direkt; `supportsInteraction`, `navigations`, `supportsFileTransfer`
-  und `supportsAudio` leiten sich aus den Fähigkeiten des Agents ab. Die Navigationsleiste zeigt
-  genau die Buttons aus `navigations`; `supportsFileTransfer` schaltet Drop-Ziel, APK-Installation
-  und „Datei senden".
-- **`DeviceFrameRepository`** holt sich den Agent über `getAgent(deviceId)` und ruft die
-  Fähigkeiten auf.
+  `Map<DeviceId, DeviceSession>`. Verbinden läuft über die meldende Plattform, Trennen über
+  `session.dispose()`.
+- **`DeviceConnection`** ist das eine Modell für ein verbundenes Gerät: `device`, `session` und
+  `screenSize`. `textureId`, `supportsInteraction`, `navigations`, `supportsFileTransfer` und
+  `supportsAudio` sind Getter, die die Session fragen. Canvas, maximierte Ansicht und `DeviceFrame`
+  bekommen die Verbindung als ein Objekt.
+- **`DeviceFrameRepository`** wird pro Frame mit der Session der Verbindung gebaut. Jede Aktion
+  läuft weiter über View → Bloc → Interactor → Repository; durchgereicht wird nur noch die
+  Nutzlast, keine `deviceId`.
 
 ## Eine neue Plattform hinzufügen
 
-1. Verzeichnis `feat_device_platform_x/` mit einer `DevicePlatform`-Implementierung, einem
-   `DeviceAgent` und einem `PluggedDevice`-Typ anlegen.
+1. Verzeichnis `feat_device_platform_x/` mit einer `DevicePlatform`-Implementierung, einer
+   `DeviceSession` und einem `PluggedDevice`-Typ anlegen.
 2. Die Plattform in die Liste in `main.dart` eintragen.
 
 Solange das Backend die bestehenden Fähigkeits-Interfaces bedient, bleibt die App-Schicht unberührt.
@@ -120,7 +128,7 @@ Solange das Backend die bestehenden Fähigkeits-Interfaces bedient, bleibt die A
 | Frage | Entscheidung |
 | --- | --- |
 | Form der Fähigkeiten | Nullable Getter statt `capability<T>()`; kein Enum, kein Mapping. |
-| `AndroidDeviceInfo` | Bleibt. Wird in `AndroidDevicePlatform.connect()` als Handshake-Probe geholt und liegt als Feld auf `AndroidDeviceAgent`; gelesen wird es bisher nirgends. |
+| `AndroidDeviceInfo` | Bleibt. Wird in `AndroidDevicePlatform.connect()` als Handshake-Probe geholt und liegt als Feld auf `AndroidDeviceSession`; gelesen wird es bisher nirgends. |
 | `AndroidDeviceState`, `AndroidDeviceConnection` | Bleiben als Felder von `AndroidDevice`. `state` bestimmt `isAuthorized`. |
 | iOS und devicectl | `IosDevicePlatform` verlangt kein Tool. devicectl steckt nur hinter Zwischenablage und bevorzugtem Screenshot-Weg; beide fallen ohne es weich aus. |
 | Interactors | Bleiben. Sie sind das Idiom von `use_in_case` und unabhängig von der Plattformfrage. |
@@ -131,7 +139,7 @@ Solange das Backend die bestehenden Fähigkeits-Interfaces bedient, bleibt die A
   einem iOS-Gerät durchgespielt.
 - **iOS bietet nur Home an.** Die Wischgesten für Back und App-Switch existieren in
   `iosSwipeForNavigation`, ihre distanzabhängige Physik ist aber noch nicht am Gerät nachgefühlt.
-  Freigeben heißt, sie in `IosInteractionDeviceAgent.supportedNavigations` aufzunehmen.
+  Freigeben heißt, sie in `IosInteraction.supportedNavigations` aufzunehmen.
 - **`ConnectionFailure.connectionRefused` wird nicht mehr erzeugt.** Jeder Fehlschlag ist `unknown`.
 - **`IosMediaStreamTransport` ist unbenutzt.** Im Einsatz ist nur `IosCaptureSessionTransport`.
 - **`DeviceForm` (Telefon/Tablet)** für Sidebar-Icon und Texte ist nicht umgesetzt.

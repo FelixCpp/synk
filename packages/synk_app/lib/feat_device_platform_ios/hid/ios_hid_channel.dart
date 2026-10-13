@@ -1,6 +1,6 @@
 import 'package:synk/feat_device_platform_ios/hid/ios_hardware_button.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 
 class IosHidChannel {

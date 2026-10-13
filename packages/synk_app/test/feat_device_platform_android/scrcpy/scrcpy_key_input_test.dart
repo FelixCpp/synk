@@ -1,4 +1,4 @@
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_key_input.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -1,5 +1,5 @@
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:flutter/services.dart';
 
 typedef IosMirrorScreenSize = ({

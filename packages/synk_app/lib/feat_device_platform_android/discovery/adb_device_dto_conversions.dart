@@ -1,13 +1,10 @@
 import 'package:api_adb/adb/devices/adb_connection_type_dto.dart';
 import 'package:api_adb/adb/devices/adb_device_dto.dart';
 import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
 
 extension AdbDeviceDtoToModel on AdbDeviceDto {
-  // TODO(Felix): Remote info field in adb_api
   AndroidDevice toDomain() {
     return AndroidDevice(
       id: DeviceId(serialNumber),

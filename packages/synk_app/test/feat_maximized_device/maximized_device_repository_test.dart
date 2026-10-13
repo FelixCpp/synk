@@ -1,15 +1,14 @@
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
-import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rxdart/rxdart.dart';
+
+import '../support/fake_device_session.dart';
 
 void main() {
   group('MaximizedDeviceRepository.observeDevice', () {
@@ -74,12 +73,8 @@ void main() {
 DeviceConnection _connection(String id) {
   return DeviceConnection(
     device: IosDevice(id: DeviceId(id), modelName: 'iPhone'),
-    textureId: const NativeTextureId(1),
+    session: FakeDeviceSession(),
     screenSize: const DeviceScreenSize(width: 1179, height: 2556),
-    supportsInteraction: true,
-    navigations: const {.home},
-    supportsFileTransfer: false,
-    supportsAudio: false,
   );
 }
 
@@ -95,9 +90,6 @@ class _FakeConnections implements DeviceConnectionsRepository {
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => _connections;
-
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
 
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {

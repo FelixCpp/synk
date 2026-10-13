@@ -1,4 +1,4 @@
-import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'sidebar_device_state.freezed.dart';

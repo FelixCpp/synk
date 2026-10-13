@@ -2,12 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:rxdart/rxdart.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
-import 'package:synk/feat_device_platform/application/agents/clipboard_device_agent.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/clipboard_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/key_event_interaction_layer.dart';
@@ -15,10 +11,10 @@ import 'package:synk/feat_device_platform_android/scrcpy/interaction/pointer_eve
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_key_input.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_pointer_input.dart';
 
-class ScrcpyInteractionDeviceAgent({
+class ScrcpyInteraction({
   required final Socket interactionSocket,
   required final ValueStream<DeviceScreenSize> screenSize,
-}) implements InteractionDeviceAgent, ClipboardDeviceAgent {
+}) implements DeviceInteraction, DeviceClipboard {
   final _clipboard = ClipboardInteractionLayer(interactionSocket);
   final _key = KeyEventInteractionLayer(interactionSocket);
   final _pointer = PointerEventInteractionLayer(interactionSocket);

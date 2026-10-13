@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 
-typedef MirrorSessionScreenSize = ({
+typedef ScrcpyMirrorScreenSize = ({
   NativeTextureId textureId,
   DeviceScreenSize size,
 });
@@ -25,7 +25,7 @@ class ScrcpyChannel {
 
   static final _screenSizeEvents = _screenSizeChannel.receiveBroadcastStream();
 
-  static Stream<MirrorSessionScreenSize> get screenSizeChanges {
+  static Stream<ScrcpyMirrorScreenSize> get screenSizeChanges {
     return _screenSizeEvents.map((event) {
       final args = event as Map<Object?, Object?>;
       return (
@@ -38,13 +38,13 @@ class ScrcpyChannel {
     });
   }
 
-  static Future<NativeTextureId> createSession() {
+  static Future<NativeTextureId> createMirror() {
     return _methodChannel
         .invokeMethod<int>('createTexture')
         .then((value) => NativeTextureId(value!));
   }
 
-  static Future<void> destroySession(NativeTextureId textureId) {
+  static Future<void> destroyMirror(NativeTextureId textureId) {
     return _methodChannel.invokeMethod('destroyTexture', {
       'textureId': textureId.value,
     });

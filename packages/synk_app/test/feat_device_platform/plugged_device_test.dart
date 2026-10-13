@@ -1,8 +1,5 @@
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 

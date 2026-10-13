@@ -1,21 +1,16 @@
 import 'dart:async';
 
 import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
-import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/fake_device_agent.dart';
+import '../support/fake_device_session.dart';
 import '../support/fake_device_platform.dart';
 
 void main() {
@@ -80,7 +75,7 @@ void main() {
     });
 
     test('refuses a second attempt while one is in flight', () async {
-      final connecting = Completer<DeviceAgent>();
+      final connecting = Completer<DeviceSession>();
       android.onConnect = (_) => connecting.future;
       final device = await plugInto(android, 'android-1');
 
@@ -92,24 +87,22 @@ void main() {
         throwsA(isA<DeviceAlreadyConnectingException>()),
       );
 
-      connecting.complete(FakeDeviceAgent());
+      connecting.complete(FakeDeviceSession());
       await attempt;
     });
 
-    test('disconnects a connected device by disposing its agent', () async {
-      final agent = FakeDeviceAgent();
-      android.onConnect = (_) async => agent;
+    test('disconnects a connected device by disposing its session', () async {
+      final session = FakeDeviceSession();
+      android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
 
       await repository.toggleConnection(device);
       expect(repository.isConnected(device.id), isTrue);
-      expect(repository.getAgent(device.id), agent);
 
       await repository.toggleConnection(device);
 
-      expect(agent.isDisposed, isTrue);
+      expect(session.isDisposed, isTrue);
       expect(repository.isConnected(device.id), isFalse);
-      expect(repository.getAgent(device.id), isNull);
       expect(
         repository.connectionStates.value[device.id],
         const DeviceConnectionState.disconnected(),
@@ -118,10 +111,9 @@ void main() {
   });
 
   group('DeviceConnectionsRepositoryImpl.observeDeviceConnections', () {
-    test('offers what the agent of a connection can do', () async {
-      android.onConnect = (_) async => FakeDeviceAgent(
-        interaction: _HomeOnlyInteraction(),
-      );
+    test('offers what the session of a connection can do', () async {
+      final session = FakeDeviceSession(interaction: _HomeOnlyInteraction());
+      android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
 
       await repository.toggleConnection(device);
@@ -129,6 +121,7 @@ void main() {
           (await repository.observeDeviceConnections().first).single;
 
       expect(connection.device, device);
+      expect(connection.session, session);
       expect(connection.supportsInteraction, isTrue);
       expect(connection.supportsAudio, isFalse);
       expect(connection.navigations, {DeviceNavigation.home});
@@ -136,14 +129,16 @@ void main() {
     });
 
     test('follows the screen size of a connected device', () async {
-      final agent = FakeDeviceAgent(
+      final session = FakeDeviceSession(
         screenSize: const DeviceScreenSize(width: 1080, height: 2400),
       );
-      android.onConnect = (_) async => agent;
+      android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
       await repository.toggleConnection(device);
 
-      agent.screenSizes.add(const DeviceScreenSize(width: 2400, height: 1080));
+      session.screenSizes.add(
+        const DeviceScreenSize(width: 2400, height: 1080),
+      );
       await pumpEventQueue();
 
       final connection =
@@ -172,7 +167,7 @@ void main() {
     test(
       'marks a device as connecting while the attempt is in flight',
       () async {
-        final connecting = Completer<DeviceAgent>();
+        final connecting = Completer<DeviceSession>();
         android.onConnect = (_) => connecting.future;
         final device = await plugInto(android, 'android-states-2');
 
@@ -226,7 +221,7 @@ void main() {
     test(
       'keeps a connecting device that vanishes from the device list',
       () async {
-        final connecting = Completer<DeviceAgent>();
+        final connecting = Completer<DeviceSession>();
         android.onConnect = (_) => connecting.future;
         final device = await plugInto(android, 'android-states-6');
 
@@ -248,9 +243,9 @@ void main() {
   });
 
   group('DeviceConnectionsRepositoryImpl.dispose', () {
-    test('disposes the connected agents and the platforms', () async {
-      final agent = FakeDeviceAgent();
-      final platform = FakePlatform(onConnect: (_) async => agent);
+    test('disposes the connected sessions and the platforms', () async {
+      final session = FakeDeviceSession();
+      final platform = FakePlatform(onConnect: (_) async => session);
       final repository = DeviceConnectionsRepositoryImpl(
         platforms: [platform],
       );
@@ -261,7 +256,7 @@ void main() {
 
       await repository.dispose();
 
-      expect(agent.isDisposed, isTrue);
+      expect(session.isDisposed, isTrue);
       expect(platform.isDisposed, isTrue);
     });
   });
@@ -278,7 +273,7 @@ AndroidDevice _buildDevice(String id) {
 
 class _MarkerException implements Exception {}
 
-class _HomeOnlyInteraction implements InteractionDeviceAgent {
+class _HomeOnlyInteraction implements DeviceInteraction {
   @override
   Set<DeviceNavigation> get supportedNavigations => const {.home};
 

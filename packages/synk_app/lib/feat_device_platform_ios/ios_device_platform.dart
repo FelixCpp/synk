@@ -1,16 +1,15 @@
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
-import 'package:synk/feat_device_platform_ios/ios_device_agent.dart';
+import 'package:synk/feat_device_platform_ios/ios_device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
@@ -43,7 +42,7 @@ class IosDevicePlatform({
   }
 
   @override
-  Future<DeviceAgent> connect(DeviceId deviceId) async {
+  Future<DeviceSession> connect(DeviceId deviceId) async {
     final result = await channel.startMirror(deviceId);
     final audio = await _startAudio(deviceId);
     appLogger.i(
@@ -51,7 +50,7 @@ class IosDevicePlatform({
       '${audio == null ? ' without audio' : ' with audio'}',
     );
 
-    return IosDeviceAgent(
+    return IosDeviceSession(
       transport: IosCaptureSessionTransport(channel, audio),
       hidChannel: hidChannel,
       devicectl: devicectl,

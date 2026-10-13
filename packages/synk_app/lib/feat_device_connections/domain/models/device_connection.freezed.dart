@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceConnection {
 
- PluggedDevice get device; NativeTextureId get textureId; DeviceScreenSize get screenSize; bool get supportsInteraction; Set<DeviceNavigation> get navigations; bool get supportsFileTransfer; bool get supportsAudio;
+ PluggedDevice get device; DeviceSession get session; DeviceScreenSize get screenSize;
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $DeviceConnectionCopyWith<DeviceConnection> get copyWith => _$DeviceConnectionCo
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceConnection;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceConnection&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.textureId, _this.textureId) || other.textureId == _this.textureId)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize)&&(identical(other.supportsInteraction, _this.supportsInteraction) || other.supportsInteraction == _this.supportsInteraction)&&const DeepCollectionEquality().equals(other.navigations, _this.navigations)&&(identical(other.supportsFileTransfer, _this.supportsFileTransfer) || other.supportsFileTransfer == _this.supportsFileTransfer)&&(identical(other.supportsAudio, _this.supportsAudio) || other.supportsAudio == _this.supportsAudio));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceConnection&&(identical(other.device, _this.device) || other.device == _this.device)&&(identical(other.session, _this.session) || other.session == _this.session)&&(identical(other.screenSize, _this.screenSize) || other.screenSize == _this.screenSize));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DeviceConnection;
-  return Object.hash(runtimeType,_this.device,_this.textureId,_this.screenSize,_this.supportsInteraction,const DeepCollectionEquality().hash(_this.navigations),_this.supportsFileTransfer,_this.supportsAudio);
+  return Object.hash(runtimeType,_this.device,_this.session,_this.screenSize);
 }
 
 @override
 String toString() {
   final _this = this as DeviceConnection;
-  return 'DeviceConnection(device: ${_this.device}, textureId: ${_this.textureId}, screenSize: ${_this.screenSize}, supportsInteraction: ${_this.supportsInteraction}, navigations: ${_this.navigations}, supportsFileTransfer: ${_this.supportsFileTransfer}, supportsAudio: ${_this.supportsAudio})';
+  return 'DeviceConnection(device: ${_this.device}, session: ${_this.session}, screenSize: ${_this.screenSize})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $DeviceConnectionCopyWith<$Res>  {
   factory $DeviceConnectionCopyWith(DeviceConnection value, $Res Function(DeviceConnection) _then) = _$DeviceConnectionCopyWithImpl;
 @useResult
 $Res call({
- PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, Set<DeviceNavigation> navigations, bool supportsFileTransfer, bool supportsAudio
+ PluggedDevice device, DeviceSession session, DeviceScreenSize screenSize
 });
 
 
@@ -68,16 +68,12 @@ class _$DeviceConnectionCopyWithImpl<$Res>
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? navigations = null,Object? supportsFileTransfer = null,Object? supportsAudio = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? session = null,Object? screenSize = null,}) {
   return _then(DeviceConnection(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as PluggedDevice,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
-as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
-as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
-as bool,navigations: null == navigations ? _self.navigations : navigations // ignore: cast_nullable_to_non_nullable
-as Set<DeviceNavigation>,supportsFileTransfer: null == supportsFileTransfer ? _self.supportsFileTransfer : supportsFileTransfer // ignore: cast_nullable_to_non_nullable
-as bool,supportsAudio: null == supportsAudio ? _self.supportsAudio : supportsAudio // ignore: cast_nullable_to_non_nullable
-as bool,
+as PluggedDevice,session: null == session ? _self.session : session // ignore: cast_nullable_to_non_nullable
+as DeviceSession,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
+as DeviceScreenSize,
   ));
 }
 /// Create a copy of DeviceConnection
@@ -168,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  Set<DeviceNavigation> navigations,  bool supportsFileTransfer,  bool supportsAudio)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PluggedDevice device,  DeviceSession session,  DeviceScreenSize screenSize)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceConnection() when $default != null:
-return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.navigations,_that.supportsFileTransfer,_that.supportsAudio);case _:
+return $default(_that.device,_that.session,_that.screenSize);case _:
   return orElse();
 
 }
@@ -189,10 +185,10 @@ return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInte
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  Set<DeviceNavigation> navigations,  bool supportsFileTransfer,  bool supportsAudio)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PluggedDevice device,  DeviceSession session,  DeviceScreenSize screenSize)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceConnection():
-return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.navigations,_that.supportsFileTransfer,_that.supportsAudio);}
+return $default(_that.device,_that.session,_that.screenSize);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -206,10 +202,10 @@ return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInte
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PluggedDevice device,  NativeTextureId textureId,  DeviceScreenSize screenSize,  bool supportsInteraction,  Set<DeviceNavigation> navigations,  bool supportsFileTransfer,  bool supportsAudio)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PluggedDevice device,  DeviceSession session,  DeviceScreenSize screenSize)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceConnection() when $default != null:
-return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInteraction,_that.navigations,_that.supportsFileTransfer,_that.supportsAudio);case _:
+return $default(_that.device,_that.session,_that.screenSize);case _:
   return null;
 
 }
@@ -220,23 +216,13 @@ return $default(_that.device,_that.textureId,_that.screenSize,_that.supportsInte
 /// @nodoc
 
 
-class _DeviceConnection implements DeviceConnection {
-  const _DeviceConnection({required this.device, required this.textureId, required this.screenSize, required this.supportsInteraction, required  Set<DeviceNavigation> navigations, required this.supportsFileTransfer, required this.supportsAudio}): _navigations = navigations;
+class _DeviceConnection extends DeviceConnection {
+  const _DeviceConnection({required this.device, required this.session, required this.screenSize}): super._();
   
 
 @override final  PluggedDevice device;
-@override final  NativeTextureId textureId;
+@override final  DeviceSession session;
 @override final  DeviceScreenSize screenSize;
-@override final  bool supportsInteraction;
- final  Set<DeviceNavigation> _navigations;
-@override Set<DeviceNavigation> get navigations {
-  if (_navigations is EqualUnmodifiableSetView) return _navigations;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableSetView(_navigations);
-}
-
-@override final  bool supportsFileTransfer;
-@override final  bool supportsAudio;
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
@@ -248,18 +234,18 @@ _$DeviceConnectionCopyWith<_DeviceConnection> get copyWith => __$DeviceConnectio
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.textureId, textureId) || other.textureId == textureId)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize)&&(identical(other.supportsInteraction, supportsInteraction) || other.supportsInteraction == supportsInteraction)&&const DeepCollectionEquality().equals(other.navigations, _navigations)&&(identical(other.supportsFileTransfer, supportsFileTransfer) || other.supportsFileTransfer == supportsFileTransfer)&&(identical(other.supportsAudio, supportsAudio) || other.supportsAudio == supportsAudio));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceConnection&&(identical(other.device, device) || other.device == device)&&(identical(other.session, session) || other.session == session)&&(identical(other.screenSize, screenSize) || other.screenSize == screenSize));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,device,textureId,screenSize,supportsInteraction,const DeepCollectionEquality().hash(_navigations),supportsFileTransfer,supportsAudio);
+    return Object.hash(runtimeType,device,session,screenSize);
 }
 
 @override
 String toString() {
-    return 'DeviceConnection(device: $device, textureId: $textureId, screenSize: $screenSize, supportsInteraction: $supportsInteraction, navigations: $navigations, supportsFileTransfer: $supportsFileTransfer, supportsAudio: $supportsAudio)';
+    return 'DeviceConnection(device: $device, session: $session, screenSize: $screenSize)';
 }
 
 
@@ -270,7 +256,7 @@ abstract mixin class _$DeviceConnectionCopyWith<$Res> implements $DeviceConnecti
   factory _$DeviceConnectionCopyWith(_DeviceConnection value, $Res Function(_DeviceConnection) _then) = __$DeviceConnectionCopyWithImpl;
 @override @useResult
 $Res call({
- PluggedDevice device, NativeTextureId textureId, DeviceScreenSize screenSize, bool supportsInteraction, Set<DeviceNavigation> navigations, bool supportsFileTransfer, bool supportsAudio
+ PluggedDevice device, DeviceSession session, DeviceScreenSize screenSize
 });
 
 
@@ -287,16 +273,12 @@ class __$DeviceConnectionCopyWithImpl<$Res>
 
 /// Create a copy of DeviceConnection
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? textureId = null,Object? screenSize = null,Object? supportsInteraction = null,Object? navigations = null,Object? supportsFileTransfer = null,Object? supportsAudio = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? session = null,Object? screenSize = null,}) {
   return _then(_DeviceConnection(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as PluggedDevice,textureId: null == textureId ? _self.textureId : textureId // ignore: cast_nullable_to_non_nullable
-as NativeTextureId,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
-as DeviceScreenSize,supportsInteraction: null == supportsInteraction ? _self.supportsInteraction : supportsInteraction // ignore: cast_nullable_to_non_nullable
-as bool,navigations: null == navigations ? _self._navigations : navigations // ignore: cast_nullable_to_non_nullable
-as Set<DeviceNavigation>,supportsFileTransfer: null == supportsFileTransfer ? _self.supportsFileTransfer : supportsFileTransfer // ignore: cast_nullable_to_non_nullable
-as bool,supportsAudio: null == supportsAudio ? _self.supportsAudio : supportsAudio // ignore: cast_nullable_to_non_nullable
-as bool,
+as PluggedDevice,session: null == session ? _self.session : session // ignore: cast_nullable_to_non_nullable
+as DeviceSession,screenSize: null == screenSize ? _self.screenSize : screenSize // ignore: cast_nullable_to_non_nullable
+as DeviceScreenSize,
   ));
 }
 

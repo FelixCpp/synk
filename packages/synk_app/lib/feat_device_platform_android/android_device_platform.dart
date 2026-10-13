@@ -8,14 +8,12 @@ import 'package:synk/feat_device_platform_android/discovery/adb_device_dto_conve
 import 'package:synk/feat_device_platform_android/device_agent/android_device_agent_client.dart';
 import 'package:synk/feat_device_platform_android/device_agent/device_agent_launcher.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_server_launcher.dart';
-import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_constants.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_info.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_session.dart';
-import 'package:synk/feat_device_platform_android/android_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_mirror.dart';
+import 'package:synk/feat_device_platform_android/android_device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
@@ -38,13 +36,13 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
   }
 
   @override
-  Future<DeviceAgent> connect(DeviceId deviceId) async {
+  Future<DeviceSession> connect(DeviceId deviceId) async {
     final adbCommunicator = api.connect(deviceId);
     await _killStaleProcesses(adbCommunicator);
 
     AndroidDeviceAgentCommunicator? communicator;
     ScrcpyServerConnection? server;
-    ScrcpySession? session;
+    ScrcpyMirror? mirror;
 
     try {
       await Future.wait([
@@ -60,10 +58,10 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
       // not worth mirroring.
       final info = await _fetchInfo(communicator!);
       final screenSize = await _fetchScreenSize(adbCommunicator);
-      session = await ScrcpySession.create();
+      mirror = await ScrcpyMirror.create();
 
-      return AndroidDeviceAgent(
-        session: session,
+      return AndroidDeviceSession(
+        mirror: mirror,
         server: server!,
         communicator: communicator!,
         adbCommunicator: adbCommunicator,
@@ -80,7 +78,7 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
 
       await communicator?.dispose();
       await server?.dispose();
-      await session?.dispose();
+      await mirror?.dispose();
       rethrow;
     }
   }

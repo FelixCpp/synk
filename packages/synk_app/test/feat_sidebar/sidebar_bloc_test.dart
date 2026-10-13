@@ -1,20 +1,16 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,9 +26,6 @@ class FakeSidebarRepository implements SidebarRepository {
 }
 
 class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
-  @override
-  DeviceAgent? getAgent(DeviceId id) => null;
-
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
     return Stream.value(const []);

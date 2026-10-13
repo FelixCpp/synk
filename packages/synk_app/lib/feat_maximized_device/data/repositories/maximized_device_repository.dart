@@ -1,6 +1,6 @@
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
 class const MaximizedDeviceRepository({
   required final DeviceConnectionsRepository connectionsRepository,

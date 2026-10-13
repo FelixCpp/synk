@@ -1,4 +1,0 @@
-enum ConnectionFailure {
-  connectionRefused,
-  unknown,
-}

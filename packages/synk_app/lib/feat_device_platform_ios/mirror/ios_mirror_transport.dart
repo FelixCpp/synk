@@ -3,14 +3,14 @@ import 'dart:typed_data';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 
 /// How a mirrored iOS screen reaches the host.
 ///
 /// The screen comes from the AVFoundation capture session over USB. The
 /// CoreDevice media stream can carry it too, and over Wi-Fi at that, but its
 /// picture drifts apart within seconds and never recovers, so only its audio
-/// is used — see [IosMediaStreamChannel]. The agent talks to whichever
+/// is used — see [IosMediaStreamChannel]. The session talks to whichever
 /// transport the repository managed to start, so it does not have to know
 /// which.
 abstract interface class IosMirrorTransport {

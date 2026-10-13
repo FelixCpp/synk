@@ -1,5 +1,4 @@
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 
 enum IosTouchEdge {
   none,

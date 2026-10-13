@@ -3,16 +3,15 @@ import 'dart:io';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
-import 'package:synk/feat_device_platform_ios/ios_device_agent.dart';
+import 'package:synk/feat_device_platform_ios/ios_device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -46,15 +45,15 @@ DevicePointerEvent _pointer(DevicePointerEventType type, double x, double y) {
 void main() {
   late Directory directory;
   late Map<String, List<MethodCall>> calls;
-  late List<IosDeviceAgent> agents;
+  late List<IosDeviceSession> sessions;
 
   List<MethodCall> callsOn(String channel) => calls[channel]!;
 
-  Future<IosDeviceAgent> buildAgent({
+  Future<IosDeviceSession> buildSession({
     bool supportsInteraction = true,
     bool hasAudio = false,
   }) async {
-    final agent = IosDeviceAgent(
+    final session = IosDeviceSession(
       transport: IosCaptureSessionTransport(
         IosMirrorChannel(),
         hasAudio ? IosAudioSideCar(IosMediaStreamChannel(), 7) : null,
@@ -66,18 +65,18 @@ void main() {
       initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
       supportsInteraction: supportsInteraction,
     );
-    agents.add(agent);
+    sessions.add(session);
 
     // Let the orientation refresh fired on construction settle.
     await pumpEventQueue();
-    return agent;
+    return session;
   }
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    directory = Directory.systemTemp.createTempSync('ios_device_agent_test');
+    directory = Directory.systemTemp.createTempSync('ios_device_session_test');
     calls = {for (final channel in _mockedChannels) channel: []};
-    agents = [];
+    sessions = [];
 
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -91,8 +90,8 @@ void main() {
   });
 
   tearDown(() async {
-    for (final agent in agents) {
-      await agent.dispose();
+    for (final session in sessions) {
+      await session.dispose();
     }
 
     final messenger =
@@ -105,11 +104,11 @@ void main() {
     directory.deleteSync(recursive: true);
   });
 
-  group('what an iOS agent can do', () {
+  group('what an iOS session can do', () {
     test('includes interaction once the HID session is prepared', () async {
-      final agent = await buildAgent(supportsInteraction: true);
+      final session = await buildSession(supportsInteraction: true);
 
-      expect(agent.interaction, isNotNull);
+      expect(session.interaction, isNotNull);
       expect(
         callsOn('dev.synk/ios_hid').map((call) => call.method),
         contains('refreshOrientation'),
@@ -117,38 +116,38 @@ void main() {
     });
 
     test('is view-only without a HID session', () async {
-      final agent = await buildAgent(supportsInteraction: false);
+      final session = await buildSession(supportsInteraction: false);
 
-      expect(agent.interaction, isNull);
+      expect(session.interaction, isNull);
       expect(callsOn('dev.synk/ios_hid'), isEmpty);
     });
 
     test('includes audio only beside a CoreDevice audio stream', () async {
-      final silent = await buildAgent(hasAudio: false);
-      final audible = await buildAgent(hasAudio: true);
+      final silent = await buildSession(hasAudio: false);
+      final audible = await buildSession(hasAudio: true);
 
       expect(silent.audio, isNull);
       expect(audible.audio, isNotNull);
     });
 
     test('never includes file transfer', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
 
-      expect(agent.fileTransfer, isNull);
+      expect(session.fileTransfer, isNull);
     });
 
     test('always includes screen capture and the clipboard', () async {
-      final agent = await buildAgent(supportsInteraction: false);
+      final session = await buildSession(supportsInteraction: false);
 
-      expect(agent.screenCapture, isNotNull);
-      expect(agent.clipboard, isNotNull);
+      expect(session.screenCapture, isNotNull);
+      expect(session.clipboard, isNotNull);
     });
   });
 
-  group('muting an iOS agent', () {
+  group('muting an iOS session', () {
     test('mutes the audio stream and remembers it', () async {
-      final agent = await buildAgent(hasAudio: true);
-      final audio = agent.audio!;
+      final session = await buildSession(hasAudio: true);
+      final audio = session.audio!;
 
       expect(audio.isAudioMuted, isTrue);
       await audio.setAudioMuted(false);
@@ -160,14 +159,18 @@ void main() {
     });
   });
 
-  group('touching an iOS agent', () {
+  group('touching an iOS session', () {
     test('keeps the edge a gesture started at until it ends', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.interaction!.simulatePointerEvent(_pointer(.down, 0.5, 1.0));
-      await agent.interaction!.simulatePointerEvent(_pointer(.move, 0.5, 0.5));
-      await agent.interaction!.simulatePointerEvent(_pointer(.up, 0.5, 0.4));
+      await session.interaction!.simulatePointerEvent(
+        _pointer(.down, 0.5, 1.0),
+      );
+      await session.interaction!.simulatePointerEvent(
+        _pointer(.move, 0.5, 0.5),
+      );
+      await session.interaction!.simulatePointerEvent(_pointer(.up, 0.5, 0.4));
       await pumpEventQueue();
 
       final touches = callsOn(
@@ -187,18 +190,20 @@ void main() {
     });
   });
 
-  group('navigating an iOS agent', () {
+  group('navigating an iOS session', () {
     test('offers home only', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
 
-      expect(agent.interaction!.supportedNavigations, {DeviceNavigation.home});
+      expect(session.interaction!.supportedNavigations, {
+        DeviceNavigation.home,
+      });
     });
 
     test('swipes up from the bottom edge for home', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.interaction!.navigate(.home);
+      await session.interaction!.navigate(.home);
 
       final swipe = callsOn(
         'dev.synk/ios_hid',
@@ -208,11 +213,11 @@ void main() {
     });
 
     test('ignores a navigation it does not offer', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.interaction!.navigate(.back);
-      await agent.interaction!.navigate(.appSwitch);
+      await session.interaction!.navigate(.back);
+      await session.interaction!.navigate(.appSwitch);
 
       expect(
         callsOn('dev.synk/ios_hid').where((call) => call.method == 'sendSwipe'),
@@ -221,12 +226,12 @@ void main() {
     });
   });
 
-  group('the power button of an iOS agent', () {
+  group('the power button of an iOS session', () {
     test('is pressed as the consumer sleep/wake usage', () async {
-      final agent = await buildAgent();
+      final session = await buildSession();
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.interaction!.pressPowerButton();
+      await session.interaction!.pressPowerButton();
 
       final press = callsOn(
         'dev.synk/ios_hid',
@@ -237,12 +242,12 @@ void main() {
     });
   });
 
-  group('pasting onto an iOS agent', () {
+  group('pasting onto an iOS session', () {
     test('taps V on the device so the text lands immediately', () async {
-      final agent = await buildAgent(supportsInteraction: true);
+      final session = await buildSession(supportsInteraction: true);
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.clipboard!.setClipboard('from the host');
+      await session.clipboard!.setClipboard('from the host');
 
       final keys = callsOn(
         'dev.synk/ios_hid',
@@ -253,15 +258,15 @@ void main() {
     });
 
     test('only writes the pasteboard without a HID session', () async {
-      final agent = await buildAgent(supportsInteraction: false);
+      final session = await buildSession(supportsInteraction: false);
 
-      await agent.clipboard!.setClipboard('from the host');
+      await session.clipboard!.setClipboard('from the host');
 
       expect(callsOn('dev.synk/ios_hid'), isEmpty);
     });
 
     test('stays a success even if the keystroke fails', () async {
-      final agent = await buildAgent(supportsInteraction: true);
+      final session = await buildSession(supportsInteraction: true);
 
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
@@ -270,19 +275,19 @@ void main() {
           );
 
       await expectLater(
-        agent.clipboard!.setClipboard('from the host'),
+        session.clipboard!.setClipboard('from the host'),
         completes,
       );
     });
   });
 
-  group('disposing an iOS agent', () {
+  group('disposing an iOS session', () {
     test('releases the input and stops the mirror', () async {
-      final agent = await buildAgent();
-      agents.clear();
+      final session = await buildSession();
+      sessions.clear();
       callsOn('dev.synk/ios_hid').clear();
 
-      await agent.dispose();
+      await session.dispose();
 
       expect(
         callsOn('dev.synk/ios_hid').map((call) => call.method),

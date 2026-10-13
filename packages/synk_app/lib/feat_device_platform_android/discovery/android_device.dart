@@ -1,8 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
-import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
 
 part 'android_device.freezed.dart';
 
@@ -19,4 +16,27 @@ sealed class AndroidDevice with _$AndroidDevice implements PluggedDevice {
 
   @override
   bool get isAuthorized => state == AndroidDeviceState.device;
+}
+
+enum AndroidDeviceState {
+  any,
+  connecting,
+  authorizing,
+  unauthorized,
+  nopermission,
+  detached,
+  offline,
+  bootloader,
+  device,
+  host,
+  recovery,
+  sideload,
+  rescue,
+}
+
+enum AndroidDeviceConnection {
+  usb,
+  tcp,
+  emulator,
+  unknown,
 }

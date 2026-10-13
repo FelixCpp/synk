@@ -113,14 +113,7 @@ class const _Content({
         keyOf: (item) => item.device.id,
         itemBuilder: (context, item) {
           return DeviceFrame(
-            deviceId: item.device.id,
-            modelName: item.device.modelName,
-            textureId: item.textureId,
-            screenSize: item.screenSize,
-            supportsInteraction: item.supportsInteraction,
-            navigations: item.navigations,
-            supportsFileTransfer: item.supportsFileTransfer,
-            supportsAudio: item.supportsAudio,
+            connection: item,
             isMaximized: false,
             onToggleMaximize: () => onMaximize(item),
             onClose: () {

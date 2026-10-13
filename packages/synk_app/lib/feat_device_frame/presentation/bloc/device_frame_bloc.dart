@@ -2,10 +2,8 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
-import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
+import 'package:dartz/dartz.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
@@ -21,7 +19,6 @@ import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_in
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,7 +30,6 @@ part 'device_frame_event.dart';
 part 'device_frame_state.dart';
 
 class DeviceFrameBloc({
-  required final DeviceId deviceId,
   required final DeviceFrameRepository repository,
   required final NotificationService notifications,
 }) extends Bloc<DeviceFrameEvent, DeviceFrameState> {
@@ -75,7 +71,7 @@ class DeviceFrameBloc({
     return isAudioMuted
         .logger(level: .trace)
         .after((muted) => emit(state.copyWith(isAudioMuted: muted)))
-        .run(deviceId);
+        .run(unit);
   }
 
   FutureOr<void> _onKeyEvent(
@@ -112,7 +108,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to simulate key stroke: $e'),
           ),
         )
-        .run((deviceId: deviceId, keyEvent: keyEvent));
+        .run(keyEvent);
   }
 
   FutureOr<void> _onPointerEvent(
@@ -132,7 +128,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to simulate pointer event: $e'),
           ),
         )
-        .run((deviceId: deviceId, pointerEvent: pointerEvent));
+        .run(pointerEvent);
   }
 
   FutureOr<void> _onPinchEvent(
@@ -153,7 +149,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to simulate pinch gesture: $e'),
           ),
         )
-        .run((deviceId: deviceId, pinchEvent: pinchEvent));
+        .run(pinchEvent);
   }
 
   FutureOr<void> _onCaptureScreenshot(
@@ -167,7 +163,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to capture screenshot: $e'),
           ),
         )
-        .run(deviceId);
+        .run(unit);
   }
 
   FutureOr<void> _onToggleRecording(
@@ -184,7 +180,7 @@ class DeviceFrameBloc({
               .new(message: 'Failed to stop recording: $e'),
             ),
           )
-          .run(deviceId);
+          .run(unit);
     }
 
     return startRecording
@@ -197,7 +193,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to start recording: $e'),
           ),
         )
-        .run(deviceId);
+        .run(unit);
   }
 
   FutureOr<void> _onToggleAudioMute(
@@ -214,7 +210,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to toggle audio: $e'),
           ),
         )
-        .run((deviceId: deviceId, muted: muted));
+        .run(muted);
   }
 
   FutureOr<void> _onFilesDropped(
@@ -244,7 +240,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to handle dropped files: $e'),
           ),
         )
-        .run((deviceId: deviceId, filepaths: event.filepaths));
+        .run(event.filepaths);
   }
 
   FutureOr<void> _onNavigate(
@@ -258,7 +254,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to navigate: $e'),
           ),
         )
-        .run((deviceId: deviceId, navigation: event.navigation));
+        .run(event.navigation);
   }
 
   FutureOr<void> _onPowerButtonPressed(
@@ -272,7 +268,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to press the power button: $e'),
           ),
         )
-        .run(deviceId);
+        .run(unit);
   }
 
   FutureOr<void> _onInstallApk(
@@ -301,7 +297,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to install APK: $e'),
           ),
         )
-        .run(deviceId);
+        .run(unit);
   }
 
   FutureOr<void> _onShareFile(
@@ -333,7 +329,7 @@ class DeviceFrameBloc({
             .new(message: 'Failed to share file: $e'),
           ),
         )
-        .run(deviceId);
+        .run(unit);
   }
 }
 

@@ -80,14 +80,7 @@ class const _Content({
           child: Padding(
             padding: SynkTheme.maximizeDevicePadding,
             child: DeviceFrame(
-              deviceId: device.device.id,
-              modelName: device.device.modelName,
-              textureId: device.textureId,
-              screenSize: device.screenSize,
-              supportsInteraction: device.supportsInteraction,
-              navigations: device.navigations,
-              supportsFileTransfer: device.supportsFileTransfer,
-              supportsAudio: device.supportsAudio,
+              connection: device,
               isMaximized: true,
               onToggleMaximize: minimize,
               onClose: onClose,

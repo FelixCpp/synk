@@ -1,20 +1,14 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:use_in_case/use_in_case.dart';
-
-typedef SimulatePointerEventInput = ({
-  DeviceId deviceId,
-  DevicePointerEvent pointerEvent,
-});
 
 class const SimulatePointerEventInteractor(
   final DeviceFrameRepository repository,
-) implements ParameterizedInteractor<SimulatePointerEventInput> {
+) implements ParameterizedInteractor<DevicePointerEvent> {
   @override
-  FutureOr<void> getOrThrow(SimulatePointerEventInput input) async {
-    return repository.simulatePointerEvent(input.deviceId, input.pointerEvent);
+  FutureOr<void> getOrThrow(DevicePointerEvent input) {
+    return repository.simulatePointerEvent(input);
   }
 }

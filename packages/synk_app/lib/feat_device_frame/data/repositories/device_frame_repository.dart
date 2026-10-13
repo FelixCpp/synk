@@ -2,30 +2,26 @@ import 'dart:io';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
-import 'package:synk/feat_device_platform/application/agents/clipboard_device_agent.dart';
-import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
-import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
 import 'package:synk/feat_device_frame/domain/models/dropped_file_outcome.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 
+/// What one frame does with the device it mirrors.
 class const DeviceFrameRepository({
-  required final DeviceConnectionsRepository repository,
+  required final DeviceId deviceId,
+  required final DeviceSession session,
 }) {
-  Future<ClipboardSyncFailure?> simulateKeyEvent(
-    DeviceId deviceId,
-    DeviceKeyEvent event,
-  ) async {
+  /// Returns the reason a clipboard shortcut could not be served, if any.
+  Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event) async {
     final shortcut = _clipboardShortcutOf(event);
 
     if (shortcut == null) {
-      await repository.getAgent(deviceId)?.interaction?.simulateKeyEvent(event);
+      await session.interaction?.simulateKeyEvent(event);
       return null;
     }
 
@@ -33,26 +29,25 @@ class const DeviceFrameRepository({
       return null;
     }
 
-    final agent = repository.getAgent(deviceId)?.clipboard;
-    if (agent == null) {
+    final clipboard = session.clipboard;
+    if (clipboard == null) {
       return null;
     }
 
     return switch (shortcut) {
-      .copyFromDevice => _copyFromDevice(deviceId, agent),
-      .pasteToDevice => _pasteToDevice(deviceId, agent),
+      .copyFromDevice => _copyFromDevice(clipboard),
+      .pasteToDevice => _pasteToDevice(clipboard),
     };
   }
 
   Future<ClipboardSyncFailure?> _copyFromDevice(
-    DeviceId deviceId,
-    ClipboardDeviceAgent agent,
+    DeviceClipboard clipboard,
   ) async {
     final String text;
     try {
-      text = await agent.getClipboard();
+      text = await clipboard.getClipboard();
     } on Object catch (error, stackTrace) {
-      return _unreachableClipboard(deviceId, error, stackTrace);
+      return _unreachableClipboard(error, stackTrace);
     }
 
     if (text.isEmpty) {
@@ -64,8 +59,7 @@ class const DeviceFrameRepository({
   }
 
   Future<ClipboardSyncFailure?> _pasteToDevice(
-    DeviceId deviceId,
-    ClipboardDeviceAgent agent,
+    DeviceClipboard clipboard,
   ) async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);
     final text = data?.text;
@@ -74,15 +68,14 @@ class const DeviceFrameRepository({
     }
 
     try {
-      await agent.setClipboard(text);
+      await clipboard.setClipboard(text);
       return null;
     } on Object catch (error, stackTrace) {
-      return _unreachableClipboard(deviceId, error, stackTrace);
+      return _unreachableClipboard(error, stackTrace);
     }
   }
 
   ClipboardSyncFailure _unreachableClipboard(
-    DeviceId deviceId,
     Object error,
     StackTrace stackTrace,
   ) {
@@ -98,42 +91,36 @@ class const DeviceFrameRepository({
     };
   }
 
-  Future<void> simulatePointerEvent(
-    DeviceId deviceId,
-    DevicePointerEvent event,
-  ) async {
-    await repository
-        .getAgent(deviceId)
-        ?.interaction
-        ?.simulatePointerEvent(event);
+  Future<void> simulatePointerEvent(DevicePointerEvent event) async {
+    await session.interaction?.simulatePointerEvent(event);
   }
 
-  Future<void> simulatePinchEvent(DeviceId deviceId, PinchEvent event) async {
-    await repository.getAgent(deviceId)?.interaction?.simulatePinchEvent(event);
+  Future<void> simulatePinchEvent(PinchEvent event) async {
+    await session.interaction?.simulatePinchEvent(event);
   }
 
-  Future<void> navigate(DeviceId deviceId, DeviceNavigation navigation) async {
-    await repository.getAgent(deviceId)?.interaction?.navigate(navigation);
+  Future<void> navigate(DeviceNavigation navigation) async {
+    await session.interaction?.navigate(navigation);
   }
 
-  Future<void> pressPowerButton(DeviceId deviceId) async {
-    await repository.getAgent(deviceId)?.interaction?.pressPowerButton();
+  Future<void> pressPowerButton() async {
+    await session.interaction?.pressPowerButton();
   }
 
-  Future<void> captureScreenshot(DeviceId deviceId) async {
+  Future<void> captureScreenshot() async {
     const pngGroup = XTypeGroup(
       label: 'PNGs',
       extensions: ['png'],
       uniformTypeIdentifiers: ['public.png'],
     );
 
-    final agent = repository.getAgent(deviceId)?.screenCapture;
-    if (agent == null) {
+    final screenCapture = session.screenCapture;
+    if (screenCapture == null) {
       // TODO(Felix): Custom exception type
-      throw Exception('Could not resolve agent for device $deviceId');
+      throw Exception('Device $deviceId cannot capture its screen');
     }
 
-    final pngBytes = await agent.captureScreenshot();
+    final pngBytes = await screenCapture.captureScreenshot();
     final filename = 'screenshot_$deviceId.png';
     final saveLocation = await getSaveLocation(
       acceptedTypeGroups: const [pngGroup],
@@ -153,17 +140,17 @@ class const DeviceFrameRepository({
     await pngFile.saveTo(saveLocation.path);
   }
 
-  Future<bool> startRecording(DeviceId deviceId) async {
+  Future<bool> startRecording() async {
     const mp4Group = XTypeGroup(
       label: 'MP4-Videos',
       extensions: ['mp4'],
       uniformTypeIdentifiers: ['public.mpeg-4'],
     );
 
-    final agent = repository.getAgent(deviceId)?.screenCapture;
-    if (agent == null) {
+    final screenCapture = session.screenCapture;
+    if (screenCapture == null) {
       // TODO(Felix): Custom exception type
-      throw Exception('Could not resolve agent for device $deviceId');
+      throw Exception('Device $deviceId cannot record its screen');
     }
 
     final saveLocation = await getSaveLocation(
@@ -175,40 +162,29 @@ class const DeviceFrameRepository({
       return false;
     }
 
-    await agent.startRecording(saveLocation.path);
+    await screenCapture.startRecording(saveLocation.path);
     return true;
   }
 
-  Future<void> stopRecording(DeviceId deviceId) async {
-    final agent = repository.getAgent(deviceId)?.screenCapture;
-    if (agent == null) {
-      return;
-    }
-
-    await agent.stopRecording();
+  Future<void> stopRecording() async {
+    await session.screenCapture?.stopRecording();
   }
 
-  bool isAudioMuted(DeviceId deviceId) {
-    return repository.getAgent(deviceId)?.audio?.isAudioMuted ?? true;
+  bool isAudioMuted() {
+    return session.audio?.isAudioMuted ?? true;
   }
 
-  Future<void> setAudioMuted(DeviceId deviceId, bool muted) async {
-    final agent = repository.getAgent(deviceId)?.audio;
-    if (agent == null) {
-      return;
-    }
-
-    await agent.setAudioMuted(muted);
+  Future<void> setAudioMuted(bool muted) async {
+    await session.audio?.setAudioMuted(muted);
   }
 
   Future<List<DroppedFileOutcome>> handleDroppedFiles(
-    DeviceId deviceId,
     List<String> filepaths,
   ) async {
-    final agent = repository.getAgent(deviceId)?.fileTransfer;
-    if (agent == null) {
+    final fileTransfer = session.fileTransfer;
+    if (fileTransfer == null) {
       // TODO(Felix): Custom exception type
-      throw Exception('Could not resolve agent for device $deviceId');
+      throw Exception('Device $deviceId cannot receive files');
     }
 
     final outcomes = <DroppedFileOutcome>[];
@@ -218,10 +194,10 @@ class const DeviceFrameRepository({
       final isApk = path.extension(filepath).toLowerCase() == '.apk';
 
       if (isApk) {
-        await agent.installApk(filepath);
+        await fileTransfer.installApk(filepath);
         outcomes.add((action: .installed, filename: filename));
       } else {
-        await agent.pushFile(filepath);
+        await fileTransfer.pushFile(filepath);
         outcomes.add((action: .pushed, filename: filename));
       }
     }
@@ -229,7 +205,7 @@ class const DeviceFrameRepository({
     return outcomes;
   }
 
-  Future<DroppedFileOutcome?> installApk(DeviceId deviceId) async {
+  Future<DroppedFileOutcome?> installApk() async {
     const apkGroup = XTypeGroup(label: 'APKs', extensions: ['apk']);
 
     final file = await openFile(acceptedTypeGroups: const [apkGroup]);
@@ -237,17 +213,17 @@ class const DeviceFrameRepository({
       return null;
     }
 
-    final outcomes = await handleDroppedFiles(deviceId, [file.path]);
+    final outcomes = await handleDroppedFiles([file.path]);
     return outcomes.isEmpty ? null : outcomes.first;
   }
 
-  Future<DroppedFileOutcome?> shareFile(DeviceId deviceId) async {
+  Future<DroppedFileOutcome?> shareFile() async {
     final file = await openFile();
     if (file == null) {
       return null;
     }
 
-    final outcomes = await handleDroppedFiles(deviceId, [file.path]);
+    final outcomes = await handleDroppedFiles([file.path]);
     return outcomes.isEmpty ? null : outcomes.first;
   }
 }

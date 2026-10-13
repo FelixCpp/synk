@@ -1,18 +1,17 @@
 import 'package:rxdart/rxdart.dart';
-import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
-import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
-import 'fake_device_agent.dart';
+import 'fake_device_session.dart';
 
 /// A platform whose plugged devices and connection attempts a test controls.
 class FakePlatform implements DevicePlatform {
   FakePlatform({this.onConnect});
 
-  /// Answers a connection attempt; a fresh [FakeDeviceAgent] without it.
-  Future<DeviceAgent> Function(DeviceId deviceId)? onConnect;
+  /// Answers a connection attempt; a fresh [FakeDeviceSession] without it.
+  Future<DeviceSession> Function(DeviceId deviceId)? onConnect;
 
   final devices = BehaviorSubject.seeded(<PluggedDevice>[]);
   final connectCalls = <DeviceId>[];
@@ -27,9 +26,9 @@ class FakePlatform implements DevicePlatform {
   Stream<List<PluggedDevice>> observeDevices() => devices;
 
   @override
-  Future<DeviceAgent> connect(DeviceId deviceId) async {
+  Future<DeviceSession> connect(DeviceId deviceId) async {
     connectCalls.add(deviceId);
-    return await onConnect?.call(deviceId) ?? FakeDeviceAgent();
+    return await onConnect?.call(deviceId) ?? FakeDeviceSession();
   }
 
   @override
