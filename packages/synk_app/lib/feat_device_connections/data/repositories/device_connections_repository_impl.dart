@@ -1,46 +1,41 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
-import 'package:synk/feat_device_agent/domain/repositories/device_agent_repository.dart';
-import 'package:synk/feat_device_agent/domain/repositories/ios_device_agent_repository.dart';
-import 'package:synk/feat_device_connections/domain/models/android_device_info.dart';
-import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
-import 'package:synk/feat_plugged_devices/ios/domain/repositories/plugged_ios_devices_repository.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/device_platform.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DeviceConnectionsRepositoryImpl({
-  required final PluggedAdbDevicesRepository pluggedAdbDevicesRepository,
-  required final DeviceAgentRepository agentRepository,
-  required final PluggedIosDevicesRepository pluggedIosDevicesRepository,
-  required final IosDeviceAgentRepository iosAgentRepository,
+  required final List<DevicePlatform> platforms,
 }) implements DeviceConnectionsRepository {
-  final androidDeviceAgentsById = <DeviceId, AndroidDeviceAgent>{};
-  final androidDeviceInfos = <DeviceId, AndroidDeviceInfo>{};
-  final iosDeviceAgentsById = <DeviceId, IosDeviceAgent>{};
+  final agentsById = <DeviceId, DeviceAgent>{};
   final connectionStates = BehaviorSubject.seeded(
     <DeviceId, DeviceConnectionState>{},
   );
   final screenSizes = BehaviorSubject.seeded(<DeviceId, DeviceScreenSize>{});
   final screenSizeSubscriptions =
       <DeviceId, StreamSubscription<DeviceScreenSize>>{};
-  late final StreamSubscription<Set<DeviceId>> pluggedDeviceSubscription;
+
+  var _platformsByDeviceId = <DeviceId, DevicePlatform>{};
+  late final StreamSubscription<List<List<PluggedDevice>>>
+  pluggedDeviceSubscription;
 
   this {
-    pluggedDeviceSubscription = _observePluggedDeviceIds().listen(
-      _forgetStatesOfAbsentDevices,
-    );
+    pluggedDeviceSubscription = _observeDevicesPerPlatform().listen((
+      devicesPerPlatform,
+    ) {
+      _platformsByDeviceId = {
+        for (final (index, devices) in devicesPerPlatform.indexed)
+          for (final device in devices) device.id: platforms[index],
+      };
+
+      _forgetStatesOfAbsentDevices(_platformsByDeviceId.keys.toSet());
+    });
   }
 
   @override
@@ -52,47 +47,46 @@ class DeviceConnectionsRepositoryImpl({
     screenSizeSubscriptions.clear();
     await screenSizes.close();
     await connectionStates.close();
-    await agentRepository.dispose();
-    await iosAgentRepository.dispose();
+
+    for (final agent in agentsById.values) {
+      await agent.dispose();
+    }
+    agentsById.clear();
+
+    for (final platform in platforms) {
+      await platform.dispose();
+    }
   }
 
   @override
   Future<void> toggleConnection(PluggedDevice device) async {
-    final isDeviceConnected = isConnected(device.id);
-
-    switch (device) {
-      case AndroidDevice():
-        await (isDeviceConnected
-            ? _disconnectAndroid(device)
-            : _connectAndroid(device));
-      case IosDevice():
-        await (isDeviceConnected
-            ? _disconnectIos(device)
-            : _connectIos(device));
-    }
+    await (isConnected(device.id) ? _disconnect(device) : _connect(device));
   }
 
   @override
   bool isConnected(DeviceId id) {
-    if (androidDeviceAgentsById.containsKey(id)) {
-      return true;
-    }
+    return agentsById.containsKey(id);
+  }
 
-    if (iosDeviceAgentsById.containsKey(id)) {
-      return true;
-    }
+  @override
+  DeviceAgent? getAgent(DeviceId id) {
+    return agentsById[id];
+  }
 
-    return false;
+  @override
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return _observeDevicesPerPlatform().map((devicesPerPlatform) {
+      return [for (final devices in devicesPerPlatform) ...devices];
+    });
   }
 
   @override
   Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
-    return Rx.combineLatest3(
-      pluggedAdbDevicesRepository.observeAdbDevices(),
-      pluggedIosDevicesRepository.observeIosDevices(),
+    return Rx.combineLatest2(
+      observePluggedDevices(),
       connectionStates,
-      (androidDevices, iosDevices, states) => {
-        for (final device in _pluggedDevices(androidDevices, iosDevices))
+      (devices, states) => {
+        for (final device in devices)
           device.id: states[device.id] ?? const .disconnected(),
       },
     );
@@ -100,125 +94,73 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() {
-    return Rx.combineLatest4(
-      pluggedAdbDevicesRepository.observeAdbDevices(),
-      pluggedIosDevicesRepository.observeIosDevices(),
+    return Rx.combineLatest3(
+      observePluggedDevices(),
       connectionStates,
       screenSizes,
-      (androidDevices, iosDevices, states, sizes) => [
-        for (final device in _pluggedDevices(androidDevices, iosDevices))
+      (devices, states, sizes) => [
+        for (final device in devices)
           if (states[device.id] is ConnectionStateConnected)
             ?_buildConnection(device, sizes),
       ],
     );
   }
 
-  Stream<Set<DeviceId>> _observePluggedDeviceIds() {
-    return Rx.combineLatest2(
-      pluggedAdbDevicesRepository.observeAdbDevices(),
-      pluggedIosDevicesRepository.observeIosDevices(),
-      (androidDevices, iosDevices) => {
-        for (final device in _pluggedDevices(androidDevices, iosDevices))
-          device.id,
-      },
-    );
-  }
+  /// One list per entry of [platforms], in the same order.
+  Stream<List<List<PluggedDevice>>> _observeDevicesPerPlatform() {
+    if (platforms.isEmpty) {
+      return Stream.value(const []);
+    }
 
-  List<PluggedDevice> _pluggedDevices(
-    List<AndroidDevice> androidDevices,
-    List<IosDevice> iosDevices,
-  ) {
-    return [...androidDevices, ...iosDevices];
+    return Rx.combineLatestList([
+      for (final platform in platforms) platform.observeDevices(),
+    ]);
   }
 
   DeviceConnection? _buildConnection(
     PluggedDevice device,
     Map<DeviceId, DeviceScreenSize> sizes,
   ) {
-    if (androidDeviceAgentsById[device.id] case final agent?) {
-      return DeviceConnection.android(
-        device: device,
-        info: androidDeviceInfos[device.id]!,
-        textureId: agent.textureId,
-        screenSize: sizes[device.id] ?? agent.screenSize,
-        supportsInteraction: true,
-        supportsAudio: true,
-      );
+    final agent = agentsById[device.id];
+    if (agent == null) {
+      return null;
     }
 
-    if (iosDeviceAgentsById[device.id] case final agent?) {
-      return DeviceConnection.ios(
-        device: device,
-        textureId: agent.textureId,
-        screenSize: sizes[device.id] ?? agent.screenSize,
-        supportsInteraction: agent.supportsInteraction,
-        supportsAudio: agent.supportsAudio,
-      );
-    }
-
-    return null;
+    return DeviceConnection(
+      device: device,
+      textureId: agent.textureId,
+      screenSize: sizes[device.id] ?? agent.screenSize,
+      supportsInteraction: agent.interaction != null,
+      supportsDeviceActions: agent.fileTransfer != null,
+      supportsAudio: agent.audio != null,
+    );
   }
 
-  Future<void> _connectAndroid(AndroidDevice device) async {
+  Future<void> _connect(PluggedDevice device) async {
+    final platform = _platformsByDeviceId[device.id];
+    if (platform == null) {
+      throw DeviceNotPluggedException(deviceId: device.id);
+    }
+
     _ensureIdle(device.id);
     _setState(device.id, const DeviceConnectionState.connecting());
 
     try {
-      final agent = await agentRepository.establishConnection(device.id);
-      try {
-        final info = await agent.fetchAndroidDeviceInfo();
-        androidDeviceAgentsById[device.id] = agent;
-        androidDeviceInfos[device.id] = info;
-        _watchScreenSize(device.id, agent);
-        _setState(device.id, const DeviceConnectionState.connected());
-      } catch (_) {
-        await agentRepository.cutConnection(device.id);
-        rethrow;
-      }
-    } catch (error) {
+      final agent = await platform.connect(device.id);
+      agentsById[device.id] = agent;
+      _watchScreenSize(device.id, agent);
+      _setState(device.id, const DeviceConnectionState.connected());
+    } catch (_) {
       _setState(
         device.id,
-        DeviceConnectionState.failed(failure: _failureOf(error)),
+        const DeviceConnectionState.failed(failure: .unknown),
       );
       rethrow;
     }
   }
 
-  Future<void> _disconnectAndroid(AndroidDevice device) async {
-    await agentRepository.cutConnection(device.id);
-    androidDeviceAgentsById.remove(device.id);
-    androidDeviceInfos.remove(device.id);
-    await screenSizeSubscriptions.remove(device.id)?.cancel();
-    _forgetScreenSize(device.id);
-    _setState(device.id, const DeviceConnectionState.disconnected());
-  }
-
-  Future<void> _connectIos(IosDevice device) async {
-    _ensureIdle(device.id);
-    _setState(device.id, const DeviceConnectionState.connecting());
-
-    try {
-      final agent = await iosAgentRepository.establishConnection(device.id);
-      try {
-        iosDeviceAgentsById[device.id] = agent;
-        _watchScreenSize(device.id, agent);
-        _setState(device.id, const DeviceConnectionState.connected());
-      } catch (_) {
-        await iosAgentRepository.cutConnection(device.id);
-        rethrow;
-      }
-    } catch (error) {
-      _setState(
-        device.id,
-        DeviceConnectionState.failed(failure: _failureOf(error)),
-      );
-      rethrow;
-    }
-  }
-
-  Future<void> _disconnectIos(IosDevice device) async {
-    await iosAgentRepository.cutConnection(device.id);
-    iosDeviceAgentsById.remove(device.id);
+  Future<void> _disconnect(PluggedDevice device) async {
+    await agentsById.remove(device.id)?.dispose();
     await screenSizeSubscriptions.remove(device.id)?.cancel();
     _forgetScreenSize(device.id);
     _setState(device.id, const DeviceConnectionState.disconnected());
@@ -259,14 +201,7 @@ class DeviceConnectionsRepositoryImpl({
     ConnectionStateConnected() => false,
   };
 
-  ConnectionFailure _failureOf(Object error) => switch (error) {
-    DeviceAgentAlreadyConnectedException() =>
-      ConnectionFailure.connectionRefused,
-    DeviceAgentNotConnectedException() => ConnectionFailure.connectionRefused,
-    _ => ConnectionFailure.unknown,
-  };
-
-  void _watchScreenSize(DeviceId deviceId, ScreenCaptureAgent agent) {
+  void _watchScreenSize(DeviceId deviceId, DeviceAgent agent) {
     screenSizeSubscriptions[deviceId] = agent.screenSizeChanges.listen(
       (size) => screenSizes.add({...screenSizes.value, deviceId: size}),
     );
@@ -274,50 +209,5 @@ class DeviceConnectionsRepositoryImpl({
 
   void _forgetScreenSize(DeviceId deviceId) {
     screenSizes.add({...screenSizes.value}..remove(deviceId));
-  }
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) {
-    return androidDeviceAgentsById[id];
-  }
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) {
-    return androidDeviceAgentsById[id] ?? iosDeviceAgentsById[id];
-  }
-
-  @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) {
-    return androidDeviceAgentsById[id] ?? iosDeviceAgentsById[id];
-  }
-
-  @override
-  AudioAgent? getAudioAgent(DeviceId id) {
-    if (androidDeviceAgentsById[id] case final agent?) {
-      return agent;
-    }
-
-    // A mirrored iOS device only carries audio over the CoreDevice media
-    // stream; the capture-session fallback has nothing to mute.
-    final agent = iosDeviceAgentsById[id];
-    if (agent == null || !agent.supportsAudio) {
-      return null;
-    }
-
-    return agent;
-  }
-
-  @override
-  InteractionAgent? getInteractionAgent(DeviceId id) {
-    if (androidDeviceAgentsById[id] case final agent?) {
-      return agent;
-    }
-
-    final agent = iosDeviceAgentsById[id];
-    if (agent == null || !agent.supportsInteraction) {
-      return null;
-    }
-
-    return agent;
   }
 }

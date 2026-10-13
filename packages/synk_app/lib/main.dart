@@ -3,22 +3,16 @@ import 'dart:io';
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_hid_channel.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_media_stream_channel.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_mirror_channel.dart';
-import 'package:synk/feat_device_agent/data/repositories/android_device_agent_repository_impl.dart';
-import 'package:synk/feat_device_agent/data/repositories/unavailable_device_agent_repository.dart';
-import 'package:synk/feat_device_agent/data/repositories/ios_device_agent_repository_impl.dart';
+import 'package:synk/feat_device_platform/application/device_platform.dart';
+import 'package:synk/feat_device_platform_android/android_device_platform.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
+import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
+import 'package:synk/feat_device_platform_ios/ios_device_platform.dart';
+import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
+import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_plugged_devices/adb/data/repositories/unavailable_plugged_adb_devices_repository.dart';
-import 'package:synk/feat_plugged_devices/adb/data/datasources/adb_devices_datasource.dart';
-import 'package:synk/feat_plugged_devices/adb/data/repositories/plugged_adb_devices_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/repositories/plugged_adb_devices_repository.dart';
-import 'package:synk/feat_plugged_devices/ios/data/datasources/ios_device_discovery_channel.dart';
-import 'package:synk/feat_plugged_devices/ios/data/repositories/plugged_ios_devices_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/ios/domain/repositories/plugged_ios_devices_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
@@ -90,45 +84,29 @@ class const _ToolProviders({
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider.value(value: availability),
-        if (availability.isAdbAvailable)
-          RepositoryProvider(create: (context) => AdbApi(adbPath: adbPath)),
+        RepositoryProvider(create: (context) => AdbApi(adbPath: adbPath)),
         RepositoryProvider(create: (context) => DevicectlApi()),
-        RepositoryProvider<PluggedAdbDevicesRepository>(
-          create: (context) {
-            if (!availability.isAdbAvailable) {
-              return const UnavailablePluggedAdbDevicesRepository();
-            }
-
-            return PluggedAdbDevicesRepositoryImpl(
-              AdbDevicesDatasource(
-                api: RepositoryProvider.of(context),
-              ),
-            );
-          },
-          lazy: false,
-        ),
-        RepositoryProvider<PluggedIosDevicesRepository>(
-          create: (context) {
-            return PluggedIosDevicesRepositoryImpl(IosDeviceDiscoveryChannel());
-          },
-          lazy: false,
-        ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) {
-            return DeviceConnectionsRepositoryImpl(
-              pluggedAdbDevicesRepository: RepositoryProvider.of(context),
-              agentRepository: availability.isAdbAvailable
-                  ? AndroidDeviceAgentRepositoryImpl(
-                      RepositoryProvider.of(context),
-                    )
-                  : const UnavailableDeviceAgentRepository(),
-              pluggedIosDevicesRepository: RepositoryProvider.of(context),
-              iosAgentRepository: IosDeviceAgentRepositoryImpl(
-                IosMirrorChannel(),
-                IosMediaStreamChannel(),
-                IosHidChannel(),
-                RepositoryProvider.of(context),
+            final platforms = <DevicePlatform>[
+              AndroidDevicePlatform(RepositoryProvider.of(context)),
+              IosDevicePlatform(
+                discoveryChannel: IosDeviceDiscoveryChannel(),
+                channel: IosMirrorChannel(),
+                mediaStreamChannel: IosMediaStreamChannel(),
+                hidChannel: IosHidChannel(),
+                devicectl: RepositoryProvider.of(context),
               ),
+            ];
+
+            return DeviceConnectionsRepositoryImpl(
+              platforms: [
+                for (final platform in platforms)
+                  if (platform.getToolRequirements().every(
+                    availability.isAvailable,
+                  ))
+                    platform,
+              ],
             );
           },
           lazy: false,

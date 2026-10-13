@@ -1,7 +1,7 @@
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
-import 'package:synk/feat_device_frame/domain/models/control_button_type.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
@@ -10,8 +10,8 @@ import 'package:synk/feat_device_frame/presentation/widgets/device_frame_pointer
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_surface.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_tool_bar.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_screen_mirror.dart';
-import 'package:synk/feat_mirror_session/mirror_session.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -98,7 +98,9 @@ class _DeviceFrameState extends State<DeviceFrame>
                     onInstallApk: () => _installApk(context),
                     onShareFile: () => _shareFile(context),
                     onStandby: () {
-                      _pressControlButton(context, .power);
+                      BlocProvider.of<DeviceFrameBloc>(
+                        context,
+                      ).add(const .onPowerButtonPressed());
                     },
                     onClose: widget.onClose,
                   ),
@@ -113,13 +115,13 @@ class _DeviceFrameState extends State<DeviceFrame>
                   if (widget.supportsInteraction)
                     _ControlsBar(
                       onBackPressed: widget.supportsDeviceActions
-                          ? () => _pressControlButton(context, .back)
+                          ? () => _navigate(context, .back)
                           : null,
                       onHomePressed: () {
-                        _pressControlButton(context, .home);
+                        _navigate(context, .home);
                       },
                       onAppSwitchPressed: widget.supportsDeviceActions
-                          ? () => _pressControlButton(context, .appSwitch)
+                          ? () => _navigate(context, .appSwitch)
                           : null,
                     ),
                 ],
@@ -131,9 +133,8 @@ class _DeviceFrameState extends State<DeviceFrame>
     );
   }
 
-  void _pressControlButton(BuildContext context, ControlButtonType type) {
-    BlocProvider.of<DeviceFrameBloc>(context)
-        .add(.onControlButtonPressed(type));
+  void _navigate(BuildContext context, DeviceNavigation navigation) {
+    BlocProvider.of<DeviceFrameBloc>(context).add(.onNavigate(navigation));
   }
 
   void _captureScreenshot(BuildContext context) {
@@ -372,7 +373,7 @@ class const _DeviceFrameBlocProvider({
     return BlocProvider<DeviceFrameBloc>(
       create: (context) => DeviceFrameBloc(
         deviceId: deviceId,
-        repository: DeviceFrameRepositoryImpl(
+        repository: DeviceFrameRepository(
           repository: RepositoryProvider.of(context),
         ),
         notifications: RepositoryProvider.of(context),

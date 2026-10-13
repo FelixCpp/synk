@@ -1,19 +1,18 @@
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/agents/clipboard_device_agent.dart';
+import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_device_agent.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -31,14 +30,14 @@ DeviceKeyEvent _shortcut(
 
 void main() {
   late _FakeClipboardAgent agent;
-  late DeviceFrameRepositoryImpl repository;
+  late DeviceFrameRepository repository;
   String? hostClipboard;
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
 
     agent = _FakeClipboardAgent();
-    repository = DeviceFrameRepositoryImpl(
+    repository = DeviceFrameRepository(
       repository: _ConnectionsWithClipboard(agent),
     );
     hostClipboard = null;
@@ -175,14 +174,14 @@ void main() {
   });
 }
 
-class _FakeClipboardAgent implements ClipboardAgent {
+class _FakeClipboardAgent implements ClipboardDeviceAgent {
   String content = '';
   int reads = 0;
   bool isReachable = true;
   Object? failure;
 
   @override
-  Future<String> readDeviceClipboardContent() async {
+  Future<String> getClipboard() async {
     reads++;
     if (!isReachable || failure != null) {
       throw failure ?? Exception('no pasteboard on this device');
@@ -192,7 +191,7 @@ class _FakeClipboardAgent implements ClipboardAgent {
   }
 
   @override
-  Future<void> setDeviceClipboardContent(String clipboard) async {
+  Future<void> setClipboard(String clipboard) async {
     if (!isReachable || failure != null) {
       throw failure ?? Exception('no pasteboard on this device');
     }
@@ -201,22 +200,15 @@ class _FakeClipboardAgent implements ClipboardAgent {
   }
 }
 
-class _ConnectionsWithClipboard(final ClipboardAgent agent)
+class _ConnectionsWithClipboard(final ClipboardDeviceAgent agent)
     implements DeviceConnectionsRepository {
   @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => agent;
+  DeviceAgent? getAgent(DeviceId id) => FakeDeviceAgent(clipboard: agent);
 
   @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => null;
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
-
-  @override
-  AudioAgent? getAudioAgent(DeviceId id) => null;
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();

@@ -1,4 +1,4 @@
-import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';

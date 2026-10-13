@@ -8,3 +8,7 @@ analyzer:
 
 formatter:
   trailing_commas: preserve
+
+linter:
+  rules:
+    - unawaited_futures

@@ -2,15 +2,15 @@ import 'dart:ui';
 
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
-import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository_impl.dart';
-import 'package:synk/feat_maximized_device/domain/models/maximized_device.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository.dart';
 import 'package:synk/feat_maximized_device/presentation/bloc/maximized_device_bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class const MaximizedDeviceScreen({
   super.key,
-  required final MaximizedDevice device,
+  required final DeviceConnection device,
   required final Animation<double> animation,
   required final VoidCallback onStopMirroring,
 }) extends StatelessWidget {
@@ -19,7 +19,7 @@ class const MaximizedDeviceScreen({
     return BlocProvider(
       create: (context) => MaximizedDeviceBloc(
         device: device,
-        repository: MaximizedDeviceRepositoryImpl(
+        repository: MaximizedDeviceRepository(
           connectionsRepository: RepositoryProvider.of(context),
         ),
       ),
@@ -41,7 +41,7 @@ class const MaximizedDeviceScreen({
 }
 
 class const _Content({
-  required final MaximizedDevice device,
+  required final DeviceConnection device,
   required final Animation<double> animation,
   required final VoidCallback onClose,
 }) extends StatelessWidget {
@@ -80,8 +80,8 @@ class const _Content({
           child: Padding(
             padding: SynkTheme.maximizeDevicePadding,
             child: DeviceFrame(
-              deviceId: device.deviceId,
-              modelName: device.modelName,
+              deviceId: device.device.id,
+              modelName: device.device.modelName,
               textureId: device.textureId,
               screenSize: device.screenSize,
               supportsInteraction: device.supportsInteraction,

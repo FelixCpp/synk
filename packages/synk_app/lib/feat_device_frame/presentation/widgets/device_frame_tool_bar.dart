@@ -1,6 +1,6 @@
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 

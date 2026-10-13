@@ -2,25 +2,26 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_frame/domain/models/control_button_type.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/install_apk_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/is_audio_muted_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/share_file_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/simulate_control_button_event_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -45,9 +46,8 @@ class DeviceFrameBloc({
   final setAudioMuted = SetAudioMutedInteractor(repository);
   final isAudioMuted = IsAudioMutedInteractor(repository);
   final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
-  final simulateControlButton = SimulateControlButtonEventInteractor(
-    repository,
-  );
+  final navigate = NavigateInteractor(repository);
+  final pressPowerButton = PressPowerButtonInteractor(repository);
   final installApk = InstallApkInteractor(repository);
   final shareFile = ShareFileInteractor(repository);
 
@@ -60,8 +60,9 @@ class DeviceFrameBloc({
     on<_OnToggleRecording>(_onToggleRecording, transformer: sequential());
     on<_OnToggleAudioMute>(_onToggleAudioMute, transformer: sequential());
     on<_OnFilesDropped>(_onFilesDropped, transformer: sequential());
-    on<_OnControlButtonPressed>(
-      _onControlButtonPressed,
+    on<_OnNavigate>(_onNavigate, transformer: sequential());
+    on<_OnPowerButtonPressed>(
+      _onPowerButtonPressed,
       transformer: sequential(),
     );
     on<_OnInstallApk>(_onInstallApk, transformer: sequential());
@@ -246,18 +247,32 @@ class DeviceFrameBloc({
         .run((deviceId: deviceId, filepaths: event.filepaths));
   }
 
-  FutureOr<void> _onControlButtonPressed(
-    _OnControlButtonPressed event,
+  FutureOr<void> _onNavigate(
+    _OnNavigate event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return simulateControlButton
+    return navigate
         .logger()
         .intercept(
           (e) => notifications.notify(
-            .new(message: 'Failed to simulate control button press: $e'),
+            .new(message: 'Failed to navigate: $e'),
           ),
         )
-        .run((deviceId: deviceId, type: event.type));
+        .run((deviceId: deviceId, navigation: event.navigation));
+  }
+
+  FutureOr<void> _onPowerButtonPressed(
+    _OnPowerButtonPressed event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return pressPowerButton
+        .logger()
+        .intercept(
+          (e) => notifications.notify(
+            .new(message: 'Failed to press the power button: $e'),
+          ),
+        )
+        .run(deviceId);
   }
 
   FutureOr<void> _onInstallApk(

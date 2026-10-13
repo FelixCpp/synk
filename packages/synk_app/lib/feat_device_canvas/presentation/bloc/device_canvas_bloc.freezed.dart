@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceCanvasState {
 
- List<CanvasDevice> get devices;
+ List<DeviceConnection> get devices;
 /// Create a copy of DeviceCanvasState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,7 +51,7 @@ abstract mixin class $DeviceCanvasStateCopyWith<$Res>  {
   factory $DeviceCanvasStateCopyWith(DeviceCanvasState value, $Res Function(DeviceCanvasState) _then) = _$DeviceCanvasStateCopyWithImpl;
 @useResult
 $Res call({
- List<CanvasDevice> devices
+ List<DeviceConnection> devices
 });
 
 
@@ -71,7 +71,7 @@ class _$DeviceCanvasStateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? devices = null,}) {
   return _then(DeviceCanvasState(
 devices: null == devices ? _self.devices : devices // ignore: cast_nullable_to_non_nullable
-as List<CanvasDevice>,
+as List<DeviceConnection>,
   ));
 }
 
@@ -153,7 +153,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<CanvasDevice> devices)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<DeviceConnection> devices)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
 return $default(_that.devices);case _:
@@ -174,7 +174,7 @@ return $default(_that.devices);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<CanvasDevice> devices)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<DeviceConnection> devices)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState():
 return $default(_that.devices);}
@@ -191,7 +191,7 @@ return $default(_that.devices);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<CanvasDevice> devices)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<DeviceConnection> devices)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceCanvasState() when $default != null:
 return $default(_that.devices);case _:
@@ -206,11 +206,11 @@ return $default(_that.devices);case _:
 
 
 class _DeviceCanvasState implements DeviceCanvasState {
-  const _DeviceCanvasState({required  List<CanvasDevice> devices}): _devices = devices;
+  const _DeviceCanvasState({required  List<DeviceConnection> devices}): _devices = devices;
   
 
- final  List<CanvasDevice> _devices;
-@override List<CanvasDevice> get devices {
+ final  List<DeviceConnection> _devices;
+@override List<DeviceConnection> get devices {
   if (_devices is EqualUnmodifiableListView) return _devices;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_devices);
@@ -249,7 +249,7 @@ abstract mixin class _$DeviceCanvasStateCopyWith<$Res> implements $DeviceCanvasS
   factory _$DeviceCanvasStateCopyWith(_DeviceCanvasState value, $Res Function(_DeviceCanvasState) _then) = __$DeviceCanvasStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<CanvasDevice> devices
+ List<DeviceConnection> devices
 });
 
 
@@ -269,7 +269,7 @@ class __$DeviceCanvasStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? devices = null,}) {
   return _then(_DeviceCanvasState(
 devices: null == devices ? _self._devices : devices // ignore: cast_nullable_to_non_nullable
-as List<CanvasDevice>,
+as List<DeviceConnection>,
   ));
 }
 
@@ -384,7 +384,7 @@ return onCloseDevice(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( CanvasDevice device)?  onCloseDevice,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( DeviceConnection device)?  onCloseDevice,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCloseDevice() when onCloseDevice != null:
@@ -406,7 +406,7 @@ return onCloseDevice(_that.device);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( CanvasDevice device)  onCloseDevice,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( DeviceConnection device)  onCloseDevice,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnCloseDevice():
@@ -424,7 +424,7 @@ return onCloseDevice(_that.device);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( CanvasDevice device)?  onCloseDevice,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( DeviceConnection device)?  onCloseDevice,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnCloseDevice() when onCloseDevice != null:
@@ -475,7 +475,7 @@ class _OnCloseDevice implements DeviceCanvasEvent {
   const _OnCloseDevice(this.device);
   
 
- final  CanvasDevice device;
+ final  DeviceConnection device;
 
 /// Create a copy of DeviceCanvasEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -509,11 +509,11 @@ abstract mixin class _$OnCloseDeviceCopyWith<$Res> implements $DeviceCanvasEvent
   factory _$OnCloseDeviceCopyWith(_OnCloseDevice value, $Res Function(_OnCloseDevice) _then) = __$OnCloseDeviceCopyWithImpl;
 @useResult
 $Res call({
- CanvasDevice device
+ DeviceConnection device
 });
 
 
-$CanvasDeviceCopyWith<$Res> get device;
+$DeviceConnectionCopyWith<$Res> get device;
 
 }
 /// @nodoc
@@ -529,7 +529,7 @@ class __$OnCloseDeviceCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
   return _then(_OnCloseDevice(
 null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as CanvasDevice,
+as DeviceConnection,
   ));
 }
 
@@ -537,9 +537,9 @@ as CanvasDevice,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$CanvasDeviceCopyWith<$Res> get device {
+$DeviceConnectionCopyWith<$Res> get device {
   
-  return $CanvasDeviceCopyWith<$Res>(_self.device, (value) {
+  return $DeviceConnectionCopyWith<$Res>(_self.device, (value) {
     return _then(_self.copyWith(device: value));
   });
 }

@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:synk/feat_device_canvas/domain/models/canvas_device.dart';
-import 'package:synk/feat_device_canvas/domain/repositories/device_canvas_repository.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
@@ -16,7 +15,6 @@ part 'device_canvas_state.dart';
 part 'device_canvas_event.dart';
 
 class DeviceCanvasBloc(
-  final DeviceCanvasRepository repository,
   final DeviceConnectionsRepository connectionsRepository,
   final NotificationService notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
@@ -31,7 +29,7 @@ class DeviceCanvasBloc(
 
   FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceCanvasState> emit) {
     return emit.onEach(
-      repository.observeDevices(),
+      connectionsRepository.observeDeviceConnections(),
       onData: (devices) {
         emit(state.copyWith(devices: devices));
       },

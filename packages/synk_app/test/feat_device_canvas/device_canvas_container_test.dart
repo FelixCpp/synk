@@ -1,15 +1,11 @@
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -65,6 +61,14 @@ Future<void> _pumpCanvas(
 }
 
 class _FakeConnections implements DeviceConnectionsRepository {
+  @override
+  DeviceAgent? getAgent(DeviceId id) => null;
+
+  @override
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
+
   final _connections = BehaviorSubject.seeded(<DeviceConnection>[]);
 
   @override
@@ -83,19 +87,4 @@ class _FakeConnections implements DeviceConnectionsRepository {
 
   @override
   bool isConnected(DeviceId id) => false;
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
-
-  @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
-
-  @override
-  AudioAgent? getAudioAgent(DeviceId id) => null;
-
-  @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => null;
 }

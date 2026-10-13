@@ -2,8 +2,8 @@ import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_connections/domain/models/connection_failure.dart';
 import 'package:synk/feat_device_pairing/presentation/wireless_pairing_dialog.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
-import 'package:synk/feat_sidebar/data/repositories/sidebar_repository_impl.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
@@ -17,11 +17,7 @@ class const SynkSidebar({super.key}) extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<SidebarBloc>(
       create: (context) => SidebarBloc(
-        SidebarRepositoryImpl(
-          RepositoryProvider.of(context),
-          RepositoryProvider.of(context),
-          RepositoryProvider.of(context),
-        ),
+        SidebarRepository(RepositoryProvider.of(context)),
         RepositoryProvider.of(context),
         RepositoryProvider.of(context),
       ),

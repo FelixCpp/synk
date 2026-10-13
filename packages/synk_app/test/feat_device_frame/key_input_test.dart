@@ -1,18 +1,19 @@
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_device_agent.dart';
 
 const _deviceId = DeviceId('serial-1');
 
@@ -26,12 +27,12 @@ DeviceKeyEvent _key(
 
 void main() {
   late _RecordingInteractionAgent agent;
-  late DeviceFrameRepositoryImpl repository;
+  late DeviceFrameRepository repository;
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     agent = _RecordingInteractionAgent();
-    repository = DeviceFrameRepositoryImpl(
+    repository = DeviceFrameRepository(
       repository: _ConnectionsWithInteraction(agent),
     );
   });
@@ -126,7 +127,7 @@ void main() {
   });
 }
 
-class _RecordingInteractionAgent implements InteractionAgent {
+class _RecordingInteractionAgent implements InteractionDeviceAgent {
   final keyEvents = <DeviceKeyEvent>[];
 
   @override
@@ -141,29 +142,21 @@ class _RecordingInteractionAgent implements InteractionAgent {
   Future<void> simulatePinchEvent(PinchEvent event) async {}
 
   @override
-  Future<void> simulateControlAction(DeviceControlAction action) async {}
+  Future<void> navigate(DeviceNavigation navigation) async {}
+
+  @override
+  Future<void> pressPowerButton() async {}
 }
 
-class _ConnectionsWithInteraction(final InteractionAgent agent)
+class _ConnectionsWithInteraction(final InteractionDeviceAgent agent)
     implements DeviceConnectionsRepository {
   @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => agent;
+  DeviceAgent? getAgent(DeviceId id) => FakeDeviceAgent(interaction: agent);
 
   @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
-
-
-  @override
-
-  AudioAgent? getAudioAgent(DeviceId id) => null;
-
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();

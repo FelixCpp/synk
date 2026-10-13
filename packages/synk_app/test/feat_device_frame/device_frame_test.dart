@@ -1,23 +1,20 @@
+import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_mirror_session/mirror_session.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_state.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -297,21 +294,12 @@ Future<SynkColors> _pumpFrame(
 
 class _OfflineConnections implements DeviceConnectionsRepository {
   @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
+  DeviceAgent? getAgent(DeviceId id) => null;
 
   @override
-  AudioAgent? getAudioAgent(DeviceId id) => null;
-
-  @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => null;
-
-  @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
-
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();

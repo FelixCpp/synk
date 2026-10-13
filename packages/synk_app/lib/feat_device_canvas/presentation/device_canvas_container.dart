@@ -2,11 +2,9 @@ import 'dart:async';
 
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/design/widgets/reflow_grid.dart';
-import 'package:synk/feat_device_canvas/data/repositories/device_canvas_repository_impl.dart';
-import 'package:synk/feat_device_canvas/domain/models/canvas_device.dart';
 import 'package:synk/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
-import 'package:synk/feat_maximized_device/domain/models/maximized_device.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -18,9 +16,6 @@ class const DeviceCanvasContainer({super.key}) extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DeviceCanvasBloc>(
       create: (context) => DeviceCanvasBloc(
-        DeviceCanvasRepositoryImpl(
-          RepositoryProvider.of(context),
-        ),
         RepositoryProvider.of(context),
         RepositoryProvider.of<NotificationService>(context),
       ),
@@ -63,17 +58,10 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
     );
   }
 
-  Future<void> _openMaximized(BuildContext context, CanvasDevice device) async {
-    final maximizedDevice = MaximizedDevice(
-      deviceId: device.device.id,
-      modelName: device.device.modelName,
-      textureId: device.textureId,
-      screenSize: device.screenSize,
-      supportsInteraction: device.supportsInteraction,
-      supportsDeviceActions: device.supportsDeviceActions,
-      supportsAudio: device.supportsAudio,
-    );
-
+  Future<void> _openMaximized(
+    BuildContext context,
+    DeviceConnection device,
+  ) async {
     final route = PageRouteBuilder<void>(
       opaque: false,
       barrierDismissible: false,
@@ -81,7 +69,7 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
       reverseTransitionDuration: SynkTheme.maximizeTransitionDuration,
       pageBuilder: (context, animation, secondaryAnimation) {
         return MaximizedDeviceScreen(
-          device: maximizedDevice,
+          device: device,
           animation: animation,
           onStopMirroring: () {
             BlocProvider.of<DeviceCanvasBloc>(this.context)
@@ -95,7 +83,7 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
   }
 }
 
-typedef MaximizeCallback = void Function(CanvasDevice device);
+typedef MaximizeCallback = void Function(DeviceConnection device);
 
 class const _Content({
   required final DeviceCanvasState state,
@@ -115,7 +103,7 @@ class const _Content({
   Widget _buildGrid(BuildContext context) {
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ReflowGrid<CanvasDevice>(
+      child: ReflowGrid<DeviceConnection>(
         padding: SynkTheme.pagePadding,
         mainAxisSpacing: SynkTheme.verticalComponentSpacingMedium,
         crossAxisSpacing: SynkTheme.horizontalComponentSpacingMedium,

@@ -1,7 +1,7 @@
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_mirror_session/mirror_session.dart';
+import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
 import 'package:flutter/cupertino.dart';
 
 class const DeviceScreenMirror({

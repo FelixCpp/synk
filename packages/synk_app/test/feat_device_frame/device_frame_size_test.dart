@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:flutter_test/flutter_test.dart';
 

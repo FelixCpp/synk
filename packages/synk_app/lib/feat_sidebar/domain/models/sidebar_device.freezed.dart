@@ -55,7 +55,7 @@ $Res call({
 });
 
 
-$PluggedDeviceCopyWith<$Res> get device;$SidebarDeviceStateCopyWith<$Res> get state;
+$SidebarDeviceStateCopyWith<$Res> get state;
 
 }
 /// @nodoc
@@ -76,15 +76,6 @@ as SidebarDeviceState,
   ));
 }
 /// Create a copy of SidebarDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$PluggedDeviceCopyWith<$Res> get device {
-  
-  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
-    return _then(_self.copyWith(device: value));
-  });
-}/// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -267,7 +258,7 @@ $Res call({
 });
 
 
-@override $PluggedDeviceCopyWith<$Res> get device;@override $SidebarDeviceStateCopyWith<$Res> get state;
+@override $SidebarDeviceStateCopyWith<$Res> get state;
 
 }
 /// @nodoc
@@ -289,15 +280,6 @@ as SidebarDeviceState,
 }
 
 /// Create a copy of SidebarDevice
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$PluggedDeviceCopyWith<$Res> get device {
-  
-  return $PluggedDeviceCopyWith<$Res>(_self.device, (value) {
-    return _then(_self.copyWith(device: value));
-  });
-}/// Create a copy of SidebarDevice
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

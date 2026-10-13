@@ -1,23 +1,21 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_connection.dart';
-import 'package:synk/feat_plugged_devices/adb/domain/models/android_device_state.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device_connection.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device_state.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
-import 'package:synk/feat_sidebar/domain/repositories/sidebar_repository.dart';
+import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeSidebarRepository implements SidebarRepository {
@@ -32,6 +30,14 @@ class FakeSidebarRepository implements SidebarRepository {
 }
 
 class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
+  @override
+  DeviceAgent? getAgent(DeviceId id) => null;
+
+  @override
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
+
   Object? errorToThrow;
   PluggedDevice? lastToggled;
 
@@ -52,29 +58,10 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
     return Stream.value(const {});
   }
 
-
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() {
     return const Stream.empty();
   }
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
-
-
-  @override
-
-  AudioAgent? getAudioAgent(DeviceId id) => null;
-
-  @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => null;
-
-  @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
 }
 
 AndroidDevice buildDevice(String serial) {

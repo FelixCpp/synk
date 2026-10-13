@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MaximizedDeviceState {
 
- MaximizedDevice get device; bool get isGone;
+ DeviceConnection get device; bool get isGone;
 /// Create a copy of MaximizedDeviceState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -51,11 +51,11 @@ abstract mixin class $MaximizedDeviceStateCopyWith<$Res>  {
   factory $MaximizedDeviceStateCopyWith(MaximizedDeviceState value, $Res Function(MaximizedDeviceState) _then) = _$MaximizedDeviceStateCopyWithImpl;
 @useResult
 $Res call({
- MaximizedDevice device, bool isGone
+ DeviceConnection device, bool isGone
 });
 
 
-$MaximizedDeviceCopyWith<$Res> get device;
+$DeviceConnectionCopyWith<$Res> get device;
 
 }
 /// @nodoc
@@ -71,7 +71,7 @@ class _$MaximizedDeviceStateCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') @override $Res call({Object? device = null,Object? isGone = null,}) {
   return _then(MaximizedDeviceState(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as MaximizedDevice,isGone: null == isGone ? _self.isGone : isGone // ignore: cast_nullable_to_non_nullable
+as DeviceConnection,isGone: null == isGone ? _self.isGone : isGone // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -79,9 +79,9 @@ as bool,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$MaximizedDeviceCopyWith<$Res> get device {
+$DeviceConnectionCopyWith<$Res> get device {
   
-  return $MaximizedDeviceCopyWith<$Res>(_self.device, (value) {
+  return $DeviceConnectionCopyWith<$Res>(_self.device, (value) {
     return _then(_self.copyWith(device: value));
   });
 }
@@ -163,7 +163,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MaximizedDevice device,  bool isGone)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceConnection device,  bool isGone)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MaximizedDeviceState() when $default != null:
 return $default(_that.device,_that.isGone);case _:
@@ -184,7 +184,7 @@ return $default(_that.device,_that.isGone);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MaximizedDevice device,  bool isGone)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceConnection device,  bool isGone)  $default,) {final _that = this;
 switch (_that) {
 case _MaximizedDeviceState():
 return $default(_that.device,_that.isGone);}
@@ -201,7 +201,7 @@ return $default(_that.device,_that.isGone);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MaximizedDevice device,  bool isGone)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceConnection device,  bool isGone)?  $default,) {final _that = this;
 switch (_that) {
 case _MaximizedDeviceState() when $default != null:
 return $default(_that.device,_that.isGone);case _:
@@ -219,7 +219,7 @@ class _MaximizedDeviceState implements MaximizedDeviceState {
   const _MaximizedDeviceState({required this.device, required this.isGone});
   
 
-@override final  MaximizedDevice device;
+@override final  DeviceConnection device;
 @override final  bool isGone;
 
 /// Create a copy of MaximizedDeviceState
@@ -254,11 +254,11 @@ abstract mixin class _$MaximizedDeviceStateCopyWith<$Res> implements $MaximizedD
   factory _$MaximizedDeviceStateCopyWith(_MaximizedDeviceState value, $Res Function(_MaximizedDeviceState) _then) = __$MaximizedDeviceStateCopyWithImpl;
 @override @useResult
 $Res call({
- MaximizedDevice device, bool isGone
+ DeviceConnection device, bool isGone
 });
 
 
-@override $MaximizedDeviceCopyWith<$Res> get device;
+@override $DeviceConnectionCopyWith<$Res> get device;
 
 }
 /// @nodoc
@@ -274,7 +274,7 @@ class __$MaximizedDeviceStateCopyWithImpl<$Res>
 @override @pragma('vm:prefer-inline') $Res call({Object? device = null,Object? isGone = null,}) {
   return _then(_MaximizedDeviceState(
 device: null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
-as MaximizedDevice,isGone: null == isGone ? _self.isGone : isGone // ignore: cast_nullable_to_non_nullable
+as DeviceConnection,isGone: null == isGone ? _self.isGone : isGone // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -283,9 +283,9 @@ as bool,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$MaximizedDeviceCopyWith<$Res> get device {
+$DeviceConnectionCopyWith<$Res> get device {
   
-  return $MaximizedDeviceCopyWith<$Res>(_self.device, (value) {
+  return $DeviceConnectionCopyWith<$Res>(_self.device, (value) {
     return _then(_self.copyWith(device: value));
   });
 }

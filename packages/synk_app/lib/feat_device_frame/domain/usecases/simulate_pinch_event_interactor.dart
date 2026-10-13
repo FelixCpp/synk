@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 typedef SimulatePinchEventInput = ({

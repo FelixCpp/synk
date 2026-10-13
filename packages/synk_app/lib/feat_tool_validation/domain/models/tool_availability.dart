@@ -15,4 +15,11 @@ class const ToolAvailability({
       isDevicectlAvailable: isAvailable(.devicectl),
     );
   }
+
+  bool isAvailable(ExternalTool tool) {
+    return switch (tool) {
+      .adb => isAdbAvailable,
+      .devicectl => isDevicectlAvailable,
+    };
+  }
 }

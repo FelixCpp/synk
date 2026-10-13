@@ -21,9 +21,9 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onFilesDropped(List<String> filepaths) =
       _OnFilesDropped;
 
-  const factory DeviceFrameEvent.onControlButtonPressed(
-    ControlButtonType type,
-  ) = _OnControlButtonPressed;
+  const factory DeviceFrameEvent.onNavigate(DeviceNavigation navigation) =
+      _OnNavigate;
+  const factory DeviceFrameEvent.onPowerButtonPressed() = _OnPowerButtonPressed;
   const factory DeviceFrameEvent.onInstallApk() = _OnInstallApk;
   const factory DeviceFrameEvent.onShareFile() = _OnShareFile;
 }

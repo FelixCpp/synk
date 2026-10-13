@@ -1,26 +1,27 @@
 import 'package:api_devicectl/api_devicectl.dart';
-import 'package:synk/feat_device_agent/application/android_device_agent.dart';
-import 'package:synk/feat_device_agent/application/ios_device_agent.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_hid_channel.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_mirror_channel.dart';
-import 'package:synk/feat_device_agent/data/datasources/ios_mirror_transport.dart';
-import 'package:synk/feat_device_agent/domain/models/audio_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/clipboard_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/device_key_event.dart';
-import 'package:synk/feat_device_agent/domain/models/device_pointer_event.dart';
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_agent/domain/models/interaction_agent.dart';
-import 'package:synk/feat_device_agent/domain/models/ios_touch_gesture.dart';
-import 'package:synk/feat_device_agent/domain/models/screen_capture_agent.dart';
+import 'package:synk/feat_device_platform/application/device_agent.dart';
+import 'package:synk/feat_device_platform/application/agents/interaction_device_agent.dart';
+import 'package:synk/feat_device_platform/domain/models/device_navigation.dart';
+import 'package:synk/feat_device_platform/domain/models/pinch_event.dart';
+import 'package:synk/feat_device_platform_ios/ios_device_agent.dart';
+import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
+import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
+import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
+import 'package:synk/feat_device_platform/domain/models/device_key_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_pointer_event.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
-import 'package:synk/feat_mirror_session/mirror_session.dart';
-import 'package:synk/feat_plugged_devices/domain/models/device_id.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/domain/models/device_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_device_agent.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -62,9 +63,9 @@ void main() {
     });
   });
 
-  group('the gesture behind a control action', () {
+  group('the gesture behind a navigation', () {
     test('leaves the bottom edge for home', () {
-      final swipe = iosSwipeForControlAction(.home)!;
+      final swipe = iosSwipeForNavigation(.home);
 
       expect(swipe.edge, IosTouchEdge.bottom);
       expect(swipe.from.y, 1.0);
@@ -73,28 +74,25 @@ void main() {
     });
 
     test('holds at the top for the app switcher', () {
-      final swipe = iosSwipeForControlAction(.appSwitch)!;
+      final swipe = iosSwipeForNavigation(.appSwitch);
 
       expect(swipe.edge, IosTouchEdge.bottom);
       expect(swipe.hold, greaterThan(Duration.zero));
     });
 
     test('comes in from the left edge for back', () {
-      final swipe = iosSwipeForControlAction(.back)!;
+      final swipe = iosSwipeForNavigation(.back);
 
       expect(swipe.edge, IosTouchEdge.left);
       expect(swipe.from.x, 0.0);
       expect(swipe.to.x, greaterThan(swipe.from.x));
     });
-
-    test('does not exist for standby', () {
-      expect(iosSwipeForControlAction(.standby), isNull);
-    });
   });
 
   group('the iOS agent', () {
     late List<MethodCall> calls;
-    late IosDeviceAgent agent;
+    late IosDeviceAgent deviceAgent;
+    late InteractionDeviceAgent agent;
 
     setUp(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -120,15 +118,17 @@ void main() {
         (call) async => null,
       );
 
-      agent = IosDeviceAgent(
-        IosCaptureSessionTransport(IosMirrorChannel(), null),
-        IosHidChannel(),
-        DevicectlApi(),
-        _deviceId,
-        const NativeTextureId(1),
-        const DeviceScreenSize(width: 1179, height: 2556),
-        true,
+      deviceAgent = IosDeviceAgent(
+        transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
+        hidChannel: IosHidChannel(),
+        devicectl: DevicectlApi(),
+        deviceId: _deviceId,
+        textureId: const NativeTextureId(1),
+        initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
+        supportsInteraction: true,
       );
+
+      agent = deviceAgent.interaction!;
 
       // The constructor fires an unawaited orientation refresh so a device
       // that is already in landscape when mirroring starts is handled
@@ -202,9 +202,9 @@ void main() {
     });
 
     test(
-      'scripts a control action as one swipe, not as single events',
+      'scripts a navigation as one swipe, not as single events',
       () async {
-        await agent.simulateControlAction(.home);
+        await agent.navigate(.home);
 
         expect(calls.single.method, 'sendSwipe');
         expect(calls.single.arguments['edge'], 'bottom');
@@ -212,8 +212,8 @@ void main() {
       },
     );
 
-    test('presses the sleep button for standby, rather than swiping', () async {
-      await agent.simulateControlAction(.standby);
+    test('presses the sleep button for power, rather than swiping', () async {
+      await agent.pressPowerButton();
 
       expect(calls.single.method, 'pressButton');
       expect(calls.single.arguments['usagePage'], 0x0c);
@@ -287,7 +287,7 @@ void main() {
     });
 
     test('releases the device input when it shuts down', () async {
-      await agent.dispose();
+      await deviceAgent.dispose();
 
       expect(
         calls.map((call) => call.method),
@@ -346,13 +346,13 @@ void main() {
       'device already in landscape is handled from the first touch',
       () async {
         IosDeviceAgent(
-          IosCaptureSessionTransport(IosMirrorChannel(), null),
-          IosHidChannel(),
-          DevicectlApi(),
-          _deviceId,
-          const NativeTextureId(1),
-          const DeviceScreenSize(width: 1179, height: 2556),
-          true,
+          transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
+          hidChannel: IosHidChannel(),
+          devicectl: DevicectlApi(),
+          deviceId: _deviceId,
+          textureId: const NativeTextureId(1),
+          initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
+          supportsInteraction: true,
         );
 
         await pumpEventQueue();
@@ -372,13 +372,13 @@ void main() {
 
     test('is not requested for a device that takes no input', () async {
       IosDeviceAgent(
-        IosCaptureSessionTransport(IosMirrorChannel(), null),
-        IosHidChannel(),
-        DevicectlApi(),
-        _deviceId,
-        const NativeTextureId(1),
-        const DeviceScreenSize(width: 1179, height: 2556),
-        false,
+        transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
+        hidChannel: IosHidChannel(),
+        devicectl: DevicectlApi(),
+        deviceId: _deviceId,
+        textureId: const NativeTextureId(1),
+        initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
+        supportsInteraction: false,
       );
 
       await pumpEventQueue();
@@ -388,27 +388,27 @@ void main() {
   });
 
   group('the frame repository', () {
-    test('turns a control button into the matching device action', () async {
+    test('passes navigation and the power button on to the device', () async {
       final agent = _RecordingInteractionAgent();
-      final repository = DeviceFrameRepositoryImpl(
+      final repository = DeviceFrameRepository(
         repository: _ConnectionsWithInteraction(agent),
       );
 
-      await repository.simulateControlButtonEvent(_deviceId, .back);
-      await repository.simulateControlButtonEvent(_deviceId, .home);
-      await repository.simulateControlButtonEvent(_deviceId, .appSwitch);
-      await repository.simulateControlButtonEvent(_deviceId, .power);
+      await repository.navigate(_deviceId, .back);
+      await repository.navigate(_deviceId, .home);
+      await repository.navigate(_deviceId, .appSwitch);
+      await repository.pressPowerButton(_deviceId);
 
-      expect(agent.actions, [
-        DeviceControlAction.back,
-        DeviceControlAction.home,
-        DeviceControlAction.appSwitch,
-        DeviceControlAction.standby,
+      expect(agent.navigations, [
+        DeviceNavigation.back,
+        DeviceNavigation.home,
+        DeviceNavigation.appSwitch,
       ]);
+      expect(agent.powerButtonPresses, 1);
     });
 
     test('drops input for a device that does not take any', () async {
-      final repository = DeviceFrameRepositoryImpl(
+      final repository = DeviceFrameRepository(
         repository: _ConnectionsWithInteraction(null),
       );
 
@@ -416,13 +416,15 @@ void main() {
         _deviceId,
         _pointer(.down, 0.5, 0.5),
       );
-      await repository.simulateControlButtonEvent(_deviceId, .home);
+      await repository.navigate(_deviceId, .home);
+      await repository.pressPowerButton(_deviceId);
     });
   });
 }
 
-class _RecordingInteractionAgent implements InteractionAgent {
-  final actions = <DeviceControlAction>[];
+class _RecordingInteractionAgent implements InteractionDeviceAgent {
+  final navigations = <DeviceNavigation>[];
+  var powerButtonPresses = 0;
   final pointerEvents = <DevicePointerEvent>[];
 
   @override
@@ -437,27 +439,26 @@ class _RecordingInteractionAgent implements InteractionAgent {
   Future<void> simulatePinchEvent(PinchEvent event) async {}
 
   @override
-  Future<void> simulateControlAction(DeviceControlAction action) async {
-    actions.add(action);
+  Future<void> navigate(DeviceNavigation navigation) async {
+    navigations.add(navigation);
+  }
+
+  @override
+  Future<void> pressPowerButton() async {
+    powerButtonPresses++;
   }
 }
 
-class _ConnectionsWithInteraction(final InteractionAgent? agent)
+class _ConnectionsWithInteraction(final InteractionDeviceAgent? agent)
     implements DeviceConnectionsRepository {
   @override
-  InteractionAgent? getInteractionAgent(DeviceId id) => agent;
+  DeviceAgent? getAgent(DeviceId id) =>
+      agent == null ? null : FakeDeviceAgent(interaction: agent);
 
   @override
-  ClipboardAgent? getClipboardAgent(DeviceId id) => null;
-
-  @override
-  AndroidDeviceAgent? getAndroidDeviceAgent(DeviceId id) => null;
-
-  @override
-  ScreenCaptureAgent? getScreenCaptureAgent(DeviceId id) => null;
-
-  @override
-  AudioAgent? getAudioAgent(DeviceId id) => null;
+  Stream<List<PluggedDevice>> observePluggedDevices() {
+    return Stream.value(const []);
+  }
 
   @override
   Stream<List<DeviceConnection>> observeDeviceConnections() => const .empty();

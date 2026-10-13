@@ -1,27 +1,18 @@
-import 'package:synk/feat_device_agent/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_connections/domain/models/android_device_info.dart';
-import 'package:synk/feat_mirror_session/mirror_session.dart';
-import 'package:synk/feat_plugged_devices/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/native_texture_id.dart';
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'device_connection.freezed.dart';
 
 @freezed
 sealed class DeviceConnection with _$DeviceConnection {
-  const factory DeviceConnection.android({
-    required PluggedDevice device,
-    required AndroidDeviceInfo info,
-    required NativeTextureId textureId,
-    required DeviceScreenSize screenSize,
-    required bool supportsInteraction,
-    required bool supportsAudio,
-  }) = _AndroidDeviceConnection;
-
-  const factory DeviceConnection.ios({
+  const factory DeviceConnection({
     required PluggedDevice device,
     required NativeTextureId textureId,
     required DeviceScreenSize screenSize,
     required bool supportsInteraction,
+    required bool supportsDeviceActions,
     required bool supportsAudio,
-  }) = _IosDeviceConnection;
+  }) = _DeviceConnection;
 }
