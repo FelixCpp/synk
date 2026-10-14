@@ -1,13 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-class SettingsWindow extends StatelessWidget {
-  const new({super.key});
-
+class const SettingsWindow({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<MyBloc>(
-      create: (context) => MyBloc(),
-      child: Container(),
-    );
+    return const Placeholder();
   }
 }
