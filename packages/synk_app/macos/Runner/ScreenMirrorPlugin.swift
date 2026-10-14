@@ -417,6 +417,25 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     )
     guard sampleStatus == noErr, let sampleBuffer else { return }
 
+    // The recorder passes these buffers through to the file untouched, so the
+    // sample table it writes is only as good as what is attached here. Without
+    // this every P frame would be filed as a sync sample and a player seeking
+    // to one of them finds no picture to start from.
+    if let attachments = CMSampleBufferGetSampleAttachmentsArray(
+      sampleBuffer,
+      createIfNecessary: true
+    ) {
+      let attachment = unsafeBitCast(
+        CFArrayGetValueAtIndex(attachments, 0),
+        to: CFMutableDictionary.self
+      )
+      CFDictionarySetValue(
+        attachment,
+        Unmanaged.passUnretained(kCMSampleAttachmentKey_NotSync).toOpaque(),
+        Unmanaged.passUnretained(isKeyframe ? kCFBooleanFalse : kCFBooleanTrue).toOpaque()
+      )
+    }
+
     appendToRecording(sampleBuffer: sampleBuffer, isKeyframe: isKeyframe, presentationTime: presentationTime)
 
     var infoFlags = VTDecodeInfoFlags()

@@ -6,6 +6,7 @@ import 'package:synk/feat_device_frame/data/repositories/device_frame_repository
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
 
@@ -34,7 +35,9 @@ void main() {
     clipboard = _FakeClipboard();
     repository = DeviceFrameRepository(
       deviceId: _deviceId,
+      modelName: 'Test Device',
       session: FakeDeviceSession(clipboard: clipboard),
+      screenCaptureEventChannel: ScreenCaptureEventChannel(),
     );
     hostClipboard = null;
 

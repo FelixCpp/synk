@@ -176,10 +176,12 @@ class DeviceConnectionsRepositoryImpl({
     });
   }
 
-  bool _isIdle(DeviceConnectionState state) => switch (state) {
-    ConnectionStateDisconnected() => true,
-    ConnectionStateFailed() => true,
-    ConnectionStateConnecting() => false,
-    ConnectionStateConnected() => false,
-  };
+  bool _isIdle(DeviceConnectionState state) {
+    return state.map(
+      disconnected: (_) => true,
+      connecting: (_) => false,
+      connected: (_) => false,
+      failed: (_) => true,
+    );
+  }
 }

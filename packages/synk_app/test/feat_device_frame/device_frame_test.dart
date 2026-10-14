@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
 
@@ -231,6 +232,10 @@ Future<SynkColors> _pumpFrame(
         RepositoryProvider<NotificationService>(
           create: (_) => NotificationService(),
           dispose: (service) => service.dispose(),
+        ),
+        RepositoryProvider<ScreenCaptureEventChannel>(
+          create: (_) => ScreenCaptureEventChannel(),
+          dispose: (channel) => channel.dispose(),
         ),
       ],
       child: WidgetsApp(

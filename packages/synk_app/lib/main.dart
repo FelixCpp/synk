@@ -16,6 +16,7 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
+import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
@@ -66,7 +67,12 @@ Future<void> main() async {
         RepositoryProvider<NotificationService>(
           create: (context) => NotificationService(),
           lazy: false,
-          dispose: (service) => service.dispose(),
+          dispose: (repository) => repository.dispose(),
+        ),
+        RepositoryProvider<ScreenCaptureEventChannel>(
+          create: (_) => ScreenCaptureEventChannel(),
+          lazy: false,
+          dispose: (repository) => repository.dispose(),
         ),
       ],
       child: _Root(adbPath: adbPath),
@@ -181,7 +187,6 @@ class _SynkScreenState extends State<_SynkScreen> {
   @override
   void initState() {
     super.initState();
-    // After the first frame, so the notification listener is subscribed.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final notifications = context.read<NotificationService>();

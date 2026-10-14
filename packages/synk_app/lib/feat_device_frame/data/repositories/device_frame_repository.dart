@@ -10,11 +10,14 @@ import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
+import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 /// What one frame does with the device it mirrors.
 class const DeviceFrameRepository({
   required final DeviceId deviceId,
+  required final String modelName,
   required final DeviceSession session,
+  required final ScreenCaptureEventChannel screenCaptureEventChannel,
 }) {
   /// Returns the reason a clipboard shortcut could not be served, if any.
   Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event) async {
@@ -138,6 +141,16 @@ class const DeviceFrameRepository({
     );
 
     await pngFile.saveTo(saveLocation.path);
+
+    screenCaptureEventChannel.submit(
+      .png(
+        bytes: pngBytes,
+        filepath: saveLocation.path,
+        screenSize: session.screenSize,
+        deviceId: deviceId,
+        modelName: modelName,
+      ),
+    );
   }
 
   Future<bool> startRecording() async {
@@ -167,7 +180,19 @@ class const DeviceFrameRepository({
   }
 
   Future<void> stopRecording() async {
-    await session.screenCapture?.stopRecording();
+    final screenCapture = session.screenCapture;
+    if (screenCapture == null) {
+      return;
+    }
+
+    // The writer reports whether it closed a complete file. It does not when
+    // no frame ever reached it, and the leftover on disk opens nowhere.
+    if (!await screenCapture.stopRecording()) {
+      // TODO(Felix): Custom exception type
+      throw Exception(
+        'The recording of $deviceId holds no frames and was not written',
+      );
+    }
   }
 
   bool isAudioMuted() {

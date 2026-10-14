@@ -1,10 +1,5 @@
 name: Release macOS App
 
-# Manually triggered release: you provide a version number, the workflow bumps
-# packages/synk_app/pubspec.yaml, builds the macOS app, packages it as a .dmg,
-# creates (and pushes) the matching git tag, and publishes a GitHub Release
-# with the .dmg attached.
-
 on:
   workflow_dispatch:
     inputs:

@@ -7,6 +7,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection.dar
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -101,28 +102,42 @@ class const _Content({
   }
 
   Widget _buildGrid(BuildContext context) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: ReflowGrid<DeviceConnection>(
-        padding: SynkTheme.pagePadding,
-        mainAxisSpacing: SynkTheme.verticalComponentSpacingMedium,
-        crossAxisSpacing: SynkTheme.horizontalComponentSpacingMedium,
-        items: state.devices,
-        cellSizeOf: (item) => deviceFrameSizeFor(item.screenSize),
-        duration: const Duration(milliseconds: 150),
-        keyOf: (item) => item.device.id,
-        itemBuilder: (context, item) {
-          return DeviceFrame(
-            connection: item,
-            isMaximized: false,
-            onToggleMaximize: () => onMaximize(item),
-            onClose: () {
-              BlocProvider.of<DeviceCanvasBloc>(context)
-                  .add(.onCloseDevice(item));
-            },
-          );
-        },
-      ),
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context)
+                .copyWith(scrollbars: false),
+            child: ReflowGrid<DeviceConnection>(
+              padding: SynkTheme.pagePadding,
+              mainAxisSpacing: SynkTheme.verticalComponentSpacingMedium,
+              crossAxisSpacing: SynkTheme.horizontalComponentSpacingMedium,
+              items: state.devices,
+              cellSizeOf: (item) => deviceFrameSizeFor(item.screenSize),
+              duration: const Duration(milliseconds: 150),
+              keyOf: (item) => item.device.id,
+              itemBuilder: (context, item) {
+                return DeviceFrame(
+                  connection: item,
+                  isMaximized: false,
+                  onToggleMaximize: () => onMaximize(item),
+                  onClose: () {
+                    BlocProvider.of<DeviceCanvasBloc>(context)
+                        .add(.onCloseDevice(item));
+                  },
+                );
+              },
+            ),
+          ),
+        ),
+        Align(
+          alignment: .bottomRight,
+          child: Padding(
+            padding: SynkTheme.cardPadding,
+            child: ScreenCapturePreviewThumbnail(),
+          ),
+        ),
+      ],
     );
   }
 }

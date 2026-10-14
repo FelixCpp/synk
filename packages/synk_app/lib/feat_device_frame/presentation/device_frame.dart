@@ -370,7 +370,9 @@ class const _DeviceFrameBlocProvider({
       create: (context) => DeviceFrameBloc(
         repository: DeviceFrameRepository(
           deviceId: connection.device.id,
+          modelName: connection.device.modelName,
           session: connection.session,
+          screenCaptureEventChannel: RepositoryProvider.of(context),
         ),
         notifications: RepositoryProvider.of(context),
       ),

@@ -84,6 +84,10 @@ class ScrcpyServerLauncher {
     'control=true',
     'video=true',
     'video_codec=h264',
+    // A recording can only begin on an IDR frame, so the encoder's keyframe
+    // interval is how long the recorder sits armed before it writes anything.
+    // scrcpy leaves it at ten seconds, which loses every short clip.
+    'video_codec_options=i-frame-interval:int=1',
     'video_bit_rate=8000000',
     'max_fps=60',
     'tunnel_forward=true',
