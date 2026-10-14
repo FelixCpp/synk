@@ -372,6 +372,7 @@ class const _DeviceFrameBlocProvider({
           deviceId: connection.device.id,
           modelName: connection.device.modelName,
           session: connection.session,
+          settingsRepository: RepositoryProvider.of(context),
           screenCaptureEventChannel: RepositoryProvider.of(context),
         ),
         notifications: RepositoryProvider.of(context),

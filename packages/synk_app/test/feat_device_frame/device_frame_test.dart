@@ -14,8 +14,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
+import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
 import '../support/fake_device_session.dart';
+
+import '../support/fake_settings_repository.dart';
 
 void main() {
   group('DeviceFrame', () {
@@ -236,6 +239,9 @@ Future<SynkColors> _pumpFrame(
         RepositoryProvider<ScreenCaptureEventChannel>(
           create: (_) => ScreenCaptureEventChannel(),
           dispose: (channel) => channel.dispose(),
+        ),
+        RepositoryProvider<SettingsRepository>(
+          create: (_) => FakeSettingsRepository(),
         ),
       ],
       child: WidgetsApp(

@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('serial-1');
 
@@ -29,6 +30,7 @@ void main() {
       deviceId: _deviceId,
       modelName: 'Test Device',
       session: FakeDeviceSession(interaction: interaction),
+      settingsRepository: FakeSettingsRepository(),
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
     );
   });

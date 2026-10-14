@@ -185,9 +185,7 @@ class DeviceFrameBloc({
 
     return startRecording
         .logger()
-        .after((started) {
-          if (started) emit(state.copyWith(isRecording: true));
-        })
+        .after((_) => emit(state.copyWith(isRecording: true)))
         .intercept(
           (e) => notifications.notify(
             .new(message: 'Failed to start recording: $e'),

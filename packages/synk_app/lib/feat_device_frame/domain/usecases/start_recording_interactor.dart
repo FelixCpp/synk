@@ -5,9 +5,9 @@ import 'package:synk/feat_device_frame/data/repositories/device_frame_repository
 import 'package:use_in_case/use_in_case.dart';
 
 class const StartRecordingInteractor(final DeviceFrameRepository repository)
-    implements ResultInteractor<bool> {
+    implements Interactor {
   @override
-  FutureOr<bool> getOrThrow(Unit input) {
+  FutureOr<void> getOrThrow(Unit input) {
     return repository.startRecording();
   }
 }

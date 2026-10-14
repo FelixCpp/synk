@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
@@ -17,20 +18,25 @@ import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
+import 'package:synk/feat_settings/data/repositories/settings_repository_impl.dart';
+import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_issue_message.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_validation_gate.dart';
-import 'package:synk/feat_theme_mode/domain/models/theme_mode.dart';
-import 'package:synk/feat_theme_mode/presentation/bloc/theme_mode_bloc.dart';
-import 'package:synk/feat_theme_mode/presentation/theme_mode_provider.dart';
+import 'package:synk/feat_settings/domain/models/theme_mode.dart';
+import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
+import 'package:synk/feat_settings/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
+
+const _defaultThemeMode = ThemeMode.light;
 
 Future<void> _configureWindow() async {
   await WindowManipulator.initialize();
@@ -61,6 +67,8 @@ Future<void> main() async {
     ),
   );
 
+  final defaultScreenCaptureSavePath = (await getDownloadsDirectory())!.path;
+
   runApp(
     MultiRepositoryProvider(
       providers: [
@@ -73,6 +81,19 @@ Future<void> main() async {
           create: (_) => ScreenCaptureEventChannel(),
           lazy: false,
           dispose: (repository) => repository.dispose(),
+        ),
+        RepositoryProvider<RxSharedPreferences>(
+          create: (_) => RxSharedPreferences.getInstance(),
+          lazy: false,
+          dispose: (repository) => repository.dispose(),
+        ),
+        RepositoryProvider<SettingsRepository>(
+          create: (context) => SettingsRepositoryImpl(
+            preferences: RepositoryProvider.of(context),
+            fallbackScreenCaptureSavePath: defaultScreenCaptureSavePath,
+            fallbackThemeMode: _defaultThemeMode,
+          ),
+          lazy: false,
         ),
       ],
       child: _Root(adbPath: adbPath),
@@ -130,8 +151,9 @@ class const _Root({required final String adbPath}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeModeProvider(
-      builder: (context, state) {
-        final theme = SynkUiThemeData.forBrightness(state.themeMode);
+      initialThemeMode: _defaultThemeMode,
+      builder: (context, themeMode) {
+        final theme = SynkUiThemeData.forBrightness(themeMode);
 
         return SynkUiTheme(
           data: theme,
@@ -158,7 +180,7 @@ class const _Root({required final String adbPath}) extends StatelessWidget {
                       adbPath: adbPath,
                       availability: ToolAvailability.fromIssues(warnings),
                       child: _SynkScreen(
-                        themeMode: state.themeMode,
+                        themeMode: themeMode,
                         warnings: warnings,
                       ),
                     );
@@ -222,8 +244,8 @@ class _SynkScreenState extends State<_SynkScreen> {
             icon: widget.themeMode == .dark
                 ? CupertinoIcons.sun_max
                 : CupertinoIcons.moon,
-            onPressed: () => context.read<ThemeModeBloc>().add(
-              const .onToggleThemeMode(),
+            onPressed: () => context.read<SettingsBloc>().add(
+              .onSetThemeMode(widget.themeMode.inverted()),
             ),
           ),
         ),

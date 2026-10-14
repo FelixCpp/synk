@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -37,6 +38,7 @@ void main() {
       deviceId: _deviceId,
       modelName: 'Test Device',
       session: FakeDeviceSession(clipboard: clipboard),
+      settingsRepository: FakeSettingsRepository(),
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
     );
     hostClipboard = null;

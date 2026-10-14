@@ -9,17 +9,18 @@ import 'package:synk/feat_device_frame/domain/models/dropped_file_outcome.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
+import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
-/// What one frame does with the device it mirrors.
 class const DeviceFrameRepository({
   required final DeviceId deviceId,
   required final String modelName,
   required final DeviceSession session,
+  required final SettingsRepository settingsRepository,
   required final ScreenCaptureEventChannel screenCaptureEventChannel,
 }) {
-  /// Returns the reason a clipboard shortcut could not be served, if any.
   Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event) async {
     final shortcut = _clipboardShortcutOf(event);
 
@@ -111,12 +112,6 @@ class const DeviceFrameRepository({
   }
 
   Future<void> captureScreenshot() async {
-    const pngGroup = XTypeGroup(
-      label: 'PNGs',
-      extensions: ['png'],
-      uniformTypeIdentifiers: ['public.png'],
-    );
-
     final screenCapture = session.screenCapture;
     if (screenCapture == null) {
       // TODO(Felix): Custom exception type
@@ -124,28 +119,13 @@ class const DeviceFrameRepository({
     }
 
     final pngBytes = await screenCapture.captureScreenshot();
-    final filename = 'screenshot_$deviceId.png';
-    final saveLocation = await getSaveLocation(
-      acceptedTypeGroups: const [pngGroup],
-      suggestedName: filename,
-    );
-
-    if (saveLocation == null) {
-      return;
-    }
-
-    final pngFile = XFile.fromData(
-      pngBytes,
-      name: filename,
-      mimeType: 'image/png',
-    );
-
-    await pngFile.saveTo(saveLocation.path);
+    final filepath = await _screenCaptureFilepath('Screenshot', 'png');
+    await File(filepath).writeAsBytes(pngBytes);
 
     screenCaptureEventChannel.submit(
       .png(
         bytes: pngBytes,
-        filepath: saveLocation.path,
+        filepath: filepath,
         screenSize: session.screenSize,
         deviceId: deviceId,
         modelName: modelName,
@@ -153,30 +133,26 @@ class const DeviceFrameRepository({
     );
   }
 
-  Future<bool> startRecording() async {
-    const mp4Group = XTypeGroup(
-      label: 'MP4-Videos',
-      extensions: ['mp4'],
-      uniformTypeIdentifiers: ['public.mpeg-4'],
-    );
-
+  Future<void> startRecording() async {
     final screenCapture = session.screenCapture;
     if (screenCapture == null) {
       // TODO(Felix): Custom exception type
       throw Exception('Device $deviceId cannot record its screen');
     }
 
-    final saveLocation = await getSaveLocation(
-      acceptedTypeGroups: const [mp4Group],
-      suggestedName: 'recording_$deviceId.mp4',
+    final filepath = await _screenCaptureFilepath('Recording', 'mp4');
+    await screenCapture.startRecording(filepath);
+  }
+
+  Future<String> _screenCaptureFilepath(String kind, String extension) async {
+    final directory = await settingsRepository.getScreenCaptureSavePath();
+    await Directory(directory).create(recursive: true);
+
+    final timestamp = DateFormat("yyyy-MM-dd 'at' HH.mm.ss").format(
+      DateTime.now(),
     );
 
-    if (saveLocation == null) {
-      return false;
-    }
-
-    await screenCapture.startRecording(saveLocation.path);
-    return true;
+    return path.join(directory, '$kind $modelName $timestamp.$extension');
   }
 
   Future<void> stopRecording() async {
@@ -185,8 +161,6 @@ class const DeviceFrameRepository({
       return;
     }
 
-    // The writer reports whether it closed a complete file. It does not when
-    // no frame ever reached it, and the leftover on disk opens nowhere.
     if (!await screenCapture.stopRecording()) {
       // TODO(Felix): Custom exception type
       throw Exception(

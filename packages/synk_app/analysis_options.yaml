@@ -12,3 +12,4 @@ formatter:
 linter:
   rules:
     - unawaited_futures
+    - prefer_single_quotes

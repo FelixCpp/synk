@@ -37,6 +37,7 @@ dependencies:
   desktop_drop: ^0.8.4
   shared_preferences: ^2.5.5
   json_annotation: ^4.12.0
+  rx_shared_preferences: ^4.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
