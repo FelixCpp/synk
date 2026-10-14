@@ -10,6 +10,7 @@ class const SynkUiCard({
   final List<BoxShadow> elevation = SynkUiElevation.flat,
   final bool clip = false,
   final bool focused = false,
+  final Color? color,
   final Color overlayColor = const Color(0x00000000),
 }) extends StatelessWidget {
   @override
@@ -21,7 +22,7 @@ class const SynkUiCard({
       duration: SynkUiMotion.state,
       curve: SynkUiMotion.standard,
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: color ?? colors.surface,
         borderRadius: borderRadius,
         boxShadow: elevation,
       ),

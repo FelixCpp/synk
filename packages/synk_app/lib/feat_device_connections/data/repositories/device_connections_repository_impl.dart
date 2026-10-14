@@ -6,10 +6,12 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DeviceConnectionsRepositoryImpl({
   required final List<DevicePlatform> platforms,
+  required final SettingsRepository settingsRepository,
 }) implements DeviceConnectionsRepository {
   final sessionsById = <DeviceId, DeviceSession>{};
   final connectionStates = BehaviorSubject.seeded(
@@ -131,7 +133,9 @@ class DeviceConnectionsRepositoryImpl({
     _setState(device.id, const DeviceConnectionState.connecting());
 
     try {
-      final session = await platform.connect(device.id);
+      // Read per connect: a running session keeps what it was started with.
+      final options = await settingsRepository.getMirrorOptions();
+      final session = await platform.connect(device.id, options);
       sessionsById[device.id] = session;
       _setState(device.id, const DeviceConnectionState.connected());
     } catch (_) {

@@ -2,6 +2,7 @@ import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
@@ -30,7 +31,7 @@ class IosDevicePlatform({
           .shareValue();
 
   @override
-  Set<ExternalTool> getToolRequirements() {
+  Set<ExternalTool> getRequiredTools() {
     return const {};
   }
 
@@ -40,7 +41,9 @@ class IosDevicePlatform({
   }
 
   @override
-  Future<DeviceSession> connect(DeviceId deviceId) async {
+  // iOS mirroring does not go through scrcpy, so [options] has nothing to
+  // act on here.
+  Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions _) async {
     final result = await channel.startMirror(deviceId);
     final audio = await _startAudio(deviceId);
     appLogger.i(

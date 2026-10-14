@@ -1,6 +1,5 @@
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
-/// Which external tools are usable, derived from the problems found.
 class const ToolAvailability({
   required final bool isAdbAvailable,
   required final bool isDevicectlAvailable,

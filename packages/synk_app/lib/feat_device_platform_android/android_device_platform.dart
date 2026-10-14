@@ -12,6 +12,7 @@ import 'package:synk/feat_device_platform_android/device_agent/android_device_in
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_mirror.dart';
 import 'package:synk/feat_device_platform_android/android_device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -26,7 +27,7 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
       }).shareValue();
 
   @override
-  Set<ExternalTool> getToolRequirements() {
+  Set<ExternalTool> getRequiredTools() {
     return {.adb};
   }
 
@@ -36,7 +37,7 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
   }
 
   @override
-  Future<DeviceSession> connect(DeviceId deviceId) async {
+  Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions options) async {
     final adbCommunicator = api.connect(deviceId);
     await _killStaleProcesses(adbCommunicator);
 
@@ -49,7 +50,7 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
         DeviceAgentLauncher.launch(adbCommunicator).then(
           (value) => communicator = value,
         ),
-        ScrcpyServerLauncher.launch(adbCommunicator).then(
+        ScrcpyServerLauncher.launch(adbCommunicator, options: options).then(
           (value) => server = value,
         ),
       ]);
@@ -67,6 +68,7 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
         adbCommunicator: adbCommunicator,
         initialScreenSize: screenSize,
         info: info,
+        options: options,
       );
     } catch (error, stackTrace) {
       developer.log(

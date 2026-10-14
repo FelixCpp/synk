@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:api_adb/api_adb.dart';
+import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -41,6 +42,7 @@ class ScrcpyServerLauncher {
 
   static Future<ScrcpyServerConnection> launch(
     AdbDeviceCommunicator communicator, {
+    MirrorOptions options = const .defaults(),
     Duration connectTimeout = const Duration(seconds: 30),
     Duration firstVideoByteTimeout = const Duration(seconds: 30),
   }) async {
@@ -51,7 +53,9 @@ class ScrcpyServerLauncher {
 
     final scid = _random.nextInt(0x7fffffff).toRadixString(16).padLeft(8, '0');
 
-    final process = await communicator.startShell(_serverArguments(scid));
+    final process = await communicator.startShell(
+      _serverArguments(scid, options),
+    );
 
     // stdout and stderr keep the process' streams from closing until they
     // have been read at least once. We have no use for either.
@@ -72,7 +76,8 @@ class ScrcpyServerLauncher {
     }
   }
 
-  static List<String> _serverArguments(String scid) => [
+  static List<String> _serverArguments(String scid, MirrorOptions options) =>
+      [
     'CLASSPATH=$scrcpyServerRemotePath',
     'app_process',
     '/',
@@ -88,8 +93,8 @@ class ScrcpyServerLauncher {
     // interval is how long the recorder sits armed before it writes anything.
     // scrcpy leaves it at ten seconds, which loses every short clip.
     'video_codec_options=i-frame-interval:int=1',
-    'video_bit_rate=8000000',
-    'max_fps=60',
+    'video_bit_rate=${options.videoBitRate}',
+    'max_fps=${options.maxFps}',
     'tunnel_forward=true',
     'raw_stream=true',
     'send_dummy_byte=true',

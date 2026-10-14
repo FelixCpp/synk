@@ -6,6 +6,7 @@ import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/clipboard_interaction_layer.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/interaction/display_power_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/key_event_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/pointer_event_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_key_input.dart';
@@ -14,13 +15,18 @@ import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_pointer_input.da
 class ScrcpyInteraction({
   required final Socket interactionSocket,
   required final ValueStream<DeviceScreenSize> screenSize,
+
+  /// Keeps the device's own display dark for the whole session.
+  final bool keepDisplayOff = false,
 }) implements DeviceInteraction, DeviceClipboard {
   final _clipboard = ClipboardInteractionLayer(interactionSocket);
   final _key = KeyEventInteractionLayer(interactionSocket);
   final _pointer = PointerEventInteractionLayer(interactionSocket);
+  final _displayPower = DisplayPowerInteractionLayer(interactionSocket);
 
   this {
     _clipboard.listenForDeviceMessages();
+    if (keepDisplayOff) _displayPower.setDisplayPower(on: false);
   }
 
   Future<void> dispose() async {
@@ -36,7 +42,8 @@ class ScrcpyInteraction({
 
   @override
   Future<void> simulatePointerEvent(DevicePointerEvent event) async {
-    if (event.type == .down) {
+    // Waking the device would undo the dark display the user asked for.
+    if (event.type == .down && !keepDisplayOff) {
       _pressKey(.wakeup);
     }
 

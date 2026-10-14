@@ -8,7 +8,7 @@ import 'package:synk/feat_device_frame/data/repositories/device_frame_repository
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/install_apk_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/is_audio_muted_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/apply_audio_mute_preference_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/share_file_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
@@ -40,7 +40,9 @@ class DeviceFrameBloc({
   final startRecording = StartRecordingInteractor(repository);
   final stopRecording = StopRecordingInteractor(repository);
   final setAudioMuted = SetAudioMutedInteractor(repository);
-  final isAudioMuted = IsAudioMutedInteractor(repository);
+  final applyAudioMutePreference = ApplyAudioMutePreferenceInteractor(
+    repository,
+  );
   final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
   final navigate = NavigateInteractor(repository);
   final pressPowerButton = PressPowerButtonInteractor(repository);
@@ -68,7 +70,7 @@ class DeviceFrameBloc({
   }
 
   FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceFrameState> emit) {
-    return isAudioMuted
+    return applyAudioMutePreference
         .logger(level: .trace)
         .after((muted) => emit(state.copyWith(isAudioMuted: muted)))
         .run(unit);

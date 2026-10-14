@@ -24,7 +24,7 @@ class const DeviceFrameRepository({
   Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event) async {
     final shortcut = _clipboardShortcutOf(event);
 
-    if (shortcut == null) {
+    if (shortcut == null || !await settingsRepository.getSyncClipboard()) {
       await session.interaction?.simulateKeyEvent(event);
       return null;
     }
@@ -169,7 +169,10 @@ class const DeviceFrameRepository({
     }
   }
 
-  bool isAudioMuted() {
+  /// Applies the user's connect-time audio preference, reporting what stuck.
+  Future<bool> applyAudioMutePreference() async {
+    final muted = await settingsRepository.getMuteOnConnect();
+    await setAudioMuted(muted);
     return session.audio?.isAudioMuted ?? true;
   }
 

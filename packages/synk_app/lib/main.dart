@@ -27,6 +27,7 @@ import 'package:synk/feat_tool_validation/presentation/widgets/tool_issue_messag
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_validation_gate.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
+import 'package:synk/feat_settings/presentation/settings_window.dart';
 import 'package:synk/feat_settings/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -58,7 +59,7 @@ Future<void> main() async {
 
   await _configureWindow();
 
-  final adbPath = path.normalize(
+  final bundledAdbPath = path.normalize(
     path.join(
       path.dirname(Platform.resolvedExecutable),
       '..',
@@ -68,6 +69,17 @@ Future<void> main() async {
   );
 
   final defaultScreenCaptureSavePath = (await getDownloadsDirectory())!.path;
+
+  // Built before the tree: which adb binary to use is decided once, at
+  // startup, and both AdbApi and the tool check need the answer up front.
+  final preferences = RxSharedPreferences.getInstance();
+  final settingsRepository = SettingsRepositoryImpl(
+    preferences: preferences,
+    fallbackScreenCaptureSavePath: defaultScreenCaptureSavePath,
+    fallbackThemeMode: _defaultThemeMode,
+  );
+
+  final activeAdbPath = await settingsRepository.getAdbPath() ?? bundledAdbPath;
 
   runApp(
     MultiRepositoryProvider(
@@ -83,20 +95,19 @@ Future<void> main() async {
           dispose: (repository) => repository.dispose(),
         ),
         RepositoryProvider<RxSharedPreferences>(
-          create: (_) => RxSharedPreferences.getInstance(),
+          create: (_) => preferences,
           lazy: false,
           dispose: (repository) => repository.dispose(),
         ),
         RepositoryProvider<SettingsRepository>(
-          create: (context) => SettingsRepositoryImpl(
-            preferences: RepositoryProvider.of(context),
-            fallbackScreenCaptureSavePath: defaultScreenCaptureSavePath,
-            fallbackThemeMode: _defaultThemeMode,
-          ),
+          create: (_) => settingsRepository,
           lazy: false,
         ),
       ],
-      child: _Root(adbPath: adbPath),
+      child: _Root(
+        activeAdbPath: activeAdbPath,
+        bundledAdbPath: bundledAdbPath,
+      ),
     ),
   );
 }
@@ -126,20 +137,22 @@ class const _ToolProviders({
               ),
             ];
 
+            final availablePlatforms = platforms.where((platform) {
+              final tools = platform.getRequiredTools();
+              final isToolAvailable = tools.every(
+                (tool) => availability.isAvailable(tool),
+              );
+
+              return isToolAvailable;
+            }).toList();
+
             return DeviceConnectionsRepositoryImpl(
-              platforms: [
-                for (final platform in platforms)
-                  if (platform.getToolRequirements().every(
-                    availability.isAvailable,
-                  ))
-                    platform,
-              ],
+              platforms: availablePlatforms,
+              settingsRepository: RepositoryProvider.of(context),
             );
           },
           lazy: false,
-          dispose: (repository) {
-            repository.dispose();
-          },
+          dispose: (repository) => repository.dispose(),
         ),
       ],
       child: child,
@@ -147,13 +160,23 @@ class const _ToolProviders({
   }
 }
 
-class const _Root({required final String adbPath}) extends StatelessWidget {
+class const _Root({
+  required final String activeAdbPath,
+  required final String bundledAdbPath,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeModeProvider(
       initialThemeMode: _defaultThemeMode,
       builder: (context, themeMode) {
-        final theme = SynkUiThemeData.forBrightness(themeMode);
+        final SynkUiThemeData theme = switch (themeMode) {
+          .light => .light,
+          .dark => .dark,
+          .system => switch (MediaQuery.platformBrightnessOf(context)) {
+            .dark => .dark,
+            .light => .light,
+          },
+        };
 
         return SynkUiTheme(
           data: theme,
@@ -174,14 +197,15 @@ class const _Root({required final String adbPath}) extends StatelessWidget {
                   context,
                 ),
                 child: ToolValidationGate(
-                  adbPath: adbPath,
+                  adbPath: activeAdbPath,
                   builder: (context, warnings) {
                     return _ToolProviders(
-                      adbPath: adbPath,
+                      adbPath: activeAdbPath,
                       availability: ToolAvailability.fromIssues(warnings),
                       child: _SynkScreen(
-                        themeMode: themeMode,
                         warnings: warnings,
+                        activeAdbPath: activeAdbPath,
+                        bundledAdbPath: bundledAdbPath,
                       ),
                     );
                   },
@@ -196,15 +220,18 @@ class const _Root({required final String adbPath}) extends StatelessWidget {
 }
 
 class const _SynkScreen({
-  required final ThemeMode themeMode,
   required final List<ToolIssue> warnings,
+  required final String activeAdbPath,
+  required final String bundledAdbPath,
 }) extends StatefulWidget {
   @override
   State<_SynkScreen> createState() => _SynkScreenState();
 }
 
 class _SynkScreenState extends State<_SynkScreen> {
-  var _showSidebar = true;
+  /// `null` until the toolbar toggle is used; the stored preference seeds the
+  /// session, after which the user's in-session choice wins.
+  bool? _showSidebar;
 
   @override
   void initState() {
@@ -225,33 +252,38 @@ class _SynkScreenState extends State<_SynkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SynkUiShell(
-      title: 'Synk',
-      showSidebar: _showSidebar,
-      leading: SynkUiTooltip(
-        message: 'Seitenleiste ausblenden/anzeigen',
-        child: SynkUiIconButton(
-          icon: CupertinoIcons.sidebar_left,
-          onPressed: () => setState(() => _showSidebar = !_showSidebar),
-        ),
-      ),
-      actions: [
-        SynkUiTooltip(
-          message: widget.themeMode == .dark
-              ? 'Helles Design aktivieren'
-              : 'Dunkles Design aktivieren',
-          child: SynkUiIconButton(
-            icon: widget.themeMode == .dark
-                ? CupertinoIcons.sun_max
-                : CupertinoIcons.moon,
-            onPressed: () => context.read<SettingsBloc>().add(
-              .onSetThemeMode(widget.themeMode.inverted()),
+    return BlocSelector<SettingsBloc, SettingsState, bool>(
+      selector: (state) => state.showSidebarOnStart,
+      builder: (context, showSidebarOnStart) {
+        final showSidebar = _showSidebar ?? showSidebarOnStart;
+
+        return SynkUiShell(
+          title: 'Synk',
+          showSidebar: showSidebar,
+          leading: SynkUiTooltip(
+            message: 'Seitenleiste ausblenden/anzeigen',
+            child: SynkUiIconButton(
+              icon: CupertinoIcons.sidebar_left,
+              onPressed: () => setState(() => _showSidebar = !showSidebar),
             ),
           ),
-        ),
-      ],
-      sidebar: const SynkSidebar(),
-      child: const DeviceCanvasContainer(),
+          actions: [
+            SynkUiTooltip(
+              message: 'Einstellungen',
+              child: SynkUiIconButton(
+                icon: CupertinoIcons.gear_alt,
+                onPressed: () => showSettingsWindow(
+                  context,
+                  activeAdbPath: widget.activeAdbPath,
+                  bundledAdbPath: widget.bundledAdbPath,
+                ),
+              ),
+            ),
+          ],
+          sidebar: const SynkSidebar(),
+          child: const DeviceCanvasContainer(),
+        );
+      },
     );
   }
 }

@@ -6,22 +6,30 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
+import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_device_session.dart';
 import '../support/fake_device_platform.dart';
+import '../support/fake_settings_repository.dart';
 
 void main() {
   late FakePlatform android;
   late FakePlatform ios;
+  late FakeSettingsRepository settings;
   late DeviceConnectionsRepositoryImpl repository;
 
   setUp(() {
     android = FakePlatform();
     ios = FakePlatform();
-    repository = DeviceConnectionsRepositoryImpl(platforms: [android, ios]);
+    settings = FakeSettingsRepository();
+    repository = DeviceConnectionsRepositoryImpl(
+      platforms: [android, ios],
+      settingsRepository: settings,
+    );
   });
 
   tearDown(() async {
@@ -45,7 +53,10 @@ void main() {
     });
 
     test('lists nothing without any platform', () async {
-      final empty = DeviceConnectionsRepositoryImpl(platforms: const []);
+      final empty = DeviceConnectionsRepositoryImpl(
+        platforms: const [],
+        settingsRepository: FakeSettingsRepository(),
+      );
       addTearDown(empty.dispose);
 
       expect(await empty.observePluggedDevices().first, isEmpty);
@@ -242,12 +253,46 @@ void main() {
     );
   });
 
+  group('DeviceConnectionsRepositoryImpl mirror options', () {
+    test('hands the stored options to the platform it connects', () async {
+      settings
+        ..frameRate = MirrorFrameRate.fps30
+        ..quality = MirrorQuality.high
+        ..turnDeviceScreenOff = true;
+      final pixel = await plugInto(android, 'android-1');
+
+      await repository.toggleConnection(pixel);
+
+      final options = android.connectOptions.single;
+      expect(options.maxFps, 30);
+      expect(options.videoBitRate, MirrorQuality.high.videoBitRate);
+      expect(options.turnDeviceScreenOff, isTrue);
+    });
+
+    test('re-reads them for every connect', () async {
+      final pixel = await plugInto(android, 'android-1');
+
+      settings.frameRate = MirrorFrameRate.fps30;
+      await repository.toggleConnection(pixel);
+      await repository.toggleConnection(pixel);
+
+      settings.frameRate = MirrorFrameRate.fps60;
+      await repository.toggleConnection(pixel);
+
+      expect(
+        android.connectOptions.map((options) => options.maxFps),
+        [30, 60],
+      );
+    });
+  });
+
   group('DeviceConnectionsRepositoryImpl.dispose', () {
     test('disposes the connected sessions and the platforms', () async {
       final session = FakeDeviceSession();
       final platform = FakePlatform(onConnect: (_) async => session);
       final repository = DeviceConnectionsRepositoryImpl(
         platforms: [platform],
+        settingsRepository: FakeSettingsRepository(),
       );
       final device = _buildDevice('android-1');
       platform.plug([device]);

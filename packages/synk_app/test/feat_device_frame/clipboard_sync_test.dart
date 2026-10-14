@@ -27,6 +27,8 @@ DeviceKeyEvent _shortcut(
 
 void main() {
   late _FakeClipboard clipboard;
+  late _RecordingInteraction interaction;
+  late FakeSettingsRepository settings;
   late DeviceFrameRepository repository;
   String? hostClipboard;
 
@@ -34,11 +36,16 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
 
     clipboard = _FakeClipboard();
+    interaction = _RecordingInteraction();
+    settings = FakeSettingsRepository();
     repository = DeviceFrameRepository(
       deviceId: _deviceId,
       modelName: 'Test Device',
-      session: FakeDeviceSession(clipboard: clipboard),
-      settingsRepository: FakeSettingsRepository(),
+      session: FakeDeviceSession(
+        clipboard: clipboard,
+        interaction: interaction,
+      ),
+      settingsRepository: settings,
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
     );
     hostClipboard = null;
@@ -152,6 +159,40 @@ void main() {
       expect(failure, ClipboardSyncFailure.toolUnavailable);
     });
 
+    test('passes ⌘C to the device untouched when sync is off', () async {
+      settings.syncClipboard = false;
+      clipboard.content = 'from the device';
+
+      await repository.simulateKeyEvent(
+        _shortcut(LogicalKeyboardKey.keyC),
+      );
+
+      expect(clipboard.reads, 0);
+      expect(hostClipboard, isNull);
+      expect(interaction.keyEvents, hasLength(1));
+    });
+
+    test('passes ⌘V to the device untouched when sync is off', () async {
+      settings.syncClipboard = false;
+      hostClipboard = 'from the host';
+      clipboard.content = 'keep me';
+
+      await repository.simulateKeyEvent(
+        _shortcut(LogicalKeyboardKey.keyV),
+      );
+
+      expect(clipboard.content, 'keep me');
+      expect(interaction.keyEvents, hasLength(1));
+    });
+
+    test('leaves ordinary typing off the preference path', () async {
+      await repository.simulateKeyEvent(
+        _shortcut(LogicalKeyboardKey.keyA, withMeta: false),
+      );
+
+      expect(interaction.keyEvents, hasLength(1));
+    });
+
     test('ignores the keys without the meta modifier', () async {
       clipboard.content = 'from the device';
 
@@ -163,6 +204,18 @@ void main() {
       expect(hostClipboard, isNull);
     });
   });
+}
+
+class _RecordingInteraction implements DeviceInteraction {
+  final keyEvents = <DeviceKeyEvent>[];
+
+  @override
+  Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
+    keyEvents.add(event);
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => Future<void>.value();
 }
 
 class _FakeClipboard implements DeviceClipboard {

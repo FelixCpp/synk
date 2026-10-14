@@ -21,6 +21,7 @@ class SynkUiRadius {
   static const row = 8.0;
   static const card = 10.0;
   static const frame = 14.0;
+  static const segment = 7.0;
 }
 
 class SynkUiSize {
@@ -32,6 +33,10 @@ class SynkUiSize {
   static const control = 28.0;
   static const statusTile = 28.0;
   static const statusDot = 7.0;
+  static const segment = 24.0;
+  static const toggleWidth = 34.0;
+  static const toggleHeight = 20.0;
+  static const toggleKnob = 16.0;
   static const titleStrip = 52.0;
   static const trafficGutter = 88.0;
   static const sidebarWidth = 248.0;

@@ -8,6 +8,7 @@ import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_server_launcher.
 import 'package:synk/feat_device_platform_android/device_agent/android_device_info.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform_android/adb/adb_file_transfer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_audio.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_interaction.dart';
@@ -21,6 +22,7 @@ class AndroidDeviceSession({
   required AdbDeviceCommunicator adbCommunicator,
   required DeviceScreenSize initialScreenSize,
   required final AndroidDeviceInfo info,
+  required final MirrorOptions options,
 }) implements DeviceSession {
   final _audio = ScrcpyAudio(
     mirror: mirror,
@@ -43,6 +45,7 @@ class AndroidDeviceSession({
     _interaction = ScrcpyInteraction(
       interactionSocket: server.controlSocket,
       screenSize: _screenSize,
+      keepDisplayOff: options.turnDeviceScreenOff,
     );
     _videoSubscription = server.videoStream.listen(
       (bytes) => mirror.uploadVideo(bytes),
