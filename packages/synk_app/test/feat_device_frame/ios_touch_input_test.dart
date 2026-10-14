@@ -7,13 +7,15 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
@@ -383,12 +385,14 @@ void main() {
   group('the frame repository', () {
     test('passes navigation and the power button on to the device', () async {
       final interaction = _RecordingInteraction();
-      final repository = DeviceFrameRepository(
+      final repository = DeviceFrameRepositoryImpl(
         deviceId: _deviceId,
         modelName: 'Test Device',
         session: FakeDeviceSession(interaction: interaction),
         settingsRepository: FakeSettingsRepository(),
         screenCaptureEventChannel: ScreenCaptureEventChannel(),
+        hostClipboard: FakeHostClipboard(),
+        filePicker: const SystemFilePicker(),
       );
 
       await repository.navigate(.back);
@@ -405,12 +409,14 @@ void main() {
     });
 
     test('drops input for a device that does not take any', () async {
-      final repository = DeviceFrameRepository(
+      final repository = DeviceFrameRepositoryImpl(
         deviceId: _deviceId,
         modelName: 'Test Device',
         session: FakeDeviceSession(),
         settingsRepository: FakeSettingsRepository(),
         screenCaptureEventChannel: ScreenCaptureEventChannel(),
+        hostClipboard: FakeHostClipboard(),
+        filePicker: const SystemFilePicker(),
       );
 
       await repository.simulatePointerEvent(

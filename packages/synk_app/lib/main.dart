@@ -1,9 +1,12 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
+import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
@@ -19,13 +22,16 @@ import 'package:synk/feat_notifications/presentation/app_notification_listener.d
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_settings/data/repositories/settings_repository_impl.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
+import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_issue_message.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_validation_gate.dart';
-import 'package:synk/feat_settings/domain/models/theme_mode.dart';
+import 'package:synk/feat_settings/presentation/settings_popover.dart';
+import 'package:synk/feat_settings/presentation/settings_shortcut.dart';
 import 'package:synk/feat_settings/presentation/settings_window.dart';
 import 'package:synk/feat_settings/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,55 +42,34 @@ import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 
-const _defaultThemeMode = ThemeMode.light;
-
-Future<void> _configureWindow() async {
-  await WindowManipulator.initialize();
-  await WindowManipulator.makeTitlebarTransparent();
-  await WindowManipulator.enableFullSizeContentView();
-  await WindowManipulator.hideTitle();
-  await WindowManipulator.addToolbar();
-  await WindowManipulator.setToolbarStyle(
-    toolbarStyle: NSWindowToolbarStyle.unified,
-  );
-}
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  appLogger = createAppLogger(
-    level: kDebugMode ? Level.debug : Level.info,
-  );
+  appLogger = createAppLogger(level: kDebugMode ? Level.debug : Level.info);
 
   await _configureWindow();
 
-  final bundledAdbPath = path.normalize(
-    path.join(
-      path.dirname(Platform.resolvedExecutable),
-      '..',
-      'Resources',
-      'adb',
-    ),
+  final preferences = RxSharedPreferences.getInstance();
+  final defaults = Settings.defaults(
+    screenCaptureSavePath: (await getDownloadsDirectory())!.path,
   );
 
-  final defaultScreenCaptureSavePath = (await getDownloadsDirectory())!.path;
-
-  // Built before the tree: which adb binary to use is decided once, at
-  // startup, and both AdbApi and the tool check need the answer up front.
-  final preferences = RxSharedPreferences.getInstance();
   final settingsRepository = SettingsRepositoryImpl(
     preferences: preferences,
-    fallbackScreenCaptureSavePath: defaultScreenCaptureSavePath,
-    fallbackThemeMode: _defaultThemeMode,
+    defaults: defaults,
   );
 
-  final activeAdbPath = await settingsRepository.getAdbPath() ?? bundledAdbPath;
+  final settings = await settingsRepository.read();
+  final adbPaths = AdbPaths(
+    bundled: _bundledAdbPath(),
+    custom: settings.customAdbPath,
+  );
 
   runApp(
     MultiRepositoryProvider(
       providers: [
         RepositoryProvider<NotificationService>(
-          create: (context) => NotificationService(),
+          create: (_) => NotificationService(),
           lazy: false,
           dispose: (repository) => repository.dispose(),
         ),
@@ -102,71 +87,44 @@ Future<void> main() async {
           create: (_) => settingsRepository,
           lazy: false,
         ),
+        RepositoryProvider<AdbPaths>.value(value: adbPaths),
+        RepositoryProvider<HostClipboard>.value(
+          value: const SystemHostClipboard(),
+        ),
+        RepositoryProvider<FilePicker>.value(value: const SystemFilePicker()),
       ],
-      child: _Root(
-        activeAdbPath: activeAdbPath,
-        bundledAdbPath: bundledAdbPath,
-      ),
+      child: _Root(defaults: defaults),
     ),
   );
 }
 
-class const _ToolProviders({
-  required final String adbPath,
-  required final ToolAvailability availability,
-  required final Widget child,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider.value(value: availability),
-        RepositoryProvider(create: (context) => AdbApi(adbPath: adbPath)),
-        RepositoryProvider(create: (context) => DevicectlApi()),
-        RepositoryProvider<DeviceConnectionsRepository>(
-          create: (context) {
-            final platforms = <DevicePlatform>[
-              AndroidDevicePlatform(RepositoryProvider.of(context)),
-              IosDevicePlatform(
-                discoveryChannel: IosDeviceDiscoveryChannel(),
-                channel: IosMirrorChannel(),
-                mediaStreamChannel: IosMediaStreamChannel(),
-                hidChannel: IosHidChannel(),
-                devicectl: RepositoryProvider.of(context),
-              ),
-            ];
-
-            final availablePlatforms = platforms.where((platform) {
-              final tools = platform.getRequiredTools();
-              final isToolAvailable = tools.every(
-                (tool) => availability.isAvailable(tool),
-              );
-
-              return isToolAvailable;
-            }).toList();
-
-            return DeviceConnectionsRepositoryImpl(
-              platforms: availablePlatforms,
-              settingsRepository: RepositoryProvider.of(context),
-            );
-          },
-          lazy: false,
-          dispose: (repository) => repository.dispose(),
-        ),
-      ],
-      child: child,
-    );
-  }
+Future<void> _configureWindow() async {
+  await WindowManipulator.initialize();
+  await WindowManipulator.makeTitlebarTransparent();
+  await WindowManipulator.enableFullSizeContentView();
+  await WindowManipulator.hideTitle();
+  await WindowManipulator.addToolbar();
+  await WindowManipulator.setToolbarStyle(
+    toolbarStyle: NSWindowToolbarStyle.unified,
+  );
 }
 
-class const _Root({
-  required final String activeAdbPath,
-  required final String bundledAdbPath,
-}) extends StatelessWidget {
+String _bundledAdbPath() {
+  return path.normalize(
+    path.join(
+      path.dirname(Platform.resolvedExecutable),
+      '..',
+      'Resources',
+      'adb',
+    ),
+  );
+}
+
+class const _Root({required final Settings defaults}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeModeProvider(
-      initialThemeMode: _defaultThemeMode,
+      defaults: defaults,
       builder: (context, themeMode) {
         final SynkUiThemeData theme = switch (themeMode) {
           .light => .light,
@@ -196,16 +154,11 @@ class const _Root({
                   context,
                 ),
                 child: ToolValidationGate(
-                  adbPath: activeAdbPath,
+                  adbPath: RepositoryProvider.of<AdbPaths>(context).active,
                   builder: (context, warnings) {
                     return _ToolProviders(
-                      adbPath: activeAdbPath,
                       availability: ToolAvailability.fromIssues(warnings),
-                      child: _SynkScreen(
-                        warnings: warnings,
-                        activeAdbPath: activeAdbPath,
-                        bundledAdbPath: bundledAdbPath,
-                      ),
+                      child: _SynkScreen(warnings: warnings),
                     );
                   },
                 ),
@@ -218,11 +171,60 @@ class const _Root({
   }
 }
 
-class const _SynkScreen({
-  required final List<ToolIssue> warnings,
-  required final String activeAdbPath,
-  required final String bundledAdbPath,
-}) extends StatefulWidget {
+class const _ToolProviders({
+  required final ToolAvailability availability,
+  required final Widget child,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: availability),
+        RepositoryProvider(
+          create: (context) => AdbApi(
+            adbPath: RepositoryProvider.of<AdbPaths>(context).active,
+          ),
+        ),
+        RepositoryProvider(create: (context) => DevicectlApi()),
+        RepositoryProvider<DeviceConnectionsRepository>(
+          create: (context) => DeviceConnectionsRepositoryImpl(
+            platforms: _availablePlatforms(context, availability),
+            settingsRepository: RepositoryProvider.of(context),
+          ),
+          lazy: false,
+          dispose: (repository) => repository.dispose(),
+        ),
+      ],
+      child: child,
+    );
+  }
+
+  List<DevicePlatform> _availablePlatforms(
+    BuildContext context,
+    ToolAvailability availability,
+  ) {
+    final platforms = <DevicePlatform>[
+      AndroidDevicePlatform(RepositoryProvider.of(context)),
+      IosDevicePlatform(
+        discoveryChannel: IosDeviceDiscoveryChannel(),
+        channel: IosMirrorChannel(),
+        mediaStreamChannel: IosMediaStreamChannel(),
+        hidChannel: IosHidChannel(),
+        devicectl: RepositoryProvider.of(context),
+      ),
+    ];
+
+    return platforms
+        .where(
+          (platform) =>
+              platform.getRequiredTools().every(availability.isAvailable),
+        )
+        .toList();
+  }
+}
+
+class const _SynkScreen({required final List<ToolIssue> warnings})
+    extends StatefulWidget {
   @override
   State<_SynkScreen> createState() => _SynkScreenState();
 }
@@ -233,47 +235,43 @@ class _SynkScreenState extends State<_SynkScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final notifications = context.read<NotificationService>();
-      for (final warning in widget.warnings) {
-        notifications.notify(
-          AppNotification(
-            message: warning.message,
-            severity: NotificationSeverity.critical,
-          ),
-        );
-      }
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _reportWarnings());
+  }
+
+  void _reportWarnings() {
+    if (!mounted) {
+      return;
+    }
+
+    final notifications = context.read<NotificationService>();
+    for (final warning in widget.warnings) {
+      notifications.notify(
+        AppNotification(
+          message: warning.message,
+          severity: NotificationSeverity.critical,
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SynkUiShell(
-      title: 'Synk',
-      showSidebar: _showSidebar,
-      leading: SynkUiTooltip(
-        message: 'Seitenleiste ausblenden/anzeigen',
-        child: SynkUiIconButton(
-          icon: CupertinoIcons.sidebar_left,
-          onPressed: () => setState(() => _showSidebar = !_showSidebar),
-        ),
-      ),
-      actions: [
-        SynkUiTooltip(
-          message: 'Einstellungen',
+    return SettingsShortcut(
+      onInvoke: () => unawaited(showSettingsWindow(context)),
+      child: SynkUiShell(
+        title: 'Synk',
+        showSidebar: _showSidebar,
+        leading: SynkUiTooltip(
+          message: 'Seitenleiste ausblenden/anzeigen',
           child: SynkUiIconButton(
-            icon: CupertinoIcons.gear_alt,
-            onPressed: () => showSettingsWindow(
-              context,
-              activeAdbPath: widget.activeAdbPath,
-              bundledAdbPath: widget.bundledAdbPath,
-            ),
+            icon: CupertinoIcons.sidebar_left,
+            onPressed: () => setState(() => _showSidebar = !_showSidebar),
           ),
         ),
-      ],
-      sidebar: const SynkSidebar(),
-      child: const DeviceCanvasContainer(),
+        actions: const [SettingsPopover()],
+        sidebar: const SynkSidebar(),
+        child: const DeviceCanvasContainer(),
+      ),
     );
   }
 }

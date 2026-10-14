@@ -12,6 +12,5 @@ sealed class ScreenCapturePreviewState with _$ScreenCapturePreviewState {
     return const .new(captures: []);
   }
 
-  /// Newest first — the stack grows towards the viewer.
   ScreenCaptureEvent? get topmost => captures.firstOrNull;
 }

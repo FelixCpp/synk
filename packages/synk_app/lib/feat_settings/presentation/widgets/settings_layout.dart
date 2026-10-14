@@ -29,9 +29,6 @@ class const SettingsPage({
   }
 }
 
-/// The [note] carries what holds for the whole group — most usefully *when* a
-/// setting takes effect, which a row title cannot say without repeating itself
-/// on every sibling.
 class const SettingsSection({
   super.key,
   required final String title,
@@ -114,7 +111,6 @@ class const SettingsRow({
   }
 }
 
-/// The text block of a [SettingsRow]: what the setting is, and why.
 class const SettingsRowLabel({
   super.key,
   required final String title,

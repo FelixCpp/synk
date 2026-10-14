@@ -1,11 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/settings_category.dart';
-import 'package:synk/feat_settings/presentation/widgets/settings_capture_page.dart';
-import 'package:synk/feat_settings/presentation/widgets/settings_devices_page.dart';
-import 'package:synk/feat_settings/presentation/widgets/settings_general_page.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_nav.dart';
-import 'package:synk/feat_settings/presentation/widgets/settings_tools_page.dart';
+import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/presentation/bloc/tool_validation_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
@@ -16,34 +14,28 @@ const _windowWidth = 780.0;
 const _windowHeight = 560.0;
 const _headerHeight = 48.0;
 
-Future<void> showSettingsWindow(
-  BuildContext context, {
-  required String activeAdbPath,
-  required String bundledAdbPath,
-}) {
-  // The dialog route lives above the providers of the calling context. The
-  // bloc is handed over rather than its state, so re-running the tool check
-  // from inside the window keeps the window in sync.
+Future<void> showSettingsWindow(BuildContext context) {
   final toolValidation = BlocProvider.of<ToolValidationBloc>(context);
+  final settings = BlocProvider.of<SettingsBloc>(context);
+  final adbPaths = RepositoryProvider.of<AdbPaths>(context);
 
   return showSynkUiDialog<void>(
     context: context,
     barrierDismissible: true,
-    builder: (context) => BlocProvider.value(
-      value: toolValidation,
-      child: SettingsWindow(
-        activeAdbPath: activeAdbPath,
-        bundledAdbPath: bundledAdbPath,
+    builder: (context) => MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: toolValidation),
+        BlocProvider.value(value: settings),
+      ],
+      child: RepositoryProvider.value(
+        value: adbPaths,
+        child: const SettingsWindow(),
       ),
     ),
   );
 }
 
-class const SettingsWindow({
-  super.key,
-  required final String activeAdbPath,
-  required final String bundledAdbPath,
-}) extends StatefulWidget {
+class const SettingsWindow({super.key}) extends StatefulWidget {
   @override
   State<SettingsWindow> createState() => _SettingsWindowState();
 }
@@ -64,8 +56,6 @@ class _SettingsWindowState extends State<SettingsWindow> {
           autofocus: true,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // The mock is sized for a roomy main window; shrink rather than
-              // overflow when the user has made the window small.
               return SynkUiCard(
                 elevation: SynkUiElevation.modal,
                 clip: true,
@@ -86,13 +76,7 @@ class _SettingsWindowState extends State<SettingsWindow> {
                                 setState(() => _category = category);
                               },
                             ),
-                            Expanded(
-                              child: _Body(
-                                category: _category,
-                                activeAdbPath: widget.activeAdbPath,
-                                bundledAdbPath: widget.bundledAdbPath,
-                              ),
-                            ),
+                            Expanded(child: _Body(category: _category)),
                           ],
                         ),
                       ),
@@ -160,11 +144,8 @@ class const _Header({required final VoidCallback onClose})
   }
 }
 
-/// Every page stays alive so switching categories keeps scroll position.
 class const _Body({
   required final SettingsCategory category,
-  required final String activeAdbPath,
-  required final String bundledAdbPath,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -174,13 +155,7 @@ class const _Body({
         index: category.index,
         sizing: StackFit.expand,
         children: [
-          const SettingsGeneralPage(),
-          const SettingsCapturePage(),
-          const SettingsDevicesPage(),
-          SettingsToolsPage(
-            activeAdbPath: activeAdbPath,
-            bundledAdbPath: bundledAdbPath,
-          ),
+          for (final category in SettingsCategory.values) category.page,
         ],
       ),
     );

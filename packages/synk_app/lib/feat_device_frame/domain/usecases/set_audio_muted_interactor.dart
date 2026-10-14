@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 class const SetAudioMutedInteractor(final DeviceFrameRepository repository)

@@ -7,7 +7,7 @@ import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
-import 'package:synk/feat_screen_capture_preview/data/repositores/screen_capture_preview_repository_impl.dart';
+import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/bloc/screen_capture_preview_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 
@@ -86,7 +86,7 @@ class const _TopCard({
     final bloc = BlocProvider.of<ScreenCapturePreviewBloc>(context);
 
     return SynkUiTooltip(
-      message: 'Open in the system viewer',
+      message: 'Aufnahme öffnen',
       child: SynkUiInteractive(
         cursor: SystemMouseCursors.click,
         onPressed: () => bloc.add(.onPreviewPressed(capture)),
@@ -177,20 +177,29 @@ class const _Card({
   Widget build(BuildContext context) {
     return capture.map(
       png: (png) {
-        return _Png(
-          pngBytes: png.bytes,
+        return _Poster(
+          bytes: png.bytes,
           screenSize: png.screenSize,
           modelName: png.modelName,
+        );
+      },
+      video: (video) {
+        return _Poster(
+          bytes: video.posterBytes,
+          screenSize: video.screenSize,
+          modelName: video.modelName,
+          isVideo: true,
         );
       },
     );
   }
 }
 
-class const _Png({
-  required final Uint8List pngBytes,
+class const _Poster({
+  required final Uint8List? bytes,
   required final DeviceScreenSize screenSize,
   required final String modelName,
+  final bool isVideo = false,
 }) extends StatelessWidget {
   double get aspectRatio {
     return screenSize.width / screenSize.height;
@@ -213,11 +222,11 @@ class const _Png({
           child: Stack(
             fit: .expand,
             children: [
-              Image.memory(
-                pngBytes,
-                fit: .cover,
-                gaplessPlayback: true,
-              ),
+              if (bytes case final bytes?)
+                Image.memory(bytes, fit: .cover, gaplessPlayback: true)
+              else
+                const _MissingPoster(),
+              if (isVideo) const Center(child: _PlayBadge()),
               Positioned(
                 left: 0.0,
                 right: 0.0,
@@ -226,6 +235,47 @@ class const _Png({
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class const _PlayBadge() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: SynkTheme.screenCapturePreviewPlaySlot,
+      height: SynkTheme.screenCapturePreviewPlaySlot,
+      alignment: .center,
+      decoration: const BoxDecoration(
+        shape: .circle,
+        color: SynkColors.statusOverlayBackground,
+      ),
+      child: const Padding(
+        padding: EdgeInsets.only(left: 2.0),
+        child: Icon(
+          CupertinoIcons.play_fill,
+          size: SynkUiSize.icon,
+          color: SynkColors.statusOverlayLabel,
+        ),
+      ),
+    );
+  }
+}
+
+class const _MissingPoster() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.synkUi.colors;
+
+    return ColoredBox(
+      color: colors.inset,
+      child: Center(
+        child: Icon(
+          CupertinoIcons.video_camera,
+          size: SynkUiSize.icon * 2,
+          color: colors.textTertiary,
         ),
       ),
     );

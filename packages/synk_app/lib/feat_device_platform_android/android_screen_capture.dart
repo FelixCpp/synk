@@ -15,8 +15,8 @@ class AndroidScreenCapture({
   }
 
   @override
-  Future<void> startRecording(String path) {
-    return mirror.startRecording(path);
+  Future<void> startRecording(String path, {required bool withAudio}) {
+    return mirror.startRecording(path, withAudio: withAudio);
   }
 
   @override

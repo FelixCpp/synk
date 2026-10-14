@@ -56,11 +56,10 @@ extension DeviceFrameEventPatterns on DeviceFrameEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnToggleRecording value)?  onToggleRecording,TResult Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnPinchEvent value)?  onPinchEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnFilesDropped value)?  onFilesDropped,TResult Function( _OnNavigate value)?  onNavigate,TResult Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult Function( _OnInstallApk value)?  onInstallApk,TResult Function( _OnShareFile value)?  onShareFile,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnToggleRecording value)?  onToggleRecording,TResult Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnPinchEvent value)?  onPinchEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnFilesDropped value)?  onFilesDropped,TResult Function( _OnNavigate value)?  onNavigate,TResult Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult Function( _OnInstallApk value)?  onInstallApk,TResult Function( _OnShareFile value)?  onShareFile,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _OnSetup() when onSetup != null:
-return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that);case _OnToggleRecording() when onToggleRecording != null:
 return onToggleRecording(_that);case _OnToggleAudioMute() when onToggleAudioMute != null:
 return onToggleAudioMute(_that);case _OnPointerEvent() when onPointerEvent != null:
@@ -89,11 +88,10 @@ return onShareFile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnToggleRecording value)  onToggleRecording,required TResult Function( _OnToggleAudioMute value)  onToggleAudioMute,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnPinchEvent value)  onPinchEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnFilesDropped value)  onFilesDropped,required TResult Function( _OnNavigate value)  onNavigate,required TResult Function( _OnPowerButtonPressed value)  onPowerButtonPressed,required TResult Function( _OnInstallApk value)  onInstallApk,required TResult Function( _OnShareFile value)  onShareFile,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnToggleRecording value)  onToggleRecording,required TResult Function( _OnToggleAudioMute value)  onToggleAudioMute,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnPinchEvent value)  onPinchEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnFilesDropped value)  onFilesDropped,required TResult Function( _OnNavigate value)  onNavigate,required TResult Function( _OnPowerButtonPressed value)  onPowerButtonPressed,required TResult Function( _OnInstallApk value)  onInstallApk,required TResult Function( _OnShareFile value)  onShareFile,}){
 final _that = this;
 switch (_that) {
-case _OnSetup():
-return onSetup(_that);case _OnCaptureScreenshot():
+case _OnCaptureScreenshot():
 return onCaptureScreenshot(_that);case _OnToggleRecording():
 return onToggleRecording(_that);case _OnToggleAudioMute():
 return onToggleAudioMute(_that);case _OnPointerEvent():
@@ -118,11 +116,10 @@ return onShareFile(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnToggleRecording value)?  onToggleRecording,TResult? Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnPinchEvent value)?  onPinchEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnFilesDropped value)?  onFilesDropped,TResult? Function( _OnNavigate value)?  onNavigate,TResult? Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult? Function( _OnInstallApk value)?  onInstallApk,TResult? Function( _OnShareFile value)?  onShareFile,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnToggleRecording value)?  onToggleRecording,TResult? Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnPinchEvent value)?  onPinchEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnFilesDropped value)?  onFilesDropped,TResult? Function( _OnNavigate value)?  onNavigate,TResult? Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult? Function( _OnInstallApk value)?  onInstallApk,TResult? Function( _OnShareFile value)?  onShareFile,}){
 final _that = this;
 switch (_that) {
-case _OnSetup() when onSetup != null:
-return onSetup(_that);case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot(_that);case _OnToggleRecording() when onToggleRecording != null:
 return onToggleRecording(_that);case _OnToggleAudioMute() when onToggleAudioMute != null:
 return onToggleAudioMute(_that);case _OnPointerEvent() when onPointerEvent != null:
@@ -150,10 +147,9 @@ return onShareFile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( KeyEvent keyEvent)?  onKeyEvent,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( KeyEvent keyEvent)?  onKeyEvent,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _OnSetup() when onSetup != null:
-return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
 return onToggleRecording();case _OnToggleAudioMute() when onToggleAudioMute != null:
 return onToggleAudioMute();case _OnPointerEvent() when onPointerEvent != null:
@@ -182,10 +178,9 @@ return onShareFile();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( KeyEvent keyEvent)  onKeyEvent,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( KeyEvent keyEvent)  onKeyEvent,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
 switch (_that) {
-case _OnSetup():
-return onSetup();case _OnCaptureScreenshot():
+case _OnCaptureScreenshot():
 return onCaptureScreenshot();case _OnToggleRecording():
 return onToggleRecording();case _OnToggleAudioMute():
 return onToggleAudioMute();case _OnPointerEvent():
@@ -210,10 +205,9 @@ return onShareFile();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( KeyEvent keyEvent)?  onKeyEvent,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( KeyEvent keyEvent)?  onKeyEvent,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
 switch (_that) {
-case _OnSetup() when onSetup != null:
-return onSetup();case _OnCaptureScreenshot() when onCaptureScreenshot != null:
+case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
 return onToggleRecording();case _OnToggleAudioMute() when onToggleAudioMute != null:
 return onToggleAudioMute();case _OnPointerEvent() when onPointerEvent != null:
@@ -231,38 +225,6 @@ return onShareFile();case _:
 }
 
 }
-
-/// @nodoc
-
-
-class _OnSetup implements DeviceFrameEvent {
-  const _OnSetup();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnSetup);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-    return 'DeviceFrameEvent.onSetup()';
-}
-
-
-}
-
-
-
 
 /// @nodoc
 
@@ -815,7 +777,7 @@ String toString() {
 /// @nodoc
 mixin _$DeviceFrameState {
 
- bool get isProcessingDroppedFiles; bool get isRecording; bool get isAudioMuted;
+ bool get isTransferringFiles; bool get isRecording; bool get isAudioMuted;
 /// Create a copy of DeviceFrameState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -827,20 +789,20 @@ $DeviceFrameStateCopyWith<DeviceFrameState> get copyWith => _$DeviceFrameStateCo
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceFrameState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceFrameState&&(identical(other.isProcessingDroppedFiles, _this.isProcessingDroppedFiles) || other.isProcessingDroppedFiles == _this.isProcessingDroppedFiles)&&(identical(other.isRecording, _this.isRecording) || other.isRecording == _this.isRecording)&&(identical(other.isAudioMuted, _this.isAudioMuted) || other.isAudioMuted == _this.isAudioMuted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceFrameState&&(identical(other.isTransferringFiles, _this.isTransferringFiles) || other.isTransferringFiles == _this.isTransferringFiles)&&(identical(other.isRecording, _this.isRecording) || other.isRecording == _this.isRecording)&&(identical(other.isAudioMuted, _this.isAudioMuted) || other.isAudioMuted == _this.isAudioMuted));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DeviceFrameState;
-  return Object.hash(runtimeType,_this.isProcessingDroppedFiles,_this.isRecording,_this.isAudioMuted);
+  return Object.hash(runtimeType,_this.isTransferringFiles,_this.isRecording,_this.isAudioMuted);
 }
 
 @override
 String toString() {
   final _this = this as DeviceFrameState;
-  return 'DeviceFrameState(isProcessingDroppedFiles: ${_this.isProcessingDroppedFiles}, isRecording: ${_this.isRecording}, isAudioMuted: ${_this.isAudioMuted})';
+  return 'DeviceFrameState(isTransferringFiles: ${_this.isTransferringFiles}, isRecording: ${_this.isRecording}, isAudioMuted: ${_this.isAudioMuted})';
 }
 
 
@@ -851,7 +813,7 @@ abstract mixin class $DeviceFrameStateCopyWith<$Res>  {
   factory $DeviceFrameStateCopyWith(DeviceFrameState value, $Res Function(DeviceFrameState) _then) = _$DeviceFrameStateCopyWithImpl;
 @useResult
 $Res call({
- bool isProcessingDroppedFiles, bool isRecording, bool isAudioMuted
+ bool isTransferringFiles, bool isRecording, bool isAudioMuted
 });
 
 
@@ -868,9 +830,9 @@ class _$DeviceFrameStateCopyWithImpl<$Res>
 
 /// Create a copy of DeviceFrameState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? isProcessingDroppedFiles = null,Object? isRecording = null,Object? isAudioMuted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? isTransferringFiles = null,Object? isRecording = null,Object? isAudioMuted = null,}) {
   return _then(DeviceFrameState(
-isProcessingDroppedFiles: null == isProcessingDroppedFiles ? _self.isProcessingDroppedFiles : isProcessingDroppedFiles // ignore: cast_nullable_to_non_nullable
+isTransferringFiles: null == isTransferringFiles ? _self.isTransferringFiles : isTransferringFiles // ignore: cast_nullable_to_non_nullable
 as bool,isRecording: null == isRecording ? _self.isRecording : isRecording // ignore: cast_nullable_to_non_nullable
 as bool,isAudioMuted: null == isAudioMuted ? _self.isAudioMuted : isAudioMuted // ignore: cast_nullable_to_non_nullable
 as bool,
@@ -955,10 +917,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isProcessingDroppedFiles,  bool isRecording,  bool isAudioMuted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool isTransferringFiles,  bool isRecording,  bool isAudioMuted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceFrameState() when $default != null:
-return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMuted);case _:
+return $default(_that.isTransferringFiles,_that.isRecording,_that.isAudioMuted);case _:
   return orElse();
 
 }
@@ -976,10 +938,10 @@ return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMu
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isProcessingDroppedFiles,  bool isRecording,  bool isAudioMuted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool isTransferringFiles,  bool isRecording,  bool isAudioMuted)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceFrameState():
-return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMuted);}
+return $default(_that.isTransferringFiles,_that.isRecording,_that.isAudioMuted);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -993,10 +955,10 @@ return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMu
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isProcessingDroppedFiles,  bool isRecording,  bool isAudioMuted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool isTransferringFiles,  bool isRecording,  bool isAudioMuted)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceFrameState() when $default != null:
-return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMuted);case _:
+return $default(_that.isTransferringFiles,_that.isRecording,_that.isAudioMuted);case _:
   return null;
 
 }
@@ -1008,10 +970,10 @@ return $default(_that.isProcessingDroppedFiles,_that.isRecording,_that.isAudioMu
 
 
 class _DeviceFrameState implements DeviceFrameState {
-  const _DeviceFrameState({required this.isProcessingDroppedFiles, required this.isRecording, required this.isAudioMuted});
+  const _DeviceFrameState({required this.isTransferringFiles, required this.isRecording, required this.isAudioMuted});
   
 
-@override final  bool isProcessingDroppedFiles;
+@override final  bool isTransferringFiles;
 @override final  bool isRecording;
 @override final  bool isAudioMuted;
 
@@ -1025,18 +987,18 @@ _$DeviceFrameStateCopyWith<_DeviceFrameState> get copyWith => __$DeviceFrameStat
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceFrameState&&(identical(other.isProcessingDroppedFiles, isProcessingDroppedFiles) || other.isProcessingDroppedFiles == isProcessingDroppedFiles)&&(identical(other.isRecording, isRecording) || other.isRecording == isRecording)&&(identical(other.isAudioMuted, isAudioMuted) || other.isAudioMuted == isAudioMuted));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceFrameState&&(identical(other.isTransferringFiles, isTransferringFiles) || other.isTransferringFiles == isTransferringFiles)&&(identical(other.isRecording, isRecording) || other.isRecording == isRecording)&&(identical(other.isAudioMuted, isAudioMuted) || other.isAudioMuted == isAudioMuted));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,isProcessingDroppedFiles,isRecording,isAudioMuted);
+    return Object.hash(runtimeType,isTransferringFiles,isRecording,isAudioMuted);
 }
 
 @override
 String toString() {
-    return 'DeviceFrameState(isProcessingDroppedFiles: $isProcessingDroppedFiles, isRecording: $isRecording, isAudioMuted: $isAudioMuted)';
+    return 'DeviceFrameState(isTransferringFiles: $isTransferringFiles, isRecording: $isRecording, isAudioMuted: $isAudioMuted)';
 }
 
 
@@ -1047,7 +1009,7 @@ abstract mixin class _$DeviceFrameStateCopyWith<$Res> implements $DeviceFrameSta
   factory _$DeviceFrameStateCopyWith(_DeviceFrameState value, $Res Function(_DeviceFrameState) _then) = __$DeviceFrameStateCopyWithImpl;
 @override @useResult
 $Res call({
- bool isProcessingDroppedFiles, bool isRecording, bool isAudioMuted
+ bool isTransferringFiles, bool isRecording, bool isAudioMuted
 });
 
 
@@ -1064,9 +1026,9 @@ class __$DeviceFrameStateCopyWithImpl<$Res>
 
 /// Create a copy of DeviceFrameState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? isProcessingDroppedFiles = null,Object? isRecording = null,Object? isAudioMuted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? isTransferringFiles = null,Object? isRecording = null,Object? isAudioMuted = null,}) {
   return _then(_DeviceFrameState(
-isProcessingDroppedFiles: null == isProcessingDroppedFiles ? _self.isProcessingDroppedFiles : isProcessingDroppedFiles // ignore: cast_nullable_to_non_nullable
+isTransferringFiles: null == isTransferringFiles ? _self.isTransferringFiles : isTransferringFiles // ignore: cast_nullable_to_non_nullable
 as bool,isRecording: null == isRecording ? _self.isRecording : isRecording // ignore: cast_nullable_to_non_nullable
 as bool,isAudioMuted: null == isAudioMuted ? _self.isAudioMuted : isAudioMuted // ignore: cast_nullable_to_non_nullable
 as bool,

@@ -5,6 +5,8 @@ import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
@@ -17,6 +19,7 @@ import 'package:synk/feat_screen_capture_event/application/screen_capture_event_
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_host_clipboard.dart';
 
 import '../support/fake_settings_repository.dart';
 
@@ -186,6 +189,31 @@ void main() {
         reason: 'a focused frame has to swallow the keystroke and mirror it',
       );
     });
+
+    testWidgets('lets ⌘, past a focused frame instead of typing it', (
+      tester,
+    ) async {
+      final reachedTheCanvas = <KeyEvent>[];
+      await _pumpFrame(
+        tester,
+        _referenceScreenSize,
+        onKeyEscapedFrame: reachedTheCanvas.add,
+      );
+
+      await tester.tap(find.byType(Texture));
+      await tester.pumpAndSettle();
+      reachedTheCanvas.clear();
+
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.comma);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+
+      expect(
+        reachedTheCanvas.map((event) => event.logicalKey),
+        contains(LogicalKeyboardKey.comma),
+        reason: 'Synk owns ⌘, — it must not be mirrored to the device',
+      );
+    });
   });
 }
 
@@ -242,6 +270,12 @@ Future<SynkColors> _pumpFrame(
         ),
         RepositoryProvider<SettingsRepository>(
           create: (_) => FakeSettingsRepository(),
+        ),
+        RepositoryProvider<HostClipboard>(
+          create: (_) => FakeHostClipboard(),
+        ),
+        RepositoryProvider<FilePicker>.value(
+          value: const SystemFilePicker(),
         ),
       ],
       child: WidgetsApp(

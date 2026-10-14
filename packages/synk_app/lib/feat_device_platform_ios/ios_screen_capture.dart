@@ -45,7 +45,7 @@ class const IosScreenCapture({
   }
 
   @override
-  Future<void> startRecording(String path) {
+  Future<void> startRecording(String path, {required bool withAudio}) {
     return transport.startRecording(textureId, path);
   }
 

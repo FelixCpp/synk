@@ -2,13 +2,15 @@ import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
@@ -29,8 +31,8 @@ void main() {
   late _FakeClipboard clipboard;
   late _RecordingInteraction interaction;
   late FakeSettingsRepository settings;
-  late DeviceFrameRepository repository;
-  String? hostClipboard;
+  late FakeHostClipboard host;
+  late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +40,8 @@ void main() {
     clipboard = _FakeClipboard();
     interaction = _RecordingInteraction();
     settings = FakeSettingsRepository();
-    repository = DeviceFrameRepository(
+    host = FakeHostClipboard();
+    repository = DeviceFrameRepositoryImpl(
       deviceId: _deviceId,
       modelName: 'Test Device',
       session: FakeDeviceSession(
@@ -47,26 +50,9 @@ void main() {
       ),
       settingsRepository: settings,
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
+      hostClipboard: host,
+      filePicker: const SystemFilePicker(),
     );
-    hostClipboard = null;
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, (call) async {
-          switch (call.method) {
-            case 'Clipboard.getData':
-              return hostClipboard == null ? null : {'text': hostClipboard};
-            case 'Clipboard.setData':
-              hostClipboard = (call.arguments as Map)['text'] as String?;
-              return null;
-            default:
-              return null;
-          }
-        });
-  });
-
-  tearDown(() {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(SystemChannels.platform, null);
   });
 
   group('clipboard shortcuts', () {
@@ -78,11 +64,11 @@ void main() {
       );
 
       expect(clipboard.reads, 1);
-      expect(hostClipboard, 'from the device');
+      expect(host.text, 'from the device');
     });
 
     test('paste pushes the host clipboard onto the device', () async {
-      hostClipboard = 'from the host';
+      host.text = 'from the host';
 
       await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyV),
@@ -102,20 +88,20 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(hostClipboard, isNull);
+      expect(host.text, isNull);
     });
 
     test(
       'leaves the host clipboard alone when the device has no text',
       () async {
-        hostClipboard = 'keep me';
+        host.text = 'keep me';
         clipboard.content = '';
 
         await repository.simulateKeyEvent(
           _shortcut(LogicalKeyboardKey.keyC),
         );
 
-        expect(hostClipboard, 'keep me');
+        expect(host.text, 'keep me');
       },
     );
 
@@ -134,7 +120,7 @@ void main() {
 
     test('reports a device clipboard it cannot reach', () async {
       clipboard.isReachable = false;
-      hostClipboard = 'keep me';
+      host.text = 'keep me';
 
       final copy = await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyC),
@@ -145,12 +131,12 @@ void main() {
 
       expect(copy, ClipboardSyncFailure.deviceUnreachable);
       expect(paste, ClipboardSyncFailure.deviceUnreachable);
-      expect(hostClipboard, 'keep me');
+      expect(host.text, 'keep me');
     });
 
     test('reports a missing devicectl as an unavailable tool', () async {
       clipboard.failure = const DevicectlCommandException(message: 'no xcode');
-      hostClipboard = 'text';
+      host.text = 'text';
 
       final failure = await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyV),
@@ -160,7 +146,7 @@ void main() {
     });
 
     test('passes ⌘C to the device untouched when sync is off', () async {
-      settings.syncClipboard = false;
+      settings.update((it) => it.copyWith(syncClipboard: false));
       clipboard.content = 'from the device';
 
       await repository.simulateKeyEvent(
@@ -168,13 +154,13 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(hostClipboard, isNull);
+      expect(host.text, isNull);
       expect(interaction.keyEvents, hasLength(1));
     });
 
     test('passes ⌘V to the device untouched when sync is off', () async {
-      settings.syncClipboard = false;
-      hostClipboard = 'from the host';
+      settings.update((it) => it.copyWith(syncClipboard: false));
+      host.text = 'from the host';
       clipboard.content = 'keep me';
 
       await repository.simulateKeyEvent(
@@ -201,7 +187,7 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(hostClipboard, isNull);
+      expect(host.text, isNull);
     });
   });
 }

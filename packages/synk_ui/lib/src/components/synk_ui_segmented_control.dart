@@ -14,6 +14,8 @@ class const SynkUiSegmentedControl<T>({
   required final List<SynkUiSegment<T>> segments,
   required final T value,
   required final ValueChanged<T>? onChanged,
+
+  final bool dense = false,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,7 @@ class const SynkUiSegmentedControl<T>({
                 label: segment.label,
                 selected: segment.value == value,
                 selectedColor: selectedColor,
+                dense: dense,
                 onPressed: onChanged == null
                     ? null
                     : () => onChanged(segment.value),
@@ -56,6 +59,7 @@ class const _Segment({
   required final String label,
   required final bool selected,
   required final Color selectedColor,
+  required final bool dense,
   required final VoidCallback? onPressed,
 }) extends StatelessWidget {
   @override
@@ -72,8 +76,10 @@ class const _Segment({
         return AnimatedContainer(
           duration: SynkUiMotion.state,
           curve: SynkUiMotion.standard,
-          height: SynkUiSize.segment,
-          padding: const EdgeInsets.symmetric(horizontal: SynkUiSpace.s12),
+          height: dense ? SynkUiSize.segmentDense : SynkUiSize.segment,
+          padding: EdgeInsets.symmetric(
+            horizontal: dense ? 10.0 : SynkUiSpace.s12,
+          ),
           decoration: BoxDecoration(
             color: selected ? selectedColor : colors.overlayFor(states),
             borderRadius: borderRadius,

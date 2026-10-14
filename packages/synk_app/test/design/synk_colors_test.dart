@@ -15,7 +15,11 @@ void main() {
         ) async {
           final colors = await _resolve(tester, brightness);
 
-          for (final surface in [colors.canvas, colors.card, colors.cardHover]) {
+          for (final surface in [
+            colors.canvas,
+            colors.card,
+            colors.cardHover,
+          ]) {
             expect(
               _contrastOn(colors.label, surface, colors.canvas),
               greaterThanOrEqualTo(4.5),
@@ -44,7 +48,8 @@ void main() {
                     _asPainted(colors.canvas).computeLuminance())
                 .abs(),
             greaterThan(0.005),
-            reason: 'card ${_hex(colors.card)} vs canvas '
+            reason:
+                'card ${_hex(colors.card)} vs canvas '
                 '${_hex(colors.canvas)}',
           );
         });

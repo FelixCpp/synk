@@ -68,11 +68,17 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
   private var audioFormat: AVAudioFormat?
   private var isAudioMuted = true
   private var pendingAudioBuffer = Data()
+  /// Logged once, so a refusing engine says so instead of just staying silent.
+  private var hasReportedAudioFailure = false
 
   // MARK: Recording
 
   private var assetWriter: AVAssetWriter?
   private var assetWriterInput: AVAssetWriterInput?
+  private var audioWriterInput: AVAssetWriterInput?
+  private var recordingAudioFormat: CMAudioFormatDescription?
+  private var recordedAudioAnchor: CMTime?
+  private var recordedAudioFrames: Int64 = 0
   private var isRecordingArmed = false
   private var isRecording = false
 
@@ -116,10 +122,15 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
 
     if isRecording || isRecordingArmed {
       assetWriterInput?.markAsFinished()
+      audioWriterInput?.markAsFinished()
       assetWriter?.cancelWriting()
     }
     assetWriter = nil
     assetWriterInput = nil
+    audioWriterInput = nil
+    recordingAudioFormat = nil
+    recordedAudioAnchor = nil
+    recordedAudioFrames = 0
     isRecordingArmed = false
     isRecording = false
   }
@@ -129,7 +140,7 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
   /// Arms recording: the actual `AVAssetWriter` session only starts once the
   /// next IDR frame arrives, so the output file always begins on a keyframe
   /// and is decodable from byte zero.
-  func startRecording(path: String) throws {
+  func startRecording(path: String, withAudio: Bool) throws {
     guard !isRecording, !isRecordingArmed else { return }
 
     let url = URL(fileURLWithPath: path)
@@ -151,10 +162,37 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
       )
     }
     writer.add(input)
+
+    // The device always streams sound, whether or not it is being played, so
+    // recording it is purely a question of giving the file a second track.
+    var audioInput: AVAssetWriterInput?
+    if withAudio {
+      let candidate = AVAssetWriterInput(
+        mediaType: .audio,
+        outputSettings: [
+          AVFormatIDKey: kAudioFormatMPEG4AAC,
+          AVSampleRateKey: Self.audioSampleRate,
+          AVNumberOfChannelsKey: Int(Self.audioChannelCount),
+          AVEncoderBitRateKey: 128_000,
+        ]
+      )
+      candidate.expectsMediaDataInRealTime = true
+
+      if writer.canAdd(candidate) {
+        writer.add(candidate)
+        audioInput = candidate
+      } else {
+        NSLog("MirrorTextureSession: recorder refused an audio track, filming silently")
+      }
+    }
+
     writer.startWriting()
 
     assetWriter = writer
     assetWriterInput = input
+    audioWriterInput = audioInput
+    recordedAudioAnchor = nil
+    recordedAudioFrames = 0
     isRecordingArmed = true
   }
 
@@ -167,11 +205,15 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     isRecording = false
     isRecordingArmed = false
     assetWriterInput?.markAsFinished()
+    audioWriterInput?.markAsFinished()
     writer.finishWriting {
       completion(writer.status == .completed)
     }
     assetWriter = nil
     assetWriterInput = nil
+    audioWriterInput = nil
+    recordedAudioAnchor = nil
+    recordedAudioFrames = 0
   }
 
   private func appendToRecording(sampleBuffer: CMSampleBuffer, isKeyframe: Bool, presentationTime: CMTime) {
@@ -194,41 +236,178 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     isAudioMuted = muted
     if muted {
       audioPlayerNode?.stop()
-      pendingAudioBuffer.removeAll()
     }
   }
 
+  /// Muting silences playback only. A recording still gets the sound, which is
+  /// what makes "mute on connect" and "record audio" independent of each other
+  /// rather than one quietly disabling the other.
   func feedAudioChunk(_ chunk: Data) {
-    guard !isAudioMuted else { return }
-
-    let format = ensureAudioEngine()
     pendingAudioBuffer.append(chunk)
 
     let frameCount = pendingAudioBuffer.count / Self.audioBytesPerFrame
     guard frameCount > 0 else { return }
 
     let byteCount = frameCount * Self.audioBytesPerFrame
-    guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(frameCount)) else {
-      pendingAudioBuffer.removeSubrange(0..<byteCount)
-      return
-    }
+    let frames = pendingAudioBuffer.subdata(in: 0..<byteCount)
+    pendingAudioBuffer.removeSubrange(0..<byteCount)
+
+    appendAudioToRecording(frames, frameCount: frameCount)
+
+    guard !isAudioMuted else { return }
+    playAudio(frames, frameCount: frameCount)
+  }
+
+  private func playAudio(_ frames: Data, frameCount: Int) {
+    let format = ensureAudioEngine()
+    guard
+      let buffer = AVAudioPCMBuffer(
+        pcmFormat: format,
+        frameCapacity: AVAudioFrameCount(frameCount)
+      )
+    else { return }
     buffer.frameLength = AVAudioFrameCount(frameCount)
 
-    pendingAudioBuffer.subdata(in: 0..<byteCount).withUnsafeBytes { raw in
+    frames.withUnsafeBytes { raw in
       if let source = raw.baseAddress, let destination = buffer.int16ChannelData?[0] {
-        memcpy(destination, source, byteCount)
+        memcpy(destination, source, frames.count)
       }
     }
-    pendingAudioBuffer.removeSubrange(0..<byteCount)
 
     guard let engine = audioEngine, let playerNode = audioPlayerNode else { return }
     if !engine.isRunning {
-      try? engine.start()
+      do {
+        try engine.start()
+      } catch {
+        if !hasReportedAudioFailure {
+          hasReportedAudioFailure = true
+          NSLog("MirrorTextureSession: audio engine refused to start: \(error)")
+        }
+        return
+      }
     }
     playerNode.scheduleBuffer(buffer)
     if !playerNode.isPlaying {
       playerNode.play()
     }
+  }
+
+  // MARK: Audio recording
+
+  /// Sound runs on its own sample counter, anchored to the host clock the
+  /// first time a buffer reaches the file.
+  ///
+  /// Stamping each chunk with its arrival time instead would shove the track
+  /// around with every burst off the socket. The counter also advances for
+  /// buffers the writer was not ready for, so a dropped one leaves a silent
+  /// gap rather than pulling everything after it out of sync with the picture.
+  private func appendAudioToRecording(_ frames: Data, frameCount: Int) {
+    guard isRecording, let input = audioWriterInput else { return }
+
+    let anchor = recordedAudioAnchor ?? CMClockGetTime(CMClockGetHostTimeClock())
+    recordedAudioAnchor = anchor
+
+    let presentationTime = CMTimeAdd(
+      anchor,
+      CMTime(value: recordedAudioFrames, timescale: Int32(Self.audioSampleRate))
+    )
+    recordedAudioFrames += Int64(frameCount)
+
+    guard
+      input.isReadyForMoreMediaData,
+      let formatDescription = ensureRecordingAudioFormat(),
+      let sampleBuffer = makeAudioSampleBuffer(
+        frames: frames,
+        frameCount: frameCount,
+        presentationTime: presentationTime,
+        formatDescription: formatDescription
+      )
+    else { return }
+
+    input.append(sampleBuffer)
+  }
+
+  private func ensureRecordingAudioFormat() -> CMAudioFormatDescription? {
+    if let recordingAudioFormat { return recordingAudioFormat }
+
+    var asbd = AudioStreamBasicDescription(
+      mSampleRate: Self.audioSampleRate,
+      mFormatID: kAudioFormatLinearPCM,
+      mFormatFlags: kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked,
+      mBytesPerPacket: UInt32(Self.audioBytesPerFrame),
+      mFramesPerPacket: 1,
+      mBytesPerFrame: UInt32(Self.audioBytesPerFrame),
+      mChannelsPerFrame: UInt32(Self.audioChannelCount),
+      mBitsPerChannel: 16,
+      mReserved: 0
+    )
+
+    var description: CMAudioFormatDescription?
+    let status = CMAudioFormatDescriptionCreate(
+      allocator: kCFAllocatorDefault,
+      asbd: &asbd,
+      layoutSize: 0,
+      layout: nil,
+      magicCookieSize: 0,
+      magicCookie: nil,
+      extensions: nil,
+      formatDescriptionOut: &description
+    )
+    guard status == noErr else {
+      NSLog("MirrorTextureSession: cannot describe the incoming PCM, status=\(status)")
+      return nil
+    }
+
+    recordingAudioFormat = description
+    return description
+  }
+
+  private func makeAudioSampleBuffer(
+    frames: Data,
+    frameCount: Int,
+    presentationTime: CMTime,
+    formatDescription: CMAudioFormatDescription
+  ) -> CMSampleBuffer? {
+    var blockBuffer: CMBlockBuffer?
+    let byteCount = frames.count
+
+    let blockStatus = CMBlockBufferCreateWithMemoryBlock(
+      allocator: kCFAllocatorDefault,
+      memoryBlock: nil,
+      blockLength: byteCount,
+      blockAllocator: kCFAllocatorDefault,
+      customBlockSource: nil,
+      offsetToData: 0,
+      dataLength: byteCount,
+      flags: 0,
+      blockBufferOut: &blockBuffer
+    )
+    guard blockStatus == kCMBlockBufferNoErr, let blockBuffer else { return nil }
+
+    let replaceStatus = frames.withUnsafeBytes { raw -> OSStatus in
+      guard let base = raw.baseAddress else { return -1 }
+      return CMBlockBufferReplaceDataBytes(
+        with: base,
+        blockBuffer: blockBuffer,
+        offsetIntoDestination: 0,
+        dataLength: byteCount
+      )
+    }
+    guard replaceStatus == kCMBlockBufferNoErr else { return nil }
+
+    var sampleBuffer: CMSampleBuffer?
+    let status = CMAudioSampleBufferCreateReadyWithPacketDescriptions(
+      allocator: kCFAllocatorDefault,
+      dataBuffer: blockBuffer,
+      formatDescription: formatDescription,
+      sampleCount: frameCount,
+      presentationTimeStamp: presentationTime,
+      packetDescriptions: nil,
+      sampleBufferOut: &sampleBuffer
+    )
+    guard status == noErr else { return nil }
+
+    return sampleBuffer
   }
 
   private func ensureAudioEngine() -> AVAudioFormat {
@@ -567,7 +746,10 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
         return
       }
       do {
-        try session.startRecording(path: path)
+        try session.startRecording(
+          path: path,
+          withAudio: args["withAudio"] as? Bool ?? false
+        )
         result(nil)
       } catch {
         result(FlutterError(code: "recording_failed", message: error.localizedDescription, details: nil))

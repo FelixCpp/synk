@@ -1,5 +1,6 @@
 import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
 import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_layout.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -20,8 +21,8 @@ String _qualityLabel(MirrorQuality quality) => switch (quality) {
 class const SettingsDevicesPage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      builder: (context, state) {
+    return BlocBuilder<SettingsBloc, Settings>(
+      builder: (context, settings) {
         final colors = context.synkUi.colors;
         final bloc = context.read<SettingsBloc>();
 
@@ -37,7 +38,7 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                 SettingsRow(
                   label: const SettingsRowLabel(title: 'Bildrate'),
                   trailing: SynkUiSegmentedControl<MirrorFrameRate>(
-                    value: state.frameRate,
+                    value: settings.frameRate,
                     segments: [
                       for (final frameRate in MirrorFrameRate.values)
                         SynkUiSegment(
@@ -46,7 +47,7 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                         ),
                     ],
                     onChanged: (frameRate) => bloc.add(
-                      .onSetFrameRate(frameRate),
+                      .onSave(settings.copyWith(frameRate: frameRate)),
                     ),
                   ),
                 ),
@@ -57,7 +58,7 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                         'Höher braucht mehr Bandbreite, vor allem über WLAN.',
                   ),
                   trailing: SynkUiSegmentedControl<MirrorQuality>(
-                    value: state.quality,
+                    value: settings.quality,
                     segments: [
                       for (final quality in MirrorQuality.values)
                         SynkUiSegment(
@@ -65,7 +66,9 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                           label: _qualityLabel(quality),
                         ),
                     ],
-                    onChanged: (quality) => bloc.add(.onSetQuality(quality)),
+                    onChanged: (quality) => bloc.add(
+                      .onSave(settings.copyWith(quality: quality)),
+                    ),
                   ),
                 ),
                 SettingsRow(
@@ -77,23 +80,23 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                     badge: SynkUiTag(label: 'Android', color: colors.accent),
                   ),
                   trailing: SynkUiToggle(
-                    value: state.turnDeviceScreenOff,
+                    value: settings.turnDeviceScreenOff,
                     onChanged: (value) => bloc.add(
-                      .onSetTurnDeviceScreenOff(value),
+                      .onSave(settings.copyWith(turnDeviceScreenOff: value)),
                     ),
                   ),
                 ),
                 SettingsRow(
                   label: const SettingsRowLabel(
-                    title: 'Ton zu Beginn stummschalten',
+                    title: 'Beim Verbinden stummschalten',
                     subtitle:
                         'Der Ton wird trotzdem übertragen und lässt sich im '
                         'Gerätefenster jederzeit einschalten.',
                   ),
                   trailing: SynkUiToggle(
-                    value: state.muteOnConnect,
+                    value: settings.muteOnConnect,
                     onChanged: (value) => bloc.add(
-                      .onSetMuteOnConnect(value),
+                      .onSave(settings.copyWith(muteOnConnect: value)),
                     ),
                   ),
                 ),
@@ -110,9 +113,9 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                         'aus, gehen die Tastenkürzel an das Gerät selbst.',
                   ),
                   trailing: SynkUiToggle(
-                    value: state.syncClipboard,
+                    value: settings.syncClipboard,
                     onChanged: (value) => bloc.add(
-                      .onSetSyncClipboard(value),
+                      .onSave(settings.copyWith(syncClipboard: value)),
                     ),
                   ),
                 ),

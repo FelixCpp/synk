@@ -28,7 +28,10 @@ class FakePlatform implements DevicePlatform {
   Stream<List<PluggedDevice>> observeDevices() => devices;
 
   @override
-  Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions options) async {
+  Future<DeviceSession> connect(
+    DeviceId deviceId,
+    MirrorOptions options,
+  ) async {
     connectCalls.add(deviceId);
     connectOptions.add(options);
     return await onConnect?.call(deviceId) ?? FakeDeviceSession();

@@ -1,6 +1,7 @@
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/app_shortcuts.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
@@ -67,7 +68,6 @@ class _DeviceFrameState extends State<DeviceFrame>
       screenSize: connection.screenSize,
       isMaximized: widget.isMaximized,
       child: _DeviceFrameBlocProvider(
-        // A reconnect brings a new session, and with it a new bloc.
         key: ObjectKey(connection.session),
         connection: connection,
         builder: (context, state) => _FrameDropTarget(
@@ -80,7 +80,7 @@ class _DeviceFrameState extends State<DeviceFrame>
             child: _FrameSurface(
               hasFocus: focusNode.hasFocus,
               isDragHovered: isDragHovered,
-              isProcessingDroppedFiles: state.isProcessingDroppedFiles,
+              isTransferringFiles: state.isTransferringFiles,
               child: Column(
                 children: [
                   _ToolBar(
@@ -245,7 +245,7 @@ class const _FocusableFrame({
       onKeyEvent: (node, event) => _handleKeyEvent(context, event),
       child: GestureDetector(
         onTapDown: (details) => focusNode.requestFocus(),
-        onTap: () {}, // Consume tap to prevent focus loss when releasing
+        onTap: () {},
         behavior: .translucent,
         child: child,
       ),
@@ -259,6 +259,10 @@ class const _FocusableFrame({
       return .handled;
     }
 
+    if (AppShortcuts.owns(event)) {
+      return .ignored;
+    }
+
     BlocProvider.of<DeviceFrameBloc>(context).add(.onKeyEvent(event));
     return .handled;
   }
@@ -267,7 +271,7 @@ class const _FocusableFrame({
 class const _FrameSurface({
   required final bool hasFocus,
   required final bool isDragHovered,
-  required final bool isProcessingDroppedFiles,
+  required final bool isTransferringFiles,
   required final Widget child,
 }) extends StatelessWidget {
   @override
@@ -276,7 +280,7 @@ class const _FrameSurface({
       hasFocus: hasFocus,
       child: DeviceFrameDropFeedback(
         isDragHovered: isDragHovered,
-        isProcessing: isProcessingDroppedFiles,
+        isProcessing: isTransferringFiles,
         child: child,
       ),
     );
@@ -368,12 +372,14 @@ class const _DeviceFrameBlocProvider({
   Widget build(BuildContext context) {
     return BlocProvider<DeviceFrameBloc>(
       create: (context) => DeviceFrameBloc(
-        repository: DeviceFrameRepository(
+        repository: DeviceFrameRepositoryImpl(
           deviceId: connection.device.id,
           modelName: connection.device.modelName,
           session: connection.session,
           settingsRepository: RepositoryProvider.of(context),
           screenCaptureEventChannel: RepositoryProvider.of(context),
+          hostClipboard: RepositoryProvider.of(context),
+          filePicker: RepositoryProvider.of(context),
         ),
         notifications: RepositoryProvider.of(context),
       ),

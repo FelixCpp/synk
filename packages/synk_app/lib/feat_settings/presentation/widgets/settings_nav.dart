@@ -6,7 +6,6 @@ const _navWidth = 200.0;
 const _navItemHeight = 32.0;
 const _navIconSize = 16.0;
 
-/// The rail on the left of the settings window listing every category.
 class const SettingsNav({
   super.key,
   required final SettingsCategory selected,

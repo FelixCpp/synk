@@ -1,18 +1,17 @@
 import 'package:file_selector/file_selector.dart';
+import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_kind.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_layout.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Mirrors the name `DeviceFrameRepository` builds for a capture.
-const _namePattern = 'Screenshot <Gerät> JJJJ-MM-TT at HH.MM.SS.png';
-
 class const SettingsCapturePage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      builder: (context, state) {
+    return BlocBuilder<SettingsBloc, Settings>(
+      builder: (context, settings) {
         final theme = context.synkUi;
         final colors = theme.colors;
         final bloc = context.read<SettingsBloc>();
@@ -31,12 +30,15 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
                     color: colors.accent,
                   ),
                   label: SettingsRowLabel(
-                    title: state.screenCaptureSavePath ?? 'Wird geladen …',
+                    title: settings.screenCaptureSavePath,
                     titleStyle: theme.typography.mono.copyWith(
                       fontSize: 12.0,
                       color: colors.text,
                     ),
-                    subtitle: _namePattern,
+                    subtitle: ScreenCaptureKind.screenshot.filenameFor(
+                      '<Gerät>',
+                      DateTime.now(),
+                    ),
                   ),
                   trailing: Row(
                     spacing: SynkUiSpace.s8,
@@ -50,10 +52,7 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
                       ),
                       SynkUiButton(
                         label: 'Ändern …',
-                        onPressed: () => _pickSavePath(
-                          bloc,
-                          state.screenCaptureSavePath,
-                        ),
+                        onPressed: () => _pickSavePath(bloc, settings),
                       ),
                     ],
                   ),
@@ -61,37 +60,48 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
               ],
             ),
             SettingsSection(
-              title: 'Nach der Aufnahme',
+              title: 'Verhalten',
               children: [
                 SettingsRow(
                   label: const SettingsRowLabel(
-                    title: 'Vorschau einblenden',
+                    title: 'Vorschau nach Aufnahme',
                     subtitle:
                         'Kleines Vorschaubild unten rechts, wie bei macOS.',
                   ),
                   trailing: SynkUiToggle(
-                    value: state.showCapturePreview,
+                    value: settings.showCapturePreview,
                     onChanged: (value) => bloc.add(
-                      .onSetShowCapturePreview(value),
+                      .onSave(settings.copyWith(showCapturePreview: value)),
                     ),
                   ),
                 ),
-                // Both of these need native code that does not exist yet, so
-                // they are shown as unavailable rather than as dead switches.
-                const SettingsRow(
-                  label: SettingsRowLabel(
+                SettingsRow(
+                  label: const SettingsRowLabel(
                     title: 'Screenshot in die Zwischenablage kopieren',
-                    subtitle: 'Noch nicht verfügbar.',
+                    subtitle: 'Zusätzlich zur Datei im Speicherort.',
                   ),
-                  trailing: SynkUiToggle(value: false, onChanged: null),
+                  trailing: SynkUiToggle(
+                    value: settings.copyScreenshotToClipboard,
+                    onChanged: (value) => bloc.add(
+                      .onSave(
+                        settings.copyWith(copyScreenshotToClipboard: value),
+                      ),
+                    ),
+                  ),
                 ),
-                const SettingsRow(
+                SettingsRow(
                   label: SettingsRowLabel(
                     title: 'Ton in Videos aufnehmen',
                     subtitle:
-                        'Noch nicht verfügbar – Aufnahmen sind derzeit stumm.',
+                        'Unabhängig davon, ob der Ton am Mac zu hören ist.',
+                    badge: SynkUiTag(label: 'Android', color: colors.accent),
                   ),
-                  trailing: SynkUiToggle(value: false, onChanged: null),
+                  trailing: SynkUiToggle(
+                    value: settings.recordAudio,
+                    onChanged: (value) => bloc.add(
+                      .onSave(settings.copyWith(recordAudio: value)),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -101,9 +111,9 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
     );
   }
 
-  Future<void> _pickSavePath(SettingsBloc bloc, String? current) async {
+  Future<void> _pickSavePath(SettingsBloc bloc, Settings settings) async {
     final directory = await getDirectoryPath(
-      initialDirectory: current,
+      initialDirectory: settings.screenCaptureSavePath,
       confirmButtonText: 'Auswählen',
     );
 
@@ -111,6 +121,6 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
       return;
     }
 
-    bloc.add(.onSetScreenCaptureSavePath(directory));
+    bloc.add(.onSave(settings.copyWith(screenCaptureSavePath: directory)));
   }
 }

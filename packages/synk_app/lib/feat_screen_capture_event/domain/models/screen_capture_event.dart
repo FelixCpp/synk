@@ -15,4 +15,12 @@ sealed class ScreenCaptureEvent with _$ScreenCaptureEvent {
     required DeviceId deviceId,
     required String modelName,
   }) = _Png;
+
+  const factory ScreenCaptureEvent.video({
+    required Uint8List? posterBytes,
+    required String filepath,
+    required DeviceScreenSize screenSize,
+    required DeviceId deviceId,
+    required String modelName,
+  }) = _Video;
 }

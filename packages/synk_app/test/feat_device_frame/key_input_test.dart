@@ -1,12 +1,14 @@
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('serial-1');
@@ -21,17 +23,19 @@ DeviceKeyEvent _key(
 
 void main() {
   late _RecordingInteraction interaction;
-  late DeviceFrameRepository repository;
+  late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     interaction = _RecordingInteraction();
-    repository = DeviceFrameRepository(
+    repository = DeviceFrameRepositoryImpl(
       deviceId: _deviceId,
       modelName: 'Test Device',
       session: FakeDeviceSession(interaction: interaction),
       settingsRepository: FakeSettingsRepository(),
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
+      hostClipboard: FakeHostClipboard(),
+      filePicker: const SystemFilePicker(),
     );
   });
 

@@ -34,6 +34,7 @@ class SynkUiSize {
   static const statusTile = 28.0;
   static const statusDot = 7.0;
   static const segment = 24.0;
+  static const segmentDense = 22.0;
   static const toggleWidth = 34.0;
   static const toggleHeight = 20.0;
   static const toggleKnob = 16.0;

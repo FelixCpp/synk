@@ -80,7 +80,10 @@ class SynkTheme {
 
   static Size deviceFrameSizeFor(double aspectRatio) {
     final mirrorWidth = math.sqrt(deviceFrameMirrorArea * aspectRatio);
-    return Size(mirrorWidth, mirrorWidth / aspectRatio + deviceFrameChromeHeight);
+    return Size(
+      mirrorWidth,
+      mirrorWidth / aspectRatio + deviceFrameChromeHeight,
+    );
   }
 
   static const screenCapturePreviewWidth = 140.0;
@@ -95,9 +98,8 @@ class SynkTheme {
     return Size(width, width / aspectRatio);
   }
 
-  /// How far each card behind the top one peeks out. The corner sits at the
-  /// bottom right of the canvas, so the pile has to grow inwards.
   static const screenCapturePreviewStackOffset = Offset(-7.0, -7.0);
   static const screenCapturePreviewStackScaleStep = 0.04;
   static const screenCapturePreviewDismissSlot = 22.0;
+  static const screenCapturePreviewPlaySlot = 30.0;
 }

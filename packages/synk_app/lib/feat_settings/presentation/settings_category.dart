@@ -1,4 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_capture_page.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_devices_page.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_general_page.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_tools_page.dart';
 
 enum SettingsCategory {
   general(label: 'Allgemein', icon: CupertinoIcons.gear_alt),
@@ -10,4 +14,11 @@ enum SettingsCategory {
 
   final String label;
   final IconData icon;
+
+  Widget get page => switch (this) {
+    general => const SettingsGeneralPage(),
+    capture => const SettingsCapturePage(),
+    devices => const SettingsDevicesPage(),
+    tools => const SettingsToolsPage(),
+  };
 }

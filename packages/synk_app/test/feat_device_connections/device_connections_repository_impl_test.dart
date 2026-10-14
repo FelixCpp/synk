@@ -255,10 +255,13 @@ void main() {
 
   group('DeviceConnectionsRepositoryImpl mirror options', () {
     test('hands the stored options to the platform it connects', () async {
-      settings
-        ..frameRate = MirrorFrameRate.fps30
-        ..quality = MirrorQuality.high
-        ..turnDeviceScreenOff = true;
+      settings.update(
+        (it) => it.copyWith(
+          frameRate: MirrorFrameRate.fps30,
+          quality: MirrorQuality.high,
+          turnDeviceScreenOff: true,
+        ),
+      );
       final pixel = await plugInto(android, 'android-1');
 
       await repository.toggleConnection(pixel);
@@ -272,17 +275,38 @@ void main() {
     test('re-reads them for every connect', () async {
       final pixel = await plugInto(android, 'android-1');
 
-      settings.frameRate = MirrorFrameRate.fps30;
+      settings.update((it) => it.copyWith(frameRate: MirrorFrameRate.fps30));
       await repository.toggleConnection(pixel);
       await repository.toggleConnection(pixel);
 
-      settings.frameRate = MirrorFrameRate.fps60;
+      settings.update((it) => it.copyWith(frameRate: MirrorFrameRate.fps60));
       await repository.toggleConnection(pixel);
 
       expect(
         android.connectOptions.map((options) => options.maxFps),
         [30, 60],
       );
+    });
+  });
+
+  group('DeviceConnectionsRepositoryImpl connect-time audio', () {
+    Future<FakeAudio> connectWith({required bool muteOnConnect}) async {
+      final audio = FakeAudio()..isAudioMuted = false;
+      android.onConnect = (_) async => FakeDeviceSession(audio: audio);
+      settings.update((it) => it.copyWith(muteOnConnect: muteOnConnect));
+      final pixel = await plugInto(android, 'android-1');
+
+      await repository.toggleConnection(pixel);
+
+      return audio;
+    }
+
+    test('mutes a fresh session when the preference asks for it', () async {
+      expect((await connectWith(muteOnConnect: true)).isAudioMuted, isTrue);
+    });
+
+    test('leaves it audible when it does not', () async {
+      expect((await connectWith(muteOnConnect: false)).isAudioMuted, isFalse);
     });
   });
 

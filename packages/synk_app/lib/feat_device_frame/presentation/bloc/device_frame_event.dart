@@ -2,7 +2,6 @@ part of 'device_frame_bloc.dart';
 
 @freezed
 sealed class DeviceFrameEvent with _$DeviceFrameEvent {
-  const factory DeviceFrameEvent.onSetup() = _OnSetup;
   const factory DeviceFrameEvent.onCaptureScreenshot() = _OnCaptureScreenshot;
   const factory DeviceFrameEvent.onToggleRecording() = _OnToggleRecording;
   const factory DeviceFrameEvent.onToggleAudioMute() = _OnToggleAudioMute;

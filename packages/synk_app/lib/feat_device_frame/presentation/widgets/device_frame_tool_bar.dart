@@ -41,7 +41,7 @@ class const DeviceFrameToolBar({
               child: Row(
                 spacing: SynkTheme.horizontalComponentSpacingSmall,
                 children: [
-                  _StatusDot(isLive: true), // TODO(Felix): Maybe remove this?
+                  const _StatusDot(),
                   Flexible(
                     child: SynkUiTooltip(
                       message: connection.device.id,
@@ -56,7 +56,6 @@ class const DeviceFrameToolBar({
                 ],
               ),
             ),
-            // Scales the actions down in a narrow frame instead of overflowing.
             Flexible(
               child: FittedBox(
                 fit: .scaleDown,
@@ -127,9 +126,7 @@ class const _Actions({
             onPressed: onToggleMaximize,
           ),
         ),
-        if (connection.supportsInteraction ||
-            connection.supportsFileTransfer ||
-            isAudioMuted)
+        if (connection.hasMenuActions)
           _OverflowButton(
             connection: connection,
             isAudioMuted: isAudioMuted,
@@ -223,12 +220,10 @@ class const _OverflowButton({
   }
 }
 
-class const _StatusDot({required final bool isLive}) extends StatelessWidget {
+class const _StatusDot() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final color = isLive
-        ? context.colors.deviceConnected
-        : context.colors.deviceDisconnected;
+    final color = context.colors.deviceConnected;
 
     return Padding(
       padding: const EdgeInsets.only(right: 2.0),
@@ -244,4 +239,9 @@ class const _StatusDot({required final bool isLive}) extends StatelessWidget {
       ),
     );
   }
+}
+
+extension on DeviceConnection {
+  bool get hasMenuActions =>
+      supportsFileTransfer || supportsAudio || supportsInteraction;
 }

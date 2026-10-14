@@ -32,8 +32,8 @@ class const ScrcpyMirror._({required final NativeTextureId textureId}) {
         .map((event) => event.size);
   }
 
-  Future<void> startRecording(String path) {
-    return ScrcpyChannel.startRecording(textureId, path);
+  Future<void> startRecording(String path, {required bool withAudio}) {
+    return ScrcpyChannel.startRecording(textureId, path, withAudio: withAudio);
   }
 
   Future<bool> stopRecording() {

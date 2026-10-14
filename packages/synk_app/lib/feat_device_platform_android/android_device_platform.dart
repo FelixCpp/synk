@@ -37,7 +37,10 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
   }
 
   @override
-  Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions options) async {
+  Future<DeviceSession> connect(
+    DeviceId deviceId,
+    MirrorOptions options,
+  ) async {
     final adbCommunicator = api.connect(deviceId);
     await _killStaleProcesses(adbCommunicator);
 

@@ -1,38 +1,31 @@
 import 'package:file_selector/file_selector.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_layout.dart';
+import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/presentation/bloc/tool_validation_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class const SettingsToolsPage({
-  super.key,
-
-  /// The adb binary this run of Synk is actually using.
-  required final String activeAdbPath,
-
-  /// The copy of adb that ships inside Synk.
-  required final String bundledAdbPath,
-}) extends StatelessWidget {
+class const SettingsToolsPage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final adbPaths = RepositoryProvider.of<AdbPaths>(context);
+
     return BlocBuilder<ToolValidationBloc, ToolValidationState>(
       builder: (context, validation) {
-        // `null` while a check is in flight — neither green nor amber is
-        // honest at that point.
         final issues = validation.map(
           loading: (_) => null,
           toolsUnavailable: (state) => state.issues,
           toolsAvailable: (state) => state.warnings,
         );
 
-        return BlocBuilder<SettingsBloc, SettingsState>(
+        return BlocBuilder<SettingsBloc, Settings>(
           builder: (context, settings) {
-            final storedAdbPath = settings.adbPath;
-            final nextAdbPath = storedAdbPath ?? bundledAdbPath;
-            final settingsBloc = context.read<SettingsBloc>();
+            final customAdbPath = settings.customAdbPath;
+            final bloc = context.read<SettingsBloc>();
 
             return SettingsPage(
               title: 'Tools',
@@ -44,24 +37,24 @@ class const SettingsToolsPage({
                       name: 'adb',
                       issue: _issueFor(issues, ExternalTool.adb),
                       checking: issues == null,
-                      availableMessage:
-                          storedAdbPath ?? 'In Synk enthalten',
+                      availableMessage: customAdbPath ?? 'In Synk enthalten',
                       consequence: 'Android-Geräte nicht verfügbar',
-                      // adb is only picked up while Synk starts.
-                      needsRestart: nextAdbPath != activeAdbPath,
+                      needsRestart:
+                          (customAdbPath ?? adbPaths.bundled) !=
+                          adbPaths.active,
                       actions: [
-                        if (storedAdbPath != null)
+                        if (customAdbPath != null)
                           SynkUiButton(
                             label: 'Standard',
                             variant: SynkUiButtonVariant.secondary,
-                            onPressed: () => settingsBloc.add(
-                              const .onSetAdbPath(null),
+                            onPressed: () => bloc.add(
+                              .onSave(settings.copyWith(customAdbPath: null)),
                             ),
                           ),
                         SynkUiButton(
                           label: 'Eigenen Pfad …',
                           variant: SynkUiButtonVariant.secondary,
-                          onPressed: () => _pickAdbPath(settingsBloc),
+                          onPressed: () => _pickAdbPath(bloc, settings),
                         ),
                       ],
                     ),
@@ -78,9 +71,9 @@ class const SettingsToolsPage({
                           variant: SynkUiButtonVariant.secondary,
                           onPressed: issues == null
                               ? null
-                              : () => context
-                                    .read<ToolValidationBloc>()
-                                    .add(const .onValidate()),
+                              : () => context.read<ToolValidationBloc>().add(
+                                  const .onValidate(),
+                                ),
                         ),
                       ],
                     ),
@@ -94,13 +87,13 @@ class const SettingsToolsPage({
     );
   }
 
-  Future<void> _pickAdbPath(SettingsBloc bloc) async {
+  Future<void> _pickAdbPath(SettingsBloc bloc, Settings settings) async {
     final file = await openFile(confirmButtonText: 'Auswählen');
     if (file == null) {
       return;
     }
 
-    bloc.add(.onSetAdbPath(file.path));
+    bloc.add(.onSave(settings.copyWith(customAdbPath: file.path)));
   }
 }
 

@@ -13,18 +13,93 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// A 1x1 PNG, enough for the widget tree to lay a capture out.
 final _png = Uint8List.fromList([
-  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
-  0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
-  0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49,
-  0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+  0x89,
+  0x50,
+  0x4E,
+  0x47,
+  0x0D,
+  0x0A,
+  0x1A,
+  0x0A,
+  0x00,
+  0x00,
+  0x00,
+  0x0D,
+  0x49,
+  0x48,
+  0x44,
+  0x52,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x00,
+  0x01,
+  0x08,
+  0x06,
+  0x00,
+  0x00,
+  0x00,
+  0x1F,
+  0x15,
+  0xC4,
+  0x89,
+  0x00,
+  0x00,
+  0x00,
+  0x0A,
+  0x49,
+  0x44,
+  0x41,
+  0x54,
+  0x78,
+  0x9C,
+  0x63,
+  0x00,
+  0x01,
+  0x00,
+  0x00,
+  0x05,
+  0x00,
+  0x01,
+  0x0D,
+  0x0A,
+  0x2D,
+  0xB4,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x49,
+  0x45,
+  0x4E,
+  0x44,
+  0xAE,
+  0x42,
+  0x60,
+  0x82,
 ]);
 
 ScreenCaptureEvent _capture(String device, DeviceScreenSize screenSize) {
   return ScreenCaptureEvent.png(
     bytes: _png,
     filepath: '/tmp/screenshot_$device.png',
+    screenSize: screenSize,
+    deviceId: DeviceId(device),
+    modelName: 'Model $device',
+  );
+}
+
+ScreenCaptureEvent _recording(
+  String device,
+  DeviceScreenSize screenSize, {
+  Uint8List? poster,
+}) {
+  return ScreenCaptureEvent.video(
+    posterBytes: poster,
+    filepath: '/tmp/recording_$device.mp4',
     screenSize: screenSize,
     deviceId: DeviceId(device),
     modelName: 'Model $device',
@@ -104,6 +179,58 @@ void main() {
       closeTo(alone.width, 0.01),
       reason: 'a card sliding behind must not push the corner around',
     );
+  });
+
+  testWidgets('shows a recording with its poster frame', (tester) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_recording('a', portrait, poster: _png));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsOneWidget);
+    expect(
+      find.byIcon(CupertinoIcons.play_fill),
+      findsOneWidget,
+      reason: 'a still frame alone cannot say that this is a recording',
+    );
+    expect(find.text('Model a'), findsOneWidget);
+  });
+
+  testWidgets('still shows a recording whose poster failed', (tester) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_recording('a', portrait));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsNothing);
+    expect(find.byIcon(CupertinoIcons.video_camera), findsOneWidget);
+    expect(
+      find.byIcon(CupertinoIcons.play_fill),
+      findsOneWidget,
+      reason: 'a missing poster must not cost the card its preview',
+    );
+  });
+
+  testWidgets('leaves a screenshot without the recording badge', (
+    tester,
+  ) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_capture('a', portrait));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(CupertinoIcons.play_fill), findsNothing);
+  });
+
+  testWidgets('piles recordings and screenshots together', (tester) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_capture('a', portrait));
+    channel.submit(_recording('b', portrait, poster: _png));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsNWidgets(2));
+    expect(find.text('Model b'), findsOneWidget);
   });
 
   testWidgets('drops a capture that was dismissed', (tester) async {

@@ -19,7 +19,8 @@ class const SynkUiTextField({
 class _SynkUiTextFieldState extends State<SynkUiTextField> {
   FocusNode? _ownedFocusNode;
 
-  FocusNode get _focusNode => widget.focusNode ?? (_ownedFocusNode ??= FocusNode());
+  FocusNode get _focusNode =>
+      widget.focusNode ?? (_ownedFocusNode ??= FocusNode());
 
   @override
   void dispose() {

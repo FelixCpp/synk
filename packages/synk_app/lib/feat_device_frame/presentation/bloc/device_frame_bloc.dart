@@ -3,21 +3,22 @@ import 'dart:async';
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
-import 'package:synk/feat_device_platform/domain/models/device_input.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
+import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/handle_dropped_files_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/install_apk_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/apply_audio_mute_preference_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
-import 'package:synk/feat_device_frame/domain/usecases/share_file_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/send_picked_file_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -40,17 +41,13 @@ class DeviceFrameBloc({
   final startRecording = StartRecordingInteractor(repository);
   final stopRecording = StopRecordingInteractor(repository);
   final setAudioMuted = SetAudioMutedInteractor(repository);
-  final applyAudioMutePreference = ApplyAudioMutePreferenceInteractor(
-    repository,
-  );
-  final handleDroppedFiles = HandleDroppedFilesInteractor(repository);
+  final sendFiles = SendFilesInteractor(repository);
+  final sendPickedApk = SendPickedApkInteractor(repository);
+  final sendPickedFile = SendPickedFileInteractor(repository);
   final navigate = NavigateInteractor(repository);
   final pressPowerButton = PressPowerButtonInteractor(repository);
-  final installApk = InstallApkInteractor(repository);
-  final shareFile = ShareFileInteractor(repository);
 
-  this : super(.initial()) {
-    on<_OnSetup>(_onSetup);
+  this : super(.initial(isAudioMuted: repository.isAudioMuted)) {
     on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnPinchEvent>(_onPinchEvent, transformer: sequential());
@@ -65,93 +62,71 @@ class DeviceFrameBloc({
     );
     on<_OnInstallApk>(_onInstallApk, transformer: sequential());
     on<_OnShareFile>(_onShareFile, transformer: sequential());
-
-    add(const .onSetup());
-  }
-
-  FutureOr<void> _onSetup(_OnSetup event, Emitter<DeviceFrameState> emit) {
-    return applyAudioMutePreference
-        .logger(level: .trace)
-        .after((muted) => emit(state.copyWith(isAudioMuted: muted)))
-        .run(unit);
   }
 
   FutureOr<void> _onKeyEvent(
     _OnKeyEvent event,
     Emitter<DeviceFrameState> emit,
-  ) async {
+  ) {
     final keyEvent = event.keyEvent.toDeviceKeyEvent();
     if (keyEvent == null) {
-      return;
+      return null;
     }
 
     return simulateKeyEvent
         .logger(level: .trace)
-        .after((failure) {
-          if (failure == null) {
-            return;
-          }
-
-          notifications.notify(
-            .new(
-              message: switch (failure) {
-                .toolUnavailable =>
-                  'Zwischenablage nicht verfügbar: Xcode (devicectl) lässt '
-                      'sich nicht ausführen oder das Gerät ist nicht '
-                      'erreichbar.',
-                .deviceUnreachable =>
-                  'Die Zwischenablage des Geräts ist nicht erreichbar.',
-              },
-            ),
-          );
-        })
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to simulate key stroke: $e'),
-          ),
-        )
+        .after(_reportClipboardSyncFailure)
+        .intercept(_notify('Failed to simulate key stroke'))
         .run(keyEvent);
+  }
+
+  void _reportClipboardSyncFailure(ClipboardSyncFailure? failure) {
+    if (failure == null) {
+      return;
+    }
+
+    notifications.notify(
+      .new(
+        message: switch (failure) {
+          .toolUnavailable =>
+            'Zwischenablage nicht verfügbar: Xcode (devicectl) lässt sich '
+                'nicht ausführen oder das Gerät ist nicht erreichbar.',
+          .deviceUnreachable =>
+            'Die Zwischenablage des Geräts ist nicht erreichbar.',
+        },
+      ),
+    );
   }
 
   FutureOr<void> _onPointerEvent(
     _OnPointerEvent event,
     Emitter<DeviceFrameState> emit,
-  ) async {
-    final pointerEvent = DevicePointerEvent(
-      type: event.type,
-      normalizedPointerX: event.normalizedPointerX,
-      normalizedPointerY: event.normalizedPointerY,
-    );
-
-    await simulatePointerEvent
+  ) {
+    return simulatePointerEvent
         .logger(level: .trace)
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to simulate pointer event: $e'),
+        .intercept(_notify('Failed to simulate pointer event'))
+        .run(
+          .new(
+            type: event.type,
+            normalizedPointerX: event.normalizedPointerX,
+            normalizedPointerY: event.normalizedPointerY,
           ),
-        )
-        .run(pointerEvent);
+        );
   }
 
   FutureOr<void> _onPinchEvent(
     _OnPinchEvent event,
     Emitter<DeviceFrameState> emit,
-  ) async {
-    final PinchEvent pinchEvent = (
-      type: event.type,
-      centerX: event.centerX,
-      centerY: event.centerY,
-      spread: event.spread,
-    );
-
-    await simulatePinchEvent
+  ) {
+    return simulatePinchEvent
         .logger(level: .trace)
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to simulate pinch gesture: $e'),
-          ),
-        )
-        .run(pinchEvent);
+        .intercept(_notify('Failed to simulate pinch gesture'))
+        .run((
+          type: event.type,
+          centerX: event.centerX,
+          centerY: event.centerY,
+          spread: event.spread,
+        ));
   }
 
   FutureOr<void> _onCaptureScreenshot(
@@ -160,11 +135,7 @@ class DeviceFrameBloc({
   ) {
     return captureScreenshot
         .logger()
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to capture screenshot: $e'),
-          ),
-        )
+        .intercept(_notify('Failed to capture screenshot'))
         .run(unit);
   }
 
@@ -177,22 +148,14 @@ class DeviceFrameBloc({
 
       return stopRecording
           .logger()
-          .intercept(
-            (e) => notifications.notify(
-              .new(message: 'Failed to stop recording: $e'),
-            ),
-          )
+          .intercept(_notify('Failed to stop recording'))
           .run(unit);
     }
 
     return startRecording
         .logger()
         .after((_) => emit(state.copyWith(isRecording: true)))
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to start recording: $e'),
-          ),
-        )
+        .intercept(_notify('Failed to start recording'))
         .run(unit);
   }
 
@@ -205,11 +168,7 @@ class DeviceFrameBloc({
 
     return setAudioMuted
         .logger()
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to toggle audio: $e'),
-          ),
-        )
+        .intercept(_notify('Failed to toggle audio'))
         .run(muted);
   }
 
@@ -217,30 +176,58 @@ class DeviceFrameBloc({
     _OnFilesDropped event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return handleDroppedFiles
+    return sendFiles
         .logger()
         .busyStateChange(
-          (isBusy) => emit(state.copyWith(isProcessingDroppedFiles: isBusy)),
+          (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
-        .after((outcomes) {
-          for (final outcome in outcomes) {
-            notifications.notify(
-              .new(
-                severity: .success,
-                message: switch (outcome.action) {
-                  .installed => 'App installiert: ${outcome.filename}',
-                  .pushed => 'Datei auf Gerät übertragen: ${outcome.filename}',
-                },
-              ),
-            );
-          }
-        })
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to handle dropped files: $e'),
-          ),
-        )
+        .after((outcomes) => outcomes.forEach(_reportTransfer))
+        .intercept(_notify('Failed to handle dropped files'))
         .run(event.filepaths);
+  }
+
+  FutureOr<void> _onInstallApk(
+    _OnInstallApk event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return sendPickedApk
+        .logger()
+        .busyStateChange(
+          (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
+        )
+        .after(_reportTransfer)
+        .intercept(_notify('Failed to install APK'))
+        .run(unit);
+  }
+
+  FutureOr<void> _onShareFile(
+    _OnShareFile event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return sendPickedFile
+        .logger()
+        .busyStateChange(
+          (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
+        )
+        .after(_reportTransfer)
+        .intercept(_notify('Failed to share file'))
+        .run(unit);
+  }
+
+  void _reportTransfer(FileTransferOutcome? outcome) {
+    if (outcome == null) {
+      return;
+    }
+
+    notifications.notify(
+      .new(
+        severity: .success,
+        message: switch (outcome.action) {
+          .installed => 'App installiert: ${outcome.filename}',
+          .pushed => 'Datei auf Gerät übertragen: ${outcome.filename}',
+        },
+      ),
+    );
   }
 
   FutureOr<void> _onNavigate(
@@ -249,11 +236,7 @@ class DeviceFrameBloc({
   ) {
     return navigate
         .logger()
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to navigate: $e'),
-          ),
-        )
+        .intercept(_notify('Failed to navigate'))
         .run(event.navigation);
   }
 
@@ -263,73 +246,12 @@ class DeviceFrameBloc({
   ) {
     return pressPowerButton
         .logger()
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to press the power button: $e'),
-          ),
-        )
+        .intercept(_notify('Failed to press the power button'))
         .run(unit);
   }
 
-  FutureOr<void> _onInstallApk(
-    _OnInstallApk event,
-    Emitter<DeviceFrameState> emit,
-  ) {
-    return installApk
-        .logger()
-        .busyStateChange(
-          (isBusy) => emit(state.copyWith(isProcessingDroppedFiles: isBusy)),
-        )
-        .after((outcome) {
-          if (outcome == null) {
-            return;
-          }
-
-          notifications.notify(
-            .new(
-              severity: .success,
-              message: 'App installiert: ${outcome.filename}',
-            ),
-          );
-        })
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to install APK: $e'),
-          ),
-        )
-        .run(unit);
-  }
-
-  FutureOr<void> _onShareFile(
-    _OnShareFile event,
-    Emitter<DeviceFrameState> emit,
-  ) {
-    return shareFile
-        .logger()
-        .busyStateChange(
-          (isBusy) => emit(state.copyWith(isProcessingDroppedFiles: isBusy)),
-        )
-        .after((outcome) {
-          if (outcome == null) {
-            return;
-          }
-
-          notifications.notify(
-            .new(
-              severity: .success,
-              message: switch (outcome.action) {
-                .installed => 'App installiert: ${outcome.filename}',
-                .pushed => 'Datei auf Gerät übertragen: ${outcome.filename}',
-              },
-            ),
-          );
-        })
-        .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to share file: $e'),
-          ),
-        )
-        .run(unit);
+  void Function(Object) _notify(String message) {
+    return (error) => notifications.notify(.new(message: '$message: $error'));
   }
 }
 

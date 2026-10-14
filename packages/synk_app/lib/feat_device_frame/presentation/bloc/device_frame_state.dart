@@ -3,16 +3,16 @@ part of 'device_frame_bloc.dart';
 @freezed
 sealed class DeviceFrameState with _$DeviceFrameState {
   const factory DeviceFrameState({
-    required bool isProcessingDroppedFiles,
+    required bool isTransferringFiles,
     required bool isRecording,
     required bool isAudioMuted,
   }) = _DeviceFrameState;
 
-  factory DeviceFrameState.initial() {
-    return const .new(
-      isProcessingDroppedFiles: false,
+  factory DeviceFrameState.initial({required bool isAudioMuted}) {
+    return .new(
+      isTransferringFiles: false,
       isRecording: false,
-      isAudioMuted: true,
+      isAudioMuted: isAudioMuted,
     );
   }
 }

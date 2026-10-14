@@ -98,7 +98,6 @@ class DeviceConnectionsRepositoryImpl({
     });
   }
 
-  /// A connection follows the screen size of its session, e.g. on rotation.
   Stream<DeviceConnection> _observeConnection(
     PluggedDevice device,
     DeviceSession session,
@@ -112,7 +111,6 @@ class DeviceConnectionsRepositoryImpl({
     });
   }
 
-  /// One list per entry of [platforms], in the same order.
   Stream<List<List<PluggedDevice>>> _observeDevicesPerPlatform() {
     if (platforms.isEmpty) {
       return Stream.value(const []);
@@ -133,9 +131,10 @@ class DeviceConnectionsRepositoryImpl({
     _setState(device.id, const DeviceConnectionState.connecting());
 
     try {
-      // Read per connect: a running session keeps what it was started with.
-      final options = await settingsRepository.getMirrorOptions();
-      final session = await platform.connect(device.id, options);
+      final settings = await settingsRepository.read();
+      final session = await platform.connect(device.id, settings.mirrorOptions);
+      await session.audio?.setAudioMuted(settings.muteOnConnect);
+
       sessionsById[device.id] = session;
       _setState(device.id, const DeviceConnectionState.connected());
     } catch (_) {

@@ -4,14 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('screenCapturePreviewSizeFor', () {
     test('keeps the reference device on the established thumbnail size', () {
-      const referenceAspectRatio = SynkTheme.screenCapturePreviewReferenceAspectRatio;
+      const referenceAspectRatio =
+          SynkTheme.screenCapturePreviewReferenceAspectRatio;
 
       final size = SynkTheme.screenCapturePreviewSizeFor(referenceAspectRatio);
 
       expect(size.width, closeTo(SynkTheme.screenCapturePreviewWidth, 0.01));
       expect(
         size.height,
-        closeTo(SynkTheme.screenCapturePreviewWidth / referenceAspectRatio, 0.01),
+        closeTo(
+          SynkTheme.screenCapturePreviewWidth / referenceAspectRatio,
+          0.01,
+        ),
       );
     });
 

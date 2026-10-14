@@ -1,62 +1,87 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository.dart';
+import 'package:synk/feat_device_frame/application/file_picker.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
+import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
-const _deviceId = DeviceId('serial-1');
-
-DeviceFrameRepository _repositoryFor(
-  FakeAudio audio, {
-  required bool muteOnConnect,
-}) {
-  return DeviceFrameRepository(
-    deviceId: _deviceId,
-    modelName: 'Test Device',
-    session: FakeDeviceSession(audio: audio),
-    settingsRepository: FakeSettingsRepository(muteOnConnect: muteOnConnect),
-    screenCaptureEventChannel: ScreenCaptureEventChannel(),
-  );
-}
-
 void main() {
-  group('DeviceFrameRepository.applyAudioMutePreference', () {
-    test('mutes a fresh session when the preference asks for it', () async {
+  group('DeviceFrameBloc audio', () {
+    test('reports the mute state a session already has', () async {
       final audio = FakeAudio()..isAudioMuted = false;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
 
-      final muted = await _repositoryFor(
-        audio,
-        muteOnConnect: true,
-      ).applyAudioMutePreference();
+      await pumpEventQueue();
 
-      expect(audio.isAudioMuted, isTrue);
-      expect(muted, isTrue);
+      expect(bloc.state.isAudioMuted, isFalse);
     });
 
-    test('unmutes a fresh session when the preference asks for it', () async {
-      final audio = FakeAudio()..isAudioMuted = true;
+    test(
+      'leaves the session alone, however the preference is set',
+      () async {
+        // A device can carry more than one frame: the maximized view builds a
+        // second one for the same session. If setup imposed the connect-time
+        // preference, opening it would silence audio the user just turned on.
+        final audio = FakeAudio()..isAudioMuted = false;
+        final bloc = _blocFor(audio);
+        addTearDown(bloc.close);
 
-      final muted = await _repositoryFor(
-        audio,
-        muteOnConnect: false,
-      ).applyAudioMutePreference();
+        await pumpEventQueue();
+
+        expect(audio.isAudioMuted, isFalse);
+      },
+    );
+
+    test('unmuting in the frame reaches the session', () async {
+      // The state a fresh session is handed by the connect-time preference.
+      final audio = FakeAudio()..isAudioMuted = true;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      expect(bloc.state.isAudioMuted, isTrue);
+
+      bloc.add(const DeviceFrameEvent.onToggleAudioMute());
+      await pumpEventQueue();
 
       expect(audio.isAudioMuted, isFalse);
-      expect(muted, isFalse);
+      expect(bloc.state.isAudioMuted, isFalse);
     });
 
-    test('reports a session without audio as muted', () async {
-      final repository = DeviceFrameRepository(
-        deviceId: _deviceId,
-        modelName: 'Test Device',
-        session: FakeDeviceSession(),
-        settingsRepository: FakeSettingsRepository(muteOnConnect: false),
-        screenCaptureEventChannel: ScreenCaptureEventChannel(),
-      );
+    test('muting again reaches the session too', () async {
+      final audio = FakeAudio()..isAudioMuted = false;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
 
-      expect(await repository.applyAudioMutePreference(), isTrue);
+      bloc.add(const DeviceFrameEvent.onToggleAudioMute());
+      await pumpEventQueue();
+
+      expect(audio.isAudioMuted, isTrue);
     });
   });
+}
+
+DeviceFrameBloc _blocFor(FakeAudio audio) {
+  final notifications = NotificationService();
+  addTearDown(notifications.dispose);
+
+  return DeviceFrameBloc(
+    repository: DeviceFrameRepositoryImpl(
+      deviceId: const DeviceId('serial-1'),
+      modelName: 'Test Device',
+      session: FakeDeviceSession(audio: audio),
+      settingsRepository: FakeSettingsRepository(),
+      screenCaptureEventChannel: ScreenCaptureEventChannel(),
+      hostClipboard: FakeHostClipboard(),
+      filePicker: const SystemFilePicker(),
+    ),
+    notifications: notifications,
+  );
 }

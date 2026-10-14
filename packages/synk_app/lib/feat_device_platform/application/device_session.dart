@@ -5,12 +5,10 @@ import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart'
 
 extension type const NativeTextureId(int value) implements int {}
 
-/// One connected device. What it can do beyond being mirrored is optional.
 abstract interface class DeviceSession {
   NativeTextureId get textureId;
   DeviceScreenSize get screenSize;
 
-  /// Emits the current size first, then every change, e.g. on rotation.
   Stream<DeviceScreenSize> get screenSizeChanges;
 
   DeviceAudio? get audio;
@@ -44,7 +42,7 @@ abstract interface class DeviceAudio {
 
 abstract interface class DeviceScreenCapture {
   Future<Uint8List> captureScreenshot();
-  Future<void> startRecording(String path);
+  Future<void> startRecording(String path, {required bool withAudio});
   Future<bool> stopRecording();
 }
 

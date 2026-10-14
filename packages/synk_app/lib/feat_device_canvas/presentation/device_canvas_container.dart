@@ -8,6 +8,7 @@ import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
@@ -135,8 +136,8 @@ class const _Content({
           alignment: .bottomRight,
           child: Padding(
             padding: SynkTheme.cardPadding,
-            child: BlocSelector<SettingsBloc, SettingsState, bool>(
-              selector: (state) => state.showCapturePreview,
+            child: BlocSelector<SettingsBloc, Settings, bool>(
+              selector: (settings) => settings.showCapturePreview,
               builder: (context, showPreview) => showPreview
                   ? const ScreenCapturePreviewThumbnail()
                   : const SizedBox.shrink(),

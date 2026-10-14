@@ -73,7 +73,9 @@ class const _BusyOverlay({super.key}) extends StatelessWidget {
             const SynkUiSpinner(size: 18.0, color: foreground),
             Text(
               'Wird übertragen…',
-              style: context.synkUi.typography.label.copyWith(color: foreground),
+              style: context.synkUi.typography.label.copyWith(
+                color: foreground,
+              ),
             ),
           ],
         ),

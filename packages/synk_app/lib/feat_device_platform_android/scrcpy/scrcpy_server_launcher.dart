@@ -76,8 +76,7 @@ class ScrcpyServerLauncher {
     }
   }
 
-  static List<String> _serverArguments(String scid, MirrorOptions options) =>
-      [
+  static List<String> _serverArguments(String scid, MirrorOptions options) => [
     'CLASSPATH=$scrcpyServerRemotePath',
     'app_process',
     '/',

@@ -82,10 +82,15 @@ class ScrcpyChannel {
     });
   }
 
-  static Future<void> startRecording(NativeTextureId textureId, String path) {
+  static Future<void> startRecording(
+    NativeTextureId textureId,
+    String path, {
+    required bool withAudio,
+  }) {
     return _methodChannel.invokeMethod('startRecording', {
       'textureId': textureId.value,
       'path': path,
+      'withAudio': withAudio,
     });
   }
 

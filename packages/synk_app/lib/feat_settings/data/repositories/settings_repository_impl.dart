@@ -1,216 +1,114 @@
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
 import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
-import 'package:synk/feat_settings/domain/models/settings_defaults.dart';
+import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
-import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 
 class SettingsRepositoryImpl({
   required final RxSharedPreferences preferences,
-  required final String fallbackScreenCaptureSavePath,
-  required final ThemeMode fallbackThemeMode,
+  required final Settings defaults,
 }) implements SettingsRepository {
-  static const screenCaptureSavePath = 'screen_capture_save_path';
+  @override
+  Future<Settings> read() async {
+    return _decode(await preferences.readAll());
+  }
+
+  @override
+  Stream<Settings> observe() {
+    return preferences.observeAll().map(_decode);
+  }
+
+  @override
+  Future<void> save(Settings settings) async {
+    await Future.wait([
+      preferences.setString(_Key.themeMode, settings.themeMode.name),
+      preferences.setString(
+        _Key.screenCaptureSavePath,
+        settings.screenCaptureSavePath,
+      ),
+      preferences.setBool(
+        _Key.showCapturePreview,
+        settings.showCapturePreview,
+      ),
+      preferences.setBool(
+        _Key.copyScreenshotToClipboard,
+        settings.copyScreenshotToClipboard,
+      ),
+      preferences.setBool(_Key.recordAudio, settings.recordAudio),
+      preferences.setString(_Key.frameRate, settings.frameRate.name),
+      preferences.setString(_Key.quality, settings.quality.name),
+      preferences.setBool(
+        _Key.turnDeviceScreenOff,
+        settings.turnDeviceScreenOff,
+      ),
+      preferences.setBool(_Key.muteOnConnect, settings.muteOnConnect),
+      preferences.setBool(_Key.syncClipboard, settings.syncClipboard),
+      preferences.setString(_Key.customAdbPath, settings.customAdbPath),
+    ]);
+  }
+
+  Settings _decode(Map<String, Object?> stored) {
+    T read<T extends Object>(String key, T fallback) {
+      return stored[key] as T? ?? fallback;
+    }
+
+    E readEnum<E extends Enum>(String key, List<E> values, E fallback) {
+      final name = stored[key];
+
+      for (final value in values) {
+        if (value.name == name) return value;
+      }
+
+      return fallback;
+    }
+
+    return Settings(
+      themeMode: readEnum(
+        _Key.themeMode,
+        ThemeMode.values,
+        defaults.themeMode,
+      ),
+      screenCaptureSavePath: read(
+        _Key.screenCaptureSavePath,
+        defaults.screenCaptureSavePath,
+      ),
+      showCapturePreview: read(
+        _Key.showCapturePreview,
+        defaults.showCapturePreview,
+      ),
+      copyScreenshotToClipboard: read(
+        _Key.copyScreenshotToClipboard,
+        defaults.copyScreenshotToClipboard,
+      ),
+      recordAudio: read(_Key.recordAudio, defaults.recordAudio),
+      frameRate: readEnum(
+        _Key.frameRate,
+        MirrorFrameRate.values,
+        defaults.frameRate,
+      ),
+      quality: readEnum(_Key.quality, MirrorQuality.values, defaults.quality),
+      turnDeviceScreenOff: read(
+        _Key.turnDeviceScreenOff,
+        defaults.turnDeviceScreenOff,
+      ),
+      muteOnConnect: read(_Key.muteOnConnect, defaults.muteOnConnect),
+      syncClipboard: read(_Key.syncClipboard, defaults.syncClipboard),
+      customAdbPath: stored[_Key.customAdbPath] as String?,
+    );
+  }
+}
+
+abstract final class _Key {
   static const themeMode = 'theme_mode';
+  static const screenCaptureSavePath = 'screen_capture_save_path';
   static const showCapturePreview = 'show_capture_preview';
+  static const copyScreenshotToClipboard = 'copy_screenshot_to_clipboard';
+  static const recordAudio = 'record_audio';
   static const frameRate = 'mirror_frame_rate';
   static const quality = 'mirror_quality';
   static const turnDeviceScreenOff = 'turn_device_screen_off';
   static const muteOnConnect = 'mute_on_connect';
   static const syncClipboard = 'sync_clipboard';
-  static const adbPath = 'adb_path';
-
-  @override
-  Future<String> getScreenCaptureSavePath() async {
-    return await preferences.getString(screenCaptureSavePath) ??
-        fallbackScreenCaptureSavePath;
-  }
-
-  @override
-  Future<String?> getAdbPath() {
-    return preferences.getString(adbPath);
-  }
-
-  @override
-  Future<MirrorOptions> getMirrorOptions() async {
-    final frameRate = _frameRateFromPreference(
-      await preferences.getString(SettingsRepositoryImpl.frameRate),
-    );
-    final quality = _qualityFromPreference(
-      await preferences.getString(SettingsRepositoryImpl.quality),
-    );
-
-    return MirrorOptions(
-      maxFps: frameRate.maxFps,
-      videoBitRate: quality.videoBitRate,
-      turnDeviceScreenOff:
-          await preferences.getBool(turnDeviceScreenOff) ??
-          SettingsDefaults.turnDeviceScreenOff,
-    );
-  }
-
-  @override
-  Future<bool> getMuteOnConnect() async {
-    return await preferences.getBool(muteOnConnect) ??
-        SettingsDefaults.muteOnConnect;
-  }
-
-  @override
-  Future<bool> getSyncClipboard() async {
-    return await preferences.getBool(syncClipboard) ??
-        SettingsDefaults.syncClipboard;
-  }
-
-  @override
-  Future<void> setThemeMode(ThemeMode mode) async {
-    await preferences.setString(themeMode, mode.name);
-  }
-
-  @override
-  Future<void> setScreenCaptureSavePath(String path) async {
-    await preferences.setString(screenCaptureSavePath, path);
-  }
-
-  @override
-  Future<void> setShowCapturePreview(bool value) async {
-    await preferences.setBool(showCapturePreview, value);
-  }
-
-  @override
-  Future<void> setFrameRate(MirrorFrameRate value) async {
-    await preferences.setString(frameRate, value.name);
-  }
-
-  @override
-  Future<void> setQuality(MirrorQuality value) async {
-    await preferences.setString(quality, value.name);
-  }
-
-  @override
-  Future<void> setTurnDeviceScreenOff(bool value) async {
-    await preferences.setBool(turnDeviceScreenOff, value);
-  }
-
-  @override
-  Future<void> setMuteOnConnect(bool value) async {
-    await preferences.setBool(muteOnConnect, value);
-  }
-
-  @override
-  Future<void> setSyncClipboard(bool value) async {
-    await preferences.setBool(syncClipboard, value);
-  }
-
-  @override
-  Future<void> setAdbPath(String? path) async {
-    // A null value removes the key, which is what "use the bundled adb" is.
-    await preferences.setString(adbPath, path);
-  }
-
-  @override
-  Stream<SettingsState> observeState() {
-    return Rx.combineLatest2(
-      _observeAppearance(),
-      _observeMirroring(),
-      (appearance, mirroring) {
-        return SettingsState(
-          themeMode: appearance.themeMode,
-          screenCaptureSavePath: appearance.screenCaptureSavePath,
-          showCapturePreview: appearance.showCapturePreview,
-          adbPath: appearance.adbPath,
-          frameRate: mirroring.frameRate,
-          quality: mirroring.quality,
-          turnDeviceScreenOff: mirroring.turnDeviceScreenOff,
-          muteOnConnect: mirroring.muteOnConnect,
-          syncClipboard: mirroring.syncClipboard,
-        );
-      },
-    );
-  }
-
-  Stream<
-    ({
-      ThemeMode themeMode,
-      String screenCaptureSavePath,
-      bool showCapturePreview,
-      String? adbPath,
-    })
-  >
-  _observeAppearance() {
-    return Rx.combineLatest4(
-      preferences
-          .getStringStream(themeMode)
-          .map((value) => _themeModeFromPreference(value) ?? fallbackThemeMode),
-      preferences
-          .getStringStream(screenCaptureSavePath)
-          .map((value) => value ?? fallbackScreenCaptureSavePath),
-      _boolStream(showCapturePreview, SettingsDefaults.showCapturePreview),
-      preferences.getStringStream(adbPath),
-      (themeMode, savePath, preview, adb) => (
-        themeMode: themeMode,
-        screenCaptureSavePath: savePath,
-        showCapturePreview: preview,
-        adbPath: adb,
-      ),
-    );
-  }
-
-  Stream<
-    ({
-      MirrorFrameRate frameRate,
-      MirrorQuality quality,
-      bool turnDeviceScreenOff,
-      bool muteOnConnect,
-      bool syncClipboard,
-    })
-  >
-  _observeMirroring() {
-    return Rx.combineLatest5(
-      preferences
-          .getStringStream(frameRate)
-          .map(_frameRateFromPreference),
-      preferences.getStringStream(quality).map(_qualityFromPreference),
-      _boolStream(turnDeviceScreenOff, SettingsDefaults.turnDeviceScreenOff),
-      _boolStream(muteOnConnect, SettingsDefaults.muteOnConnect),
-      _boolStream(syncClipboard, SettingsDefaults.syncClipboard),
-      (frameRate, quality, screenOff, mute, clipboard) => (
-        frameRate: frameRate,
-        quality: quality,
-        turnDeviceScreenOff: screenOff,
-        muteOnConnect: mute,
-        syncClipboard: clipboard,
-      ),
-    );
-  }
-
-  Stream<bool> _boolStream(String key, bool fallback) {
-    return preferences.getBoolStream(key).map((value) => value ?? fallback);
-  }
-}
-
-/// Values written before `system` existed were already `dark`/`light`, so
-/// matching on the enum name needs no migration.
-ThemeMode? _themeModeFromPreference(String? value) {
-  for (final mode in ThemeMode.values) {
-    if (mode.name == value) return mode;
-  }
-
-  return null;
-}
-
-MirrorFrameRate _frameRateFromPreference(String? value) {
-  return MirrorFrameRate.values.firstWhere(
-    (frameRate) => frameRate.name == value,
-    orElse: () => SettingsDefaults.frameRate,
-  );
-}
-
-MirrorQuality _qualityFromPreference(String? value) {
-  return MirrorQuality.values.firstWhere(
-    (quality) => quality.name == value,
-    orElse: () => SettingsDefaults.quality,
-  );
+  static const customAdbPath = 'adb_path';
 }
