@@ -26,7 +26,6 @@ import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_issue_message.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_validation_gate.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
-import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/settings_window.dart';
 import 'package:synk/feat_settings/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -229,9 +228,7 @@ class const _SynkScreen({
 }
 
 class _SynkScreenState extends State<_SynkScreen> {
-  /// `null` until the toolbar toggle is used; the stored preference seeds the
-  /// session, after which the user's in-session choice wins.
-  bool? _showSidebar;
+  var _showSidebar = true;
 
   @override
   void initState() {
@@ -252,38 +249,31 @@ class _SynkScreenState extends State<_SynkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocSelector<SettingsBloc, SettingsState, bool>(
-      selector: (state) => state.showSidebarOnStart,
-      builder: (context, showSidebarOnStart) {
-        final showSidebar = _showSidebar ?? showSidebarOnStart;
-
-        return SynkUiShell(
-          title: 'Synk',
-          showSidebar: showSidebar,
-          leading: SynkUiTooltip(
-            message: 'Seitenleiste ausblenden/anzeigen',
-            child: SynkUiIconButton(
-              icon: CupertinoIcons.sidebar_left,
-              onPressed: () => setState(() => _showSidebar = !showSidebar),
+    return SynkUiShell(
+      title: 'Synk',
+      showSidebar: _showSidebar,
+      leading: SynkUiTooltip(
+        message: 'Seitenleiste ausblenden/anzeigen',
+        child: SynkUiIconButton(
+          icon: CupertinoIcons.sidebar_left,
+          onPressed: () => setState(() => _showSidebar = !_showSidebar),
+        ),
+      ),
+      actions: [
+        SynkUiTooltip(
+          message: 'Einstellungen',
+          child: SynkUiIconButton(
+            icon: CupertinoIcons.gear_alt,
+            onPressed: () => showSettingsWindow(
+              context,
+              activeAdbPath: widget.activeAdbPath,
+              bundledAdbPath: widget.bundledAdbPath,
             ),
           ),
-          actions: [
-            SynkUiTooltip(
-              message: 'Einstellungen',
-              child: SynkUiIconButton(
-                icon: CupertinoIcons.gear_alt,
-                onPressed: () => showSettingsWindow(
-                  context,
-                  activeAdbPath: widget.activeAdbPath,
-                  bundledAdbPath: widget.bundledAdbPath,
-                ),
-              ),
-            ),
-          ],
-          sidebar: const SynkSidebar(),
-          child: const DeviceCanvasContainer(),
-        );
-      },
+        ),
+      ],
+      sidebar: const SynkSidebar(),
+      child: const DeviceCanvasContainer(),
     );
   }
 }

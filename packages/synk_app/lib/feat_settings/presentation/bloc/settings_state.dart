@@ -5,7 +5,6 @@ sealed class SettingsState with _$SettingsState {
   const factory SettingsState({
     required ThemeMode themeMode,
     required String? screenCaptureSavePath,
-    required bool showSidebarOnStart,
     required bool showCapturePreview,
     required MirrorFrameRate frameRate,
     required MirrorQuality quality,
@@ -21,7 +20,6 @@ sealed class SettingsState with _$SettingsState {
     return .new(
       themeMode: mode,
       screenCaptureSavePath: null,
-      showSidebarOnStart: SettingsDefaults.showSidebarOnStart,
       showCapturePreview: SettingsDefaults.showCapturePreview,
       frameRate: SettingsDefaults.frameRate,
       quality: SettingsDefaults.quality,

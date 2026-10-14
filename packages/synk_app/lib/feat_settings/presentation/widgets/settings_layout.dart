@@ -29,25 +29,37 @@ class const SettingsPage({
   }
 }
 
+/// The [note] carries what holds for the whole group — most usefully *when* a
+/// setting takes effect, which a row title cannot say without repeating itself
+/// on every sibling.
 class const SettingsSection({
   super.key,
   required final String title,
   required final List<Widget> children,
+  final String? note,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.synkUi;
     final colors = theme.colors;
+    final note = this.note;
 
     return Column(
       crossAxisAlignment: .stretch,
       spacing: SynkUiSpace.s8,
       children: [
-        Text(
-          title.toUpperCase(),
-          style: theme.typography.microLabel.copyWith(
-            color: colors.textSecondary,
-          ),
+        Column(
+          crossAxisAlignment: .stretch,
+          spacing: SynkUiSpace.s4,
+          children: [
+            Text(
+              title.toUpperCase(),
+              style: theme.typography.microLabel.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+            if (note != null) Text(note, style: theme.typography.secondary),
+          ],
         ),
         SynkUiCard(
           color: colors.raised,

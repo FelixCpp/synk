@@ -9,8 +9,6 @@ sealed class SettingsEvent with _$SettingsEvent {
       _OnSetScreenCaptureSavePath;
   const factory SettingsEvent.onRevealScreenCaptureSavePath() =
       _OnRevealScreenCaptureSavePath;
-  const factory SettingsEvent.onSetShowSidebarOnStart(bool value) =
-      _OnSetShowSidebarOnStart;
   const factory SettingsEvent.onSetShowCapturePreview(bool value) =
       _OnSetShowCapturePreview;
   const factory SettingsEvent.onSetFrameRate(MirrorFrameRate frameRate) =

@@ -146,7 +146,7 @@ class const _ToolRow({
       label: SettingsRowLabel(
         title: name,
         badge: needsRestart
-            ? SynkUiTag(label: 'Neustart', color: colors.warn)
+            ? SynkUiTag(label: 'Neustart nötig', color: colors.warn)
             : null,
         subtitle: message,
         subtitleStyle: theme.typography.mono.copyWith(

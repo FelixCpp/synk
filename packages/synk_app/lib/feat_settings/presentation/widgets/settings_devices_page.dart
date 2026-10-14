@@ -7,14 +7,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 String _frameRateLabel(MirrorFrameRate frameRate) => switch (frameRate) {
-  MirrorFrameRate.fps30 => '30 fps',
-  MirrorFrameRate.fps60 => '60 fps',
+  .fps30 => '30 fps',
+  .fps60 => '60 fps',
 };
 
 String _qualityLabel(MirrorQuality quality) => switch (quality) {
-  MirrorQuality.low => 'Niedrig',
-  MirrorQuality.medium => 'Mittel',
-  MirrorQuality.high => 'Hoch',
+  .low => 'Niedrig',
+  .medium => 'Mittel',
+  .high => 'Hoch',
 };
 
 class const SettingsDevicesPage({super.key}) extends StatelessWidget {
@@ -29,13 +29,13 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
           title: 'Geräte',
           children: [
             SettingsSection(
-              title: 'Spiegeln',
+              title: 'Für neue Verbindungen',
+              note:
+                  'Eine Verbindung behält, womit sie gestartet wurde. '
+                  'Änderungen greifen beim nächsten Verbinden.',
               children: [
                 SettingsRow(
-                  label: const SettingsRowLabel(
-                    title: 'Bildrate',
-                    subtitle: 'Wirkt ab der nächsten Verbindung.',
-                  ),
+                  label: const SettingsRowLabel(title: 'Bildrate'),
                   trailing: SynkUiSegmentedControl<MirrorFrameRate>(
                     value: state.frameRate,
                     segments: [
@@ -71,7 +71,9 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                 SettingsRow(
                   label: SettingsRowLabel(
                     title: 'Display am Gerät ausschalten',
-                    subtitle: 'Wirkt ab der nächsten Verbindung.',
+                    subtitle:
+                        'Das Gerät bleibt dunkel, während du es am Mac '
+                        'bedienst.',
                     badge: SynkUiTag(label: 'Android', color: colors.accent),
                   ),
                   trailing: SynkUiToggle(
@@ -81,13 +83,13 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                     ),
                   ),
                 ),
-              ],
-            ),
-            SettingsSection(
-              title: 'Beim Verbinden',
-              children: [
                 SettingsRow(
-                  label: const SettingsRowLabel(title: 'Ton stummschalten'),
+                  label: const SettingsRowLabel(
+                    title: 'Ton zu Beginn stummschalten',
+                    subtitle:
+                        'Der Ton wird trotzdem übertragen und lässt sich im '
+                        'Gerätefenster jederzeit einschalten.',
+                  ),
                   trailing: SynkUiToggle(
                     value: state.muteOnConnect,
                     onChanged: (value) => bloc.add(
@@ -95,12 +97,17 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
                     ),
                   ),
                 ),
+              ],
+            ),
+            SettingsSection(
+              title: 'Im Gerätefenster',
+              children: [
                 SettingsRow(
                   label: const SettingsRowLabel(
                     title: 'Zwischenablage synchronisieren',
                     subtitle:
-                        '⌘C und ⌘V im Gerätefenster kopieren zwischen Mac '
-                        'und Gerät.',
+                        '⌘C und ⌘V kopieren zwischen Mac und Gerät. Ist das '
+                        'aus, gehen die Tastenkürzel an das Gerät selbst.',
                   ),
                   trailing: SynkUiToggle(
                     value: state.syncClipboard,

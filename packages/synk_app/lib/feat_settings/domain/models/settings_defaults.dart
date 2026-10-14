@@ -8,7 +8,6 @@ import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
 class SettingsDefaults {
   const SettingsDefaults._();
 
-  static const showSidebarOnStart = true;
   static const showCapturePreview = true;
   static const frameRate = MirrorFrameRate.fps60;
   static const quality = MirrorQuality.medium;

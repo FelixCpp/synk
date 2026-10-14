@@ -11,7 +11,6 @@ class FakeSettingsRepository implements SettingsRepository {
   FakeSettingsRepository({
     this.screenCaptureSavePath = '/tmp/synk-test-captures',
     this.themeMode = ThemeMode.light,
-    this.showSidebarOnStart = SettingsDefaults.showSidebarOnStart,
     this.showCapturePreview = SettingsDefaults.showCapturePreview,
     this.frameRate = SettingsDefaults.frameRate,
     this.quality = SettingsDefaults.quality,
@@ -23,7 +22,6 @@ class FakeSettingsRepository implements SettingsRepository {
 
   String screenCaptureSavePath;
   ThemeMode themeMode;
-  bool showSidebarOnStart;
   bool showCapturePreview;
   MirrorFrameRate frameRate;
   MirrorQuality quality;
@@ -61,11 +59,6 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   Future<void> setThemeMode(ThemeMode mode) async {
     themeMode = mode;
-  }
-
-  @override
-  Future<void> setShowSidebarOnStart(bool value) async {
-    showSidebarOnStart = value;
   }
 
   @override
@@ -109,7 +102,6 @@ class FakeSettingsRepository implements SettingsRepository {
       SettingsState(
         themeMode: themeMode,
         screenCaptureSavePath: screenCaptureSavePath,
-        showSidebarOnStart: showSidebarOnStart,
         showCapturePreview: showCapturePreview,
         frameRate: frameRate,
         quality: quality,

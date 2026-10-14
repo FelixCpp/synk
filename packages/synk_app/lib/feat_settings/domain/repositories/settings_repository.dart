@@ -21,7 +21,6 @@ abstract interface class SettingsRepository {
 
   Future<void> setThemeMode(ThemeMode mode);
   Future<void> setScreenCaptureSavePath(String path);
-  Future<void> setShowSidebarOnStart(bool value);
   Future<void> setShowCapturePreview(bool value);
   Future<void> setFrameRate(MirrorFrameRate frameRate);
   Future<void> setQuality(MirrorQuality quality);

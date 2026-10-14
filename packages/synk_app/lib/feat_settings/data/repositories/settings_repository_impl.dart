@@ -15,7 +15,6 @@ class SettingsRepositoryImpl({
 }) implements SettingsRepository {
   static const screenCaptureSavePath = 'screen_capture_save_path';
   static const themeMode = 'theme_mode';
-  static const showSidebarOnStart = 'show_sidebar_on_start';
   static const showCapturePreview = 'show_capture_preview';
   static const frameRate = 'mirror_frame_rate';
   static const quality = 'mirror_quality';
@@ -76,11 +75,6 @@ class SettingsRepositoryImpl({
   }
 
   @override
-  Future<void> setShowSidebarOnStart(bool value) async {
-    await preferences.setBool(showSidebarOnStart, value);
-  }
-
-  @override
   Future<void> setShowCapturePreview(bool value) async {
     await preferences.setBool(showCapturePreview, value);
   }
@@ -125,7 +119,6 @@ class SettingsRepositoryImpl({
         return SettingsState(
           themeMode: appearance.themeMode,
           screenCaptureSavePath: appearance.screenCaptureSavePath,
-          showSidebarOnStart: appearance.showSidebarOnStart,
           showCapturePreview: appearance.showCapturePreview,
           adbPath: appearance.adbPath,
           frameRate: mirroring.frameRate,
@@ -142,26 +135,23 @@ class SettingsRepositoryImpl({
     ({
       ThemeMode themeMode,
       String screenCaptureSavePath,
-      bool showSidebarOnStart,
       bool showCapturePreview,
       String? adbPath,
     })
   >
   _observeAppearance() {
-    return Rx.combineLatest5(
+    return Rx.combineLatest4(
       preferences
           .getStringStream(themeMode)
           .map((value) => _themeModeFromPreference(value) ?? fallbackThemeMode),
       preferences
           .getStringStream(screenCaptureSavePath)
           .map((value) => value ?? fallbackScreenCaptureSavePath),
-      _boolStream(showSidebarOnStart, SettingsDefaults.showSidebarOnStart),
       _boolStream(showCapturePreview, SettingsDefaults.showCapturePreview),
       preferences.getStringStream(adbPath),
-      (themeMode, savePath, sidebar, preview, adb) => (
+      (themeMode, savePath, preview, adb) => (
         themeMode: themeMode,
         screenCaptureSavePath: savePath,
-        showSidebarOnStart: sidebar,
         showCapturePreview: preview,
         adbPath: adb,
       ),

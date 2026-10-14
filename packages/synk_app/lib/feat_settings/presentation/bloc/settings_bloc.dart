@@ -19,7 +19,6 @@ import 'package:synk/feat_settings/domain/usecases/set_mute_on_connect_interacto
 import 'package:synk/feat_settings/domain/usecases/set_quality_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/set_screen_capture_save_path_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/set_show_capture_preview_interactor.dart';
-import 'package:synk/feat_settings/domain/usecases/set_show_sidebar_on_start_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/set_sync_clipboard_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/set_theme_mode_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/set_turn_device_screen_off_interactor.dart';
@@ -42,7 +41,6 @@ class SettingsBloc({
     repository,
     const SystemFileOpener(),
   );
-  final setShowSidebarOnStart = SetShowSidebarOnStartInteractor(repository);
   final setShowCapturePreview = SetShowCapturePreviewInteractor(repository);
   final setFrameRate = SetFrameRateInteractor(repository);
   final setQuality = SetQualityInteractor(repository);
@@ -61,10 +59,6 @@ class SettingsBloc({
     on<_OnRevealScreenCaptureSavePath>(
       _onRevealScreenCaptureSavePath,
       transformer: droppable(),
-    );
-    on<_OnSetShowSidebarOnStart>(
-      _onSetShowSidebarOnStart,
-      transformer: sequential(),
     );
     on<_OnSetShowCapturePreview>(
       _onSetShowCapturePreview,
@@ -122,16 +116,6 @@ class SettingsBloc({
           ),
         )
         .run(unit);
-  }
-
-  FutureOr<void> _onSetShowSidebarOnStart(
-    _OnSetShowSidebarOnStart event,
-    Emitter<SettingsState> emit,
-  ) {
-    return setShowSidebarOnStart
-        .logger()
-        .intercept(_report('Seitenleiste beim Start'))
-        .run(event.value);
   }
 
   FutureOr<void> _onSetShowCapturePreview(

@@ -8,52 +8,37 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 class const SettingsGeneralPage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<SettingsBloc, SettingsState>(
-      builder: (context, state) {
-        final bloc = context.read<SettingsBloc>();
-
-        return SettingsPage(
-          title: 'Allgemein',
+    return SettingsPage(
+      title: 'Allgemein',
+      children: [
+        SettingsSection(
+          title: 'Erscheinungsbild',
           children: [
-            SettingsSection(
-              title: 'Erscheinungsbild',
-              children: [
-                SettingsRow(
-                  label: const SettingsRowLabel(
-                    title: 'Design',
-                    subtitle: '„System“ folgt der macOS-Einstellung.',
-                  ),
-                  trailing: SynkUiSegmentedControl<ThemeMode>(
-                    value: state.themeMode,
+            SettingsRow(
+              label: const SettingsRowLabel(
+                title: 'Design',
+                subtitle: '„System“ folgt der macOS-Einstellung.',
+              ),
+              trailing: BlocSelector<SettingsBloc, SettingsState, ThemeMode>(
+                selector: (state) => state.themeMode,
+                builder: (context, themeMode) {
+                  return SynkUiSegmentedControl<ThemeMode>(
+                    value: themeMode,
                     segments: const [
                       SynkUiSegment(value: ThemeMode.light, label: 'Hell'),
                       SynkUiSegment(value: ThemeMode.dark, label: 'Dunkel'),
                       SynkUiSegment(value: ThemeMode.system, label: 'System'),
                     ],
-                    onChanged: (mode) => bloc.add(.onSetThemeMode(mode)),
-                  ),
-                ),
-              ],
-            ),
-            SettingsSection(
-              title: 'Fenster',
-              children: [
-                SettingsRow(
-                  label: const SettingsRowLabel(
-                    title: 'Seitenleiste beim Start anzeigen',
-                  ),
-                  trailing: SynkUiToggle(
-                    value: state.showSidebarOnStart,
-                    onChanged: (value) => bloc.add(
-                      .onSetShowSidebarOnStart(value),
+                    onChanged: (mode) => context.read<SettingsBloc>().add(
+                      .onSetThemeMode(mode),
                     ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ],
-        );
-      },
+        ),
+      ],
     );
   }
 }
