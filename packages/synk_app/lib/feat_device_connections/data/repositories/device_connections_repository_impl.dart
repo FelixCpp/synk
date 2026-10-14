@@ -13,22 +13,18 @@ class DeviceConnectionsRepositoryImpl({
   required final List<DevicePlatform> platforms,
   required final SettingsRepository settingsRepository,
 }) implements DeviceConnectionsRepository {
-  final sessionsById = <DeviceId, DeviceSession>{};
+  final _sessionsById = <DeviceId, DeviceSession>{};
   final connectionStates = BehaviorSubject.seeded(
     <DeviceId, DeviceConnectionState>{},
   );
 
   var _platformsByDeviceId = <DeviceId, DevicePlatform>{};
-  late final StreamSubscription<List<List<PluggedDevice>>>
-  pluggedDeviceSubscription;
+  late final StreamSubscription<void> _discoverySubscription;
 
   this {
-    pluggedDeviceSubscription = _observeDevicesPerPlatform().listen((
-      devicesPerPlatform,
-    ) {
+    _discoverySubscription = _observeDiscoveries().listen((discoveries) {
       _platformsByDeviceId = {
-        for (final (index, devices) in devicesPerPlatform.indexed)
-          for (final device in devices) device.id: platforms[index],
+        for (final (:device, :platform) in discoveries) device.id: platform,
       };
 
       _forgetStatesOfAbsentDevices(_platformsByDeviceId.keys.toSet());
@@ -37,13 +33,13 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   Future<void> dispose() async {
-    await pluggedDeviceSubscription.cancel();
+    await _discoverySubscription.cancel();
     await connectionStates.close();
 
-    for (final session in sessionsById.values) {
+    for (final session in _sessionsById.values) {
       await session.dispose();
     }
-    sessionsById.clear();
+    _sessionsById.clear();
 
     for (final platform in platforms) {
       await platform.dispose();
@@ -57,14 +53,16 @@ class DeviceConnectionsRepositoryImpl({
 
   @override
   bool isConnected(DeviceId id) {
-    return sessionsById.containsKey(id);
+    return _sessionsById.containsKey(id);
   }
 
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
-    return _observeDevicesPerPlatform().map((devicesPerPlatform) {
-      return [for (final devices in devicesPerPlatform) ...devices];
-    });
+    return _observeDiscoveries().map(
+      (discoveries) => [
+        for (final discovery in discoveries) discovery.device,
+      ],
+    );
   }
 
   @override
@@ -86,7 +84,7 @@ class DeviceConnectionsRepositoryImpl({
       connectionStates,
       (devices, states) => [
         for (final device in devices)
-          if (sessionsById[device.id] case final session?)
+          if (_sessionsById[device.id] case final session?)
             _observeConnection(device, session),
       ],
     ).switchMap((connections) {
@@ -111,14 +109,24 @@ class DeviceConnectionsRepositoryImpl({
     });
   }
 
-  Stream<List<List<PluggedDevice>>> _observeDevicesPerPlatform() {
+  Stream<List<_DeviceDiscovery>> _observeDiscoveries() {
     if (platforms.isEmpty) {
       return Stream.value(const []);
     }
 
     return Rx.combineLatestList([
-      for (final platform in platforms) platform.observeDevices(),
-    ]);
+      for (final platform in platforms) _observeDiscoveriesOf(platform),
+    ]).map((perPlatform) => [for (final devices in perPlatform) ...devices]);
+  }
+
+  Stream<List<_DeviceDiscovery>> _observeDiscoveriesOf(
+    DevicePlatform platform,
+  ) {
+    return platform.observeDevices().map(
+      (devices) => [
+        for (final device in devices) (device: device, platform: platform),
+      ],
+    );
   }
 
   Future<void> _connect(PluggedDevice device) async {
@@ -135,7 +143,7 @@ class DeviceConnectionsRepositoryImpl({
       final session = await platform.connect(device.id, settings.mirrorOptions);
       await session.audio?.setAudioMuted(settings.muteOnConnect);
 
-      sessionsById[device.id] = session;
+      _sessionsById[device.id] = session;
       _setState(device.id, const DeviceConnectionState.connected());
     } catch (_) {
       _setState(
@@ -147,7 +155,7 @@ class DeviceConnectionsRepositoryImpl({
   }
 
   Future<void> _disconnect(PluggedDevice device) async {
-    await sessionsById.remove(device.id)?.dispose();
+    await _sessionsById.remove(device.id)?.dispose();
     _setState(device.id, const DeviceConnectionState.disconnected());
   }
 
@@ -188,3 +196,8 @@ class DeviceConnectionsRepositoryImpl({
     );
   }
 }
+
+typedef _DeviceDiscovery = ({
+  PluggedDevice device,
+  DevicePlatform platform,
+});
