@@ -1,8 +1,6 @@
 import AVFoundation
 import AudioToolbox
-import CoreMedia
 import Foundation
-import VideoToolbox
 import os
 
 private let logger = Logger(subsystem: "dev.synk", category: "ios_media_stream")
@@ -174,12 +172,7 @@ final class RtcpReporter: @unchecked Sendable {
     static let senderReport: UInt8 = 200
     static let receiverReport: UInt8 = 201
     static let sourceDescription: UInt8 = 202
-    /// Payload-specific feedback (RFC 4585); format 1 is picture loss.
-    static let payloadFeedback: UInt8 = 206
   }
-
-  /// A burst of loss would otherwise produce a burst of requests.
-  private static let keyframeRequestInterval: TimeInterval = 0.25
 
   private let socket: Int32
   private let destination: sockaddr_in6
@@ -187,8 +180,6 @@ final class RtcpReporter: @unchecked Sendable {
   private let remoteSSRC: UInt32
   private let interval: TimeInterval
   private let clockRate: UInt32
-  /// Whether this stream needs the receiver to ask for intra frames.
-  private let requestsKeyframes: Bool
 
   private let lock = NSLock()
   private var timer: DispatchSourceTimer?
@@ -208,15 +199,10 @@ final class RtcpReporter: @unchecked Sendable {
   /// arrived — together they are the round-trip estimate the sender wants.
   private var lastSenderReport: UInt32 = 0
   private var lastSenderReportArrival: TimeInterval?
-  private var lastKeyframeRequest: TimeInterval?
-  /// Full intra requests carry a sequence number the sender uses to tell a
-  /// repeat apart from a fresh request.
-  private var fullIntraRequestCount: UInt8 = 0
 
   init?(
     socket: Int32, senderIP: String, rtcpPort: UInt16, interfaceName: String,
-    localSSRC: UInt32, remoteSSRC: UInt32, interval: TimeInterval, clockRate: UInt32,
-    requestsKeyframes: Bool = false
+    localSSRC: UInt32, remoteSSRC: UInt32, interval: TimeInterval, clockRate: UInt32
   ) {
     // Reports have to come from the port the device sends to, so this shares
     // the receive socket — but through its own descriptor. The reader closes
@@ -242,7 +228,6 @@ final class RtcpReporter: @unchecked Sendable {
     // A report interval of zero would busy-loop; fall back to the RFC default.
     self.interval = interval > 0 ? interval : 5
     self.clockRate = clockRate
-    self.requestsKeyframes = requestsKeyframes
   }
 
   func start() {
@@ -321,49 +306,6 @@ final class RtcpReporter: @unchecked Sendable {
     lastSenderReport = middle
     lastSenderReportArrival = Date().timeIntervalSince1970
     lock.unlock()
-  }
-
-  /// Asks the sender for a fresh intra frame, in both standard forms.
-  ///
-  /// Measured against iOS 27.0.1, this device acts on neither: it emits a
-  /// single intra frame when the stream starts and none afterwards, whatever
-  /// it is asked. The request is still the right thing to send after a loss,
-  /// and costs one small packet.
-  func requestKeyframe() {
-    let now = Date().timeIntervalSince1970
-    lock.lock()
-    if let lastKeyframeRequest, now - lastKeyframeRequest < Self.keyframeRequestInterval {
-      lock.unlock()
-      return
-    }
-    lastKeyframeRequest = now
-    lock.unlock()
-
-    lock.lock()
-    fullIntraRequestCount &+= 1
-    let sequenceNumber = fullIntraRequestCount
-    lock.unlock()
-
-    var packet = Data()
-    // Picture loss indication: the gentle form, which Apple's sender ignores
-    // for this stream.
-    packet.append(0x80 | 1)  // Version 2, feedback message type 1 (PLI).
-    packet.append(PacketType.payloadFeedback)
-    packet.appendBigEndian(UInt16(2))  // 12 bytes, in words, minus one.
-    packet.appendBigEndian(localSSRC)
-    packet.appendBigEndian(remoteSSRC)
-
-    // Full intra request (RFC 5104), which it does act on.
-    packet.append(0x80 | 4)  // Version 2, feedback message type 4 (FIR).
-    packet.append(PacketType.payloadFeedback)
-    packet.appendBigEndian(UInt16(4))  // 20 bytes, in words, minus one.
-    packet.appendBigEndian(localSSRC)
-    packet.appendBigEndian(UInt32(0))  // Unused for FIR.
-    packet.appendBigEndian(remoteSSRC)
-    packet.append(sequenceNumber)
-    packet.append(contentsOf: [0, 0, 0])  // Reserved.
-
-    transmit(packet)
   }
 
   private func tick() {
@@ -484,304 +426,6 @@ extension Array where Element == UInt8 {
   }
 }
 
-// MARK: - Video
-
-/// Turns the HEVC stream a CoreDevice media stream sends into pixel buffers.
-///
-/// The device packetises per RFC 7798: aggregation packets (NAL type 48),
-/// fragmentation units (49) and plain single NAL units. Parameter sets arrive
-/// inline and are repeated, so the format description is built from the stream
-/// itself rather than from the negotiation.
-/// Sendable by discipline rather than by locking: `receive` is only ever
-/// called from one `RtpSocketReader` thread, and `RtpSocketReader.stop()`
-/// waits for that thread, so `invalidate()` never overlaps it.
-final class HevcStreamDecoder: @unchecked Sendable {
-  private enum NalType {
-    static let vps: UInt8 = 32
-    static let sps: UInt8 = 33
-    static let pps: UInt8 = 34
-    static let aggregationPacket: UInt8 = 48
-    static let fragmentationUnit: UInt8 = 49
-  }
-
-  /// The RTP clock rate for video, fixed by RFC 7798.
-  static let clockRate: UInt32 = 90_000
-
-  private var videoParameterSet: [UInt8]?
-  private var sequenceParameterSet: [UInt8]?
-  private var pictureParameterSet: [UInt8]?
-  private var formatDescription: CMVideoFormatDescription?
-  private var decompressionSession: VTDecompressionSession?
-
-  /// NAL units of the access unit being collected, and the partially received
-  /// fragmentation unit feeding it.
-  private var pendingNalUnits: [[UInt8]] = []
-  private var fragment: [UInt8] = []
-  private var expectedSequenceNumber: UInt16?
-  /// Set when a gap hits the access unit being collected. The rest of it still
-  /// arrives, but submitting what is left would hand the decoder a frame with
-  /// holes — which it renders as a picture where only some regions updated.
-  private var accessUnitDamaged = false
-
-  private(set) var droppedAccessUnits = 0
-  private(set) var decodeFailures = 0
-  private(set) var submittedAccessUnits = 0
-  /// NAL types of the first access units, for diagnosing a stream that starts
-  /// mid-GOP.
-  private(set) var firstNalTypes: [UInt8] = []
-  /// How many intra random access pictures the stream delivered. HEVC puts
-  /// them at NAL types 16 through 21.
-  private(set) var intraFrames = 0
-
-  /// Called on the receive thread for every decoded frame.
-  var onFrame: ((CVPixelBuffer, CMTime) -> Void)?
-  /// Called when a gap in the stream forced an access unit to be dropped.
-  var onPacketLoss: (() -> Void)?
-  /// Diagnostics: receives every reassembled NAL unit in order.
-  var onNalUnit: (([UInt8]) -> Void)?
-
-  func receive(_ packet: RtpPacket) {
-    // A gap means a lost packet: the access unit under construction can no
-    // longer be complete, so drop it rather than feed the decoder a hole.
-    if let expected = expectedSequenceNumber, packet.sequenceNumber != expected {
-      pendingNalUnits = []
-      fragment = []
-      accessUnitDamaged = true
-      onPacketLoss?()
-    }
-    expectedSequenceNumber = packet.sequenceNumber &+ 1
-
-    depacketize(packet.payload)
-    if packet.hasMarker { completeAccessUnit(timestamp: packet.timestamp) }
-  }
-
-  private func depacketize(_ payload: UnsafeBufferPointer<UInt8>) {
-    guard payload.count >= 2 else { return }
-
-    switch (payload[0] >> 1) & 0x3F {
-    case NalType.aggregationPacket:
-      // PayloadHdr, then a run of (16-bit size, NAL unit) pairs.
-      var cursor = 2
-      while cursor + 2 <= payload.count {
-        let size = Int(UInt16(payload[cursor]) << 8 | UInt16(payload[cursor + 1]))
-        cursor += 2
-        guard size > 0, cursor + size <= payload.count else { return }
-        append(nalUnit: Array(payload[cursor..<(cursor + size)]))
-        cursor += size
-      }
-
-    case NalType.fragmentationUnit:
-      // PayloadHdr (2 bytes) then the FU header: start | end | type.
-      guard payload.count > 3 else { return }
-      let header = payload[2]
-      let isStart = header & 0x80 != 0
-      let isEnd = header & 0x40 != 0
-      let fragmentType = header & 0x3F
-
-      if isStart {
-        // Rebuild the NAL header the fragments were split from: keep the layer
-        // and temporal bits of the payload header, put the real type back.
-        fragment = [(payload[0] & 0x81) | (fragmentType << 1), payload[1]]
-      } else if fragment.isEmpty {
-        return  // A middle fragment whose start was lost.
-      }
-      fragment.append(contentsOf: payload[3...])
-      if isEnd {
-        append(nalUnit: fragment)
-        fragment = []
-      }
-
-    default:
-      append(nalUnit: Array(payload))
-    }
-  }
-
-  private func append(nalUnit: [UInt8]) {
-    guard let first = nalUnit.first else { return }
-    onNalUnit?(nalUnit)
-    switch (first >> 1) & 0x3F {
-    case NalType.vps: replace(&videoParameterSet, with: nalUnit)
-    case NalType.sps: replace(&sequenceParameterSet, with: nalUnit)
-    case NalType.pps: replace(&pictureParameterSet, with: nalUnit)
-    default: pendingNalUnits.append(nalUnit)
-    }
-  }
-
-  /// Parameter sets are repeated with every keyframe, so most of these are
-  /// identical. A changed one means the stream reconfigured — the device was
-  /// rotated, say — and the cached format description no longer describes it.
-  private func replace(_ parameterSet: inout [UInt8]?, with nalUnit: [UInt8]) {
-    guard parameterSet != nalUnit else { return }
-    parameterSet = nalUnit
-    formatDescription = nil
-    invalidateSession()
-  }
-
-  /// Drops the decompression session, letting frames already in flight finish
-  /// first — their callback holds an unretained reference back here.
-  private func invalidateSession() {
-    guard let decompressionSession else { return }
-    VTDecompressionSessionWaitForAsynchronousFrames(decompressionSession)
-    VTDecompressionSessionInvalidate(decompressionSession)
-    self.decompressionSession = nil
-  }
-
-  private func completeAccessUnit(timestamp: UInt32) {
-    defer {
-      pendingNalUnits = []
-      accessUnitDamaged = false
-    }
-    guard !accessUnitDamaged else {
-      droppedAccessUnits += 1
-      return
-    }
-    guard !pendingNalUnits.isEmpty,
-      let formatDescription = resolveFormatDescription(),
-      let session = resolveSession(formatDescription: formatDescription)
-    else { return }
-
-    submittedAccessUnits += 1
-    if pendingNalUnits.contains(where: { (16...21).contains(($0[0] >> 1) & 0x3F) }) {
-      intraFrames += 1
-    }
-    if firstNalTypes.count < 24 {
-      firstNalTypes.append(contentsOf: pendingNalUnits.map { ($0[0] >> 1) & 0x3F })
-    }
-
-    // VideoToolbox wants length-prefixed NAL units, not Annex B start codes.
-    var payload: [UInt8] = []
-    payload.reserveCapacity(pendingNalUnits.reduce(0) { $0 + $1.count + 4 })
-    for nalUnit in pendingNalUnits {
-      let size = UInt32(nalUnit.count)
-      payload.append(UInt8(truncatingIfNeeded: size >> 24))
-      payload.append(UInt8(truncatingIfNeeded: size >> 16))
-      payload.append(UInt8(truncatingIfNeeded: size >> 8))
-      payload.append(UInt8(truncatingIfNeeded: size))
-      payload.append(contentsOf: nalUnit)
-    }
-
-    guard
-      let sampleBuffer = Self.makeSampleBuffer(
-        payload: payload, formatDescription: formatDescription,
-        presentationTime: CMTime(
-          value: CMTimeValue(timestamp), timescale: CMTimeScale(Self.clockRate)))
-    else { return }
-
-    let status = VTDecompressionSessionDecodeFrame(
-      session, sampleBuffer: sampleBuffer,
-      flags: [._EnableAsynchronousDecompression], frameRefcon: nil, infoFlagsOut: nil)
-    if status != noErr { decodeFailures += 1 }
-  }
-
-  private func resolveFormatDescription() -> CMVideoFormatDescription? {
-    if let formatDescription { return formatDescription }
-    guard let videoParameterSet, let sequenceParameterSet, let pictureParameterSet else {
-      return nil
-    }
-
-    var created: CMFormatDescription?
-    let status = videoParameterSet.withUnsafeBufferPointer { vps in
-      sequenceParameterSet.withUnsafeBufferPointer { sps in
-        pictureParameterSet.withUnsafeBufferPointer { pps in
-          let pointers = [vps.baseAddress!, sps.baseAddress!, pps.baseAddress!]
-          let sizes = [vps.count, sps.count, pps.count]
-          return pointers.withUnsafeBufferPointer { pointerList in
-            sizes.withUnsafeBufferPointer { sizeList in
-              CMVideoFormatDescriptionCreateFromHEVCParameterSets(
-                allocator: kCFAllocatorDefault, parameterSetCount: 3,
-                parameterSetPointers: pointerList.baseAddress!,
-                parameterSetSizes: sizeList.baseAddress!, nalUnitHeaderLength: 4,
-                extensions: nil, formatDescriptionOut: &created)
-            }
-          }
-        }
-      }
-    }
-
-    guard status == noErr, let created else {
-      logger.error("Cannot build the HEVC format description: \(status)")
-      return nil
-    }
-    formatDescription = created
-    return created
-  }
-
-  private func resolveSession(formatDescription: CMVideoFormatDescription)
-    -> VTDecompressionSession?
-  {
-    if let decompressionSession { return decompressionSession }
-
-    var callback = VTDecompressionOutputCallbackRecord(
-      decompressionOutputCallback: { refcon, _, status, _, imageBuffer, presentationTime, _ in
-        guard let refcon else { return }
-        let decoder = Unmanaged<HevcStreamDecoder>.fromOpaque(refcon).takeUnretainedValue()
-        guard status == noErr, let imageBuffer else {
-          decoder.decodeFailures += 1
-          return
-        }
-        decoder.onFrame?(imageBuffer, presentationTime)
-      },
-      decompressionOutputRefCon: Unmanaged.passUnretained(self).toOpaque())
-
-    // BGRA keeps the Flutter texture path identical to the capture-session one.
-    //
-    // Flutter wraps the buffer in a Metal texture through its IOSurface. The
-    // hardware decoder happens to back its buffers that way already, but
-    // asking is what makes that a guarantee rather than an observation.
-    let attributes: [CFString: Any] = [
-      kCVPixelBufferPixelFormatTypeKey: kCVPixelFormatType_32BGRA,
-      kCVPixelBufferIOSurfacePropertiesKey: [CFString: Any](),
-      kCVPixelBufferMetalCompatibilityKey: true,
-    ]
-
-    var session: VTDecompressionSession?
-    let status = VTDecompressionSessionCreate(
-      allocator: kCFAllocatorDefault, formatDescription: formatDescription,
-      decoderSpecification: nil, imageBufferAttributes: attributes as CFDictionary,
-      outputCallback: &callback, decompressionSessionOut: &session)
-
-    guard status == noErr else {
-      logger.error("Cannot create the HEVC decompression session: \(status)")
-      return nil
-    }
-    decompressionSession = session
-    return session
-  }
-
-  private static func makeSampleBuffer(
-    payload: [UInt8], formatDescription: CMVideoFormatDescription, presentationTime: CMTime
-  ) -> CMSampleBuffer? {
-    let block = UnsafeMutablePointer<UInt8>.allocate(capacity: payload.count)
-    block.update(from: payload, count: payload.count)
-
-    var blockBuffer: CMBlockBuffer?
-    var status = CMBlockBufferCreateWithMemoryBlock(
-      allocator: kCFAllocatorDefault, memoryBlock: block, blockLength: payload.count,
-      blockAllocator: kCFAllocatorDefault, customBlockSource: nil, offsetToData: 0,
-      dataLength: payload.count, flags: 0, blockBufferOut: &blockBuffer)
-    guard status == noErr, let blockBuffer else {
-      block.deallocate()
-      return nil
-    }
-
-    var timing = CMSampleTimingInfo(
-      duration: .invalid, presentationTimeStamp: presentationTime, decodeTimeStamp: .invalid)
-    var sampleSize = payload.count
-    var sampleBuffer: CMSampleBuffer?
-    status = CMSampleBufferCreateReady(
-      allocator: kCFAllocatorDefault, dataBuffer: blockBuffer,
-      formatDescription: formatDescription, sampleCount: 1, sampleTimingEntryCount: 1,
-      sampleTimingArray: &timing, sampleSizeEntryCount: 1, sampleSizeArray: &sampleSize,
-      sampleBufferOut: &sampleBuffer)
-    guard status == noErr else { return nil }
-    return sampleBuffer
-  }
-
-  func invalidate() {
-    invalidateSession()
-  }
-}
-
 // MARK: - Audio
 
 /// Turns the system-audio stream into PCM buffers.
@@ -790,7 +434,9 @@ final class HevcStreamDecoder: @unchecked Sendable {
 /// per RTP packet. Silence is sent as a tiny inactive frame rather than being
 /// dropped, so packet flow alone says nothing about whether anything is
 /// audible.
-/// Sendable under the same discipline as `HevcStreamDecoder`.
+/// Sendable by discipline rather than by locking: `receive` is only ever
+/// called from one `RtpSocketReader` thread, and `RtpSocketReader.stop()`
+/// waits for that thread, so `invalidate()` never overlaps it.
 final class AacEldStreamDecoder: @unchecked Sendable {
   static let sampleRate: Double = 48_000
   static let channelCount: UInt32 = 2

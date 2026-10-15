@@ -141,7 +141,6 @@ Solange das Backend die bestehenden Fähigkeits-Interfaces bedient, bleibt die A
   `iosSwipeForNavigation`, ihre distanzabhängige Physik ist aber noch nicht am Gerät nachgefühlt.
   Freigeben heißt, sie in `IosInteraction.supportedNavigations` aufzunehmen.
 - **`ConnectionFailure.connectionRefused` wird nicht mehr erzeugt.** Jeder Fehlschlag ist `unknown`.
-- **`IosMediaStreamTransport` ist unbenutzt.** Im Einsatz ist nur `IosCaptureSessionTransport`.
 - **`DeviceForm` (Telefon/Tablet)** für Sidebar-Icon und Texte ist nicht umgesetzt.
 - **Repository-Interfaces** mit nur einer Implementierung gibt es noch für Connections, Pairing,
   Tool-Validierung und Theme-Mode. Das von Connections dient den Tests als Naht.

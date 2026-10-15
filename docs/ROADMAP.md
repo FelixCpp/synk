@@ -143,13 +143,12 @@ unrecognized"), und mit `kAVCMediaStreamOptionRunInProcess` baut der Strom
 zwar, aber `AVCVideoDataOutput` scheitert, weil es die prozessübergreifende
 Image-Queue braucht.
 
-**Einbau.** `IosMediaStreamPlugin` liegt neben `IosMirrorPlugin` und beantwortet
-dieselben Methodennamen; `IosMirrorTransport` ist die Naht dazwischen. Das
-Repository bevorzugt den Medienstrom und fällt auf die Capture-Session zurück –
-die erreicht jedes vertraute Gerät, braucht aber USB und hat keinen Ton. Audio
-hängt an der neuen Abstraktion `AudioAgent`, die Android und iOS gemeinsam
-implementieren; der Mute-Knopf in der Toolbar hing vorher an „ist Android" und
-hängt jetzt an `supportsAudio`.
+**Einbau.** Das Bild kommt ausschliesslich aus der Capture-Session
+(`IosMirrorPlugin`); `IosMediaStreamPlugin` liefert nur noch den Ton daneben.
+Der Videopfad über den Medienstrom (HEVC-Decoder, Textur, Screenshot, Aufnahme,
+`IosMediaStreamTransport`) war gebaut, aber nie verdrahtet, und ist entfernt.
+Wer ihn für kabelloses Mirroring zurückholen will: zuletzt vollständig in
+Commit `e2f3aee`.
 
 **Drei Fallen, die Zeit gekostet haben** (Details im Spike-README):
 

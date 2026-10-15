@@ -54,7 +54,7 @@ class IosDevicePlatform({
     );
 
     return IosDeviceSession(
-      transport: IosCaptureSessionTransport(channel, audio),
+      transport: IosMirrorTransport(channel, audio),
       hidChannel: hidChannel,
       devicectl: devicectl,
       fileSystem: fileSystem,

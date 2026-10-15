@@ -43,7 +43,7 @@ void main() {
     bool hasAudio = false,
   }) async {
     final session = IosDeviceSession(
-      transport: IosCaptureSessionTransport(
+      transport: IosMirrorTransport(
         IosMirrorChannel(),
         hasAudio ? IosAudioSideCar(IosMediaStreamChannel(), 7) : null,
       ),
