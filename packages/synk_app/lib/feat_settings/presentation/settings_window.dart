@@ -126,12 +126,6 @@ class const _Header({required final VoidCallback onClose})
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Text(
-                'esc',
-                style: theme.typography.mono.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
               SynkUiIconButton(
                 icon: CupertinoIcons.xmark,
                 onPressed: onClose,
