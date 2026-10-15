@@ -6,6 +6,11 @@ desktop and lets you control them with mouse and keyboard.
 ![Platform](https://img.shields.io/badge/platform-macOS-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/devices-dark.png">
+  <img alt="synk mirroring a Pixel 6 and an iPhone 15 side by side" src="docs/screenshots/devices-light.png" width="720">
+</picture>
+
 ## Features
 
 - **Screen mirroring** of several devices at once, laid out in a grid; any device can be maximized
@@ -17,6 +22,13 @@ desktop and lets you control them with mouse and keyboard.
 - **Android only**: wireless connection via Wi-Fi pairing, file transfer and APK install by drag & drop,
   Back / Home / Recent Apps buttons
 - **Settings** for frame rate, video quality, capture location, theme (light / dark / system) and more
+
+Maximize any device to focus on it; the rest of the grid stays connected in the background:
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/focus-dark.png">
+  <img alt="A single mirrored iPhone maximized in focus mode" src="docs/screenshots/focus-light.png" width="720">
+</picture>
 
 ## Android vs. iOS
 
