@@ -11,6 +11,7 @@
 **/devtools_options.yaml
 **/pubspec.lock
 **/*.symbols
+**/*.dmg
 
 **/.gradle/
 **/.kotlin/
