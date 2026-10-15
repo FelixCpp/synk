@@ -380,6 +380,8 @@ class const _DeviceFrameBlocProvider({
           screenCaptureEventChannel: RepositoryProvider.of(context),
           hostClipboard: RepositoryProvider.of(context),
           filePicker: RepositoryProvider.of(context),
+          fileSystem: RepositoryProvider.of(context),
+          clock: RepositoryProvider.of(context),
         ),
         notifications: RepositoryProvider.of(context),
       ),

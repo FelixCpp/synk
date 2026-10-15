@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
@@ -81,6 +83,8 @@ DeviceFrameBloc _blocFor(FakeAudio audio) {
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
       hostClipboard: FakeHostClipboard(),
       filePicker: const SystemFilePicker(),
+      fileSystem: MemoryFileSystem(),
+      clock: const Clock(),
     ),
     notifications: notifications,
   );

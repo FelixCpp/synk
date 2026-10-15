@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:app_logger/app_logger.dart';
+import 'package:clock/clock.dart';
+import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_clipboard/application/host_clipboard.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
@@ -24,6 +26,8 @@ class DeviceFrameRepositoryImpl({
   required final ScreenCaptureEventChannel screenCaptureEventChannel,
   required final HostClipboard hostClipboard,
   required final FilePicker filePicker,
+  required final FileSystem fileSystem,
+  required final Clock clock,
 }) implements DeviceFrameRepository {
   late final _clipboardSync = DeviceClipboardSync(
     deviceId: deviceId,
@@ -35,6 +39,8 @@ class DeviceFrameRepositoryImpl({
     modelName: modelName,
     settingsRepository: settingsRepository,
     events: screenCaptureEventChannel,
+    fileSystem: fileSystem,
+    clock: clock,
   );
 
   String? _runningRecordingFilepath;

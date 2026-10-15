@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:file/file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
@@ -17,6 +18,7 @@ class IosDeviceSession({
   required final IosMirrorTransport transport,
   required final IosHidChannel hidChannel,
   required final DevicectlApi devicectl,
+  required final FileSystem fileSystem,
   required final DeviceId deviceId,
   @override required final NativeTextureId textureId,
   required DeviceScreenSize initialScreenSize,
@@ -44,6 +46,7 @@ class IosDeviceSession({
     devicectl: devicectl,
     deviceId: deviceId,
     textureId: textureId,
+    fileSystem: fileSystem,
   );
 
   final _screenSize = BehaviorSubject.seeded(initialScreenSize);

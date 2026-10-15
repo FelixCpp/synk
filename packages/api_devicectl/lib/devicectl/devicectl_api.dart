@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:api_devicectl/devicectl/process/devicectl_process_runner.dart';
+import 'package:process/process.dart';
 
 class const DevicectlCommandException({required final String message})
     implements Exception {
@@ -9,8 +10,14 @@ class const DevicectlCommandException({required final String message})
   String toString() => 'DevicectlCommandException: $message';
 }
 
-class DevicectlApi({final String xcrunPath = defaultXcrunPath}) {
-  final processRunner = DevicectlProcessRunner(xcrunPath: xcrunPath);
+class DevicectlApi({
+  final String xcrunPath = defaultXcrunPath,
+  final ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final processRunner = DevicectlProcessRunner(
+    xcrunPath: xcrunPath,
+    processManager: processManager,
+  );
 
   Future<void> captureScreenshot({
     required String deviceId,

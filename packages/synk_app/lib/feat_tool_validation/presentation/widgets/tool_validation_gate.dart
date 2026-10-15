@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synk/feat_tool_validation/data/repositories/tool_validation_repository_impl.dart';
@@ -24,7 +22,9 @@ class const ToolValidationGate({
     return RepositoryProvider<ToolValidationRepository>(
       create: (context) => ToolValidationRepositoryImpl(
         adbPath: adbPath,
-        checkXcode: Platform.isMacOS,
+        fileSystem: RepositoryProvider.of(context),
+        processManager: RepositoryProvider.of(context),
+        platform: RepositoryProvider.of(context),
       ),
       lazy: false,
       child: BlocProvider<ToolValidationBloc>(

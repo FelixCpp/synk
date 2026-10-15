@@ -3,10 +3,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:api_adb/api_adb.dart';
+import 'package:clock/clock.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
+import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 
 const scrcpyServerVersion = '4.1';
 const scrcpyServerRemotePath = '/data/local/tmp/scrcpy-server.jar';
@@ -36,18 +36,23 @@ class const ScrcpyServerConnection({
   }
 }
 
-class ScrcpyServerLauncher {
-  static final _serverFilepathProvider = _scrcpyServerFilepathProvider();
+class ScrcpyServerLauncher({
+  required final BundledFiles bundledFiles,
+  required final Clock clock,
+}) {
   static final _random = Random();
 
-  static Future<ScrcpyServerConnection> launch(
+  Future<ScrcpyServerConnection> launch(
     AdbDeviceCommunicator communicator, {
     MirrorOptions options = const .defaults(),
     Duration connectTimeout = const Duration(seconds: 30),
     Duration firstVideoByteTimeout = const Duration(seconds: 30),
   }) async {
     await communicator.pushFile(
-      localFilepath: await _serverFilepathProvider(),
+      localFilepath: await bundledFiles.pathOf(
+        'assets/bundled_files/scrcpy-server.jar',
+        filename: 'scrcpy-server.jar',
+      ),
       remoteFilepath: scrcpyServerRemotePath,
     );
 
@@ -101,7 +106,7 @@ class ScrcpyServerLauncher {
     'cleanup=true',
   ];
 
-  static Future<ScrcpyServerConnection> _connect(
+  Future<ScrcpyServerConnection> _connect(
     AdbDeviceCommunicator communicator, {
     required Process process,
     required String socketName,
@@ -117,7 +122,11 @@ class ScrcpyServerLauncher {
     Socket? controlSocket;
 
     try {
-      video = await _VideoChannel.connect(portForward, timeout: connectTimeout);
+      video = await _VideoChannel.connect(
+        portForward,
+        timeout: connectTimeout,
+        clock: clock,
+      );
       audioSocket = await portForward.connect();
       controlSocket = await portForward.connect();
 
@@ -154,9 +163,10 @@ class const _VideoChannel({
   static Future<_VideoChannel> connect(
     AdbPortForward portForward, {
     required Duration timeout,
+    required Clock clock,
     Duration retryDelay = const Duration(milliseconds: 50),
   }) async {
-    final deadline = DateTime.now().add(timeout);
+    final deadline = clock.fromNowBy(timeout);
 
     while (true) {
       final socket = await portForward.connect();
@@ -219,35 +229,9 @@ class const _VideoChannel({
         socket.destroy();
         unawaited(controller.close());
 
-        if (DateTime.now().isAfter(deadline)) rethrow;
+        if (clock.now().isAfter(deadline)) rethrow;
         await Future.delayed(retryDelay);
       }
     }
   }
-}
-
-Future<String> Function() _scrcpyServerFilepathProvider() {
-  String? jarFilepath;
-
-  return () async {
-    if (jarFilepath case String jarPath) {
-      return jarPath;
-    }
-
-    final jarFile = await rootBundle.load(
-      'assets/bundled_files/scrcpy-server.jar',
-    );
-    final tempDir = await getTemporaryDirectory();
-    final location = path.join(tempDir.path, 'scrcpy-server.jar');
-    final file = await File(location).create(recursive: true);
-
-    final bytes = jarFile.buffer.asUint8List(
-      jarFile.offsetInBytes,
-      jarFile.lengthInBytes,
-    );
-
-    await file.writeAsBytes(bytes);
-
-    return jarFilepath = file.path;
-  };
 }

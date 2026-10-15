@@ -16,6 +16,7 @@ class const ThemeModeProvider({
         defaults: defaults,
         repository: RepositoryProvider.of(context),
         notifications: RepositoryProvider.of(context),
+        fileOpener: RepositoryProvider.of(context),
       ),
       child: BlocSelector<SettingsBloc, Settings, ThemeMode>(
         selector: (settings) => settings.themeMode,

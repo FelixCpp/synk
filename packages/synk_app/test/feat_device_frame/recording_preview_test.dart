@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
@@ -14,9 +15,10 @@ import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
 final _poster = Uint8List.fromList([1, 2, 3]);
+final _takenAt = DateTime(2026, 10, 15, 9, 41, 7);
 
 void main() {
-  late Directory directory;
+  late MemoryFileSystem fileSystem;
   late _FakeScreenCapture screenCapture;
   late FakeSettingsRepository settings;
   late ScreenCaptureEventChannel channel;
@@ -24,14 +26,14 @@ void main() {
   late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
-    directory = Directory.systemTemp.createTempSync('synk_recording_test');
+    fileSystem = MemoryFileSystem();
     screenCapture = _FakeScreenCapture();
     channel = ScreenCaptureEventChannel();
     announced = [];
     channel.observeEvents().listen(announced.add);
 
     settings = FakeSettingsRepository(
-      screenCaptureSavePath: directory.path,
+      screenCaptureSavePath: '/captures',
     );
     repository = DeviceFrameRepositoryImpl(
       deviceId: const DeviceId('serial-1'),
@@ -41,12 +43,13 @@ void main() {
       screenCaptureEventChannel: channel,
       hostClipboard: FakeHostClipboard(),
       filePicker: const SystemFilePicker(),
+      fileSystem: fileSystem,
+      clock: Clock.fixed(_takenAt),
     );
   });
 
   tearDown(() async {
     await channel.dispose();
-    directory.deleteSync(recursive: true);
   });
 
   group('DeviceFrameRepository recording previews', () {
@@ -57,7 +60,10 @@ void main() {
 
       expect(announced, hasLength(1));
       expect(announced.single.filepath, screenCapture.startedPath);
-      expect(announced.single.filepath, endsWith('.mp4'));
+      expect(
+        announced.single.filepath,
+        '/captures/Recording Test Device 2026-10-15 at 09.41.07.mp4',
+      );
 
       announced.single.map(
         png: (_) => fail('a recording must not pose as a screenshot'),

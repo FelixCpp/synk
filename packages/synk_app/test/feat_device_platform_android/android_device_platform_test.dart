@@ -3,10 +3,15 @@ import 'dart:async';
 import 'package:api_adb/adb/devices/adb_connection_type_dto.dart';
 import 'package:api_adb/adb/devices/adb_device_state_dto.dart';
 import 'package:api_adb/api_adb.dart';
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
+import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_asset_bundle.dart';
 
 void main() {
   group('AndroidDevicePlatform.observeDevices', () {
@@ -16,7 +21,15 @@ void main() {
         final frames = StreamController<List<AdbDeviceDto>>();
         addTearDown(frames.close);
 
-        final platform = AndroidDevicePlatform(_FakeAdbApi(frames.stream));
+        final platform = AndroidDevicePlatform(
+          _FakeAdbApi(frames.stream),
+          bundledFiles: BundledFiles(
+            bundle: FakeAssetBundle(const {}),
+            fileSystem: MemoryFileSystem(),
+            directory: '/cache',
+          ),
+          clock: const Clock(),
+        );
 
         final seenByFirst = <List<PluggedDevice>>[];
         final first = platform.observeDevices().listen(seenByFirst.add);

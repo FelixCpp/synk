@@ -12,6 +12,8 @@ import 'package:synk/feat_device_frame/data/repositories/device_frame_repository
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
@@ -117,6 +119,7 @@ void main() {
         transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
+        fileSystem: MemoryFileSystem(),
         deviceId: _deviceId,
         textureId: const NativeTextureId(1),
         initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
@@ -344,6 +347,7 @@ void main() {
           transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
           hidChannel: IosHidChannel(),
           devicectl: DevicectlApi(),
+          fileSystem: MemoryFileSystem(),
           deviceId: _deviceId,
           textureId: const NativeTextureId(1),
           initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
@@ -370,6 +374,7 @@ void main() {
         transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
+        fileSystem: MemoryFileSystem(),
         deviceId: _deviceId,
         textureId: const NativeTextureId(1),
         initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
@@ -393,6 +398,8 @@ void main() {
         screenCaptureEventChannel: ScreenCaptureEventChannel(),
         hostClipboard: FakeHostClipboard(),
         filePicker: const SystemFilePicker(),
+        fileSystem: MemoryFileSystem(),
+        clock: const Clock(),
       );
 
       await repository.navigate(.back);
@@ -417,6 +424,8 @@ void main() {
         screenCaptureEventChannel: ScreenCaptureEventChannel(),
         hostClipboard: FakeHostClipboard(),
         filePicker: const SystemFilePicker(),
+        fileSystem: MemoryFileSystem(),
+        clock: const Clock(),
       );
 
       await repository.simulatePointerEvent(

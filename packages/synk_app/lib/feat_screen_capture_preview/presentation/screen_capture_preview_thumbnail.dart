@@ -6,7 +6,6 @@ import 'package:synk/design/theme/synk_colors.dart';
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
-import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/bloc/screen_capture_preview_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -20,7 +19,7 @@ class const ScreenCapturePreviewThumbnail({
       create: (context) => ScreenCapturePreviewBloc(
         ScreenCapturePreviewRepositoryImpl(
           RepositoryProvider.of(context),
-          const SystemFileOpener(),
+          RepositoryProvider.of(context),
         ),
         RepositoryProvider.of(context),
       ),

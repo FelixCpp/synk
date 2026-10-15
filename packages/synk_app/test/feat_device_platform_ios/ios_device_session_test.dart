@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:file/memory.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
@@ -13,6 +12,8 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
+import '../support/fake_process_manager.dart';
+
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
 const _mockedChannels = [
@@ -21,18 +22,6 @@ const _mockedChannels = [
   'dev.synk/ios_mirror/screen_size',
   'dev.synk/ios_media_stream',
 ];
-
-File _writeFakeXcrun(Directory directory) {
-  final script = File('${directory.path}/xcrun')
-    ..writeAsStringSync('''
-#!/bin/sh
-cat > /dev/null
-exit 0
-''');
-
-  Process.runSync('chmod', ['+x', script.path]);
-  return script;
-}
 
 DevicePointerEvent _pointer(DevicePointerEventType type, double x, double y) {
   return DevicePointerEvent(
@@ -43,9 +32,9 @@ DevicePointerEvent _pointer(DevicePointerEventType type, double x, double y) {
 }
 
 void main() {
-  late Directory directory;
   late Map<String, List<MethodCall>> calls;
   late List<IosDeviceSession> sessions;
+  late FakeProcessManager processManager;
 
   List<MethodCall> callsOn(String channel) => calls[channel]!;
 
@@ -59,7 +48,8 @@ void main() {
         hasAudio ? IosAudioSideCar(IosMediaStreamChannel(), 7) : null,
       ),
       hidChannel: IosHidChannel(),
-      devicectl: DevicectlApi(xcrunPath: _writeFakeXcrun(directory).path),
+      devicectl: DevicectlApi(processManager: processManager),
+      fileSystem: MemoryFileSystem(),
       deviceId: _deviceId,
       textureId: const NativeTextureId(1),
       initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
@@ -74,9 +64,9 @@ void main() {
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
-    directory = Directory.systemTemp.createTempSync('ios_device_session_test');
     calls = {for (final channel in _mockedChannels) channel: []};
     sessions = [];
+    processManager = FakeProcessManager();
 
     final messenger =
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -100,8 +90,6 @@ void main() {
     for (final channel in _mockedChannels) {
       messenger.setMockMethodCallHandler(MethodChannel(channel), null);
     }
-
-    directory.deleteSync(recursive: true);
   });
 
   group('what an iOS session can do', () {
@@ -262,6 +250,7 @@ void main() {
 
       await session.clipboard!.setClipboard('from the host');
 
+      expect(processManager.stdinWrites, ['from the host']);
       expect(callsOn('dev.synk/ios_hid'), isEmpty);
     });
 

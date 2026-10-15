@@ -10,6 +10,10 @@ import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/testing.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+
+import '../support/fake_process_manager.dart';
 
 /// A 1x1 PNG, enough for the widget tree to lay a capture out.
 final _png = Uint8List.fromList([
@@ -118,6 +122,12 @@ Future<ScreenCaptureEventChannel> _pumpCorner(WidgetTester tester) async {
           dispose: (service) => service.dispose(),
         ),
         RepositoryProvider<ScreenCaptureEventChannel>.value(value: channel),
+        RepositoryProvider<SystemFileOpener>.value(
+          value: SystemFileOpener(
+            processManager: FakeProcessManager(),
+            platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
+          ),
+        ),
       ],
       child: CupertinoApp(
         home: SynkUiTheme(

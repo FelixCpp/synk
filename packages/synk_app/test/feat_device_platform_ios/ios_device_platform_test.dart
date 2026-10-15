@@ -10,6 +10,7 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:file/memory.dart';
 
 void main() {
   group('IosDevicePlatform.observeDevices', () {
@@ -25,6 +26,7 @@ void main() {
           mediaStreamChannel: IosMediaStreamChannel(),
           hidChannel: IosHidChannel(),
           devicectl: DevicectlApi(),
+          fileSystem: MemoryFileSystem(),
         );
 
         final seenByFirst = <List<PluggedDevice>>[];

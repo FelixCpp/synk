@@ -20,11 +20,12 @@ class SettingsBloc({
   required final Settings defaults,
   required final SettingsRepository repository,
   required final NotificationService notifications,
+  required final SystemFileOpener fileOpener,
 }) extends Bloc<SettingsEvent, Settings> {
   final saveSettings = SaveSettingsInteractor(repository);
   final revealScreenCaptureSavePath = RevealScreenCaptureSavePathInteractor(
     repository,
-    const SystemFileOpener(),
+    fileOpener,
   );
 
   this : super(defaults) {

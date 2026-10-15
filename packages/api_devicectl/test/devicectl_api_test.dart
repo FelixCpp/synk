@@ -1,57 +1,19 @@
-import 'dart:io';
-
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:test/test.dart';
 
-File _writeFakeXcrun(
-  Directory directory, {
-  required int exitCode,
-  String stdout = '',
-  String stderr = '',
-  bool captureStdin = false,
-}) {
-  final argumentLog = File('${directory.path}/arguments.txt');
-  final stdinLog = File('${directory.path}/stdin.txt');
-  final script = File('${directory.path}/xcrun')
-    ..writeAsStringSync('''
-#!/bin/sh
-printf '%s\\n' "\$@" > ${argumentLog.path}
-${captureStdin ? 'cat > ${stdinLog.path}' : ''}
-printf '%s' '$stdout'
-printf '%s' '$stderr' >&2
-exit $exitCode
-''');
-
-  Process.runSync('chmod', ['+x', script.path]);
-  return script;
-}
-
-List<String> _loggedArguments(Directory directory) {
-  return File('${directory.path}/arguments.txt')
-      .readAsLinesSync()
-      .where((line) => line.isNotEmpty)
-      .toList();
-}
-
-String _loggedStdin(Directory directory) {
-  return File('${directory.path}/stdin.txt').readAsStringSync();
-}
+import 'fake_process_manager.dart';
 
 void main() {
-  late Directory directory;
+  late FakeProcessManager processManager;
 
-  setUp(() {
-    directory = Directory.systemTemp.createTempSync('devicectl_api_test');
-  });
-
-  tearDown(() {
-    directory.deleteSync(recursive: true);
-  });
+  DevicectlApi apiAnswering([FakeCommandResult result = fakeSuccess]) {
+    processManager = FakeProcessManager(respond: (_) => result);
+    return DevicectlApi(processManager: processManager);
+  }
 
   group('captureScreenshot', () {
     test('invokes devicectl with the device and destination', () async {
-      final script = _writeFakeXcrun(directory, exitCode: 0);
-      final api = DevicectlApi(xcrunPath: script.path);
+      final api = apiAnswering();
 
       await api.captureScreenshot(
         deviceId: '00008120-0009555001C2601E',
@@ -59,7 +21,8 @@ void main() {
         timeout: const Duration(seconds: 12),
       );
 
-      expect(_loggedArguments(directory), [
+      expect(processManager.commands.single, [
+        defaultXcrunPath,
         'devicectl',
         'device',
         'capture',
@@ -77,8 +40,7 @@ void main() {
     test(
       'inserts the dash IOKit omits from a compact 24-char UDID',
       () async {
-        final script = _writeFakeXcrun(directory, exitCode: 0);
-        final api = DevicectlApi(xcrunPath: script.path);
+        final api = apiAnswering();
 
         await api.captureScreenshot(
           deviceId: '000081200009555001C2601E',
@@ -86,7 +48,7 @@ void main() {
         );
 
         expect(
-          _loggedArguments(directory),
+          processManager.commands.single,
           containsAllInOrder(['--device', '00008120-0009555001C2601E']),
         );
       },
@@ -95,8 +57,7 @@ void main() {
     test(
       'leaves identifiers that are not a compact UDID untouched',
       () async {
-        final script = _writeFakeXcrun(directory, exitCode: 0);
-        final api = DevicectlApi(xcrunPath: script.path);
+        final api = apiAnswering();
 
         await api.captureScreenshot(
           deviceId: 'some-device',
@@ -104,19 +65,18 @@ void main() {
         );
 
         expect(
-          _loggedArguments(directory),
+          processManager.commands.single,
           containsAllInOrder(['--device', 'some-device']),
         );
       },
     );
 
     test('throws with the process output when devicectl fails', () async {
-      final script = _writeFakeXcrun(
-        directory,
+      final api = apiAnswering((
         exitCode: 1,
+        stdout: '',
         stderr: 'ERROR: device not found',
-      );
-      final api = DevicectlApi(xcrunPath: script.path);
+      ));
 
       await expectLater(
         api.captureScreenshot(
@@ -136,12 +96,11 @@ void main() {
 
   group('readPasteboard', () {
     test('returns the payload devicectl wrote to stdout', () async {
-      final script = _writeFakeXcrun(
-        directory,
+      final api = apiAnswering((
         exitCode: 0,
         stdout: 'clipboard content',
-      );
-      final api = DevicectlApi(xcrunPath: script.path);
+        stderr: '',
+      ));
 
       final text = await api.readPasteboard(
         deviceId: 'some-device',
@@ -149,7 +108,8 @@ void main() {
       );
 
       expect(text, 'clipboard content');
-      expect(_loggedArguments(directory), [
+      expect(processManager.commands.single, [
+        defaultXcrunPath,
         'devicectl',
         'device',
         'pasteboard',
@@ -163,8 +123,7 @@ void main() {
     });
 
     test('treats an empty pasteboard as empty text, not a failure', () async {
-      final script = _writeFakeXcrun(directory, exitCode: 0);
-      final api = DevicectlApi(xcrunPath: script.path);
+      final api = apiAnswering();
 
       expect(await api.readPasteboard(deviceId: 'some-device'), isEmpty);
     });
@@ -172,12 +131,11 @@ void main() {
     test(
       'reports the error message rather than the raw stdout bytes',
       () async {
-        final script = _writeFakeXcrun(
-          directory,
+        final api = apiAnswering((
           exitCode: 1,
+          stdout: '',
           stderr: 'ERROR: pasteboard unavailable',
-        );
-        final api = DevicectlApi(xcrunPath: script.path);
+        ));
 
         await expectLater(
           api.readPasteboard(deviceId: 'some-device'),
@@ -198,12 +156,7 @@ void main() {
 
   group('writePasteboard', () {
     test('feeds the text to devicectl on stdin', () async {
-      final script = _writeFakeXcrun(
-        directory,
-        exitCode: 0,
-        captureStdin: true,
-      );
-      final api = DevicectlApi(xcrunPath: script.path);
+      final api = apiAnswering();
 
       await api.writePasteboard(
         deviceId: 'some-device',
@@ -211,8 +164,9 @@ void main() {
         timeout: const Duration(seconds: 9),
       );
 
-      expect(_loggedStdin(directory), 'hello from the host');
-      expect(_loggedArguments(directory), [
+      expect(processManager.stdinWrites, ['hello from the host']);
+      expect(processManager.commands.single, [
+        defaultXcrunPath,
         'devicectl',
         'device',
         'pasteboard',
@@ -226,12 +180,11 @@ void main() {
     });
 
     test('throws when devicectl rejects the write', () async {
-      final script = _writeFakeXcrun(
-        directory,
+      final api = apiAnswering((
         exitCode: 1,
+        stdout: '',
         stderr: 'ERROR: device not found',
-      );
-      final api = DevicectlApi(xcrunPath: script.path);
+      ));
 
       await expectLater(
         api.writePasteboard(deviceId: 'unknown-device', text: 'nope'),

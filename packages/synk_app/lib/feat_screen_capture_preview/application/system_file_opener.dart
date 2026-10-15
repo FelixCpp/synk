@@ -1,15 +1,14 @@
-import 'dart:io';
+import 'dart:io' show ProcessException;
 
-/// Hands a captured file to whatever application the operating system has
-/// registered for it.
-///
-/// Synk shows no media of its own: the system viewers do it better, and they
-/// are where the next step — annotating, trimming, attaching to a ticket —
-/// happens anyway. A screen recording would otherwise drag a whole decoder
-/// stack into the bundle for less than QuickTime already offers.
-class const SystemFileOpener() {
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
+
+class const SystemFileOpener({
+  required final ProcessManager processManager,
+  required final NativePlatform platform,
+}) {
   Future<void> open(String filepath) async {
-    final (executable, arguments) = switch (Platform.operatingSystem) {
+    final (executable, arguments) = switch (platform.operatingSystem) {
       'macos' => ('open', [filepath]),
       'windows' => ('cmd', ['/c', 'start', '', filepath]),
       'linux' => ('xdg-open', [filepath]),
@@ -18,7 +17,7 @@ class const SystemFileOpener() {
       ),
     };
 
-    final result = await Process.run(executable, arguments);
+    final result = await processManager.run([executable, ...arguments]);
 
     if (result.exitCode != 0) {
       throw ProcessException(

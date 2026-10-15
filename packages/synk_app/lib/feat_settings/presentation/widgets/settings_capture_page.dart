@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_kind.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
@@ -37,7 +38,7 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
                     ),
                     subtitle: ScreenCaptureKind.screenshot.filenameFor(
                       '<Gerät>',
-                      DateTime.now(),
+                      RepositoryProvider.of<Clock>(context).now(),
                     ),
                   ),
                   trailing: Row(

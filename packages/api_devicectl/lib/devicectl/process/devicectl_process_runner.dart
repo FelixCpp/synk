@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:process/process.dart';
+
 const defaultXcrunPath = '/usr/bin/xcrun';
 
 class const DevicectlProcessRunner({
   final String xcrunPath = defaultXcrunPath,
+  final ProcessManager processManager = const LocalProcessManager(),
 }) {
   Future<ProcessResult> run(List<String> arguments) {
-    return Process.run(xcrunPath, ['devicectl', ...arguments]);
+    return processManager.run([xcrunPath, 'devicectl', ...arguments]);
   }
 
   Future<ProcessResult> runRaw(List<String> arguments) {
-    return Process.run(
-      xcrunPath,
-      ['devicectl', ...arguments],
+    return processManager.run(
+      [xcrunPath, 'devicectl', ...arguments],
       stdoutEncoding: null,
     );
   }
@@ -22,7 +24,11 @@ class const DevicectlProcessRunner({
     List<String> arguments,
     List<int> input,
   ) async {
-    final process = await Process.start(xcrunPath, ['devicectl', ...arguments]);
+    final process = await processManager.start([
+      xcrunPath,
+      'devicectl',
+      ...arguments,
+    ]);
 
     final stdout = _collect(process.stdout);
     final stderr = _collect(process.stderr);

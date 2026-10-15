@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
@@ -14,9 +15,10 @@ import '../support/fake_host_clipboard.dart';
 import '../support/fake_settings_repository.dart';
 
 final _png = Uint8List.fromList([1, 2, 3, 4]);
+final _takenAt = DateTime(2026, 10, 15, 9, 41, 7);
 
 void main() {
-  late Directory directory;
+  late MemoryFileSystem fileSystem;
   late FakeHostClipboard clipboard;
   late FakeSettingsRepository settings;
   late ScreenCaptureEventChannel channel;
@@ -24,10 +26,10 @@ void main() {
   late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
-    directory = Directory.systemTemp.createTempSync('synk_clipboard_test');
+    fileSystem = MemoryFileSystem();
     clipboard = FakeHostClipboard();
     settings = FakeSettingsRepository(
-      screenCaptureSavePath: directory.path,
+      screenCaptureSavePath: '/captures',
     );
     channel = ScreenCaptureEventChannel();
     announced = [];
@@ -41,12 +43,13 @@ void main() {
       screenCaptureEventChannel: channel,
       hostClipboard: clipboard,
       filePicker: const SystemFilePicker(),
+      fileSystem: fileSystem,
+      clock: Clock.fixed(_takenAt),
     );
   });
 
   tearDown(() async {
     await channel.dispose();
-    directory.deleteSync(recursive: true);
   });
 
   group('DeviceFrameRepository.captureScreenshot', () {
@@ -74,7 +77,17 @@ void main() {
       await pumpEventQueue();
 
       expect(announced, hasLength(1));
-      expect(File(announced.single.filepath).existsSync(), isTrue);
+      expect(fileSystem.file(announced.single.filepath).existsSync(), isTrue);
+    });
+
+    test('names the file after the device and when it was taken', () async {
+      await repository.captureScreenshot();
+      await pumpEventQueue();
+
+      expect(
+        announced.single.filepath,
+        '/captures/Screenshot Test Device 2026-10-15 at 09.41.07.png',
+      );
     });
 
     test('survives a clipboard that refuses the image', () async {
@@ -87,7 +100,7 @@ void main() {
       await pumpEventQueue();
 
       expect(announced, hasLength(1));
-      expect(File(announced.single.filepath).existsSync(), isTrue);
+      expect(fileSystem.file(announced.single.filepath).existsSync(), isTrue);
     });
   });
 }

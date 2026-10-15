@@ -1,32 +1,28 @@
-import 'dart:io';
-
+import 'package:file/file.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
-
-typedef ToolProbe = Future<ProcessResult> Function(
-  String executable,
-  List<String> arguments,
-);
 
 class ToolValidationRepositoryImpl({
   required final String adbPath,
   final String xcrunPath = '/usr/bin/xcrun',
-  final bool checkXcode = true,
-  final ToolProbe probe = _runProbe,
-  final bool Function(String path) fileExists = _fileExists,
+  required final FileSystem fileSystem,
+  required final ProcessManager processManager,
+  required final NativePlatform platform,
 }) implements ToolValidationRepository {
   @override
   Future<List<ToolIssue>> validateTools() async {
     final results = await Future.wait([
       _checkAdb(),
-      if (checkXcode) _checkDevicectl(),
+      if (platform.isMacOS) _checkDevicectl(),
     ]);
 
     return [for (final issue in results) ?issue];
   }
 
   Future<ToolIssue?> _checkAdb() async {
-    if (!fileExists(adbPath)) {
+    if (!fileSystem.file(adbPath).existsSync()) {
       return ToolIssue(
         tool: .adb,
         problem: .notFound,
@@ -55,9 +51,11 @@ class ToolValidationRepositoryImpl({
 
   Future<String?> _tryRun(String executable, List<String> arguments) async {
     try {
-      final result = await probe(executable, arguments).timeout(
-        const Duration(seconds: 10),
-      );
+      final result = await processManager
+          .run([executable, ...arguments])
+          .timeout(
+            const Duration(seconds: 10),
+          );
 
       if (result.exitCode == 0) {
         return null;
@@ -74,9 +72,3 @@ class ToolValidationRepositoryImpl({
     }
   }
 }
-
-Future<ProcessResult> _runProbe(String executable, List<String> arguments) {
-  return Process.run(executable, arguments);
-}
-
-bool _fileExists(String path) => File(path).existsSync();

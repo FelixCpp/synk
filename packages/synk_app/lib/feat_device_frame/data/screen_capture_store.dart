@@ -1,6 +1,7 @@
-import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:clock/clock.dart';
+import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -13,21 +14,23 @@ class const ScreenCaptureStore({
   required final String modelName,
   required final SettingsRepository settingsRepository,
   required final ScreenCaptureEventChannel events,
+  required final FileSystem fileSystem,
+  required final Clock clock,
 }) {
   Future<String> reservePath(ScreenCaptureKind kind) async {
     final settings = await settingsRepository.read();
     final directory = settings.screenCaptureSavePath;
 
-    await Directory(directory).create(recursive: true);
+    await fileSystem.directory(directory).create(recursive: true);
 
     return path.join(
       directory,
-      kind.filenameFor(modelName, DateTime.now()),
+      kind.filenameFor(modelName, clock.now()),
     );
   }
 
   Future<void> writeScreenshot(String filepath, Uint8List pngBytes) {
-    return File(filepath).writeAsBytes(pngBytes);
+    return fileSystem.file(filepath).writeAsBytes(pngBytes);
   }
 
   void announceScreenshot({

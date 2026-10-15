@@ -7,9 +7,16 @@ import 'package:api_adb/adb/process/adb_process_runner.dart';
 import 'package:api_adb/adb/proto/generated/lib/adb/proto/devices.pb.dart';
 import 'package:api_adb/adb/version/adb_version_dto.dart';
 import 'package:api_adb/adb/version/adb_version_parser.dart';
+import 'package:process/process.dart';
 
-class AdbApi({required final String adbPath}) {
-  final processRunner = AdbProcessRunner(adbPath: adbPath);
+class AdbApi({
+  required final String adbPath,
+  final ProcessManager processManager = const LocalProcessManager(),
+}) {
+  final processRunner = AdbProcessRunner(
+    adbPath: adbPath,
+    processManager: processManager,
+  );
 
   Future<AdbVersionDto> fetchVersion() async {
     final process = await processRunner.run(const ['version']);

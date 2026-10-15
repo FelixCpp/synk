@@ -1,17 +1,26 @@
-import 'dart:io';
+import 'dart:io' show ProcessException;
 
+import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/testing.dart';
 import 'package:synk/feat_tool_validation/data/repositories/tool_validation_repository_impl.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
+import '../support/fake_process_manager.dart';
+
 void main() {
-  ProcessResult ok() => ProcessResult(1, 0, '', '');
+  final macos = TestNativePlatform(operatingSystem: NativePlatform.macOS);
+
+  MemoryFileSystem withAdb() {
+    return MemoryFileSystem()..file('/adb').createSync();
+  }
 
   test('reports nothing when all tools run', () async {
     final repository = ToolValidationRepositoryImpl(
       adbPath: '/adb',
-      probe: (_, _) async => ok(),
-      fileExists: (_) => true,
+      platform: macos,
+      fileSystem: withAdb(),
+      processManager: FakeProcessManager(),
     );
 
     expect(await repository.validateTools(), isEmpty);
@@ -20,8 +29,9 @@ void main() {
   test('reports a missing adb binary', () async {
     final repository = ToolValidationRepositoryImpl(
       adbPath: '/adb',
-      probe: (_, _) async => ok(),
-      fileExists: (_) => false,
+      platform: macos,
+      fileSystem: MemoryFileSystem(),
+      processManager: FakeProcessManager(),
     );
 
     final issue = (await repository.validateTools()).single;
@@ -32,10 +42,13 @@ void main() {
   test('reports a failing devicectl with its output', () async {
     final repository = ToolValidationRepositoryImpl(
       adbPath: '/adb',
-      probe: (executable, _) async => executable == '/adb'
-          ? ok()
-          : ProcessResult(1, 69, '', 'xcode license'),
-      fileExists: (_) => true,
+      platform: macos,
+      fileSystem: withAdb(),
+      processManager: FakeProcessManager(
+        respond: (command) => command.first == '/adb'
+            ? fakeSuccess
+            : (exitCode: 69, stdout: '', stderr: 'xcode license'),
+      ),
     );
 
     final issue = (await repository.validateTools()).single;
@@ -46,12 +59,47 @@ void main() {
   test('reports a tool that cannot be spawned', () async {
     final repository = ToolValidationRepositoryImpl(
       adbPath: '/adb',
-      checkXcode: false,
-      probe: (_, _) async => throw const ProcessException('/adb', []),
-      fileExists: (_) => true,
+      platform: TestNativePlatform(operatingSystem: NativePlatform.linux),
+      fileSystem: withAdb(),
+      processManager: FakeProcessManager(
+        respond: (_) => throw const ProcessException('/adb', []),
+      ),
     );
 
     final issue = (await repository.validateTools()).single;
     expect(issue.problem, ToolProblem.notRunnable);
+  });
+
+  test('skips devicectl away from macOS', () async {
+    final processManager = FakeProcessManager();
+    final repository = ToolValidationRepositoryImpl(
+      adbPath: '/adb',
+      platform: TestNativePlatform(operatingSystem: NativePlatform.linux),
+      fileSystem: withAdb(),
+      processManager: processManager,
+    );
+
+    await repository.validateTools();
+
+    expect(processManager.commands, [
+      ['/adb', 'version'],
+    ]);
+  });
+
+  test('probes adb with its version and devicectl through xcrun', () async {
+    final processManager = FakeProcessManager();
+    final repository = ToolValidationRepositoryImpl(
+      adbPath: '/adb',
+      platform: macos,
+      fileSystem: withAdb(),
+      processManager: processManager,
+    );
+
+    await repository.validateTools();
+
+    expect(processManager.commands, [
+      ['/adb', 'version'],
+      ['/usr/bin/xcrun', 'devicectl', '--version'],
+    ]);
   });
 }

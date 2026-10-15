@@ -1,14 +1,17 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:clock/clock.dart';
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:synk/feat_clipboard/application/host_clipboard.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
+import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/ios_device_platform.dart';
@@ -20,6 +23,7 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_settings/data/repositories/settings_repository_impl.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
@@ -36,11 +40,14 @@ import 'package:synk/feat_settings/presentation/settings_window.dart';
 import 'package:synk/feat_settings/presentation/theme_mode_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:platform/platform.dart';
+import 'package:process/process.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,8 +67,16 @@ Future<void> main() async {
   );
 
   final settings = await settingsRepository.read();
+  final platform = NativePlatform.current!;
+  const processManager = LocalProcessManager();
+  const fileSystem = LocalFileSystem();
+  final bundledFiles = BundledFiles(
+    bundle: rootBundle,
+    fileSystem: fileSystem,
+    directory: (await getTemporaryDirectory()).path,
+  );
   final adbPaths = AdbPaths(
-    bundled: _bundledAdbPath(),
+    bundled: _bundledAdbPath(platform),
     custom: settings.customAdbPath,
   );
 
@@ -92,6 +107,17 @@ Future<void> main() async {
           value: const SystemHostClipboard(),
         ),
         RepositoryProvider<FilePicker>.value(value: const SystemFilePicker()),
+        RepositoryProvider<FileSystem>.value(value: fileSystem),
+        RepositoryProvider<BundledFiles>.value(value: bundledFiles),
+        RepositoryProvider<Clock>.value(value: const Clock()),
+        RepositoryProvider<NativePlatform>.value(value: platform),
+        RepositoryProvider<ProcessManager>.value(value: processManager),
+        RepositoryProvider<SystemFileOpener>.value(
+          value: SystemFileOpener(
+            processManager: processManager,
+            platform: platform,
+          ),
+        ),
       ],
       child: _Root(defaults: defaults),
     ),
@@ -109,10 +135,10 @@ Future<void> _configureWindow() async {
   );
 }
 
-String _bundledAdbPath() {
+String _bundledAdbPath(NativePlatform platform) {
   return path.normalize(
     path.join(
-      path.dirname(Platform.resolvedExecutable),
+      path.dirname(platform.resolvedExecutable),
       '..',
       'Resources',
       'adb',
@@ -183,9 +209,14 @@ class const _ToolProviders({
         RepositoryProvider(
           create: (context) => AdbApi(
             adbPath: RepositoryProvider.of<AdbPaths>(context).active,
+            processManager: RepositoryProvider.of(context),
           ),
         ),
-        RepositoryProvider(create: (context) => DevicectlApi()),
+        RepositoryProvider(
+          create: (context) => DevicectlApi(
+            processManager: RepositoryProvider.of(context),
+          ),
+        ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) => DeviceConnectionsRepositoryImpl(
             platforms: _availablePlatforms(context, availability),
@@ -204,13 +235,18 @@ class const _ToolProviders({
     ToolAvailability availability,
   ) {
     final platforms = <DevicePlatform>[
-      AndroidDevicePlatform(RepositoryProvider.of(context)),
+      AndroidDevicePlatform(
+        RepositoryProvider.of(context),
+        bundledFiles: RepositoryProvider.of(context),
+        clock: RepositoryProvider.of(context),
+      ),
       IosDevicePlatform(
         discoveryChannel: IosDeviceDiscoveryChannel(),
         channel: IosMirrorChannel(),
         mediaStreamChannel: IosMediaStreamChannel(),
         hidChannel: IosHidChannel(),
         devicectl: RepositoryProvider.of(context),
+        fileSystem: RepositoryProvider.of(context),
       ),
     ];
 

@@ -5,6 +5,8 @@ import 'package:synk/feat_device_frame/data/repositories/device_frame_repository
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:clock/clock.dart';
+import 'package:file/memory.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
@@ -36,6 +38,8 @@ void main() {
       screenCaptureEventChannel: ScreenCaptureEventChannel(),
       hostClipboard: FakeHostClipboard(),
       filePicker: const SystemFilePicker(),
+      fileSystem: MemoryFileSystem(),
+      clock: const Clock(),
     );
   });
 

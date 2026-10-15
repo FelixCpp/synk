@@ -1,5 +1,6 @@
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:file/file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
@@ -21,6 +22,7 @@ class IosDevicePlatform({
   required final IosMediaStreamChannel mediaStreamChannel,
   required final IosHidChannel hidChannel,
   required final DevicectlApi devicectl,
+  required final FileSystem fileSystem,
 }) implements DevicePlatform {
   final Stream<List<PluggedDevice>> _devices;
 
@@ -55,6 +57,7 @@ class IosDevicePlatform({
       transport: IosCaptureSessionTransport(channel, audio),
       hidChannel: hidChannel,
       devicectl: devicectl,
+      fileSystem: fileSystem,
       deviceId: deviceId,
       textureId: result.textureId,
       initialScreenSize: DeviceScreenSize(

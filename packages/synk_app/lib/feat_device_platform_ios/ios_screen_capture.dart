@@ -1,8 +1,8 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
+import 'package:file/file.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -12,6 +12,7 @@ class const IosScreenCapture({
   required final DevicectlApi devicectl,
   required final DeviceId deviceId,
   required final NativeTextureId textureId,
+  required final FileSystem fileSystem,
 }) implements DeviceScreenCapture {
   @override
   Future<Uint8List> captureScreenshot() async {
@@ -29,16 +30,18 @@ class const IosScreenCapture({
   }
 
   Future<Uint8List> _captureScreenshotViaDevicectl() async {
-    final directory = await Directory.systemTemp.createTemp('synk_screenshot');
+    final directory = await fileSystem.systemTempDirectory.createTemp(
+      'synk_screenshot',
+    );
 
     try {
-      final destination = '${directory.path}/screenshot.png';
+      final destination = directory.childFile('screenshot.png');
       await devicectl.captureScreenshot(
         deviceId: deviceId,
-        destination: destination,
+        destination: destination.path,
       );
 
-      return await File(destination).readAsBytes();
+      return await destination.readAsBytes();
     } finally {
       await directory.delete(recursive: true);
     }

@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:api_adb/api_adb.dart';
+import 'package:clock/clock.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:synk/feat_device_platform_android/discovery/adb_device_dto_conversions.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_agent_client.dart';
 import 'package:synk/feat_device_platform_android/device_agent/device_agent_launcher.dart';
@@ -18,13 +20,24 @@ import 'package:synk/feat_device_platform_android/android_device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
-class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
+class AndroidDevicePlatform(
+  final AdbApi api, {
+  required BundledFiles bundledFiles,
+  required Clock clock,
+}) implements DevicePlatform {
   final Stream<List<PluggedDevice>> _devices;
+  final DeviceAgentLauncher _deviceAgentLauncher;
+  final ScrcpyServerLauncher _scrcpyServerLauncher;
 
   this
     : _devices = api.observeDevices().map<List<PluggedDevice>>((dtos) {
         return dtos.map((dto) => dto.toDomain()).toList();
-      }).shareValue();
+      }).shareValue(),
+      _deviceAgentLauncher = DeviceAgentLauncher(bundledFiles: bundledFiles),
+      _scrcpyServerLauncher = ScrcpyServerLauncher(
+        bundledFiles: bundledFiles,
+        clock: clock,
+      );
 
   @override
   Set<ExternalTool> getRequiredTools() {
@@ -50,12 +63,16 @@ class AndroidDevicePlatform(final AdbApi api) implements DevicePlatform {
 
     try {
       await Future.wait([
-        DeviceAgentLauncher.launch(adbCommunicator).then(
-          (value) => communicator = value,
-        ),
-        ScrcpyServerLauncher.launch(adbCommunicator, options: options).then(
-          (value) => server = value,
-        ),
+        _deviceAgentLauncher
+            .launch(adbCommunicator)
+            .then(
+              (value) => communicator = value,
+            ),
+        _scrcpyServerLauncher
+            .launch(adbCommunicator, options: options)
+            .then(
+              (value) => server = value,
+            ),
       ]);
 
       // Doubles as the handshake: a device agent that cannot answer this is

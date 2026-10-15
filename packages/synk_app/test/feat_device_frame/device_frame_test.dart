@@ -14,6 +14,9 @@ import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:clock/clock.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
@@ -277,6 +280,8 @@ Future<SynkColors> _pumpFrame(
         RepositoryProvider<FilePicker>.value(
           value: const SystemFilePicker(),
         ),
+        RepositoryProvider<FileSystem>(create: (_) => MemoryFileSystem()),
+        RepositoryProvider<Clock>.value(value: const Clock()),
       ],
       child: WidgetsApp(
         color: const SynkUiColors.dark().accent,
