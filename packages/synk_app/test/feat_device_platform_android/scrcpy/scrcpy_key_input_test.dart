@@ -10,9 +10,25 @@ ScrcpyKeyEvent? _scrcpyEventOf({
 }) {
   return DeviceKeyEvent(
     key: key,
+    physicalKey: PhysicalKeyboardKey.keyA,
     type: type,
     modifiers: modifiers,
   ).toScrcpyKeyEvent();
+}
+
+String? _scrcpyTextOf(
+  String? character, {
+  LogicalKeyboardKey key = LogicalKeyboardKey.keyA,
+  DeviceKeyEventType type = .down,
+  Set<DeviceKeyModifier> modifiers = const {},
+}) {
+  return DeviceKeyEvent(
+    key: key,
+    physicalKey: PhysicalKeyboardKey.keyA,
+    type: type,
+    modifiers: modifiers,
+    character: character,
+  ).toScrcpyText();
 }
 
 void main() {
@@ -61,6 +77,81 @@ void main() {
       expect(metaState & ScrcpyKeyMetaState.ctrlOn, isNonZero);
       expect(metaState & ScrcpyKeyMetaState.capsLockOn, isNonZero);
       expect(metaState & ScrcpyKeyMetaState.altOn, isZero);
+    });
+  });
+
+  group('the text scrcpy injects for a keystroke', () {
+    test('is a symbol android has no key code for', () {
+      // Shift and the period key on a German layout.
+      expect(
+        _scrcpyTextOf(
+          ':',
+          key: LogicalKeyboardKey.colon,
+          modifiers: const {DeviceKeyModifier.shiftLeft},
+        ),
+        ':',
+      );
+    });
+
+    test('is a letter outside the US alphabet', () {
+      expect(_scrcpyTextOf('ö', key: const LogicalKeyboardKey(0xf6)), 'ö');
+    });
+
+    test('is what option typed on a mac', () {
+      expect(
+        _scrcpyTextOf(
+          '@',
+          key: LogicalKeyboardKey.keyL,
+          modifiers: const {DeviceKeyModifier.altLeft},
+        ),
+        '@',
+      );
+    });
+
+    test('is a symbol even where android has a key code for it', () {
+      // The German `#` key is not where the US one is; its text is right on
+      // any device layout, the key code only on a US one.
+      expect(_scrcpyTextOf('#', key: LogicalKeyboardKey.numberSign), '#');
+    });
+
+    test('is typed again while the key repeats', () {
+      expect(_scrcpyTextOf(':', type: .repeat), ':');
+    });
+
+    test('does not exist for letters, digits and space', () {
+      expect(_scrcpyTextOf('a'), isNull);
+      expect(_scrcpyTextOf('A'), isNull);
+      expect(_scrcpyTextOf('7', key: LogicalKeyboardKey.digit7), isNull);
+      expect(_scrcpyTextOf(' ', key: LogicalKeyboardKey.space), isNull);
+    });
+
+    test('does not exist for keys that type a control character', () {
+      expect(_scrcpyTextOf('\r', key: LogicalKeyboardKey.enter), isNull);
+      expect(_scrcpyTextOf('\t', key: LogicalKeyboardKey.tab), isNull);
+      expect(_scrcpyTextOf('\x7f', key: LogicalKeyboardKey.backspace), isNull);
+    });
+
+    test('does not exist for a shortcut', () {
+      expect(
+        _scrcpyTextOf(
+          '.',
+          key: LogicalKeyboardKey.period,
+          modifiers: const {DeviceKeyModifier.metaLeft},
+        ),
+        isNull,
+      );
+      expect(
+        _scrcpyTextOf(
+          ':',
+          key: LogicalKeyboardKey.colon,
+          modifiers: const {DeviceKeyModifier.controlLeft},
+        ),
+        isNull,
+      );
+    });
+
+    test('does not exist for a release', () {
+      expect(_scrcpyTextOf(':', type: .up), isNull);
     });
   });
 

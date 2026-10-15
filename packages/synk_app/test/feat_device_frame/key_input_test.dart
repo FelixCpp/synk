@@ -15,12 +15,23 @@ import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('serial-1');
 
+final _usPositionOf = {
+  LogicalKeyboardKey.keyA: PhysicalKeyboardKey.keyA,
+  LogicalKeyboardKey.keyC: PhysicalKeyboardKey.keyC,
+  LogicalKeyboardKey.keyV: PhysicalKeyboardKey.keyV,
+};
+
 DeviceKeyEvent _key(
   LogicalKeyboardKey key, {
   DeviceKeyEventType type = DeviceKeyEventType.down,
   Set<DeviceKeyModifier> modifiers = const {},
 }) {
-  return DeviceKeyEvent(key: key, type: type, modifiers: modifiers);
+  return DeviceKeyEvent(
+    key: key,
+    physicalKey: _usPositionOf[key]!,
+    type: type,
+    modifiers: modifiers,
+  );
 }
 
 void main() {

@@ -270,8 +270,10 @@ extension on KeyEvent {
 
     return .new(
       key: logicalKey,
+      physicalKey: physicalKey,
       type: type,
       modifiers: _pressedModifiers(HardwareKeyboard.instance),
+      character: character,
     );
   }
 }

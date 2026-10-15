@@ -17,6 +17,12 @@ import '../support/fake_settings_repository.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
+final _usPositionOf = {
+  LogicalKeyboardKey.keyA: PhysicalKeyboardKey.keyA,
+  LogicalKeyboardKey.keyC: PhysicalKeyboardKey.keyC,
+  LogicalKeyboardKey.keyV: PhysicalKeyboardKey.keyV,
+};
+
 DeviceKeyEvent _shortcut(
   LogicalKeyboardKey key, {
   DeviceKeyEventType type = DeviceKeyEventType.down,
@@ -24,6 +30,7 @@ DeviceKeyEvent _shortcut(
 }) {
   return DeviceKeyEvent(
     key: key,
+    physicalKey: _usPositionOf[key]!,
     type: type,
     modifiers: withMeta ? const {DeviceKeyModifier.metaLeft} : const {},
   );

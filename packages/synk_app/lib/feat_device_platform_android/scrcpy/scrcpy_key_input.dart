@@ -61,6 +61,48 @@ extension DeviceKeyEventToScrcpy on DeviceKeyEvent {
   }
 }
 
+extension DeviceKeyEventToScrcpyText on DeviceKeyEvent {
+  /// The text this keystroke types, for a keystroke scrcpy should inject as
+  /// text rather than as a key code - the way scrcpy's own keyboard does.
+  ///
+  /// Android finds a key code by what a key means on a US keyboard. Letters,
+  /// digits and space have one of their own and stay key codes, so they keep
+  /// repeating and still work in games. Every other printable character is
+  /// sent as the text the host's layout typed: `:` is shift and the period
+  /// key on a German Mac, and no Android key code means `:`.
+  ///
+  /// Shortcuts held with control or meta stay key codes too: they are meant
+  /// as commands, not as text.
+  String? toScrcpyText() {
+    final character = this.character;
+    if (type == .up || character == null || _isShortcut) {
+      return null;
+    }
+
+    if (!_isPrintable(character) || _hasOwnKeyCode.hasMatch(character)) {
+      return null;
+    }
+
+    return character;
+  }
+
+  bool get _isShortcut => modifiers.any(
+    (modifier) => switch (modifier) {
+      .controlLeft || .controlRight || .metaLeft || .metaRight => true,
+      _ => false,
+    },
+  );
+}
+
+final _hasOwnKeyCode = RegExp(r'^[a-zA-Z0-9 ]$');
+
+/// Enter, tab, backspace and escape come with a control character of their
+/// own; they are keys, not text.
+bool _isPrintable(String text) {
+  return text.isNotEmpty &&
+      text.runes.every((rune) => rune >= 0x20 && rune != 0x7f);
+}
+
 final _scrcpyKeyCodeByLogicalKey = Map.fromEntries(
   kAndroidToLogicalKey.entries.map(
     (entry) => MapEntry(entry.value, ScrcpyKeyCode(entry.key)),

@@ -32,6 +32,7 @@ class const IosClipboard({
         await interaction.simulateKeyEvent(
           DeviceKeyEvent(
             key: LogicalKeyboardKey.keyV,
+            physicalKey: PhysicalKeyboardKey.keyV,
             type: type,
             modifiers: const {},
           ),

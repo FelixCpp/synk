@@ -51,7 +51,7 @@ class IosInteraction({
 
   @override
   Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
-    final usageCode = iosKeyUsageOf(event.key);
+    final usageCode = iosKeyUsageOf(event.physicalKey);
     if (usageCode == null) {
       return;
     }

@@ -27,8 +27,10 @@ enum DeviceKeyModifier {
 sealed class DeviceKeyEvent with _$DeviceKeyEvent {
   const factory DeviceKeyEvent({
     required LogicalKeyboardKey key,
+    required PhysicalKeyboardKey physicalKey,
     required DeviceKeyEventType type,
     required Set<DeviceKeyModifier> modifiers,
+    String? character,
   }) = _DeviceKeyEvent;
 }
 

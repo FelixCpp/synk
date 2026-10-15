@@ -254,6 +254,7 @@ void main() {
       await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
           key: LogicalKeyboardKey.keyA,
+          physicalKey: PhysicalKeyboardKey.keyA,
           type: DeviceKeyEventType.down,
           modifiers: {},
         ),
@@ -261,6 +262,7 @@ void main() {
       await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
           key: LogicalKeyboardKey.keyA,
+          physicalKey: PhysicalKeyboardKey.keyA,
           type: DeviceKeyEventType.up,
           modifiers: {},
         ),
@@ -275,7 +277,8 @@ void main() {
     test('says nothing for a key the keyboard page has no code for', () async {
       await interaction.simulateKeyEvent(
         const DeviceKeyEvent(
-          key: LogicalKeyboardKey.gameButtonA,
+          key: LogicalKeyboardKey.fn,
+          physicalKey: PhysicalKeyboardKey.fn,
           type: DeviceKeyEventType.down,
           modifiers: {},
         ),
@@ -283,6 +286,43 @@ void main() {
 
       expect(calls, isEmpty);
     });
+
+    test(
+      'sends where a key sits, so a German colon is the period key',
+      () async {
+        // Shift and the period key type `:` on a German layout. The device
+        // applies its own layout to the position, as with a real keyboard.
+        await interaction.simulateKeyEvent(
+          const DeviceKeyEvent(
+            key: LogicalKeyboardKey.colon,
+            physicalKey: PhysicalKeyboardKey.period,
+            type: DeviceKeyEventType.down,
+            modifiers: {DeviceKeyModifier.shiftLeft},
+            character: ':',
+          ),
+        );
+
+        expect(calls.single.arguments['usage'], 0x37);
+      },
+    );
+
+    test(
+      'sends an umlaut key that has no character of its own on US',
+      () async {
+        // `ö` sits where US keyboards have the semicolon.
+        await interaction.simulateKeyEvent(
+          const DeviceKeyEvent(
+            key: LogicalKeyboardKey(0xf6),
+            physicalKey: PhysicalKeyboardKey.semicolon,
+            type: DeviceKeyEventType.down,
+            modifiers: {},
+            character: 'ö',
+          ),
+        );
+
+        expect(calls.single.arguments['usage'], 0x33);
+      },
+    );
 
     test('releases the device input when it shuts down', () async {
       await session.dispose();

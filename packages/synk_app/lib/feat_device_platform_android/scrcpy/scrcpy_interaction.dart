@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
@@ -9,6 +10,7 @@ import 'package:synk/feat_device_platform_android/scrcpy/interaction/clipboard_i
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/display_power_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/key_event_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/pointer_event_interaction_layer.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/interaction/text_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_key_input.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_pointer_input.dart';
 
@@ -21,8 +23,13 @@ class ScrcpyInteraction({
 }) implements DeviceInteraction, DeviceClipboard {
   final _clipboard = ClipboardInteractionLayer(interactionSocket);
   final _key = KeyEventInteractionLayer(interactionSocket);
+  final _text = TextInteractionLayer(interactionSocket);
   final _pointer = PointerEventInteractionLayer(interactionSocket);
   final _displayPower = DisplayPowerInteractionLayer(interactionSocket);
+
+  /// Keys whose press went out as text. Their release must not reach the
+  /// device as a key code for a press it never saw.
+  final _keysTypedAsText = <PhysicalKeyboardKey>{};
 
   this {
     _clipboard.listenForDeviceMessages();
@@ -35,8 +42,18 @@ class ScrcpyInteraction({
 
   @override
   Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
-    if (event.toScrcpyKeyEvent() case final event?) {
-      _key.simulateKeyEvent(event);
+    if (event.toScrcpyText() case final text?) {
+      _keysTypedAsText.add(event.physicalKey);
+      _text.injectText(text);
+      return;
+    }
+
+    if (event.type == .up && _keysTypedAsText.remove(event.physicalKey)) {
+      return;
+    }
+
+    if (event.toScrcpyKeyEvent() case final keyEvent?) {
+      _key.simulateKeyEvent(keyEvent);
     }
   }
 

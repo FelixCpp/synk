@@ -15,7 +15,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceKeyEvent {
 
- LogicalKeyboardKey get key; DeviceKeyEventType get type; Set<DeviceKeyModifier> get modifiers;
+/// What the key means on the host's keyboard layout. Shortcuts match on
+/// this.
+ LogicalKeyboardKey get key;/// Where the key sits on the keyboard, whatever the layout.
+ PhysicalKeyboardKey get physicalKey; DeviceKeyEventType get type; Set<DeviceKeyModifier> get modifiers;/// The text the keystroke types on the host's keyboard layout, modifiers
+/// included: `:` for shift and the period key on a German layout. Absent
+/// for a release and for keys that type nothing.
+ String? get character;
 /// Create a copy of DeviceKeyEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +33,20 @@ $DeviceKeyEventCopyWith<DeviceKeyEvent> get copyWith => _$DeviceKeyEventCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as DeviceKeyEvent;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceKeyEvent&&(identical(other.key, _this.key) || other.key == _this.key)&&(identical(other.type, _this.type) || other.type == _this.type)&&const DeepCollectionEquality().equals(other.modifiers, _this.modifiers));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeviceKeyEvent&&(identical(other.key, _this.key) || other.key == _this.key)&&(identical(other.physicalKey, _this.physicalKey) || other.physicalKey == _this.physicalKey)&&(identical(other.type, _this.type) || other.type == _this.type)&&const DeepCollectionEquality().equals(other.modifiers, _this.modifiers)&&(identical(other.character, _this.character) || other.character == _this.character));
 }
 
 
 @override
 int get hashCode {
   final _this = this as DeviceKeyEvent;
-  return Object.hash(runtimeType,_this.key,_this.type,const DeepCollectionEquality().hash(_this.modifiers));
+  return Object.hash(runtimeType,_this.key,_this.physicalKey,_this.type,const DeepCollectionEquality().hash(_this.modifiers),_this.character);
 }
 
 @override
 String toString() {
   final _this = this as DeviceKeyEvent;
-  return 'DeviceKeyEvent(key: ${_this.key}, type: ${_this.type}, modifiers: ${_this.modifiers})';
+  return 'DeviceKeyEvent(key: ${_this.key}, physicalKey: ${_this.physicalKey}, type: ${_this.type}, modifiers: ${_this.modifiers}, character: ${_this.character})';
 }
 
 
@@ -51,7 +57,7 @@ abstract mixin class $DeviceKeyEventCopyWith<$Res>  {
   factory $DeviceKeyEventCopyWith(DeviceKeyEvent value, $Res Function(DeviceKeyEvent) _then) = _$DeviceKeyEventCopyWithImpl;
 @useResult
 $Res call({
- LogicalKeyboardKey key, DeviceKeyEventType type, Set<DeviceKeyModifier> modifiers
+ LogicalKeyboardKey key, PhysicalKeyboardKey physicalKey, DeviceKeyEventType type, Set<DeviceKeyModifier> modifiers, String? character
 });
 
 
@@ -68,12 +74,14 @@ class _$DeviceKeyEventCopyWithImpl<$Res>
 
 /// Create a copy of DeviceKeyEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? key = null,Object? type = null,Object? modifiers = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? key = null,Object? physicalKey = null,Object? type = null,Object? modifiers = null,Object? character = freezed,}) {
   return _then(DeviceKeyEvent(
 key: null == key ? _self.key : key // ignore: cast_nullable_to_non_nullable
-as LogicalKeyboardKey,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as LogicalKeyboardKey,physicalKey: null == physicalKey ? _self.physicalKey : physicalKey // ignore: cast_nullable_to_non_nullable
+as PhysicalKeyboardKey,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as DeviceKeyEventType,modifiers: null == modifiers ? _self.modifiers : modifiers // ignore: cast_nullable_to_non_nullable
-as Set<DeviceKeyModifier>,
+as Set<DeviceKeyModifier>,character: freezed == character ? _self.character : character // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -155,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LogicalKeyboardKey key,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( LogicalKeyboardKey key,  PhysicalKeyboardKey physicalKey,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers,  String? character)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DeviceKeyEvent() when $default != null:
-return $default(_that.key,_that.type,_that.modifiers);case _:
+return $default(_that.key,_that.physicalKey,_that.type,_that.modifiers,_that.character);case _:
   return orElse();
 
 }
@@ -176,10 +184,10 @@ return $default(_that.key,_that.type,_that.modifiers);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LogicalKeyboardKey key,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( LogicalKeyboardKey key,  PhysicalKeyboardKey physicalKey,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers,  String? character)  $default,) {final _that = this;
 switch (_that) {
 case _DeviceKeyEvent():
-return $default(_that.key,_that.type,_that.modifiers);}
+return $default(_that.key,_that.physicalKey,_that.type,_that.modifiers,_that.character);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +201,10 @@ return $default(_that.key,_that.type,_that.modifiers);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LogicalKeyboardKey key,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( LogicalKeyboardKey key,  PhysicalKeyboardKey physicalKey,  DeviceKeyEventType type,  Set<DeviceKeyModifier> modifiers,  String? character)?  $default,) {final _that = this;
 switch (_that) {
 case _DeviceKeyEvent() when $default != null:
-return $default(_that.key,_that.type,_that.modifiers);case _:
+return $default(_that.key,_that.physicalKey,_that.type,_that.modifiers,_that.character);case _:
   return null;
 
 }
@@ -208,10 +216,14 @@ return $default(_that.key,_that.type,_that.modifiers);case _:
 
 
 class _DeviceKeyEvent implements DeviceKeyEvent {
-  const _DeviceKeyEvent({required this.key, required this.type, required  Set<DeviceKeyModifier> modifiers}): _modifiers = modifiers;
+  const _DeviceKeyEvent({required this.key, required this.physicalKey, required this.type, required  Set<DeviceKeyModifier> modifiers, this.character}): _modifiers = modifiers;
   
 
+/// What the key means on the host's keyboard layout. Shortcuts match on
+/// this.
 @override final  LogicalKeyboardKey key;
+/// Where the key sits on the keyboard, whatever the layout.
+@override final  PhysicalKeyboardKey physicalKey;
 @override final  DeviceKeyEventType type;
  final  Set<DeviceKeyModifier> _modifiers;
 @override Set<DeviceKeyModifier> get modifiers {
@@ -220,6 +232,10 @@ class _DeviceKeyEvent implements DeviceKeyEvent {
   return EqualUnmodifiableSetView(_modifiers);
 }
 
+/// The text the keystroke types on the host's keyboard layout, modifiers
+/// included: `:` for shift and the period key on a German layout. Absent
+/// for a release and for keys that type nothing.
+@override final  String? character;
 
 /// Create a copy of DeviceKeyEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -231,18 +247,18 @@ _$DeviceKeyEventCopyWith<_DeviceKeyEvent> get copyWith => __$DeviceKeyEventCopyW
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceKeyEvent&&(identical(other.key, key) || other.key == key)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.modifiers, _modifiers));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeviceKeyEvent&&(identical(other.key, key) || other.key == key)&&(identical(other.physicalKey, physicalKey) || other.physicalKey == physicalKey)&&(identical(other.type, type) || other.type == type)&&const DeepCollectionEquality().equals(other.modifiers, _modifiers)&&(identical(other.character, character) || other.character == character));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,key,type,const DeepCollectionEquality().hash(_modifiers));
+    return Object.hash(runtimeType,key,physicalKey,type,const DeepCollectionEquality().hash(_modifiers),character);
 }
 
 @override
 String toString() {
-    return 'DeviceKeyEvent(key: $key, type: $type, modifiers: $modifiers)';
+    return 'DeviceKeyEvent(key: $key, physicalKey: $physicalKey, type: $type, modifiers: $modifiers, character: $character)';
 }
 
 
@@ -253,7 +269,7 @@ abstract mixin class _$DeviceKeyEventCopyWith<$Res> implements $DeviceKeyEventCo
   factory _$DeviceKeyEventCopyWith(_DeviceKeyEvent value, $Res Function(_DeviceKeyEvent) _then) = __$DeviceKeyEventCopyWithImpl;
 @override @useResult
 $Res call({
- LogicalKeyboardKey key, DeviceKeyEventType type, Set<DeviceKeyModifier> modifiers
+ LogicalKeyboardKey key, PhysicalKeyboardKey physicalKey, DeviceKeyEventType type, Set<DeviceKeyModifier> modifiers, String? character
 });
 
 
@@ -270,12 +286,14 @@ class __$DeviceKeyEventCopyWithImpl<$Res>
 
 /// Create a copy of DeviceKeyEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? key = null,Object? type = null,Object? modifiers = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? key = null,Object? physicalKey = null,Object? type = null,Object? modifiers = null,Object? character = freezed,}) {
   return _then(_DeviceKeyEvent(
 key: null == key ? _self.key : key // ignore: cast_nullable_to_non_nullable
-as LogicalKeyboardKey,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as LogicalKeyboardKey,physicalKey: null == physicalKey ? _self.physicalKey : physicalKey // ignore: cast_nullable_to_non_nullable
+as PhysicalKeyboardKey,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as DeviceKeyEventType,modifiers: null == modifiers ? _self._modifiers : modifiers // ignore: cast_nullable_to_non_nullable
-as Set<DeviceKeyModifier>,
+as Set<DeviceKeyModifier>,character: freezed == character ? _self.character : character // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
