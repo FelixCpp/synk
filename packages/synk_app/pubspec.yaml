@@ -1,7 +1,7 @@
 name: synk
 description: "A Desktop App that lets you inspect and interact devices connected to your computer."
 publish_to: "none"
-version: 0.1.1+5
+version: 0.1.2+5
 repository: https://github.com/FelixCpp/synk
 
 environment:
