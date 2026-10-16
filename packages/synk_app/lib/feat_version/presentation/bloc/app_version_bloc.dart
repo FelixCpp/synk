@@ -37,10 +37,13 @@ class AppVersionBloc(
   ) async {
     emit(state.copyWith(newerAppVersion: null));
 
-    final newerAppVersion = await getNewerAppVersion.logger().getOrElse(
-      unit,
-      (_) => const NewerAppVersion.failedToFetch(),
-    );
+    final newerAppVersion = await getNewerAppVersion
+        .logger()
+        .ensureMinExecutionTimeOnSuccess(const .new(milliseconds: 500))
+        .getOrElse(
+          unit,
+          (_) => const NewerAppVersion.failedToFetch(),
+        );
 
     emit(state.copyWith(newerAppVersion: newerAppVersion));
   }
