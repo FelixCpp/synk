@@ -37,8 +37,10 @@ class ToolValidationBloc(
           // Degraded features are warnings; only without any usable tool is the
           // app pointless.
           final failedTools = {for (final issue in issues) issue.tool};
-          final isUnavailable =
-              failedTools.length == ExternalTool.values.length;
+          final isUnavailable = const {
+            ExternalTool.adb,
+            ExternalTool.devicectl,
+          }.every(failedTools.contains);
           if (isUnavailable) {
             return emit(.toolsUnavailable(issues: issues));
           }

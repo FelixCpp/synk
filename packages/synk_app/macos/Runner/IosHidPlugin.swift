@@ -9,6 +9,10 @@ import os
 
 private let logger = Logger(subsystem: "dev.synk", category: "ios_hid")
 
+extension Notification.Name {
+  static let iosScreenWentDark = Notification.Name("dev.synk.iosScreenWentDark")
+}
+
 private let coreDeviceBinaryPath =
   "/Library/Developer/PrivateFrameworks/CoreDevice.framework/Versions/A/CoreDevice"
 
@@ -158,7 +162,12 @@ private let isCoreDeviceAvailable: Bool = {
           // A release in the meantime must not be resurrected by a late result.
           guard self.digitizers[udid] != nil else { return }
           self.rotations[udid] = state.rotation
+          let wasAwake = self.screenAwake[udid]
           self.screenAwake[udid] = state.awake
+          if !state.awake, wasAwake != false {
+            NotificationCenter.default.post(
+              name: .iosScreenWentDark, object: nil, userInfo: ["udid": udid])
+          }
         }
       }
     }
@@ -599,7 +608,7 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
     if call.method == "prepareInput" {
       logger.info(
         "No touch input: CoreDevice is unavailable (needs Xcode, Apple silicon, macOS 14+)")
-      result(false)
+      result("coreDeviceUnavailable")
       return
     }
 
@@ -647,12 +656,12 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
       Task {
         do {
           let prepared = try await injector.prepare(udid: deviceId)
-          await MainActor.run { result(prepared) }
+          await MainActor.run { result(prepared ? nil : "deviceUnknown") }
         } catch {
           logger.error(
             "Failed to prepare HID input for \(deviceId, privacy: .public): \(error.localizedDescription, privacy: .public)"
           )
-          await MainActor.run { result(false) }
+          await MainActor.run { result("preparationFailed") }
         }
       }
     }

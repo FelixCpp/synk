@@ -20,6 +20,7 @@ class const SynkSidebar({super.key}) extends StatelessWidget {
         SidebarRepository(RepositoryProvider.of(context)),
         RepositoryProvider.of(context),
         RepositoryProvider.of(context),
+        RepositoryProvider.of(context),
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
         builder: (context, state) {
@@ -343,17 +344,30 @@ class const _FailedToConnectDeviceEntry({
           ),
         ],
       ),
-      trailing: _RetryButton(
-        onPressed: () {
-          BlocProvider.of<SidebarBloc>(context)
-              .add(SidebarEvent.onConnect(pluggedDevice));
-        },
+      trailing: Row(
+        mainAxisSize: .min,
+        children: [
+          if (failure == ConnectionFailure.cameraAccessDenied)
+            _OpenCameraSettingsButton(
+              onPressed: () {
+                BlocProvider.of<SidebarBloc>(context)
+                    .add(const SidebarEvent.onOpenCameraPrivacySettings());
+              },
+            ),
+          _RetryButton(
+            onPressed: () {
+              BlocProvider.of<SidebarBloc>(context)
+                  .add(SidebarEvent.onConnect(pluggedDevice));
+            },
+          ),
+        ],
       ),
     );
   }
 
   String _labelOf(ConnectionFailure failure) => switch (failure) {
     ConnectionFailure.connectionRefused => 'Verbindung abgelehnt',
+    ConnectionFailure.cameraAccessDenied => 'Kamerazugriff verweigert',
     ConnectionFailure.unknown => 'Verbindung fehlgeschlagen',
   };
 }
@@ -396,6 +410,25 @@ class const _UnableToConnectDeviceEntry({
         ],
       ),
       trailing: null,
+    );
+  }
+}
+
+class const _OpenCameraSettingsButton({
+  required final VoidCallback onPressed,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.synkUiTheme.colors;
+
+    return SynkUiTooltip(
+      message: 'Kamerazugriff in den Systemeinstellungen erlauben',
+      child: SynkUiIconButton(
+        icon: CupertinoIcons.gear_alt,
+        iconSize: 15.0,
+        color: colors.accent,
+        onPressed: onPressed,
+      ),
     );
   }
 }

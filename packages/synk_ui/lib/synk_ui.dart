@@ -11,6 +11,7 @@ export 'src/components/synk_ui_menu.dart';
 export 'src/components/synk_ui_status_dot.dart';
 export 'src/components/synk_ui_popover.dart';
 export 'src/components/synk_ui_segmented_control.dart';
+export 'src/components/synk_ui_slider.dart';
 export 'src/components/synk_ui_spinner.dart';
 export 'src/components/synk_ui_status_tile.dart';
 export 'src/components/synk_ui_tag.dart';

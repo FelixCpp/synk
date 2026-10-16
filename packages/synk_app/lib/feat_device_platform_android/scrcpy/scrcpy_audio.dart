@@ -11,6 +11,7 @@ class ScrcpyAudio({
   late final StreamSubscription<Uint8List> _subscription;
 
   var _isAudioMuted = true;
+  var _audioVolume = 1.0;
 
   this {
     _subscription = byteStream.listen((bytes) => mirror.uploadAudio(bytes));
@@ -27,5 +28,14 @@ class ScrcpyAudio({
   Future<void> setAudioMuted(bool muted) async {
     _isAudioMuted = muted;
     await mirror.setAudioMuted(muted);
+  }
+
+  @override
+  double get audioVolume => _audioVolume;
+
+  @override
+  Future<void> setAudioVolume(double volume) async {
+    _audioVolume = volume;
+    await mirror.setAudioVolume(volume);
   }
 }

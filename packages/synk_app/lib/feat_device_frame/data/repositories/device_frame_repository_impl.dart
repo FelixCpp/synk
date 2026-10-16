@@ -54,6 +54,14 @@ class DeviceFrameRepositoryImpl({
   }
 
   @override
+  double get audioVolume => session.audio?.audioVolume ?? 1.0;
+
+  @override
+  Future<void> setAudioVolume(double volume) async {
+    await session.audio?.setAudioVolume(volume);
+  }
+
+  @override
   Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event) async {
     final shortcut = ClipboardShortcut.of(event);
     final settings = await settingsRepository.read();

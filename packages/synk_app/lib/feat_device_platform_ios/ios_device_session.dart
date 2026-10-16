@@ -22,12 +22,10 @@ class IosDeviceSession({
   required final DeviceId deviceId,
   @override required final NativeTextureId textureId,
   required DeviceScreenSize initialScreenSize,
-
-  /// Whether the HID session behind [hidChannel] could be prepared. Without
-  /// it the device is mirrored view-only.
-  required bool supportsInteraction,
+  @override
+  required final InteractionUnavailableReason? interactionUnavailableReason,
 }) implements DeviceSession {
-  final IosInteraction? _interaction = supportsInteraction
+  final IosInteraction? _interaction = interactionUnavailableReason == null
       ? IosInteraction(
           hidChannel: hidChannel,
           deviceId: deviceId,

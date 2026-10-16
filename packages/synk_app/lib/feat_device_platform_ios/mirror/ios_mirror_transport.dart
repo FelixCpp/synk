@@ -13,6 +13,10 @@ class const IosAudioSideCar(
     return channel.setAudioSessionMuted(sessionId, muted);
   }
 
+  Future<void> setVolume(double volume) {
+    return channel.setAudioSessionVolume(sessionId, volume);
+  }
+
   Future<void> stop() async {
     await channel.stopAudio(sessionId);
   }
@@ -44,6 +48,10 @@ class const IosMirrorTransport(
 
   Future<void> setAudioMuted(NativeTextureId textureId, bool muted) async {
     await audio?.setMuted(muted);
+  }
+
+  Future<void> setAudioVolume(NativeTextureId textureId, double volume) async {
+    await audio?.setVolume(volume);
   }
 
   Future<void> stopMirror(NativeTextureId textureId) async {

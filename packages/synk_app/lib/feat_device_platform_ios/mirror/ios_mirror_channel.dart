@@ -1,3 +1,4 @@
+import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:flutter/services.dart';
@@ -41,10 +42,18 @@ class IosMirrorChannel {
   }
 
   Future<IosMirrorStartResult> startMirror(String deviceId) async {
-    final result = await _channel.invokeMapMethod<String, Object?>(
-      'startMirror',
-      {'deviceId': deviceId},
-    );
+    final Map<String, Object?>? result;
+    try {
+      result = await _channel.invokeMapMethod<String, Object?>(
+        'startMirror',
+        {'deviceId': deviceId},
+      );
+    } on PlatformException catch (error) {
+      if (error.code == 'camera_access_denied') {
+        throw const CameraAccessDeniedException();
+      }
+      rethrow;
+    }
 
     return IosMirrorStartResult(
       textureId: NativeTextureId(result!['textureId']! as int),

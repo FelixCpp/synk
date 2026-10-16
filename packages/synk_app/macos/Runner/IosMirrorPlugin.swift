@@ -26,6 +26,7 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
   AVCaptureVideoDataOutputSampleBufferDelegate
 {
   let registry: FlutterTextureRegistry
+  let deviceId: String
   var textureId: Int64 = -1
   var onScreenSizeChanged: ((Int, Int) -> Void)?
   private(set) var dimensions: CMVideoDimensions?
@@ -43,9 +44,40 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
   private var isRecordingArmed = false
   private var isRecording = false
 
-  init(registry: FlutterTextureRegistry) {
+  init(registry: FlutterTextureRegistry, deviceId: String) {
     self.registry = registry
+    self.deviceId = deviceId
     super.init()
+  }
+
+  func showBlackScreen() {
+    bufferLock.lock()
+    let dimensions = self.dimensions
+    bufferLock.unlock()
+    guard let dimensions else { return }
+
+    var buffer: CVPixelBuffer?
+    CVPixelBufferCreate(
+      kCFAllocatorDefault, Int(dimensions.width), Int(dimensions.height),
+      kCVPixelFormatType_32BGRA, nil, &buffer
+    )
+    guard let buffer else { return }
+
+    CVPixelBufferLockBaseAddress(buffer, [])
+    if let base = CVPixelBufferGetBaseAddress(buffer) {
+      let byteCount = CVPixelBufferGetBytesPerRow(buffer) * CVPixelBufferGetHeight(buffer)
+      memset_pattern4(base, [UInt8(0), 0, 0, 255], byteCount)
+    }
+    CVPixelBufferUnlockBaseAddress(buffer, [])
+
+    bufferLock.lock()
+    latestPixelBuffer = buffer
+    bufferLock.unlock()
+
+    DispatchQueue.main.async { [weak self] in
+      guard let self else { return }
+      self.registry.textureFrameAvailable(self.textureId)
+    }
   }
 
   func start(device: AVCaptureDevice) throws {
@@ -283,6 +315,16 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
   init(registry: FlutterTextureRegistry) {
     self.registry = registry
     super.init()
+
+    NotificationCenter.default.addObserver(
+      forName: .iosScreenWentDark, object: nil, queue: nil
+    ) { [weak self] notification in
+      guard let self, let udid = notification.userInfo?["udid"] as? String else { return }
+      self.sessionsLock.lock()
+      let matching = self.sessions.values.filter { $0.deviceId == udid }
+      self.sessionsLock.unlock()
+      for session in matching { session.showBlackScreen() }
+    }
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -350,11 +392,9 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    // macOS treats a mirrored iOS device as a camera, so capturing it needs
-    // camera access. Opening the input without it lets TCC kill the app.
     switch AVCaptureDevice.authorizationStatus(for: .video) {
     case .authorized:
-      startMirrorSession(device: device, result: result)
+      startMirrorSession(deviceId: deviceId, device: device, result: result)
     case .notDetermined:
       AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
         DispatchQueue.main.async {
@@ -362,7 +402,7 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
             result(Self.cameraAccessDeniedError())
             return
           }
-          self?.startMirrorSession(device: device, result: result)
+          self?.startMirrorSession(deviceId: deviceId, device: device, result: result)
         }
       }
     default:
@@ -380,8 +420,10 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
     )
   }
 
-  private func startMirrorSession(device: AVCaptureDevice, result: @escaping FlutterResult) {
-    let session = IosMirrorSession(registry: registry)
+  private func startMirrorSession(
+    deviceId: String, device: AVCaptureDevice, result: @escaping FlutterResult
+  ) {
+    let session = IosMirrorSession(registry: registry, deviceId: deviceId)
     do {
       try session.start(device: device)
     } catch {

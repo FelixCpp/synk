@@ -13,6 +13,7 @@ import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dar
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_file_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/set_audio_muted_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/set_audio_volume_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_key_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
@@ -41,19 +42,30 @@ class DeviceFrameBloc({
   final startRecording = StartRecordingInteractor(repository);
   final stopRecording = StopRecordingInteractor(repository);
   final setAudioMuted = SetAudioMutedInteractor(repository);
+  final setAudioVolume = SetAudioVolumeInteractor(repository);
   final sendFiles = SendFilesInteractor(repository);
   final sendPickedApk = SendPickedApkInteractor(repository);
   final sendPickedFile = SendPickedFileInteractor(repository);
   final navigate = NavigateInteractor(repository);
   final pressPowerButton = PressPowerButtonInteractor(repository);
 
-  this : super(.initial(isAudioMuted: repository.isAudioMuted)) {
+  this
+    : super(
+        .initial(
+          isAudioMuted: repository.isAudioMuted,
+          audioVolume: repository.audioVolume,
+        ),
+      ) {
     on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnPinchEvent>(_onPinchEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
     on<_OnToggleRecording>(_onToggleRecording, transformer: sequential());
     on<_OnToggleAudioMute>(_onToggleAudioMute, transformer: sequential());
+    on<_OnAudioVolumeChanged>(
+      _onAudioVolumeChanged,
+      transformer: sequential(),
+    );
     on<_OnFilesDropped>(_onFilesDropped, transformer: sequential());
     on<_OnNavigate>(_onNavigate, transformer: sequential());
     on<_OnPowerButtonPressed>(
@@ -170,6 +182,31 @@ class DeviceFrameBloc({
         .logger()
         .intercept(_notify('Failed to toggle audio'))
         .run(muted);
+  }
+
+  Future<void> _onAudioVolumeChanged(
+    _OnAudioVolumeChanged event,
+    Emitter<DeviceFrameState> emit,
+  ) async {
+    final unmute = state.isAudioMuted && event.volume > 0.0;
+    emit(
+      state.copyWith(
+        audioVolume: event.volume,
+        isAudioMuted: unmute ? false : state.isAudioMuted,
+      ),
+    );
+
+    await setAudioVolume
+        .logger(level: .trace)
+        .intercept(_notify('Failed to change the volume'))
+        .run(event.volume);
+
+    if (unmute) {
+      await setAudioMuted
+          .logger()
+          .intercept(_notify('Failed to toggle audio'))
+          .run(false);
+    }
   }
 
   FutureOr<void> _onFilesDropped(

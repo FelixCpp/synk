@@ -53,7 +53,7 @@ void main() {
       deviceId: _deviceId,
       textureId: const NativeTextureId(1),
       initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
-      supportsInteraction: supportsInteraction,
+      interactionUnavailableReason: supportsInteraction ? null : .unknown,
     );
     sessions.add(session);
 

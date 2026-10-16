@@ -3,15 +3,21 @@ import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 
+enum IosInputProblem {
+  coreDeviceUnavailable,
+  deviceUnknown,
+  preparationFailed,
+}
+
 class IosHidChannel {
   static const _channel = MethodChannel('dev.synk/ios_hid');
 
-  Future<bool> prepareInput(DeviceId deviceId) async {
-    final prepared = await _channel.invokeMethod<bool>('prepareInput', {
+  Future<IosInputProblem?> prepareInput(DeviceId deviceId) async {
+    final problem = await _channel.invokeMethod<String>('prepareInput', {
       'deviceId': deviceId.value,
     });
 
-    return prepared ?? false;
+    return problem == null ? null : IosInputProblem.values.byName(problem);
   }
 
   Future<void> releaseInput(DeviceId deviceId) {

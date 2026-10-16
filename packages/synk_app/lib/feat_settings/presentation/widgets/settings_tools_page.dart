@@ -77,6 +77,15 @@ class const SettingsToolsPage({super.key}) extends StatelessWidget {
                         ),
                       ],
                     ),
+                    _ToolRow(
+                      name: 'CoreDevice',
+                      issue: _issueFor(issues, ExternalTool.coreDevice),
+                      checking: issues == null,
+                      availableMessage: 'Teil von Xcode',
+                      consequence: 'iOS nur ansehen, ohne Touch und Ton',
+                      needsRestart: false,
+                      actions: const [],
+                    ),
                   ],
                 ),
               ],
@@ -157,5 +166,6 @@ class const _ToolRow({
   String _problemLabel(ToolIssue issue) => switch (issue.problem) {
     ToolProblem.notFound => 'Nicht gefunden',
     ToolProblem.notRunnable => 'Nicht ausführbar',
+    ToolProblem.unsupportedMac => 'Mac nicht unterstützt',
   };
 }

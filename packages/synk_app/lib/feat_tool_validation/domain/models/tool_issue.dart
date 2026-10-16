@@ -1,11 +1,13 @@
 enum ExternalTool {
   adb,
   devicectl,
+  coreDevice,
 }
 
 enum ToolProblem {
   notFound,
   notRunnable,
+  unsupportedMac,
 }
 
 class const ToolIssue({

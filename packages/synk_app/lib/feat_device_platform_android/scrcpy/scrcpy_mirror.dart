@@ -26,6 +26,10 @@ class const ScrcpyMirror._({required final NativeTextureId textureId}) {
     await ScrcpyChannel.setAudioMuted(textureId, muted);
   }
 
+  Future<void> setAudioVolume(double volume) async {
+    await ScrcpyChannel.setAudioVolume(textureId, volume);
+  }
+
   Stream<DeviceScreenSize> get screenSizeChanges {
     return ScrcpyChannel.screenSizeChanges
         .where((event) => event.textureId == textureId)

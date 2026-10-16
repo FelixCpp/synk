@@ -13,6 +13,10 @@ import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/testing.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+
+import '../support/fake_process_manager.dart';
 
 class FakeSidebarRepository implements SidebarRepository {
   final _controller = StreamController<List<SidebarDevice>>.broadcast();
@@ -74,16 +78,22 @@ void main() {
   late FakeSidebarRepository sidebarRepository;
   late FakeDeviceConnectionsRepository connectionsRepository;
   late NotificationService notifications;
+  late FakeProcessManager processManager;
   late SidebarBloc bloc;
 
   setUp(() {
     sidebarRepository = FakeSidebarRepository();
     connectionsRepository = FakeDeviceConnectionsRepository();
     notifications = NotificationService();
+    processManager = FakeProcessManager();
     bloc = SidebarBloc(
       sidebarRepository,
       connectionsRepository,
       notifications,
+      SystemFileOpener(
+        processManager: processManager,
+        platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
+      ),
     );
   });
 
@@ -163,5 +173,17 @@ void main() {
     expect(emitted.single.message, contains('boom'));
 
     await subscription.cancel();
+  });
+
+  test('opens the camera privacy settings of macOS', () async {
+    bloc.add(const SidebarEvent.onOpenCameraPrivacySettings());
+    await pumpEventQueue();
+
+    expect(processManager.commands, [
+      [
+        'open',
+        'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera',
+      ],
+    ]);
   });
 }

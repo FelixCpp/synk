@@ -15,6 +15,7 @@ class FakeDeviceSession implements DeviceSession {
     this.clipboard,
     this.screenCapture,
     this.interaction,
+    this.interactionUnavailableReason,
     this.fileTransfer,
   }) : screenSizes = BehaviorSubject.seeded(screenSize);
 
@@ -35,6 +36,9 @@ class FakeDeviceSession implements DeviceSession {
 
   @override
   final DeviceInteraction? interaction;
+
+  @override
+  final InteractionUnavailableReason? interactionUnavailableReason;
 
   @override
   final DeviceFileTransfer? fileTransfer;
@@ -71,6 +75,14 @@ class FakeAudio implements DeviceAudio {
   @override
   Future<void> setAudioMuted(bool muted) async {
     isAudioMuted = muted;
+  }
+
+  @override
+  double audioVolume = 1.0;
+
+  @override
+  Future<void> setAudioVolume(double volume) async {
+    audioVolume = volume;
   }
 }
 

@@ -64,7 +64,7 @@ class IosDevicePlatform({
         width: result.width,
         height: result.height,
       ),
-      supportsInteraction: await _prepareInput(deviceId),
+      interactionUnavailableReason: await _prepareInput(deviceId),
     );
   }
 
@@ -86,15 +86,12 @@ class IosDevicePlatform({
     }
   }
 
-  Future<bool> _prepareInput(DeviceId deviceId) async {
+  Future<InteractionUnavailableReason?> _prepareInput(
+    DeviceId deviceId,
+  ) async {
+    final IosInputProblem? problem;
     try {
-      if (await hidChannel.prepareInput(deviceId)) {
-        appLogger.i('Touch input ready for $deviceId');
-        return true;
-      }
-
-      appLogger.i('No touch input for $deviceId; mirroring it view-only');
-      return false;
+      problem = await hidChannel.prepareInput(deviceId);
     } on Object catch (error, stackTrace) {
       appLogger.w(
         'No touch input for $deviceId; mirroring it view-only',
@@ -102,7 +99,44 @@ class IosDevicePlatform({
         stackTrace: stackTrace,
       );
 
-      return false;
+      return .unknown;
     }
+
+    if (problem == null) {
+      appLogger.i('Touch input ready for $deviceId');
+      return null;
+    }
+
+    final reason = switch (problem) {
+      .coreDeviceUnavailable =>
+        InteractionUnavailableReason.coreDeviceUnavailable,
+      .deviceUnknown || .preparationFailed => await _diagnoseInput(deviceId),
+    };
+
+    appLogger.i(
+      'No touch input for $deviceId ($reason); mirroring it view-only',
+    );
+    return reason;
+  }
+
+  Future<InteractionUnavailableReason> _diagnoseInput(DeviceId deviceId) async {
+    try {
+      final status = await devicectl.deviceStatus(deviceId: deviceId);
+      if (status == null || !status.isPaired) {
+        return .deviceNotPaired;
+      }
+
+      if (status.isDeveloperModeEnabled == false) {
+        return .developerModeDisabled;
+      }
+    } on Object catch (error, stackTrace) {
+      appLogger.w(
+        'Could not tell why $deviceId has no touch input',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return .unknown;
   }
 }

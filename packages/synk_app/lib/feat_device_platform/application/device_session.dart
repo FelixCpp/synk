@@ -5,6 +5,13 @@ import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart'
 
 extension type const NativeTextureId(int value) implements int {}
 
+enum InteractionUnavailableReason {
+  coreDeviceUnavailable,
+  deviceNotPaired,
+  developerModeDisabled,
+  unknown,
+}
+
 abstract interface class DeviceSession {
   NativeTextureId get textureId;
   DeviceScreenSize get screenSize;
@@ -15,6 +22,7 @@ abstract interface class DeviceSession {
   DeviceClipboard? get clipboard;
   DeviceScreenCapture? get screenCapture;
   DeviceInteraction? get interaction;
+  InteractionUnavailableReason? get interactionUnavailableReason;
   DeviceFileTransfer? get fileTransfer;
 
   Future<void> dispose();
@@ -38,6 +46,9 @@ abstract interface class DeviceClipboard {
 abstract interface class DeviceAudio {
   Future<void> setAudioMuted(bool muted);
   bool get isAudioMuted;
+
+  Future<void> setAudioVolume(double volume);
+  double get audioVolume;
 }
 
 abstract interface class DeviceScreenCapture {

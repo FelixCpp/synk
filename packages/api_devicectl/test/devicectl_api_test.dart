@@ -192,4 +192,90 @@ void main() {
       );
     });
   });
+
+  group('deviceStatus', () {
+    String devicesJson({
+      String udid = '00008120-0009555001C2601E',
+      String pairingState = 'paired',
+      String developerModeStatus = 'enabled',
+    }) {
+      return '''
+{
+  "result": {
+    "devices": [
+      {
+        "hardwareProperties": {"udid": "B90D57C9-9BCA-458E-8B3C-F3293A5457E5"},
+        "connectionProperties": {"pairingState": "unsupported"},
+        "deviceProperties": {}
+      },
+      {
+        "hardwareProperties": {"udid": "$udid"},
+        "connectionProperties": {"pairingState": "$pairingState"},
+        "deviceProperties": {"developerModeStatus": "$developerModeStatus"}
+      }
+    ]
+  }
+}
+''';
+    }
+
+    test('finds the device by its compact IOKit UDID', () async {
+      final api = apiAnswering(
+        (exitCode: 0, stdout: devicesJson(), stderr: ''),
+      );
+
+      final status = await api.deviceStatus(
+        deviceId: '000081200009555001C2601E',
+      );
+
+      expect(status?.isPaired, isTrue);
+      expect(status?.isDeveloperModeEnabled, isTrue);
+      expect(processManager.commands.single, [
+        defaultXcrunPath,
+        'devicectl',
+        'list',
+        'devices',
+        '--json-output',
+        '-',
+        '--quiet',
+      ]);
+    });
+
+    test('reports an unpaired device with developer mode off', () async {
+      final api = apiAnswering((
+        exitCode: 0,
+        stdout: devicesJson(
+          pairingState: 'unpaired',
+          developerModeStatus: 'disabled',
+        ),
+        stderr: '',
+      ));
+
+      final status = await api.deviceStatus(
+        deviceId: '00008120-0009555001C2601E',
+      );
+
+      expect(status?.isPaired, isFalse);
+      expect(status?.isDeveloperModeEnabled, isFalse);
+    });
+
+    test('returns null for a device devicectl does not know', () async {
+      final api = apiAnswering(
+        (exitCode: 0, stdout: devicesJson(), stderr: ''),
+      );
+
+      expect(await api.deviceStatus(deviceId: 'unknown'), isNull);
+    });
+
+    test('throws when devicectl fails', () async {
+      final api = apiAnswering(
+        (exitCode: 1, stdout: '', stderr: 'no xcode'),
+      );
+
+      await expectLater(
+        () => api.deviceStatus(deviceId: 'any'),
+        throwsA(isA<DevicectlCommandException>()),
+      );
+    });
+  });
 }

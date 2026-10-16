@@ -15,5 +15,6 @@ sealed class DeviceConnectionState with _$DeviceConnectionState {
 
 enum ConnectionFailure {
   connectionRefused,
+  cameraAccessDenied,
   unknown,
 }

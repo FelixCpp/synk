@@ -10,6 +10,11 @@ class const DevicectlCommandException({required final String message})
   String toString() => 'DevicectlCommandException: $message';
 }
 
+class const DevicectlDeviceStatus({
+  required final bool isPaired,
+  required final bool? isDeveloperModeEnabled,
+});
+
 class DevicectlApi({
   final String xcrunPath = defaultXcrunPath,
   final ProcessManager processManager = const LocalProcessManager(),
@@ -99,6 +104,55 @@ class DevicectlApi({
       );
     }
   }
+
+  Future<DevicectlDeviceStatus?> deviceStatus({
+    required String deviceId,
+  }) async {
+    final process = await processRunner.run([
+      'list',
+      'devices',
+      '--json-output',
+      '-',
+      '--quiet',
+    ]);
+
+    if (process.exitCode != 0) {
+      throw DevicectlCommandException(
+        message:
+            'Failed to list the devices '
+            '(${process.exitCode}): ${_describeOutput(process)}',
+      );
+    }
+
+    final json = jsonDecode(process.stdout as String) as Map<String, Object?>;
+    final result = json['result'] as Map<String, Object?>? ?? const {};
+    final devices = result['devices'] as List<Object?>? ?? const [];
+    final wanted = _comparableUdid(deviceId);
+
+    for (final device in devices.cast<Map<String, Object?>>()) {
+      final hardware = device['hardwareProperties'] as Map<String, Object?>?;
+      final udid = hardware?['udid'] as String?;
+      if (udid == null || _comparableUdid(udid) != wanted) continue;
+
+      final connection =
+          device['connectionProperties'] as Map<String, Object?>?;
+      final properties = device['deviceProperties'] as Map<String, Object?>?;
+      final developerMode = properties?['developerModeStatus'] as String?;
+
+      return DevicectlDeviceStatus(
+        isPaired: connection?['pairingState'] == 'paired',
+        isDeveloperModeEnabled: developerMode == null
+            ? null
+            : developerMode == 'enabled',
+      );
+    }
+
+    return null;
+  }
+}
+
+String _comparableUdid(String udid) {
+  return udid.replaceAll('-', '').toLowerCase();
 }
 
 final _compactUdidPattern = RegExp(r'^[0-9A-Fa-f]{24}$');

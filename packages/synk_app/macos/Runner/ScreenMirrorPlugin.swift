@@ -67,6 +67,7 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
   private var audioPlayerNode: AVAudioPlayerNode?
   private var audioFormat: AVAudioFormat?
   private var isAudioMuted = true
+  private var audioVolume: Float = 1.0
   private var pendingAudioBuffer = Data()
   /// Logged once, so a refusing engine says so instead of just staying silent.
   private var hasReportedAudioFailure = false
@@ -237,6 +238,11 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     if muted {
       audioPlayerNode?.stop()
     }
+  }
+
+  func setAudioVolume(_ volume: Float) {
+    audioVolume = volume
+    audioPlayerNode?.volume = volume
   }
 
   /// Muting silences playback only. A recording still gets the sound, which is
@@ -422,6 +428,7 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
 
     let engine = AVAudioEngine()
     let playerNode = AVAudioPlayerNode()
+    playerNode.volume = audioVolume
     engine.attach(playerNode)
     engine.connect(playerNode, to: engine.mainMixerNode, format: format)
 
@@ -772,6 +779,19 @@ public class ScreenMirrorPlugin: NSObject, FlutterPlugin {
         return
       }
       session.setAudioMuted(muted)
+      result(nil)
+    case "setAudioVolume":
+      guard let textureId = textureId(from: call), let session = session(for: textureId) else {
+        result(FlutterError(code: "invalid_args", message: "textureId is required", details: nil))
+        return
+      }
+      guard let args = call.arguments as? [String: Any],
+        let volume = (args["volume"] as? NSNumber)?.floatValue
+      else {
+        result(FlutterError(code: "invalid_args", message: "volume is required", details: nil))
+        return
+      }
+      session.setAudioVolume(volume)
       result(nil)
     default:
       result(FlutterMethodNotImplemented)

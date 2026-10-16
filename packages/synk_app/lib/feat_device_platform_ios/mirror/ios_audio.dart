@@ -6,6 +6,7 @@ class IosAudio({
   required final NativeTextureId textureId,
 }) implements DeviceAudio {
   var _isAudioMuted = true;
+  var _audioVolume = 1.0;
 
   @override
   bool get isAudioMuted => _isAudioMuted;
@@ -14,5 +15,14 @@ class IosAudio({
   Future<void> setAudioMuted(bool muted) async {
     await transport.setAudioMuted(textureId, muted);
     _isAudioMuted = muted;
+  }
+
+  @override
+  double get audioVolume => _audioVolume;
+
+  @override
+  Future<void> setAudioVolume(double volume) async {
+    await transport.setAudioVolume(textureId, volume);
+    _audioVolume = volume;
   }
 }

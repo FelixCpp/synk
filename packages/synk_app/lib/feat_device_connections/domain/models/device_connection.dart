@@ -19,6 +19,8 @@ sealed class DeviceConnection with _$DeviceConnection {
   NativeTextureId get textureId => session.textureId;
 
   bool get supportsInteraction => session.interaction != null;
+  InteractionUnavailableReason? get interactionUnavailableReason =>
+      session.interactionUnavailableReason;
   bool get supportsFileTransfer => session.fileTransfer != null;
   bool get supportsAudio => session.audio != null;
 

@@ -102,7 +102,7 @@ void main() {
         const MethodChannel('dev.synk/ios_hid'),
         (call) async {
           calls.add(call);
-          return call.method == 'prepareInput' ? true : null;
+          return null;
         },
       );
 
@@ -123,7 +123,7 @@ void main() {
         deviceId: _deviceId,
         textureId: const NativeTextureId(1),
         initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
-        supportsInteraction: true,
+        interactionUnavailableReason: null,
       );
 
       interaction = session.interaction!;
@@ -348,7 +348,7 @@ void main() {
         const MethodChannel('dev.synk/ios_hid'),
         (call) async {
           calls.add(call);
-          return call.method == 'prepareInput' ? true : null;
+          return null;
         },
       );
       messenger.setMockMethodCallHandler(
@@ -391,7 +391,7 @@ void main() {
           deviceId: _deviceId,
           textureId: const NativeTextureId(1),
           initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
-          supportsInteraction: true,
+          interactionUnavailableReason: null,
         );
 
         await pumpEventQueue();
@@ -418,7 +418,7 @@ void main() {
         deviceId: _deviceId,
         textureId: const NativeTextureId(1),
         initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
-        supportsInteraction: false,
+        interactionUnavailableReason: .unknown,
       );
 
       await pumpEventQueue();

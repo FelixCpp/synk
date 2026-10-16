@@ -88,9 +88,12 @@ class _DeviceFrameState extends State<DeviceFrame>
                     isMaximized: widget.isMaximized,
                     isRecording: state.isRecording,
                     isAudioMuted: state.isAudioMuted,
+                    audioVolume: state.audioVolume,
                     onCaptureScreenshot: () => _captureScreenshot(context),
                     onToggleRecording: () => _toggleRecording(context),
                     onToggleAudioMute: () => _toggleAudioMute(context),
+                    onAudioVolumeChanged: (volume) =>
+                        _changeAudioVolume(context, volume),
                     onToggleMaximize: widget.onToggleMaximize,
                     onInstallApk: () => _installApk(context),
                     onShareFile: () => _shareFile(context),
@@ -151,6 +154,11 @@ class _DeviceFrameState extends State<DeviceFrame>
 
   void _toggleAudioMute(BuildContext context) {
     BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleAudioMute());
+  }
+
+  void _changeAudioVolume(BuildContext context, double volume) {
+    BlocProvider.of<DeviceFrameBloc>(context)
+        .add(.onAudioVolumeChanged(volume));
   }
 
   void _installApk(BuildContext context) {
@@ -292,9 +300,11 @@ class const _ToolBar({
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
+  required final double audioVolume,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
+  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -310,9 +320,11 @@ class const _ToolBar({
         isMaximized: isMaximized,
         isRecording: isRecording,
         isAudioMuted: isAudioMuted,
+        audioVolume: audioVolume,
         onCaptureScreenshot: onCaptureScreenshot,
         onToggleRecording: onToggleRecording,
         onToggleAudioMute: onToggleAudioMute,
+        onAudioVolumeChanged: onAudioVolumeChanged,
         onToggleMaximize: onToggleMaximize,
         onInstallApk: onInstallApk,
         onShareFile: onShareFile,

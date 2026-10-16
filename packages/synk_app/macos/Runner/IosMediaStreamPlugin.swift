@@ -95,6 +95,22 @@ public class IosMediaStreamPlugin: NSObject, FlutterPlugin {
         session?.setAudioMuted(muted)
         result(nil)
 
+      case "setAudioSessionVolume":
+        guard let sessionId = Self.sessionId(from: call),
+          let arguments = call.arguments as? [String: Any],
+          let volume = (arguments["volume"] as? NSNumber)?.floatValue
+        else {
+          result(
+            FlutterError(
+              code: "invalid_args", message: "sessionId and volume are required", details: nil))
+          return
+        }
+        sessionsLock.lock()
+        let session = audioSessions[sessionId]
+        sessionsLock.unlock()
+        session?.setAudioVolume(volume)
+        result(nil)
+
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -222,6 +238,10 @@ public class IosMediaStreamPlugin: NSObject, FlutterPlugin {
 
     func setAudioMuted(_ muted: Bool) {
       audioPlayer.setMuted(muted)
+    }
+
+    func setAudioVolume(_ volume: Float) {
+      audioPlayer.setVolume(volume)
     }
   }
 

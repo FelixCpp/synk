@@ -9,8 +9,13 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.da
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:file/memory.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
+
+import '../support/fake_process_manager.dart';
 
 void main() {
   group('IosDevicePlatform.observeDevices', () {
@@ -46,6 +51,127 @@ void main() {
         expect(seenByLate.single.id, _pluggedDevice.serialNumber);
       },
     );
+  });
+
+  group('IosDevicePlatform.connect', () {
+    const deviceId = DeviceId('000081200009555001C2601E');
+    const channels = [
+      MethodChannel('dev.synk/ios_hid'),
+      MethodChannel('dev.synk/ios_mirror'),
+      MethodChannel('dev.synk/ios_mirror/screen_size'),
+      MethodChannel('dev.synk/ios_media_stream'),
+    ];
+
+    late String? inputProblem;
+    late FakeProcessManager processManager;
+
+    setUp(() {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      inputProblem = null;
+      processManager = FakeProcessManager();
+
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      messenger.setMockMethodCallHandler(channels[0], (call) async {
+        return call.method == 'prepareInput' ? inputProblem : null;
+      });
+      messenger.setMockMethodCallHandler(channels[1], (call) async {
+        return call.method == 'startMirror'
+            ? {'textureId': 1, 'width': 1179, 'height': 2556}
+            : null;
+      });
+      messenger.setMockMethodCallHandler(channels[2], (call) async => null);
+      messenger.setMockMethodCallHandler(channels[3], (call) async {
+        throw PlatformException(code: 'no_audio');
+      });
+    });
+
+    tearDown(() {
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      for (final channel in channels) {
+        messenger.setMockMethodCallHandler(channel, null);
+      }
+    });
+
+    void answerDevicectl({
+      String pairingState = 'paired',
+      String developerModeStatus = 'enabled',
+    }) {
+      processManager = FakeProcessManager(
+        respond: (_) => (
+          exitCode: 0,
+          stdout:
+              '{"result": {"devices": [{'
+              '"hardwareProperties": {"udid": "00008120-0009555001C2601E"}, '
+              '"connectionProperties": {"pairingState": "$pairingState"}, '
+              '"deviceProperties": '
+              '{"developerModeStatus": "$developerModeStatus"}'
+              '}]}}',
+          stderr: '',
+        ),
+      );
+    }
+
+    Future<InteractionUnavailableReason?> connect() async {
+      final platform = IosDevicePlatform(
+        discoveryChannel: _FakeIosDeviceDiscoveryChannel(const Stream.empty()),
+        channel: IosMirrorChannel(),
+        mediaStreamChannel: IosMediaStreamChannel(),
+        hidChannel: IosHidChannel(),
+        devicectl: DevicectlApi(processManager: processManager),
+        fileSystem: MemoryFileSystem(),
+      );
+
+      final session = await platform.connect(
+        deviceId,
+        const MirrorOptions.defaults(),
+      );
+      addTearDown(session.dispose);
+
+      return session.interactionUnavailableReason;
+    }
+
+    test('takes input when the device could be prepared', () async {
+      expect(await connect(), isNull);
+    });
+
+    test('blames the Mac when CoreDevice is unavailable', () async {
+      inputProblem = 'coreDeviceUnavailable';
+
+      expect(
+        await connect(),
+        InteractionUnavailableReason.coreDeviceUnavailable,
+      );
+      expect(processManager.commands, isEmpty);
+    });
+
+    test(
+      'blames a missing pairing for a device CoreDevice does not know',
+      () async {
+        inputProblem = 'deviceUnknown';
+        answerDevicectl(pairingState: 'unpaired');
+
+        expect(await connect(), InteractionUnavailableReason.deviceNotPaired);
+      },
+    );
+
+    test('blames developer mode when it is off', () async {
+      inputProblem = 'preparationFailed';
+      answerDevicectl(developerModeStatus: 'disabled');
+
+      expect(
+        await connect(),
+        InteractionUnavailableReason.developerModeDisabled,
+      );
+    });
+
+    test('admits not knowing when the device looks fine', () async {
+      inputProblem = 'preparationFailed';
+      answerDevicectl();
+
+      expect(await connect(), InteractionUnavailableReason.unknown);
+    });
   });
 }
 

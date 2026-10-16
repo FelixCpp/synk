@@ -24,4 +24,11 @@ class IosMediaStreamChannel {
       'muted': muted,
     });
   }
+
+  Future<void> setAudioSessionVolume(int sessionId, double volume) {
+    return _channel.invokeMethod('setAudioSessionVolume', {
+      'sessionId': sessionId,
+      'volume': volume,
+    });
+  }
 }

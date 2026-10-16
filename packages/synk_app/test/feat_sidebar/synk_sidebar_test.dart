@@ -1,3 +1,5 @@
+import 'package:platform/testing.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
@@ -10,6 +12,8 @@ import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/fake_process_manager.dart';
 
 class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   FakeDeviceConnectionsRepository(this.devices);
@@ -69,6 +73,15 @@ Future<void> _pumpSidebar(
             value: const ToolAvailability(
               isAdbAvailable: true,
               isDevicectlAvailable: true,
+              isCoreDeviceAvailable: true,
+            ),
+          ),
+          RepositoryProvider.value(
+            value: SystemFileOpener(
+              processManager: FakeProcessManager(),
+              platform: TestNativePlatform(
+                operatingSystem: NativePlatform.macOS,
+              ),
             ),
           ),
           RepositoryProvider<DeviceConnectionsRepository>(

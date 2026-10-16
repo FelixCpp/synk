@@ -38,6 +38,8 @@ class SynkUiSize {
   static const toggleWidth = 34.0;
   static const toggleHeight = 20.0;
   static const toggleKnob = 16.0;
+  static const sliderKnob = 14.0;
+  static const sliderTrack = 4.0;
   static const titleStrip = 52.0;
   static const trafficGutter = 88.0;
   static const sidebarWidth = 248.0;

@@ -82,6 +82,13 @@ class ScrcpyChannel {
     });
   }
 
+  static Future<void> setAudioVolume(NativeTextureId textureId, double volume) {
+    return _methodChannel.invokeMethod('setAudioVolume', {
+      'textureId': textureId.value,
+      'volume': volume,
+    });
+  }
+
   static Future<void> startRecording(
     NativeTextureId textureId,
     String path, {

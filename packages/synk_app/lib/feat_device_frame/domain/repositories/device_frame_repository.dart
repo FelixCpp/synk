@@ -5,6 +5,8 @@ import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 abstract interface class DeviceFrameRepository {
   bool get isAudioMuted;
   Future<void> setAudioMuted(bool muted);
+  double get audioVolume;
+  Future<void> setAudioVolume(double volume);
 
   Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event);
   Future<void> simulatePointerEvent(DevicePointerEvent event);

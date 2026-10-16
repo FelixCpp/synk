@@ -72,6 +72,9 @@ class AndroidDeviceSession({
   DeviceInteraction? get interaction => _interaction;
 
   @override
+  InteractionUnavailableReason? get interactionUnavailableReason => null;
+
+  @override
   DeviceScreenCapture? get screenCapture => _screenCapture;
 
   @override

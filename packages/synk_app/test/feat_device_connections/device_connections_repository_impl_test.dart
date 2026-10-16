@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
 import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
@@ -194,6 +195,24 @@ void main() {
         await expectLater(attempt, throwsA(isA<_MarkerException>()));
       },
     );
+
+    test('marks a denied camera access as such', () async {
+      android.onConnect = (_) async =>
+          throw const CameraAccessDeniedException();
+      final device = await plugInto(android, 'android-states-5');
+
+      await expectLater(
+        () => repository.toggleConnection(device),
+        throwsA(isA<CameraAccessDeniedException>()),
+      );
+
+      expect(
+        repository.connectionStates.value[device.id],
+        const DeviceConnectionState.failed(
+          failure: ConnectionFailure.cameraAccessDenied,
+        ),
+      );
+    });
 
     test('marks a failed attempt and passes the error on', () async {
       android.onConnect = (_) async => throw _MarkerException();

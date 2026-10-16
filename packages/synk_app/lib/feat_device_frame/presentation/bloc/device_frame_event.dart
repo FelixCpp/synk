@@ -5,6 +5,8 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onCaptureScreenshot() = _OnCaptureScreenshot;
   const factory DeviceFrameEvent.onToggleRecording() = _OnToggleRecording;
   const factory DeviceFrameEvent.onToggleAudioMute() = _OnToggleAudioMute;
+  const factory DeviceFrameEvent.onAudioVolumeChanged(double volume) =
+      _OnAudioVolumeChanged;
   const factory DeviceFrameEvent.onPointerEvent(
     DevicePointerEventType type,
     double normalizedPointerX,

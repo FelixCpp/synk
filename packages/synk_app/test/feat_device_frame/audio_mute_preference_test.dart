@@ -67,6 +67,55 @@ void main() {
 
       expect(audio.isAudioMuted, isTrue);
     });
+
+    test('reports the volume a session already has', () async {
+      final audio = FakeAudio()..audioVolume = 0.4;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+
+      await pumpEventQueue();
+
+      expect(bloc.state.audioVolume, 0.4);
+    });
+
+    test('changing the volume reaches the session', () async {
+      final audio = FakeAudio()..isAudioMuted = false;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      bloc.add(const DeviceFrameEvent.onAudioVolumeChanged(0.3));
+      await pumpEventQueue();
+
+      expect(audio.audioVolume, 0.3);
+      expect(bloc.state.audioVolume, 0.3);
+    });
+
+    test('turning the volume up while muted unmutes', () async {
+      final audio = FakeAudio()..isAudioMuted = true;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      bloc.add(const DeviceFrameEvent.onAudioVolumeChanged(0.6));
+      await pumpEventQueue();
+
+      expect(audio.isAudioMuted, isFalse);
+      expect(bloc.state.isAudioMuted, isFalse);
+    });
+
+    test('turning the volume down to zero leaves mute alone', () async {
+      final audio = FakeAudio()..isAudioMuted = true;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      bloc.add(const DeviceFrameEvent.onAudioVolumeChanged(0.0));
+      await pumpEventQueue();
+
+      expect(audio.isAudioMuted, isTrue);
+      expect(audio.audioVolume, 0.0);
+    });
   });
 }
 

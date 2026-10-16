@@ -1,6 +1,7 @@
 import 'package:synk/design/build_context.dart';
 import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -10,9 +11,11 @@ class const DeviceFrameToolBar({
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
+  required final double audioVolume,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
+  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
@@ -53,6 +56,9 @@ class const DeviceFrameToolBar({
                       ),
                     ),
                   ),
+                  if (connection.interactionUnavailableReason
+                      case final reason?)
+                    _ViewOnlyTag(reason: reason),
                 ],
               ),
             ),
@@ -64,9 +70,11 @@ class const DeviceFrameToolBar({
                   isMaximized: isMaximized,
                   isRecording: isRecording,
                   isAudioMuted: isAudioMuted,
+                  audioVolume: audioVolume,
                   onCaptureScreenshot: onCaptureScreenshot,
                   onToggleRecording: onToggleRecording,
                   onToggleAudioMute: onToggleAudioMute,
+                  onAudioVolumeChanged: onAudioVolumeChanged,
                   onToggleMaximize: onToggleMaximize,
                   onClose: onClose,
                   onInstallApk: onInstallApk,
@@ -87,9 +95,11 @@ class const _Actions({
   required final bool isMaximized,
   required final bool isRecording,
   required final bool isAudioMuted,
+  required final double audioVolume,
   required final VoidCallback onCaptureScreenshot,
   required final VoidCallback onToggleRecording,
   required final VoidCallback onToggleAudioMute,
+  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
   required final VoidCallback onInstallApk,
@@ -130,7 +140,9 @@ class const _Actions({
           _OverflowButton(
             connection: connection,
             isAudioMuted: isAudioMuted,
+            audioVolume: audioVolume,
             onToggleAudioMute: onToggleAudioMute,
+            onAudioVolumeChanged: onAudioVolumeChanged,
             onInstallApk: onInstallApk,
             onShareFile: onShareFile,
             onStandby: onStandby,
@@ -150,7 +162,9 @@ class const _Actions({
 class const _OverflowButton({
   required final DeviceConnection connection,
   required final bool isAudioMuted,
+  required final double audioVolume,
   required final VoidCallback onToggleAudioMute,
+  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onInstallApk,
   required final VoidCallback onShareFile,
   required final VoidCallback onStandby,
@@ -185,15 +199,11 @@ class const _OverflowButton({
           ),
         ],
         if (connection.supportsAudio)
-          SynkUiTooltip(
-            message: isAudioMuted ? 'Ton ein' : 'Ton aus',
-            child: SynkUiMenuItem(
-              icon: isAudioMuted
-                  ? CupertinoIcons.speaker_slash_fill
-                  : CupertinoIcons.speaker_2_fill,
-              label: isAudioMuted ? 'Ton ein' : 'Ton aus',
-              onPressed: onToggleAudioMute,
-            ),
+          _AudioControls(
+            isAudioMuted: isAudioMuted,
+            audioVolume: audioVolume,
+            onToggleAudioMute: onToggleAudioMute,
+            onAudioVolumeChanged: onAudioVolumeChanged,
           ),
         if (connection.supportsInteraction)
           SynkUiTooltip(
@@ -215,6 +225,79 @@ class const _OverflowButton({
           onPressed: () =>
               controller.isOpen ? controller.close() : controller.open(),
         ),
+      ),
+    );
+  }
+}
+
+class const _AudioControls({
+  required final bool isAudioMuted,
+  required final double audioVolume,
+  required final VoidCallback onToggleAudioMute,
+  required final ValueChanged<double> onAudioVolumeChanged,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final icon = switch (audioVolume) {
+      _ when isAudioMuted || audioVolume == 0.0 =>
+        CupertinoIcons.speaker_slash_fill,
+      < 0.5 => CupertinoIcons.speaker_1_fill,
+      _ => CupertinoIcons.speaker_2_fill,
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(right: SynkUiSpace.s8),
+      child: Row(
+        spacing: SynkUiSpace.s4,
+        children: [
+          SynkUiTooltip(
+            message: isAudioMuted ? 'Ton ein' : 'Ton aus',
+            child: SynkUiIconButton(
+              icon: icon,
+              onPressed: onToggleAudioMute,
+            ),
+          ),
+          Expanded(
+            child: SynkUiTooltip(
+              message: 'Lautstärke',
+              child: Opacity(
+                opacity: isAudioMuted ? 0.5 : 1.0,
+                child: SynkUiSlider(
+                  value: audioVolume,
+                  onChanged: onAudioVolumeChanged,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class const _ViewOnlyTag({required final InteractionUnavailableReason reason})
+    extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SynkUiTooltip(
+      message: switch (reason) {
+        .coreDeviceUnavailable =>
+          'Bedienung braucht Xcode auf einem Mac mit Apple Silicon und '
+              'macOS 14 oder neuer. Details unter Einstellungen › Tools.',
+        .deviceNotPaired =>
+          'Das Gerät ist Xcode nicht bekannt. Gerät entsperren, '
+              '„Diesem Computer vertrauen“ bestätigen und neu verbinden.',
+        .developerModeDisabled =>
+          'Der Entwicklermodus ist aus. Auf dem Gerät unter Einstellungen › '
+              'Datenschutz & Sicherheit › Entwicklermodus einschalten und neu '
+              'verbinden.',
+        .unknown =>
+          'Die Bedienung ließ sich nicht vorbereiten. Gerät entsperren und '
+              'neu verbinden.',
+      },
+      child: SynkUiTag(
+        label: 'Nur Ansicht',
+        color: context.synkUiTheme.colors.warn,
       ),
     );
   }

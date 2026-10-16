@@ -572,6 +572,7 @@ final class AacEldStreamDecoder: @unchecked Sendable {
 final class SystemAudioPlayer: @unchecked Sendable {
   private let lock = NSLock()
   private var isMuted = true
+  private var volume: Float = 1.0
   private var engine: AVAudioEngine?
   private var player: AVAudioPlayerNode?
   private var format: AVAudioFormat?
@@ -585,6 +586,15 @@ final class SystemAudioPlayer: @unchecked Sendable {
     lock.unlock()
 
     if muted { player?.stop() }
+  }
+
+  func setVolume(_ volume: Float) {
+    lock.lock()
+    self.volume = volume
+    let player = self.player
+    lock.unlock()
+
+    player?.volume = volume
   }
 
   /// Takes interleaved frames as the decoder produces them.
@@ -646,6 +656,7 @@ final class SystemAudioPlayer: @unchecked Sendable {
 
     let engine = AVAudioEngine()
     let player = AVAudioPlayerNode()
+    player.volume = volume
     engine.attach(player)
     // Connecting through the mixer lets it resample to whatever the Mac's
     // current output device runs at.
