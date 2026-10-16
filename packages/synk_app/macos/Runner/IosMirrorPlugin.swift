@@ -350,6 +350,37 @@ public class IosMirrorPlugin: NSObject, FlutterPlugin {
       return
     }
 
+    // macOS treats a mirrored iOS device as a camera, so capturing it needs
+    // camera access. Opening the input without it lets TCC kill the app.
+    switch AVCaptureDevice.authorizationStatus(for: .video) {
+    case .authorized:
+      startMirrorSession(device: device, result: result)
+    case .notDetermined:
+      AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+        DispatchQueue.main.async {
+          guard granted else {
+            result(Self.cameraAccessDeniedError())
+            return
+          }
+          self?.startMirrorSession(device: device, result: result)
+        }
+      }
+    default:
+      result(Self.cameraAccessDeniedError())
+    }
+  }
+
+  private static func cameraAccessDeniedError() -> FlutterError {
+    FlutterError(
+      code: "camera_access_denied",
+      message:
+        "Camera access is required to mirror iOS devices. "
+        + "Allow synk under System Settings > Privacy & Security > Camera.",
+      details: nil
+    )
+  }
+
+  private func startMirrorSession(device: AVCaptureDevice, result: @escaping FlutterResult) {
     let session = IosMirrorSession(registry: registry)
     do {
       try session.start(device: device)
