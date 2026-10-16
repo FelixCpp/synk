@@ -2,7 +2,11 @@ import 'dart:math' as math;
 
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/settings_category.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_capture_page.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_devices_page.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_general_page.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_nav.dart';
+import 'package:synk/feat_settings/presentation/widgets/settings_tools_page.dart';
 import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/presentation/bloc/tool_validation_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -154,4 +158,13 @@ class const _Body({
       ),
     );
   }
+}
+
+extension on SettingsCategory {
+  Widget get page => switch (this) {
+    .general => const SettingsGeneralPage(),
+    .capture => const SettingsCapturePage(),
+    .devices => const SettingsDevicesPage(),
+    .tools => const SettingsToolsPage(),
+  };
 }

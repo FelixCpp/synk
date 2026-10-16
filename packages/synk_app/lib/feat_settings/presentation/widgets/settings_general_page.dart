@@ -1,3 +1,4 @@
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
@@ -35,6 +36,18 @@ class const SettingsGeneralPage({super.key}) extends StatelessWidget {
                       .onSave(settings.copyWith(themeMode: themeMode)),
                     ),
                   ),
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: 'Version',
+              children: [
+                SettingsRow(
+                  label: const SettingsRowLabel(
+                    title: 'Aktuelle Version',
+                    subtitle: 'Deine installierte Version',
+                  ),
+                  trailing: Text('${PackageInfo.fromPlatform()}'),
                 ),
               ],
             ),

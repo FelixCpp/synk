@@ -15,13 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeviceKeyEvent {
 
-/// What the key means on the host's keyboard layout. Shortcuts match on
-/// this.
- LogicalKeyboardKey get key;/// Where the key sits on the keyboard, whatever the layout.
- PhysicalKeyboardKey get physicalKey; DeviceKeyEventType get type; Set<DeviceKeyModifier> get modifiers;/// The text the keystroke types on the host's keyboard layout, modifiers
-/// included: `:` for shift and the period key on a German layout. Absent
-/// for a release and for keys that type nothing.
- String? get character;
+ LogicalKeyboardKey get key; PhysicalKeyboardKey get physicalKey; DeviceKeyEventType get type; Set<DeviceKeyModifier> get modifiers; String? get character;
 /// Create a copy of DeviceKeyEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -219,10 +213,7 @@ class _DeviceKeyEvent implements DeviceKeyEvent {
   const _DeviceKeyEvent({required this.key, required this.physicalKey, required this.type, required  Set<DeviceKeyModifier> modifiers, this.character}): _modifiers = modifiers;
   
 
-/// What the key means on the host's keyboard layout. Shortcuts match on
-/// this.
 @override final  LogicalKeyboardKey key;
-/// Where the key sits on the keyboard, whatever the layout.
 @override final  PhysicalKeyboardKey physicalKey;
 @override final  DeviceKeyEventType type;
  final  Set<DeviceKeyModifier> _modifiers;
@@ -232,9 +223,6 @@ class _DeviceKeyEvent implements DeviceKeyEvent {
   return EqualUnmodifiableSetView(_modifiers);
 }
 
-/// The text the keystroke types on the host's keyboard layout, modifiers
-/// included: `:` for shift and the period key on a German layout. Absent
-/// for a release and for keys that type nothing.
 @override final  String? character;
 
 /// Create a copy of DeviceKeyEvent

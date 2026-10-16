@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Settings {
 
- ThemeMode get themeMode; String get screenCaptureSavePath; bool get showCapturePreview; bool get copyScreenshotToClipboard; bool get recordAudio; MirrorFrameRate get frameRate; MirrorQuality get quality; bool get turnDeviceScreenOff; bool get muteOnConnect; bool get syncClipboard; String? get customAdbPath;
+ ThemeMode get themeMode; String get screenCaptureSavePath; bool get showCapturePreview; bool get copyScreenshotToClipboard; bool get recordAudio; MirrorFrameRate get frameRate; MirrorQuality get quality; bool get turnDeviceScreenOff; bool get muteOnConnect; bool get syncClipboard; String? get customAdbPath; SynkVersion get version;
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $SettingsCopyWith<Settings> get copyWith => _$SettingsCopyWithImpl<Settings>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as Settings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settings&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.screenCaptureSavePath, _this.screenCaptureSavePath) || other.screenCaptureSavePath == _this.screenCaptureSavePath)&&(identical(other.showCapturePreview, _this.showCapturePreview) || other.showCapturePreview == _this.showCapturePreview)&&(identical(other.copyScreenshotToClipboard, _this.copyScreenshotToClipboard) || other.copyScreenshotToClipboard == _this.copyScreenshotToClipboard)&&(identical(other.recordAudio, _this.recordAudio) || other.recordAudio == _this.recordAudio)&&(identical(other.frameRate, _this.frameRate) || other.frameRate == _this.frameRate)&&(identical(other.quality, _this.quality) || other.quality == _this.quality)&&(identical(other.turnDeviceScreenOff, _this.turnDeviceScreenOff) || other.turnDeviceScreenOff == _this.turnDeviceScreenOff)&&(identical(other.muteOnConnect, _this.muteOnConnect) || other.muteOnConnect == _this.muteOnConnect)&&(identical(other.syncClipboard, _this.syncClipboard) || other.syncClipboard == _this.syncClipboard)&&(identical(other.customAdbPath, _this.customAdbPath) || other.customAdbPath == _this.customAdbPath));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settings&&(identical(other.themeMode, _this.themeMode) || other.themeMode == _this.themeMode)&&(identical(other.screenCaptureSavePath, _this.screenCaptureSavePath) || other.screenCaptureSavePath == _this.screenCaptureSavePath)&&(identical(other.showCapturePreview, _this.showCapturePreview) || other.showCapturePreview == _this.showCapturePreview)&&(identical(other.copyScreenshotToClipboard, _this.copyScreenshotToClipboard) || other.copyScreenshotToClipboard == _this.copyScreenshotToClipboard)&&(identical(other.recordAudio, _this.recordAudio) || other.recordAudio == _this.recordAudio)&&(identical(other.frameRate, _this.frameRate) || other.frameRate == _this.frameRate)&&(identical(other.quality, _this.quality) || other.quality == _this.quality)&&(identical(other.turnDeviceScreenOff, _this.turnDeviceScreenOff) || other.turnDeviceScreenOff == _this.turnDeviceScreenOff)&&(identical(other.muteOnConnect, _this.muteOnConnect) || other.muteOnConnect == _this.muteOnConnect)&&(identical(other.syncClipboard, _this.syncClipboard) || other.syncClipboard == _this.syncClipboard)&&(identical(other.customAdbPath, _this.customAdbPath) || other.customAdbPath == _this.customAdbPath)&&const DeepCollectionEquality().equals(other.version, _this.version));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Settings;
-  return Object.hash(runtimeType,_this.themeMode,_this.screenCaptureSavePath,_this.showCapturePreview,_this.copyScreenshotToClipboard,_this.recordAudio,_this.frameRate,_this.quality,_this.turnDeviceScreenOff,_this.muteOnConnect,_this.syncClipboard,_this.customAdbPath);
+  return Object.hash(runtimeType,_this.themeMode,_this.screenCaptureSavePath,_this.showCapturePreview,_this.copyScreenshotToClipboard,_this.recordAudio,_this.frameRate,_this.quality,_this.turnDeviceScreenOff,_this.muteOnConnect,_this.syncClipboard,_this.customAdbPath,const DeepCollectionEquality().hash(_this.version));
 }
 
 @override
 String toString() {
   final _this = this as Settings;
-  return 'Settings(themeMode: ${_this.themeMode}, screenCaptureSavePath: ${_this.screenCaptureSavePath}, showCapturePreview: ${_this.showCapturePreview}, copyScreenshotToClipboard: ${_this.copyScreenshotToClipboard}, recordAudio: ${_this.recordAudio}, frameRate: ${_this.frameRate}, quality: ${_this.quality}, turnDeviceScreenOff: ${_this.turnDeviceScreenOff}, muteOnConnect: ${_this.muteOnConnect}, syncClipboard: ${_this.syncClipboard}, customAdbPath: ${_this.customAdbPath})';
+  return 'Settings(themeMode: ${_this.themeMode}, screenCaptureSavePath: ${_this.screenCaptureSavePath}, showCapturePreview: ${_this.showCapturePreview}, copyScreenshotToClipboard: ${_this.copyScreenshotToClipboard}, recordAudio: ${_this.recordAudio}, frameRate: ${_this.frameRate}, quality: ${_this.quality}, turnDeviceScreenOff: ${_this.turnDeviceScreenOff}, muteOnConnect: ${_this.muteOnConnect}, syncClipboard: ${_this.syncClipboard}, customAdbPath: ${_this.customAdbPath}, version: ${_this.version})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $SettingsCopyWith<$Res>  {
   factory $SettingsCopyWith(Settings value, $Res Function(Settings) _then) = _$SettingsCopyWithImpl;
 @useResult
 $Res call({
- ThemeMode themeMode, String screenCaptureSavePath, bool showCapturePreview, bool copyScreenshotToClipboard, bool recordAudio, MirrorFrameRate frameRate, MirrorQuality quality, bool turnDeviceScreenOff, bool muteOnConnect, bool syncClipboard, String? customAdbPath
+ ThemeMode themeMode, String screenCaptureSavePath, bool showCapturePreview, bool copyScreenshotToClipboard, bool recordAudio, MirrorFrameRate frameRate, MirrorQuality quality, bool turnDeviceScreenOff, bool muteOnConnect, bool syncClipboard, String? customAdbPath, SynkVersion version
 });
 
 
@@ -68,7 +68,7 @@ class _$SettingsCopyWithImpl<$Res>
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? screenCaptureSavePath = null,Object? showCapturePreview = null,Object? copyScreenshotToClipboard = null,Object? recordAudio = null,Object? frameRate = null,Object? quality = null,Object? turnDeviceScreenOff = null,Object? muteOnConnect = null,Object? syncClipboard = null,Object? customAdbPath = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? themeMode = null,Object? screenCaptureSavePath = null,Object? showCapturePreview = null,Object? copyScreenshotToClipboard = null,Object? recordAudio = null,Object? frameRate = null,Object? quality = null,Object? turnDeviceScreenOff = null,Object? muteOnConnect = null,Object? syncClipboard = null,Object? customAdbPath = freezed,Object? version = freezed,}) {
   return _then(Settings(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,screenCaptureSavePath: null == screenCaptureSavePath ? _self.screenCaptureSavePath : screenCaptureSavePath // ignore: cast_nullable_to_non_nullable
@@ -81,7 +81,8 @@ as MirrorQuality,turnDeviceScreenOff: null == turnDeviceScreenOff ? _self.turnDe
 as bool,muteOnConnect: null == muteOnConnect ? _self.muteOnConnect : muteOnConnect // ignore: cast_nullable_to_non_nullable
 as bool,syncClipboard: null == syncClipboard ? _self.syncClipboard : syncClipboard // ignore: cast_nullable_to_non_nullable
 as bool,customAdbPath: freezed == customAdbPath ? _self.customAdbPath : customAdbPath // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,version: freezed == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as SynkVersion,
   ));
 }
 
@@ -163,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath,  SynkVersion version)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Settings() when $default != null:
-return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath);case _:
+return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath,_that.version);case _:
   return orElse();
 
 }
@@ -184,10 +185,10 @@ return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePre
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath,  SynkVersion version)  $default,) {final _that = this;
 switch (_that) {
 case _Settings():
-return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath);}
+return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath,_that.version);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -201,10 +202,10 @@ return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePre
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ThemeMode themeMode,  String screenCaptureSavePath,  bool showCapturePreview,  bool copyScreenshotToClipboard,  bool recordAudio,  MirrorFrameRate frameRate,  MirrorQuality quality,  bool turnDeviceScreenOff,  bool muteOnConnect,  bool syncClipboard,  String? customAdbPath,  SynkVersion version)?  $default,) {final _that = this;
 switch (_that) {
 case _Settings() when $default != null:
-return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath);case _:
+return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePreview,_that.copyScreenshotToClipboard,_that.recordAudio,_that.frameRate,_that.quality,_that.turnDeviceScreenOff,_that.muteOnConnect,_that.syncClipboard,_that.customAdbPath,_that.version);case _:
   return null;
 
 }
@@ -216,7 +217,7 @@ return $default(_that.themeMode,_that.screenCaptureSavePath,_that.showCapturePre
 
 
 class _Settings extends Settings {
-  const _Settings({required this.themeMode, required this.screenCaptureSavePath, required this.showCapturePreview, required this.copyScreenshotToClipboard, required this.recordAudio, required this.frameRate, required this.quality, required this.turnDeviceScreenOff, required this.muteOnConnect, required this.syncClipboard, required this.customAdbPath}): super._();
+  const _Settings({required this.themeMode, required this.screenCaptureSavePath, required this.showCapturePreview, required this.copyScreenshotToClipboard, required this.recordAudio, required this.frameRate, required this.quality, required this.turnDeviceScreenOff, required this.muteOnConnect, required this.syncClipboard, required this.customAdbPath, required this.version}): super._();
   
 
 @override final  ThemeMode themeMode;
@@ -230,6 +231,7 @@ class _Settings extends Settings {
 @override final  bool muteOnConnect;
 @override final  bool syncClipboard;
 @override final  String? customAdbPath;
+@override final  SynkVersion version;
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
@@ -241,18 +243,18 @@ _$SettingsCopyWith<_Settings> get copyWith => __$SettingsCopyWithImpl<_Settings>
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settings&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.screenCaptureSavePath, screenCaptureSavePath) || other.screenCaptureSavePath == screenCaptureSavePath)&&(identical(other.showCapturePreview, showCapturePreview) || other.showCapturePreview == showCapturePreview)&&(identical(other.copyScreenshotToClipboard, copyScreenshotToClipboard) || other.copyScreenshotToClipboard == copyScreenshotToClipboard)&&(identical(other.recordAudio, recordAudio) || other.recordAudio == recordAudio)&&(identical(other.frameRate, frameRate) || other.frameRate == frameRate)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.turnDeviceScreenOff, turnDeviceScreenOff) || other.turnDeviceScreenOff == turnDeviceScreenOff)&&(identical(other.muteOnConnect, muteOnConnect) || other.muteOnConnect == muteOnConnect)&&(identical(other.syncClipboard, syncClipboard) || other.syncClipboard == syncClipboard)&&(identical(other.customAdbPath, customAdbPath) || other.customAdbPath == customAdbPath));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settings&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.screenCaptureSavePath, screenCaptureSavePath) || other.screenCaptureSavePath == screenCaptureSavePath)&&(identical(other.showCapturePreview, showCapturePreview) || other.showCapturePreview == showCapturePreview)&&(identical(other.copyScreenshotToClipboard, copyScreenshotToClipboard) || other.copyScreenshotToClipboard == copyScreenshotToClipboard)&&(identical(other.recordAudio, recordAudio) || other.recordAudio == recordAudio)&&(identical(other.frameRate, frameRate) || other.frameRate == frameRate)&&(identical(other.quality, quality) || other.quality == quality)&&(identical(other.turnDeviceScreenOff, turnDeviceScreenOff) || other.turnDeviceScreenOff == turnDeviceScreenOff)&&(identical(other.muteOnConnect, muteOnConnect) || other.muteOnConnect == muteOnConnect)&&(identical(other.syncClipboard, syncClipboard) || other.syncClipboard == syncClipboard)&&(identical(other.customAdbPath, customAdbPath) || other.customAdbPath == customAdbPath)&&const DeepCollectionEquality().equals(other.version, version));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,themeMode,screenCaptureSavePath,showCapturePreview,copyScreenshotToClipboard,recordAudio,frameRate,quality,turnDeviceScreenOff,muteOnConnect,syncClipboard,customAdbPath);
+    return Object.hash(runtimeType,themeMode,screenCaptureSavePath,showCapturePreview,copyScreenshotToClipboard,recordAudio,frameRate,quality,turnDeviceScreenOff,muteOnConnect,syncClipboard,customAdbPath,const DeepCollectionEquality().hash(version));
 }
 
 @override
 String toString() {
-    return 'Settings(themeMode: $themeMode, screenCaptureSavePath: $screenCaptureSavePath, showCapturePreview: $showCapturePreview, copyScreenshotToClipboard: $copyScreenshotToClipboard, recordAudio: $recordAudio, frameRate: $frameRate, quality: $quality, turnDeviceScreenOff: $turnDeviceScreenOff, muteOnConnect: $muteOnConnect, syncClipboard: $syncClipboard, customAdbPath: $customAdbPath)';
+    return 'Settings(themeMode: $themeMode, screenCaptureSavePath: $screenCaptureSavePath, showCapturePreview: $showCapturePreview, copyScreenshotToClipboard: $copyScreenshotToClipboard, recordAudio: $recordAudio, frameRate: $frameRate, quality: $quality, turnDeviceScreenOff: $turnDeviceScreenOff, muteOnConnect: $muteOnConnect, syncClipboard: $syncClipboard, customAdbPath: $customAdbPath, version: $version)';
 }
 
 
@@ -263,7 +265,7 @@ abstract mixin class _$SettingsCopyWith<$Res> implements $SettingsCopyWith<$Res>
   factory _$SettingsCopyWith(_Settings value, $Res Function(_Settings) _then) = __$SettingsCopyWithImpl;
 @override @useResult
 $Res call({
- ThemeMode themeMode, String screenCaptureSavePath, bool showCapturePreview, bool copyScreenshotToClipboard, bool recordAudio, MirrorFrameRate frameRate, MirrorQuality quality, bool turnDeviceScreenOff, bool muteOnConnect, bool syncClipboard, String? customAdbPath
+ ThemeMode themeMode, String screenCaptureSavePath, bool showCapturePreview, bool copyScreenshotToClipboard, bool recordAudio, MirrorFrameRate frameRate, MirrorQuality quality, bool turnDeviceScreenOff, bool muteOnConnect, bool syncClipboard, String? customAdbPath, SynkVersion version
 });
 
 
@@ -280,7 +282,7 @@ class __$SettingsCopyWithImpl<$Res>
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? screenCaptureSavePath = null,Object? showCapturePreview = null,Object? copyScreenshotToClipboard = null,Object? recordAudio = null,Object? frameRate = null,Object? quality = null,Object? turnDeviceScreenOff = null,Object? muteOnConnect = null,Object? syncClipboard = null,Object? customAdbPath = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? themeMode = null,Object? screenCaptureSavePath = null,Object? showCapturePreview = null,Object? copyScreenshotToClipboard = null,Object? recordAudio = null,Object? frameRate = null,Object? quality = null,Object? turnDeviceScreenOff = null,Object? muteOnConnect = null,Object? syncClipboard = null,Object? customAdbPath = freezed,Object? version = freezed,}) {
   return _then(_Settings(
 themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
 as ThemeMode,screenCaptureSavePath: null == screenCaptureSavePath ? _self.screenCaptureSavePath : screenCaptureSavePath // ignore: cast_nullable_to_non_nullable
@@ -293,7 +295,8 @@ as MirrorQuality,turnDeviceScreenOff: null == turnDeviceScreenOff ? _self.turnDe
 as bool,muteOnConnect: null == muteOnConnect ? _self.muteOnConnect : muteOnConnect // ignore: cast_nullable_to_non_nullable
 as bool,syncClipboard: null == syncClipboard ? _self.syncClipboard : syncClipboard // ignore: cast_nullable_to_non_nullable
 as bool,customAdbPath: freezed == customAdbPath ? _self.customAdbPath : customAdbPath // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,version: freezed == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as SynkVersion,
   ));
 }
 
