@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
+import 'package:api_github/api_github.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:clock/clock.dart';
 import 'package:file/file.dart';
@@ -42,6 +43,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:synk/feat_version/data/repositories/app_version_repository_impl.dart';
+import 'package:synk/feat_version/domain/repositories/app_version_repository.dart';
+import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:macos_window_utils/macos_window_utils.dart';
 import 'package:path/path.dart' as path;
@@ -57,9 +62,8 @@ Future<void> main() async {
   await _configureWindow();
 
   final preferences = RxSharedPreferences.getInstance();
-  final defaults = Settings.defaults(
-    screenCaptureSavePath: (await getDownloadsDirectory())!.path,
-  );
+  final downloadsDirectory = (await getDownloadsDirectory())!.path;
+  final defaults = Settings.defaults(screenCaptureSavePath: downloadsDirectory);
 
   final settingsRepository = SettingsRepositoryImpl(
     preferences: preferences,
@@ -75,6 +79,25 @@ Future<void> main() async {
     fileSystem: fileSystem,
     directory: (await getTemporaryDirectory()).path,
   );
+  final fileOpener = SystemFileOpener(
+    processManager: processManager,
+    platform: platform,
+  );
+  final appVersionRepository = AppVersionRepositoryImpl(
+    releasesApi: GitHubReleasesApi(
+      owner: 'FelixCpp',
+      repository: 'synk',
+      dio: Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
+      ),
+    ),
+    fileOpener: fileOpener,
+    downloadDirectory: downloadsDirectory,
+  );
+  final currentAppVersion = await appVersionRepository.getCurrentAppVersion();
   final adbPaths = AdbPaths(
     bundled: _bundledAdbPath(platform),
     custom: settings.customAdbPath,
@@ -112,14 +135,20 @@ Future<void> main() async {
         RepositoryProvider<Clock>.value(value: const Clock()),
         RepositoryProvider<NativePlatform>.value(value: platform),
         RepositoryProvider<ProcessManager>.value(value: processManager),
-        RepositoryProvider<SystemFileOpener>.value(
-          value: SystemFileOpener(
-            processManager: processManager,
-            platform: platform,
-          ),
+        RepositoryProvider<SystemFileOpener>.value(value: fileOpener),
+        RepositoryProvider<AppVersionRepository>.value(
+          value: appVersionRepository,
         ),
       ],
-      child: _Root(defaults: defaults),
+      child: BlocProvider(
+        create: (context) => AppVersionBloc(
+          currentAppVersion,
+          RepositoryProvider.of(context),
+          RepositoryProvider.of(context),
+        ),
+        lazy: false,
+        child: _Root(defaults: defaults),
+      ),
     ),
   );
 }

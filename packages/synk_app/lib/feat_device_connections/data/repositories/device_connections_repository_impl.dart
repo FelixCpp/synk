@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
+import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
@@ -150,6 +151,18 @@ class DeviceConnectionsRepositoryImpl({
       _setState(
         device.id,
         const DeviceConnectionState.failed(failure: .cameraAccessDenied),
+      );
+      rethrow;
+    } on DeviceSetupException catch (error) {
+      _setState(
+        device.id,
+        DeviceConnectionState.failed(
+          failure: switch (error.problem) {
+            .notPaired => .deviceNotPaired,
+            .developerModeDisabled => .developerModeDisabled,
+            .developerDiskImageUnavailable => .developerDiskImageUnavailable,
+          },
+        ),
       );
       rethrow;
     } catch (_) {

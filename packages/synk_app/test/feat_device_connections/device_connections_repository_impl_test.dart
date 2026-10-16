@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
+import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
@@ -210,6 +211,25 @@ void main() {
         repository.connectionStates.value[device.id],
         const DeviceConnectionState.failed(
           failure: ConnectionFailure.cameraAccessDenied,
+        ),
+      );
+    });
+
+    test('marks a device that is not set up as such', () async {
+      android.onConnect = (_) async => throw const DeviceSetupException(
+        problem: .developerModeDisabled,
+      );
+      final device = await plugInto(android, 'android-states-setup');
+
+      await expectLater(
+        () => repository.toggleConnection(device),
+        throwsA(isA<DeviceSetupException>()),
+      );
+
+      expect(
+        repository.connectionStates.value[device.id],
+        const DeviceConnectionState.failed(
+          failure: ConnectionFailure.developerModeDisabled,
         ),
       );
     });

@@ -13,6 +13,7 @@ class const DevicectlCommandException({required final String message})
 class const DevicectlDeviceStatus({
   required final bool isPaired,
   required final bool? isDeveloperModeEnabled,
+  required final bool? isDeveloperDiskImageAvailable,
 });
 
 class DevicectlApi({
@@ -138,12 +139,14 @@ class DevicectlApi({
           device['connectionProperties'] as Map<String, Object?>?;
       final properties = device['deviceProperties'] as Map<String, Object?>?;
       final developerMode = properties?['developerModeStatus'] as String?;
+      final ddiServices = properties?['ddiServicesAvailable'] as bool?;
 
       return DevicectlDeviceStatus(
         isPaired: connection?['pairingState'] == 'paired',
         isDeveloperModeEnabled: developerMode == null
             ? null
             : developerMode == 'enabled',
+        isDeveloperDiskImageAvailable: ddiServices,
       );
     }
 

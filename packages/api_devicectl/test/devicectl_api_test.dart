@@ -198,6 +198,7 @@ void main() {
       String udid = '00008120-0009555001C2601E',
       String pairingState = 'paired',
       String developerModeStatus = 'enabled',
+      bool ddiServicesAvailable = true,
     }) {
       return '''
 {
@@ -211,7 +212,10 @@ void main() {
       {
         "hardwareProperties": {"udid": "$udid"},
         "connectionProperties": {"pairingState": "$pairingState"},
-        "deviceProperties": {"developerModeStatus": "$developerModeStatus"}
+        "deviceProperties": {
+          "developerModeStatus": "$developerModeStatus",
+          "ddiServicesAvailable": $ddiServicesAvailable
+        }
       }
     ]
   }
@@ -230,6 +234,7 @@ void main() {
 
       expect(status?.isPaired, isTrue);
       expect(status?.isDeveloperModeEnabled, isTrue);
+      expect(status?.isDeveloperDiskImageAvailable, isTrue);
       expect(processManager.commands.single, [
         defaultXcrunPath,
         'devicectl',
@@ -257,6 +262,20 @@ void main() {
 
       expect(status?.isPaired, isFalse);
       expect(status?.isDeveloperModeEnabled, isFalse);
+    });
+
+    test('reports a device without developer disk image services', () async {
+      final api = apiAnswering((
+        exitCode: 0,
+        stdout: devicesJson(ddiServicesAvailable: false),
+        stderr: '',
+      ));
+
+      final status = await api.deviceStatus(
+        deviceId: '00008120-0009555001C2601E',
+      );
+
+      expect(status?.isDeveloperDiskImageAvailable, isFalse);
     });
 
     test('returns null for a device devicectl does not know', () async {

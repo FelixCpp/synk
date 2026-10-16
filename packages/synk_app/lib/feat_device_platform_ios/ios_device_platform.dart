@@ -3,6 +3,8 @@ import 'package:app_logger/app_logger.dart';
 import 'package:file/file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
+import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
@@ -46,7 +48,17 @@ class IosDevicePlatform({
   // iOS mirroring does not go through scrcpy, so [options] has nothing to
   // act on here.
   Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions _) async {
-    final result = await channel.startMirror(deviceId);
+    final IosMirrorStartResult result;
+    try {
+      result = await channel.startMirror(deviceId);
+    } on CameraAccessDeniedException {
+      rethrow;
+    } on Object {
+      final problem = await _diagnose(deviceId);
+      if (problem != null) throw DeviceSetupException(problem: problem);
+      rethrow;
+    }
+
     final audio = await _startAudio(deviceId);
     appLogger.i(
       'Mirroring $deviceId over the capture session'
@@ -110,7 +122,16 @@ class IosDevicePlatform({
     final reason = switch (problem) {
       .coreDeviceUnavailable =>
         InteractionUnavailableReason.coreDeviceUnavailable,
-      .deviceUnknown || .preparationFailed => await _diagnoseInput(deviceId),
+      .deviceUnknown || .preparationFailed => switch (await _diagnose(
+        deviceId,
+      )) {
+        .notPaired => InteractionUnavailableReason.deviceNotPaired,
+        .developerModeDisabled =>
+          InteractionUnavailableReason.developerModeDisabled,
+        .developerDiskImageUnavailable =>
+          InteractionUnavailableReason.developerDiskImageUnavailable,
+        null => InteractionUnavailableReason.unknown,
+      },
     };
 
     appLogger.i(
@@ -119,24 +140,28 @@ class IosDevicePlatform({
     return reason;
   }
 
-  Future<InteractionUnavailableReason> _diagnoseInput(DeviceId deviceId) async {
+  Future<DeviceSetupProblem?> _diagnose(DeviceId deviceId) async {
     try {
       final status = await devicectl.deviceStatus(deviceId: deviceId);
       if (status == null || !status.isPaired) {
-        return .deviceNotPaired;
+        return .notPaired;
       }
 
       if (status.isDeveloperModeEnabled == false) {
         return .developerModeDisabled;
       }
+
+      if (status.isDeveloperDiskImageAvailable == false) {
+        return .developerDiskImageUnavailable;
+      }
     } on Object catch (error, stackTrace) {
       appLogger.w(
-        'Could not tell why $deviceId has no touch input',
+        'Could not tell what keeps $deviceId from working',
         error: error,
         stackTrace: stackTrace,
       );
     }
 
-    return .unknown;
+    return null;
   }
 }

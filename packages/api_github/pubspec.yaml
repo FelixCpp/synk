@@ -1,0 +1,19 @@
+name: api_github
+description: An library containing the API for fetching releases from GitHub for the Synk application.
+version: 1.0.0
+repository: https://github.com/FelixCpp/synk
+
+environment:
+  sdk: ^3.13.4
+
+dependencies:
+  dio: ^5.11.1
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.12.0
+
+dev_dependencies:
+  build_runner: ^2.16.2
+  freezed: ^4.0.2
+  json_serializable: ^6.14.1
+  lints: ^6.0.0
+  test: ^1.25.6

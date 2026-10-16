@@ -3,7 +3,6 @@ import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
 import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
-import 'package:synk/feat_version/domain/models/synk_version.dart';
 
 part 'settings.freezed.dart';
 
@@ -23,13 +22,9 @@ sealed class Settings with _$Settings {
     required bool muteOnConnect,
     required bool syncClipboard,
     required String? customAdbPath,
-    required SynkVersion version,
   }) = _Settings;
 
-  factory Settings.defaults({
-    required String screenCaptureSavePath,
-    required SynkVersion version,
-  }) {
+  factory Settings.defaults({required String screenCaptureSavePath}) {
     return Settings(
       themeMode: ThemeMode.light,
       screenCaptureSavePath: screenCaptureSavePath,
@@ -42,7 +37,6 @@ sealed class Settings with _$Settings {
       muteOnConnect: true,
       syncClipboard: true,
       customAdbPath: null,
-      version: version,
     );
   }
 

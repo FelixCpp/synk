@@ -9,6 +9,7 @@ enum InteractionUnavailableReason {
   coreDeviceUnavailable,
   deviceNotPaired,
   developerModeDisabled,
+  developerDiskImageUnavailable,
   unknown,
 }
 

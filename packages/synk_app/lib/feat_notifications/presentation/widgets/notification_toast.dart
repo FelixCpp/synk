@@ -18,10 +18,14 @@ class const NotificationToast({
 class _NotificationToastState extends State<NotificationToast> {
   Timer? _timer;
 
+  bool get _isSuccess => widget.severity == NotificationSeverity.success;
+
   @override
   void initState() {
     super.initState();
-    _timer = Timer(const Duration(seconds: 4), widget.onDismissed);
+    if (_isSuccess) {
+      _timer = Timer(const Duration(seconds: 4), widget.onDismissed);
+    }
   }
 
   @override
@@ -32,23 +36,16 @@ class _NotificationToastState extends State<NotificationToast> {
 
   @override
   Widget build(BuildContext context) {
-    final isSuccess = widget.severity == NotificationSeverity.success;
     final colors = context.synkUiTheme.colors;
 
-    return Positioned(
-      right: SynkUiSpace.s16,
-      bottom: SynkUiSpace.s16,
-      child: SafeArea(
-        child: SynkUiToast(
-          icon: isSuccess
-              ? CupertinoIcons.checkmark_circle
-              : CupertinoIcons.exclamationmark_circle,
-          message: widget.message,
-          accent: isSuccess ? colors.live : colors.error,
-          dismissIcon: CupertinoIcons.clear,
-          onDismiss: widget.onDismissed,
-        ),
-      ),
+    return SynkUiToast(
+      icon: _isSuccess
+          ? CupertinoIcons.checkmark_circle
+          : CupertinoIcons.exclamationmark_circle,
+      message: widget.message,
+      accent: _isSuccess ? colors.live : colors.error,
+      dismissIcon: CupertinoIcons.clear,
+      onDismiss: widget.onDismissed,
     );
   }
 }

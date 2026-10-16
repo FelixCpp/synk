@@ -368,6 +368,10 @@ class const _FailedToConnectDeviceEntry({
   String _labelOf(ConnectionFailure failure) => switch (failure) {
     ConnectionFailure.connectionRefused => 'Verbindung abgelehnt',
     ConnectionFailure.cameraAccessDenied => 'Kamerazugriff verweigert',
+    ConnectionFailure.deviceNotPaired => 'Nicht gekoppelt',
+    ConnectionFailure.developerModeDisabled => 'Entwicklermodus aus',
+    ConnectionFailure.developerDiskImageUnavailable =>
+      'Nicht für Entwicklung vorbereitet',
     ConnectionFailure.unknown => 'Verbindung fehlgeschlagen',
   };
 }

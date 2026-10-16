@@ -291,6 +291,10 @@ class const _ViewOnlyTag({required final InteractionUnavailableReason reason})
           'Der Entwicklermodus ist aus. Auf dem Gerät unter Einstellungen › '
               'Datenschutz & Sicherheit › Entwicklermodus einschalten und neu '
               'verbinden.',
+        .developerDiskImageUnavailable =>
+          'Das Gerät ist nicht für die Entwicklung vorbereitet. Gerät per '
+              'Kabel anschließen, in Xcode unter Window › Devices and '
+              'Simulators die Vorbereitung abwarten und neu verbinden.',
         .unknown =>
           'Die Bedienung ließ sich nicht vorbereiten. Gerät entsperren und '
               'neu verbinden.',

@@ -10,11 +10,27 @@ class const AppNotificationListener({
   super.key,
   required final NotificationService notifications,
   required final Widget child,
-}) extends StatelessWidget {
+}) extends StatefulWidget {
+  @override
+  State<AppNotificationListener> createState() =>
+      _AppNotificationListenerState();
+}
+
+class _AppNotificationListenerState extends State<AppNotificationListener> {
+  final _toasts = <({int id, AppNotification notification})>[];
+  var _nextToastId = 0;
+  OverlayEntry? _toastEntry;
+
+  @override
+  void dispose() {
+    _toastEntry?.remove();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NotificationBloc>(
-      create: (context) => NotificationBloc(notifications),
+      create: (context) => NotificationBloc(widget.notifications),
       child: BlocListener<NotificationBloc, NotificationState>(
         listener: (context, state) {
           final notification = state.notification;
@@ -28,7 +44,55 @@ class const AppNotificationListener({
               _showToast(context, notification);
           }
         },
-        child: child,
+        child: widget.child,
+      ),
+    );
+  }
+
+  void _showToast(BuildContext context, AppNotification notification) {
+    _toasts.add((id: _nextToastId++, notification: notification));
+
+    final entry = _toastEntry;
+    if (entry != null) {
+      entry.markNeedsBuild();
+      return;
+    }
+
+    final newEntry = OverlayEntry(builder: _buildToasts);
+    _toastEntry = newEntry;
+    Overlay.of(context).insert(newEntry);
+  }
+
+  void _dismissToast(int id) {
+    _toasts.removeWhere((toast) => toast.id == id);
+
+    if (_toasts.isEmpty) {
+      _toastEntry?.remove();
+      _toastEntry = null;
+    } else {
+      _toastEntry?.markNeedsBuild();
+    }
+  }
+
+  Widget _buildToasts(BuildContext context) {
+    return Positioned(
+      right: SynkUiSpace.s16,
+      bottom: SynkUiSpace.s16,
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .end,
+          spacing: SynkUiSpace.s8,
+          children: [
+            for (final toast in _toasts)
+              NotificationToast(
+                key: ValueKey(toast.id),
+                message: toast.notification.message,
+                severity: toast.notification.severity,
+                onDismissed: () => _dismissToast(toast.id),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -51,21 +115,4 @@ void _showDialog(BuildContext context, AppNotification notification) {
       );
     },
   );
-}
-
-void _showToast(BuildContext context, AppNotification notification) {
-  final overlay = Overlay.of(context);
-  late final OverlayEntry entry;
-
-  entry = OverlayEntry(
-    builder: (context) {
-      return NotificationToast(
-        message: notification.message,
-        severity: notification.severity,
-        onDismissed: () => entry.remove(),
-      );
-    },
-  );
-
-  overlay.insert(entry);
 }

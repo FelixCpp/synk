@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:file/memory.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 
 import '../support/fake_process_manager.dart';
@@ -63,11 +64,13 @@ void main() {
     ];
 
     late String? inputProblem;
+    late bool mirrorFails;
     late FakeProcessManager processManager;
 
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
       inputProblem = null;
+      mirrorFails = false;
       processManager = FakeProcessManager();
 
       final messenger =
@@ -76,6 +79,7 @@ void main() {
         return call.method == 'prepareInput' ? inputProblem : null;
       });
       messenger.setMockMethodCallHandler(channels[1], (call) async {
+        if (mirrorFails) throw PlatformException(code: 'no_frame');
         return call.method == 'startMirror'
             ? {'textureId': 1, 'width': 1179, 'height': 2556}
             : null;
@@ -97,6 +101,7 @@ void main() {
     void answerDevicectl({
       String pairingState = 'paired',
       String developerModeStatus = 'enabled',
+      bool ddiServicesAvailable = true,
     }) {
       processManager = FakeProcessManager(
         respond: (_) => (
@@ -106,14 +111,15 @@ void main() {
               '"hardwareProperties": {"udid": "00008120-0009555001C2601E"}, '
               '"connectionProperties": {"pairingState": "$pairingState"}, '
               '"deviceProperties": '
-              '{"developerModeStatus": "$developerModeStatus"}'
+              '{"developerModeStatus": "$developerModeStatus", '
+              '"ddiServicesAvailable": $ddiServicesAvailable}'
               '}]}}',
           stderr: '',
         ),
       );
     }
 
-    Future<InteractionUnavailableReason?> connect() async {
+    Future<DeviceSession> connectSession() {
       final platform = IosDevicePlatform(
         discoveryChannel: _FakeIosDeviceDiscoveryChannel(const Stream.empty()),
         channel: IosMirrorChannel(),
@@ -123,10 +129,11 @@ void main() {
         fileSystem: MemoryFileSystem(),
       );
 
-      final session = await platform.connect(
-        deviceId,
-        const MirrorOptions.defaults(),
-      );
+      return platform.connect(deviceId, const MirrorOptions.defaults());
+    }
+
+    Future<InteractionUnavailableReason?> connect() async {
+      final session = await connectSession();
       addTearDown(session.dispose);
 
       return session.interactionUnavailableReason;
@@ -165,6 +172,51 @@ void main() {
         InteractionUnavailableReason.developerModeDisabled,
       );
     });
+
+    test(
+      'blames the missing developer disk image when developer mode is on',
+      () async {
+        inputProblem = 'preparationFailed';
+        answerDevicectl(ddiServicesAvailable: false);
+
+        expect(
+          await connect(),
+          InteractionUnavailableReason.developerDiskImageUnavailable,
+        );
+      },
+    );
+
+    test('names the setup problem when mirroring fails', () async {
+      mirrorFails = true;
+      answerDevicectl(
+        developerModeStatus: 'disabled',
+        ddiServicesAvailable: false,
+      );
+
+      await expectLater(
+        connectSession,
+        throwsA(
+          isA<DeviceSetupException>().having(
+            (e) => e.problem,
+            'problem',
+            DeviceSetupProblem.developerModeDisabled,
+          ),
+        ),
+      );
+    });
+
+    test(
+      'passes the mirroring error on when the device looks fine',
+      () async {
+        mirrorFails = true;
+        answerDevicectl();
+
+        await expectLater(
+          connectSession,
+          throwsA(isA<PlatformException>()),
+        );
+      },
+    );
 
     test('admits not knowing when the device looks fine', () async {
       inputProblem = 'preparationFailed';

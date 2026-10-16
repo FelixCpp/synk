@@ -45,8 +45,6 @@ class const SynkUiToast({
                 child: Text(
                   message,
                   style: theme.typography.body,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               if (onDismiss != null && dismissIcon != null)

@@ -9,6 +9,7 @@ import 'package:synk/feat_settings/presentation/widgets/settings_nav.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_tools_page.dart';
 import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/presentation/bloc/tool_validation_bloc.dart';
+import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -19,20 +20,17 @@ const _windowHeight = 560.0;
 const _headerHeight = 48.0;
 
 Future<void> showSettingsWindow(BuildContext context) {
-  final toolValidation = BlocProvider.of<ToolValidationBloc>(context);
-  final settings = BlocProvider.of<SettingsBloc>(context);
-  final adbPaths = RepositoryProvider.of<AdbPaths>(context);
-
   return showSynkUiDialog<void>(
     context: context,
     barrierDismissible: true,
-    builder: (context) => MultiBlocProvider(
+    builder: (dialogContext) => MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: toolValidation),
-        BlocProvider.value(value: settings),
+        BlocProvider.value(value: BlocProvider.of<ToolValidationBloc>(context)),
+        BlocProvider.value(value: BlocProvider.of<SettingsBloc>(context)),
+        BlocProvider.value(value: BlocProvider.of<AppVersionBloc>(context)),
       ],
       child: RepositoryProvider.value(
-        value: adbPaths,
+        value: RepositoryProvider.of<AdbPaths>(context),
         child: const SettingsWindow(),
       ),
     ),
@@ -45,7 +43,7 @@ class const SettingsWindow({super.key}) extends StatefulWidget {
 }
 
 class _SettingsWindowState extends State<SettingsWindow> {
-  var _category = SettingsCategory.general;
+  var _category = SettingsCategory.general; // TODO(Felix): Persist
 
   void _close() => Navigator.of(context).pop();
 
