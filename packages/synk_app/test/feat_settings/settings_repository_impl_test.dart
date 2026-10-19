@@ -58,6 +58,25 @@ void main() {
       expect((await repository.read()).customAdbPath, isNull);
     });
 
+    test('writes only the settings that changed', () async {
+      await repository.save(_defaults.copyWith(syncClipboard: false));
+
+      expect(
+        (await preferences.readAll()).keys,
+        ['sync_clipboard'],
+        reason: 'one toggle must not rewrite all eleven keys',
+      );
+    });
+
+    test('falls back when a stored value has the wrong type', () async {
+      // An older build could have written something else under this key.
+      SharedPreferences.setMockInitialValues({'show_capture_preview': 'yes'});
+
+      final settings = await repository.read();
+
+      expect(settings.showCapturePreview, _defaults.showCapturePreview);
+    });
+
     test('ignores a stored value no enum knows any more', () async {
       SharedPreferences.setMockInitialValues({
         'theme_mode': 'solarized',

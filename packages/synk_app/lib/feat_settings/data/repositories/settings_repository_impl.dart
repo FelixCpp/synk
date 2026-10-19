@@ -16,41 +16,60 @@ class SettingsRepositoryImpl({
 
   @override
   Stream<Settings> observe() {
-    return preferences.observeAll().map(_decode);
+    // Saving touches several keys, and every one of them makes
+    // rx_shared_preferences emit again. Settings has value equality, so the
+    // repeats can simply be dropped.
+    return preferences.observeAll().map(_decode).distinct();
   }
 
   @override
   Future<void> save(Settings settings) async {
+    final stored = _encode(_decode(await preferences.readAll()));
+    final wanted = _encode(settings);
+
     await Future.wait([
-      preferences.setString(_Key.themeMode, settings.themeMode.name),
-      preferences.setString(
-        _Key.screenCaptureSavePath,
-        settings.screenCaptureSavePath,
-      ),
-      preferences.setBool(
-        _Key.showCapturePreview,
-        settings.showCapturePreview,
-      ),
-      preferences.setBool(
-        _Key.copyScreenshotToClipboard,
-        settings.copyScreenshotToClipboard,
-      ),
-      preferences.setBool(_Key.recordAudio, settings.recordAudio),
-      preferences.setString(_Key.frameRate, settings.frameRate.name),
-      preferences.setString(_Key.quality, settings.quality.name),
-      preferences.setBool(
-        _Key.turnDeviceScreenOff,
-        settings.turnDeviceScreenOff,
-      ),
-      preferences.setBool(_Key.muteOnConnect, settings.muteOnConnect),
-      preferences.setBool(_Key.syncClipboard, settings.syncClipboard),
-      preferences.setString(_Key.customAdbPath, settings.customAdbPath),
+      for (final entry in wanted.entries)
+        if (stored[entry.key] != entry.value) _write(entry.key, entry.value),
     ]);
+  }
+
+  /// The counterpart of [_decode]: one entry per stored key.
+  ///
+  /// Going through this map rather than writing all eleven keys every time
+  /// keeps a single toggle from waking every listener eleven times over.
+  Map<String, Object?> _encode(Settings settings) {
+    return {
+      _Key.themeMode: settings.themeMode.name,
+      _Key.screenCaptureSavePath: settings.screenCaptureSavePath,
+      _Key.showCapturePreview: settings.showCapturePreview,
+      _Key.copyScreenshotToClipboard: settings.copyScreenshotToClipboard,
+      _Key.recordAudio: settings.recordAudio,
+      _Key.frameRate: settings.frameRate.name,
+      _Key.quality: settings.quality.name,
+      _Key.turnDeviceScreenOff: settings.turnDeviceScreenOff,
+      _Key.muteOnConnect: settings.muteOnConnect,
+      _Key.syncClipboard: settings.syncClipboard,
+      _Key.customAdbPath: settings.customAdbPath,
+    };
+  }
+
+  Future<void> _write(String key, Object? value) {
+    if (value is bool) {
+      return preferences.setBool(key, value);
+    }
+
+    // The only other thing [_encode] produces is a String, and a null one is
+    // how a custom adb location is taken back.
+    return preferences.setString(key, value as String?);
   }
 
   Settings _decode(Map<String, Object?> stored) {
     T read<T extends Object>(String key, T fallback) {
-      return stored[key] as T? ?? fallback;
+      // Not a cast: a key that holds the wrong type — an older build wrote a
+      // bool where a String is read now — must fall back, not throw and take
+      // the whole settings screen with it.
+      final value = stored[key];
+      return value is T ? value : fallback;
     }
 
     E readEnum<E extends Enum>(String key, List<E> values, E fallback) {

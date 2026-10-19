@@ -207,6 +207,13 @@ class const _Poster({
   Widget build(BuildContext context) {
     final size = ScreenCapturePreviewMetrics.sizeFor(aspectRatio);
 
+    // A phone screenshot is some 1290 by 2796 pixels, which decodes to around
+    // 14 MB of pixels — for a card 140 logical pixels wide. Decoding it at
+    // the size it is drawn keeps four of them in the corner from costing more
+    // memory than the mirrors they came from.
+    final decodeWidth =
+        (size.width * MediaQuery.devicePixelRatioOf(context)).round();
+
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SynkUiRadius.card),
@@ -221,7 +228,12 @@ class const _Poster({
             fit: .expand,
             children: [
               if (bytes case final bytes?)
-                Image.memory(bytes, fit: .cover, gaplessPlayback: true)
+                Image.memory(
+                  bytes,
+                  fit: .cover,
+                  gaplessPlayback: true,
+                  cacheWidth: decodeWidth,
+                )
               else
                 const _MissingPoster(),
               if (isVideo) const Center(child: _PlayBadge()),

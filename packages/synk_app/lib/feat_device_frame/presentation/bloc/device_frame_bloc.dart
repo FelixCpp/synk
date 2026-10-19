@@ -21,7 +21,7 @@ import 'package:synk/feat_device_frame/domain/usecases/start_recording_interacto
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_notifications/domain/models/user_message.dart';
+import 'package:synk/feat_notifications/application/notified_interactor.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,8 +89,11 @@ class DeviceFrameBloc({
     return simulateKeyEvent
         .logger(level: .trace)
         .after(_reportClipboardSyncFailure)
-        .intercept(_notify('Die Tastatureingabe kam nicht am Gerät an.'))
-        .run(keyEvent);
+        .runReporting(
+          keyEvent,
+          to: notifications,
+          whenItFails: 'Die Tastatureingabe kam nicht am Gerät an.',
+        );
   }
 
   void _reportClipboardSyncFailure(ClipboardSyncFailure? failure) {
@@ -115,98 +118,143 @@ class DeviceFrameBloc({
     _OnPointerEvent event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return simulatePointerEvent
-        .logger(level: .trace)
-        .intercept(_notify('Die Mauseingabe kam nicht am Gerät an.'))
-        .run(
-          .new(
-            type: event.type,
-            normalizedPointerX: event.normalizedPointerX,
-            normalizedPointerY: event.normalizedPointerY,
-          ),
-        );
+    // No trace log here: pointer moves arrive at pointer frequency, and one
+    // line per move buries everything else instead of saying anything.
+    return simulatePointerEvent.runReporting(
+      .new(
+        type: event.type,
+        normalizedPointerX: event.normalizedPointerX,
+        normalizedPointerY: event.normalizedPointerY,
+      ),
+      to: notifications,
+      whenItFails: 'Die Mauseingabe kam nicht am Gerät an.',
+    );
   }
 
   FutureOr<void> _onPinchEvent(
     _OnPinchEvent event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return simulatePinchEvent
-        .logger(level: .trace)
-        .intercept(_notify('Die Zoom-Geste kam nicht am Gerät an.'))
-        .run((
-          type: event.type,
-          centerX: event.centerX,
-          centerY: event.centerY,
-          spread: event.spread,
-        ));
+    return simulatePinchEvent.runReporting(
+      (
+        type: event.type,
+        centerX: event.centerX,
+        centerY: event.centerY,
+        spread: event.spread,
+      ),
+      to: notifications,
+      whenItFails: 'Die Zoom-Geste kam nicht am Gerät an.',
+    );
   }
 
   FutureOr<void> _onCaptureScreenshot(
     _OnCaptureScreenshot event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return captureScreenshot
-        .logger()
-        .intercept(_notify('Der Screenshot ist fehlgeschlagen.'))
-        .run(unit);
+    return captureScreenshot.logger().runReporting(
+      unit,
+      to: notifications,
+      whenItFails: 'Der Screenshot ist fehlgeschlagen.',
+    );
   }
 
   FutureOr<void> _onToggleRecording(
     _OnToggleRecording event,
     Emitter<DeviceFrameState> emit,
   ) {
+    // Both directions report after the fact. A stop that failed leaves the
+    // device recording, so the button has to keep saying so.
     if (state.isRecording) {
-      emit(state.copyWith(isRecording: false));
-
       return stopRecording
           .logger()
-          .intercept(_notify('Die Aufnahme ließ sich nicht beenden.'))
-          .run(unit);
+          .after((_) => emit(state.copyWith(isRecording: false)))
+          .runReporting(
+            unit,
+            to: notifications,
+            whenItFails: 'Die Aufnahme ließ sich nicht beenden.',
+          );
     }
 
     return startRecording
         .logger()
         .after((_) => emit(state.copyWith(isRecording: true)))
-        .intercept(_notify('Die Aufnahme ließ sich nicht starten.'))
-        .run(unit);
+        .runReporting(
+          unit,
+          to: notifications,
+          whenItFails: 'Die Aufnahme ließ sich nicht starten.',
+        );
   }
 
   FutureOr<void> _onToggleAudioMute(
     _OnToggleAudioMute event,
     Emitter<DeviceFrameState> emit,
   ) {
-    final muted = !state.isAudioMuted;
+    // A toggle has to feel instant, so the state leads — and steps back if
+    // the device did not follow. `consume: false`, or the report below never
+    // reaches the user.
+    final previous = state.isAudioMuted;
+    final muted = !previous;
     emit(state.copyWith(isAudioMuted: muted));
 
     return setAudioMuted
         .logger()
-        .intercept(_notify('Der Ton ließ sich nicht umschalten.'))
-        .run(muted);
+        .intercept(
+          (_) => emit(state.copyWith(isAudioMuted: previous)),
+          consume: false,
+        )
+        .runReporting(
+          muted,
+          to: notifications,
+          whenItFails: 'Der Ton ließ sich nicht umschalten.',
+        );
   }
 
   Future<void> _onAudioVolumeChanged(
     _OnAudioVolumeChanged event,
     Emitter<DeviceFrameState> emit,
   ) async {
-    final unmute = state.isAudioMuted && event.volume > 0.0;
+    // The slider has to track the thumb, so the state leads here too, and
+    // steps back together with the mute flag if the device did not follow.
+    final previousVolume = state.audioVolume;
+    final previouslyMuted = state.isAudioMuted;
+    final unmute = previouslyMuted && event.volume > 0.0;
+
     emit(
       state.copyWith(
         audioVolume: event.volume,
-        isAudioMuted: unmute ? false : state.isAudioMuted,
+        isAudioMuted: unmute ? false : previouslyMuted,
       ),
     );
 
+    // Dragging the slider sends a stream of these, so no trace log per step.
     await setAudioVolume
-        .logger(level: .trace)
-        .intercept(_notify('Die Lautstärke ließ sich nicht ändern.'))
-        .run(event.volume);
+        .intercept(
+          (_) => emit(
+            state.copyWith(
+              audioVolume: previousVolume,
+              isAudioMuted: previouslyMuted,
+            ),
+          ),
+          consume: false,
+        )
+        .runReporting(
+          event.volume,
+          to: notifications,
+          whenItFails: 'Die Lautstärke ließ sich nicht ändern.',
+        );
 
     if (unmute) {
       await setAudioMuted
           .logger()
-          .intercept(_notify('Der Ton ließ sich nicht umschalten.'))
-          .run(false);
+          .intercept(
+            (_) => emit(state.copyWith(isAudioMuted: previouslyMuted)),
+            consume: false,
+          )
+          .runReporting(
+            false,
+            to: notifications,
+            whenItFails: 'Der Ton ließ sich nicht umschalten.',
+          );
     }
   }
 
@@ -220,8 +268,11 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after((outcomes) => outcomes.forEach(_reportTransfer))
-        .intercept(_notify('Die abgelegten Dateien ließen sich nicht übertragen.'))
-        .run(event.filepaths);
+        .runReporting(
+          event.filepaths,
+          to: notifications,
+          whenItFails: 'Die abgelegten Dateien ließen sich nicht übertragen.',
+        );
   }
 
   FutureOr<void> _onInstallApk(
@@ -234,8 +285,11 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after(_reportTransfer)
-        .intercept(_notify('Die App ließ sich nicht installieren.'))
-        .run(unit);
+        .runReporting(
+          unit,
+          to: notifications,
+          whenItFails: 'Die App ließ sich nicht installieren.',
+        );
   }
 
   FutureOr<void> _onShareFile(
@@ -248,8 +302,11 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after(_reportTransfer)
-        .intercept(_notify('Die Datei ließ sich nicht übertragen.'))
-        .run(unit);
+        .runReporting(
+          unit,
+          to: notifications,
+          whenItFails: 'Die Datei ließ sich nicht übertragen.',
+        );
   }
 
   void _reportTransfer(FileTransferOutcome? outcome) {
@@ -272,26 +329,24 @@ class DeviceFrameBloc({
     _OnNavigate event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return navigate
-        .logger()
-        .intercept(_notify('Die Navigation kam nicht am Gerät an.'))
-        .run(event.navigation);
+    return navigate.logger().runReporting(
+      event.navigation,
+      to: notifications,
+      whenItFails: 'Die Navigation kam nicht am Gerät an.',
+    );
   }
 
   FutureOr<void> _onPowerButtonPressed(
     _OnPowerButtonPressed event,
     Emitter<DeviceFrameState> emit,
   ) {
-    return pressPowerButton
-        .logger()
-        .intercept(_notify('Der Standby-Knopf kam nicht am Gerät an.'))
-        .run(unit);
+    return pressPowerButton.logger().runReporting(
+      unit,
+      to: notifications,
+      whenItFails: 'Der Standby-Knopf kam nicht am Gerät an.',
+    );
   }
 
-  void Function(Object) _notify(String fallback) {
-    return (error) =>
-        notifications.notify(.new(message: userMessageFor(error, fallback)));
-  }
 }
 
 extension on KeyEvent {

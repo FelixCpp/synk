@@ -69,11 +69,16 @@ class FakeInteraction implements DeviceInteraction {
 }
 
 class FakeAudio implements DeviceAudio {
+  /// What the device refuses to do, so a frame can be caught telling the user
+  /// something that did not happen.
+  Object? failWith;
+
   @override
   bool isAudioMuted = true;
 
   @override
   Future<void> setAudioMuted(bool muted) async {
+    if (failWith case final error?) throw error;
     isAudioMuted = muted;
   }
 
@@ -82,6 +87,7 @@ class FakeAudio implements DeviceAudio {
 
   @override
   Future<void> setAudioVolume(double volume) async {
+    if (failWith case final error?) throw error;
     audioVolume = volume;
   }
 }

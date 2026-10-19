@@ -68,6 +68,61 @@ void main() {
       expect(audio.isAudioMuted, isTrue);
     });
 
+    test('takes the mute back when the device refuses it', () async {
+      final audio = FakeAudio()..isAudioMuted = false;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      audio.failWith = Exception('no audio route');
+      bloc.add(const DeviceFrameEvent.onToggleAudioMute());
+      await pumpEventQueue();
+
+      expect(
+        bloc.state.isAudioMuted,
+        isFalse,
+        reason: 'the button must not claim a mute the device never applied',
+      );
+    });
+
+    test('takes the volume back when the device refuses it', () async {
+      final audio = FakeAudio()
+        ..isAudioMuted = false
+        ..audioVolume = 0.8;
+      final bloc = _blocFor(audio);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      audio.failWith = Exception('no audio route');
+      bloc.add(const DeviceFrameEvent.onAudioVolumeChanged(0.2));
+      await pumpEventQueue();
+
+      expect(bloc.state.audioVolume, 0.8);
+    });
+
+    test('says so when the device refuses a mute', () async {
+      final audio = FakeAudio()..isAudioMuted = false;
+      final notifications = NotificationService();
+      addTearDown(notifications.dispose);
+      final shown = <String>[];
+      final subscription = notifications
+          .observeNotifications()
+          .listen((notification) => shown.add(notification.message));
+      addTearDown(subscription.cancel);
+
+      final bloc = _blocFor(audio, notifications: notifications);
+      addTearDown(bloc.close);
+      await pumpEventQueue();
+
+      audio.failWith = Exception('no audio route');
+      bloc.add(const DeviceFrameEvent.onToggleAudioMute());
+      await pumpEventQueue();
+
+      // Rolling the state back must not cost the user the message: the
+      // rollback intercept has to pass consume: false to let this through.
+      expect(shown, ['Der Ton ließ sich nicht umschalten.']);
+    });
+
     test('reports the volume a session already has', () async {
       final audio = FakeAudio()..audioVolume = 0.4;
       final bloc = _blocFor(audio);
@@ -119,9 +174,9 @@ void main() {
   });
 }
 
-DeviceFrameBloc _blocFor(FakeAudio audio) {
-  final notifications = NotificationService();
-  addTearDown(notifications.dispose);
+DeviceFrameBloc _blocFor(FakeAudio audio, {NotificationService? notifications}) {
+  final service = notifications ?? NotificationService();
+  if (notifications == null) addTearDown(service.dispose);
 
   return DeviceFrameBloc(
     repository: DeviceFrameRepositoryImpl(
@@ -135,6 +190,6 @@ DeviceFrameBloc _blocFor(FakeAudio audio) {
       fileSystem: MemoryFileSystem(),
       clock: const Clock(),
     ),
-    notifications: notifications,
+    notifications: service,
   );
 }
