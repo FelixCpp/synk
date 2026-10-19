@@ -1,4 +1,0 @@
-enum ClipboardSyncFailure {
-  toolUnavailable,
-  deviceUnreachable,
-}

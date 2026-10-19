@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:flutter/services.dart';
+import 'package:synk/feat_device_platform/domain/models/device_clipboard_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -12,13 +15,29 @@ class const IosClipboard({
 }) implements DeviceClipboard {
   @override
   Future<String> getClipboard() {
-    return devicectl.readPasteboard(deviceId: deviceId);
+    return _translatingFailures(
+      () => devicectl.readPasteboard(deviceId: deviceId),
+    );
   }
 
   @override
   Future<void> setClipboard(String content) async {
-    await devicectl.writePasteboard(deviceId: deviceId, text: content);
+    await _translatingFailures(
+      () => devicectl.writePasteboard(deviceId: deviceId, text: content),
+    );
     await _simulatePasteKeystroke();
+  }
+
+  Future<T> _translatingFailures<T>(Future<T> Function() request) async {
+    try {
+      return await request();
+    } on DevicectlCommandException {
+      throw const DeviceClipboardUnavailableException();
+    } on ProcessException {
+      throw const DeviceClipboardUnavailableException();
+    } on Object {
+      throw const DeviceClipboardUnreachableException();
+    }
   }
 
   Future<void> _simulatePasteKeystroke() async {

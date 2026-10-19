@@ -30,8 +30,8 @@ import 'package:synk/feat_settings/data/repositories/settings_repository_impl.da
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_factory_impl.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository_factory.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
@@ -163,8 +163,8 @@ Future<void> main() async {
             fileOpener,
           ),
         ),
-        RepositoryProvider<DeviceFrameRepositoryFactory>(
-          create: (context) => DeviceFrameRepositoryFactoryImpl(
+        RepositoryProvider<DeviceFrameFactory>(
+          create: (context) => DeviceFrameFactoryImpl(
             settingsRepository: settingsRepository,
             screenCaptureEventChannel: context
                 .read<ScreenCaptureEventChannel>(),

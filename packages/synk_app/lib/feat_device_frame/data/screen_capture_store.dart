@@ -5,6 +5,7 @@ import 'package:file/file.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_frame/domain/repositories/screen_captures.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_kind.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
@@ -16,7 +17,8 @@ class const ScreenCaptureStore({
   required final ScreenCaptureEventChannel events,
   required final FileSystem fileSystem,
   required final Clock clock,
-}) {
+}) implements ScreenCaptures {
+  @override
   Future<String> reservePath(ScreenCaptureKind kind) async {
     final settings = await settingsRepository.read();
     final directory = settings.screenCaptureSavePath;
@@ -29,10 +31,12 @@ class const ScreenCaptureStore({
     );
   }
 
+  @override
   Future<void> writeScreenshot(String filepath, Uint8List pngBytes) {
     return fileSystem.file(filepath).writeAsBytes(pngBytes);
   }
 
+  @override
   void announceScreenshot({
     required String filepath,
     required Uint8List pngBytes,
@@ -49,6 +53,7 @@ class const ScreenCaptureStore({
     );
   }
 
+  @override
   void announceRecording({
     required String filepath,
     required Uint8List? posterBytes,

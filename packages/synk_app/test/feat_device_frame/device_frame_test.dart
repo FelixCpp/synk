@@ -4,8 +4,8 @@ import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_factory_impl.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository_factory.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
@@ -255,8 +255,8 @@ Future<SynkUiColors> _pumpFrame(
           create: (_) => ScreenCaptureEventChannel(),
           dispose: (channel) => channel.dispose(),
         ),
-        RepositoryProvider<DeviceFrameRepositoryFactory>(
-          create: (context) => DeviceFrameRepositoryFactoryImpl(
+        RepositoryProvider<DeviceFrameFactory>(
+          create: (context) => DeviceFrameFactoryImpl(
             settingsRepository: FakeSettingsRepository(),
             screenCaptureEventChannel: context
                 .read<ScreenCaptureEventChannel>(),

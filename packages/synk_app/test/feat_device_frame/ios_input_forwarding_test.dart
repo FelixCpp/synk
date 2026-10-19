@@ -1,5 +1,6 @@
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/device_frame_harness.dart';
@@ -20,13 +21,12 @@ void main() {
   group('what the frame forwards to the device', () {
     test('passes navigation and the power button on to the device', () async {
       final interaction = _RecordingInteraction();
-      final repository = DeviceFrameHarness(interaction: interaction)
-          .repository;
+      final device = DeviceFrameHarness(interaction: interaction).device;
 
-      await repository.navigate(.back);
-      await repository.navigate(.home);
-      await repository.navigate(.appSwitch);
-      await repository.pressPowerButton();
+      await device.navigate.getOrThrow(.back);
+      await device.navigate.getOrThrow(.home);
+      await device.navigate.getOrThrow(.appSwitch);
+      await device.pressPowerButton.getOrThrow(unit);
 
       expect(interaction.navigations, [
         DeviceNavigation.back,
@@ -37,13 +37,13 @@ void main() {
     });
 
     test('drops input for a device that does not take any', () async {
-      final repository = DeviceFrameHarness().repository;
+      final device = DeviceFrameHarness().device;
 
-      await repository.simulatePointerEvent(
+      await device.simulatePointerEvent.getOrThrow(
         _pointer(.down, 0.5, 0.5),
       );
-      await repository.navigate(.home);
-      await repository.pressPowerButton();
+      await device.navigate.getOrThrow(.home);
+      await device.pressPowerButton.getOrThrow(unit);
     });
   });
 }

@@ -1,7 +1,9 @@
 import 'package:clock/clock.dart';
 import 'package:file/memory.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
+import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -44,16 +46,19 @@ final class DeviceFrameHarness {
       fileTransfer: fileTransfer,
     );
 
-    repository = DeviceFrameRepositoryImpl(
-      deviceId: deviceId,
-      modelName: modelName,
-      session: session,
+    device = DeviceFrameFactoryImpl(
       settingsRepository: settings,
       screenCaptureEventChannel: events,
       hostClipboard: host,
       filePicker: filePicker,
       fileSystem: fileSystem,
       clock: takenAt == null ? const Clock() : Clock.fixed(takenAt),
+    ).forConnection(
+      DeviceConnection(
+        device: _TestDevice(deviceId, modelName),
+        session: session,
+        screenSize: session.screenSize,
+      ),
     );
 
     events.observeEvents().listen(announced.add);
@@ -72,7 +77,7 @@ final class DeviceFrameHarness {
   final notifications = NotificationService();
 
   late final FakeDeviceSession session;
-  late final DeviceFrameRepositoryImpl repository;
+  late final DeviceFrameInteractors device;
 
   /// Captures the frame announced, in order.
   final announced = <ScreenCaptureEvent>[];
@@ -82,10 +87,10 @@ final class DeviceFrameHarness {
 
   DeviceFrameBloc? _bloc;
 
-  /// A bloc on top of [repository], built on first use and closed by [dispose].
+  /// A bloc on top of [device], built on first use and closed by [dispose].
   DeviceFrameBloc get bloc {
     return _bloc ??= DeviceFrameBloc(
-      repository: repository,
+      device: device,
       notifications: notifications,
     );
   }
@@ -95,4 +100,12 @@ final class DeviceFrameHarness {
     await events.dispose();
     await notifications.dispose();
   }
+}
+
+class const _TestDevice(
+  @override final DeviceId id,
+  @override final String modelName,
+) implements PluggedDevice {
+  @override
+  bool get isAuthorized => true;
 }

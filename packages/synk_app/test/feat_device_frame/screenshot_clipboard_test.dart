@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 
 import '../support/device_frame_harness.dart';
@@ -11,7 +12,7 @@ final _takenAt = DateTime(2026, 10, 15, 9, 41, 7);
 
 void main() {
   late DeviceFrameHarness harness;
-  late DeviceFrameRepositoryImpl repository;
+  late DeviceFrameInteractors device;
 
   setUp(() {
     harness = DeviceFrameHarness(
@@ -19,7 +20,7 @@ void main() {
       takenAt: _takenAt,
     );
     addTearDown(harness.dispose);
-    repository = harness.repository;
+    device = harness.device;
   });
 
   group('DeviceFrameRepository.captureScreenshot', () {
@@ -28,7 +29,7 @@ void main() {
         (it) => it.copyWith(copyScreenshotToClipboard: true),
       );
 
-      await repository.captureScreenshot();
+      await device.captureScreenshot.getOrThrow(unit);
 
       expect(harness.host.images, hasLength(1));
       expect(harness.host.images.single, _png);
@@ -39,7 +40,7 @@ void main() {
         (it) => it.copyWith(copyScreenshotToClipboard: false),
       );
 
-      await repository.captureScreenshot();
+      await device.captureScreenshot.getOrThrow(unit);
 
       expect(harness.host.images, isEmpty);
     });
@@ -49,7 +50,7 @@ void main() {
         (it) => it.copyWith(copyScreenshotToClipboard: true),
       );
 
-      await repository.captureScreenshot();
+      await device.captureScreenshot.getOrThrow(unit);
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));
@@ -60,7 +61,7 @@ void main() {
     });
 
     test('names the file after the device and when it was taken', () async {
-      await repository.captureScreenshot();
+      await device.captureScreenshot.getOrThrow(unit);
       await pumpEventQueue();
 
       expect(
@@ -77,7 +78,7 @@ void main() {
 
       // The file is already saved by then — a pasteboard problem must not be
       // reported to the user as a failed screenshot.
-      await expectLater(repository.captureScreenshot(), completes);
+      await expectLater(device.captureScreenshot.getOrThrow(unit), completes);
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));

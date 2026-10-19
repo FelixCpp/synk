@@ -1,7 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 
@@ -13,7 +14,7 @@ final _takenAt = DateTime(2026, 10, 15, 9, 41, 7);
 void main() {
   late DeviceFrameHarness harness;
   late _FakeScreenCapture screenCapture;
-  late DeviceFrameRepositoryImpl repository;
+  late DeviceFrameInteractors device;
 
   setUp(() {
     screenCapture = _FakeScreenCapture();
@@ -22,13 +23,13 @@ void main() {
       takenAt: _takenAt,
     );
     addTearDown(harness.dispose);
-    repository = harness.repository;
+    device = harness.device;
   });
 
   group('DeviceFrameRepository recording previews', () {
     test('announces the finished recording with a poster frame', () async {
-      await repository.startRecording();
-      await repository.stopRecording();
+      await device.startRecording.getOrThrow(unit);
+      await device.stopRecording.getOrThrow(unit);
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));
@@ -50,8 +51,8 @@ void main() {
     test('announces one whose poster could not be taken', () async {
       screenCapture.screenshotFails = true;
 
-      await repository.startRecording();
-      await repository.stopRecording();
+      await device.startRecording.getOrThrow(unit);
+      await device.stopRecording.getOrThrow(unit);
       await pumpEventQueue();
 
       harness.announced.single.map(
@@ -63,8 +64,8 @@ void main() {
     test('stays quiet when the recorder wrote no frames', () async {
       screenCapture.stopResult = false;
 
-      await repository.startRecording();
-      await expectLater(repository.stopRecording(), throwsA(isA<Exception>()));
+      await device.startRecording.getOrThrow(unit);
+      await expectLater(device.stopRecording.getOrThrow(unit), throwsA(isA<Exception>()));
       await pumpEventQueue();
 
       expect(harness.announced, isEmpty);
@@ -73,7 +74,7 @@ void main() {
     test('asks for sound when the preference says so', () async {
       harness.settings.update((it) => it.copyWith(recordAudio: true));
 
-      await repository.startRecording();
+      await device.startRecording.getOrThrow(unit);
 
       expect(screenCapture.startedWithAudio, isTrue);
     });
@@ -81,22 +82,22 @@ void main() {
     test('asks for a silent recording when it does not', () async {
       harness.settings.update((it) => it.copyWith(recordAudio: false));
 
-      await repository.startRecording();
+      await device.startRecording.getOrThrow(unit);
 
       expect(screenCapture.startedWithAudio, isFalse);
     });
 
     test('announces a recording only once', () async {
-      await repository.startRecording();
-      await repository.stopRecording();
-      await repository.stopRecording();
+      await device.startRecording.getOrThrow(unit);
+      await device.stopRecording.getOrThrow(unit);
+      await device.stopRecording.getOrThrow(unit);
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));
     });
 
     test('stays quiet for a stop without a start', () async {
-      await repository.stopRecording();
+      await device.stopRecording.getOrThrow(unit);
       await pumpEventQueue();
 
       expect(harness.announced, isEmpty);

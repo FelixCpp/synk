@@ -1,6 +1,6 @@
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -27,19 +27,19 @@ DeviceKeyEvent _key(
 
 void main() {
   late _RecordingInteraction interaction;
-  late DeviceFrameRepositoryImpl repository;
+  late DeviceFrameInteractors device;
 
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     interaction = _RecordingInteraction();
     final harness = DeviceFrameHarness(interaction: interaction);
     addTearDown(harness.dispose);
-    repository = harness.repository;
+    device = harness.device;
   });
 
   group('typing on the host', () {
     test('reaches the device for an ordinary letter', () async {
-      await repository.simulateKeyEvent(
+      await device.simulateKeyEvent.getOrThrow(
         _key(LogicalKeyboardKey.keyA),
       );
 
@@ -49,7 +49,7 @@ void main() {
 
     test('reaches the device for every phase of a keystroke', () async {
       for (final type in DeviceKeyEventType.values) {
-        await repository.simulateKeyEvent(
+        await device.simulateKeyEvent.getOrThrow(
           _key(LogicalKeyboardKey.keyA, type: type),
         );
       }
@@ -64,7 +64,7 @@ void main() {
       'reaches the device with its modifiers, for the interaction to '
       'translate',
       () async {
-        await repository.simulateKeyEvent(
+        await device.simulateKeyEvent.getOrThrow(
           _key(
             LogicalKeyboardKey.keyA,
             modifiers: const {

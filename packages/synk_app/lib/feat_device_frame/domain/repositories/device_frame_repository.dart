@@ -1,24 +1,32 @@
-import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
-import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
-import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'dart:typed_data';
 
+import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+
+/// One connected device, as far as a frame can drive it.
+///
+/// Delegation only — what Synk decides to do with a device lives in the
+/// interactors.
 abstract interface class DeviceFrameRepository {
+  DeviceScreenSize get screenSize;
+  DeviceClipboard? get clipboard;
+
   bool get isAudioMuted;
-  Future<void> setAudioMuted(bool muted);
   double get audioVolume;
+  Future<void> setAudioMuted(bool muted);
   Future<void> setAudioVolume(double volume);
 
-  Future<ClipboardSyncFailure?> simulateKeyEvent(DeviceKeyEvent event);
+  Future<void> simulateKeyEvent(DeviceKeyEvent event);
   Future<void> simulatePointerEvent(DevicePointerEvent event);
   Future<void> simulatePinchEvent(PinchEvent event);
   Future<void> navigate(DeviceNavigation navigation);
   Future<void> pressPowerButton();
 
-  Future<void> captureScreenshot();
-  Future<void> startRecording();
-  Future<void> stopRecording();
+  Future<Uint8List> captureScreenshot();
+  Future<void> startRecording(String filepath, {required bool withAudio});
+  Future<bool> stopRecording();
 
-  Future<List<FileTransferOutcome>> sendFiles(List<String> filepaths);
-  Future<FileTransferOutcome?> sendPickedApk();
-  Future<FileTransferOutcome?> sendPickedFile();
+  Future<void> installApk(String filepath);
+  Future<void> pushFile(String filepath);
 }
