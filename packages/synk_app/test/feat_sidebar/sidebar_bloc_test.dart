@@ -36,11 +36,18 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   }
 
   Object? errorToThrow;
-  PluggedDevice? lastToggled;
+  PluggedDevice? lastConnected;
+  PluggedDevice? lastDisconnected;
 
   @override
-  Future<void> toggleConnection(PluggedDevice device) async {
-    lastToggled = device;
+  Future<void> connect(PluggedDevice device) async {
+    lastConnected = device;
+    if (errorToThrow != null) throw errorToThrow!;
+  }
+
+  @override
+  Future<void> disconnect(PluggedDevice device) async {
+    lastDisconnected = device;
     if (errorToThrow != null) throw errorToThrow!;
   }
 
@@ -141,23 +148,52 @@ void main() {
     ]);
   });
 
-  test('does not notify when toggling a connection succeeds', () async {
+  test('does not notify when connecting succeeds', () async {
     final device = buildDevice('serial-2');
     final emitted = <AppNotification>[];
     final subscription = notifications.observeNotifications().listen(
       emitted.add,
     );
 
-    bloc.add(SidebarEvent.onConnect(device));
+    bloc.add(SidebarEvent.onConnectRequested(device));
     await pumpEventQueue();
 
-    expect(connectionsRepository.lastToggled, device);
+    expect(connectionsRepository.lastConnected, device);
     expect(emitted, isEmpty);
 
     await subscription.cancel();
   });
 
-  test('notifies when toggling a connection fails', () async {
+  test('passes a message meant for the user through as it is', () async {
+    final device = buildDevice('serial-5');
+    connectionsRepository.errorToThrow = DeviceNotPluggedException(
+      deviceId: device.id,
+    );
+
+    final emitted = <AppNotification>[];
+    final subscription = notifications.observeNotifications().listen(
+      emitted.add,
+    );
+
+    bloc.add(SidebarEvent.onConnectRequested(device));
+    await pumpEventQueue();
+
+    expect(emitted.single.message, contains('nicht mehr angeschlossen'));
+
+    await subscription.cancel();
+  });
+
+  test('disconnecting asks to disconnect, never to connect', () async {
+    final device = buildDevice('serial-4');
+
+    bloc.add(SidebarEvent.onDisconnectRequested(device));
+    await pumpEventQueue();
+
+    expect(connectionsRepository.lastDisconnected, device);
+    expect(connectionsRepository.lastConnected, isNull);
+  });
+
+  test('notifies when connecting fails', () async {
     final device = buildDevice('serial-3');
     connectionsRepository.errorToThrow = Exception('boom');
 
@@ -166,11 +202,15 @@ void main() {
       emitted.add,
     );
 
-    bloc.add(SidebarEvent.onConnect(device));
+    bloc.add(SidebarEvent.onConnectRequested(device));
     await pumpEventQueue();
 
     expect(emitted, hasLength(1));
-    expect(emitted.single.message, contains('boom'));
+    expect(
+      emitted.single.message,
+      'Das Gerät ließ sich nicht verbinden.',
+      reason: 'a developer-facing error must not reach the user verbatim',
+    );
 
     await subscription.cancel();
   });

@@ -2,6 +2,7 @@ import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -62,11 +63,14 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
     try {
       await interactor.getOrThrow((hostPort: hostPort, pairingCode: code));
       if (mounted) Navigator.of(context).pop(true);
-    } on Exception catch (e) {
+    } on Object catch (error) {
       if (!mounted) return;
       setState(() {
         _isSubmitting = false;
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
+        _errorMessage = userMessageFor(
+          error,
+          'Die Kopplung ist fehlgeschlagen.',
+        );
       });
     }
   }

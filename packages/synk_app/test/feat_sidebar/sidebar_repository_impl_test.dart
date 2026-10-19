@@ -160,7 +160,10 @@ class _FakeConnections implements DeviceConnectionsRepository {
   }
 
   @override
-  Future<void> toggleConnection(PluggedDevice device) async {}
+  Future<void> connect(PluggedDevice device) async {}
+
+  @override
+  Future<void> disconnect(PluggedDevice device) async {}
 
   @override
   bool isConnected(DeviceId id) => false;

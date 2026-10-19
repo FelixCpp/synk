@@ -26,7 +26,10 @@ class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
   }
 
   @override
-  Future<void> toggleConnection(PluggedDevice device) async {}
+  Future<void> connect(PluggedDevice device) async {}
+
+  @override
+  Future<void> disconnect(PluggedDevice device) async {}
 
   @override
   Future<void> dispose() async {}

@@ -4,7 +4,8 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
+import 'package:synk/feat_device_connections/domain/usecases/disconnect_device_interactor.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,7 +19,7 @@ class DeviceCanvasBloc(
   final DeviceConnectionsRepository connectionsRepository,
   final NotificationService notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
-  final toggleConnection = ToggleConnectionInteractor(connectionsRepository);
+  final disconnectDevice = DisconnectDeviceInteractor(connectionsRepository);
 
   this : super(DeviceCanvasState.initial()) {
     on<_OnSetup>(_onSetup);
@@ -40,11 +41,16 @@ class DeviceCanvasBloc(
     _OnCloseDevice event,
     Emitter<DeviceCanvasState> emit,
   ) {
-    return toggleConnection
+    return disconnectDevice
         .logger()
         .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to close device: $e'),
+          (error) => notifications.notify(
+            .new(
+              message: userMessageFor(
+                error,
+                'Die Spiegelung ließ sich nicht beenden.',
+              ),
+            ),
           ),
         )
         .run(event.device.device);

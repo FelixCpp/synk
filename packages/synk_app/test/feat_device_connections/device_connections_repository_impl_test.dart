@@ -65,24 +65,45 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl.toggleConnection', () {
+  group('DeviceConnectionsRepositoryImpl.connect', () {
     test('connects a device through the platform that reported it', () async {
       final pixel = await plugInto(android, 'android-1');
       final iphone = await plugInto(ios, 'ios-1');
 
-      await repository.toggleConnection(iphone);
+      await repository.connect(iphone);
 
       expect(ios.connectCalls, [iphone.id]);
       expect(android.connectCalls, isEmpty);
 
-      await repository.toggleConnection(pixel);
+      await repository.connect(pixel);
 
       expect(android.connectCalls, [pixel.id]);
     });
 
+    test('refuses to connect a device that is already connected', () async {
+      // The directed call is the point: a second „Verbinden“ must not quietly
+      // tear the session down the way the old toggle did.
+      final device = await plugInto(android, 'android-1');
+      await repository.connect(device);
+
+      await expectLater(
+        () => repository.connect(device),
+        throwsA(isA<DeviceAlreadyConnectingException>()),
+      );
+
+      expect(repository.isConnected(device.id), isTrue);
+    });
+
+    test('lets a disconnect of an idle device pass', () async {
+      final device = await plugInto(android, 'android-1');
+
+      await expectLater(repository.disconnect(device), completes);
+      expect(repository.isConnected(device.id), isFalse);
+    });
+
     test('refuses a device no platform has reported', () async {
       await expectLater(
-        () => repository.toggleConnection(_buildDevice('unknown-1')),
+        () => repository.connect(_buildDevice('unknown-1')),
         throwsA(isA<DeviceNotPluggedException>()),
       );
     });
@@ -92,11 +113,11 @@ void main() {
       android.onConnect = (_) => connecting.future;
       final device = await plugInto(android, 'android-1');
 
-      final attempt = repository.toggleConnection(device);
+      final attempt = repository.connect(device);
       await pumpEventQueue();
 
       await expectLater(
-        () => repository.toggleConnection(device),
+        () => repository.connect(device),
         throwsA(isA<DeviceAlreadyConnectingException>()),
       );
 
@@ -109,10 +130,10 @@ void main() {
       android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
 
-      await repository.toggleConnection(device);
+      await repository.connect(device);
       expect(repository.isConnected(device.id), isTrue);
 
-      await repository.toggleConnection(device);
+      await repository.disconnect(device);
 
       expect(session.isDisposed, isTrue);
       expect(repository.isConnected(device.id), isFalse);
@@ -129,7 +150,7 @@ void main() {
       android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
 
-      await repository.toggleConnection(device);
+      await repository.connect(device);
       final connection =
           (await repository.observeDeviceConnections().first).single;
 
@@ -147,7 +168,7 @@ void main() {
       );
       android.onConnect = (_) async => session;
       final device = await plugInto(android, 'android-1');
-      await repository.toggleConnection(device);
+      await repository.connect(device);
 
       session.screenSizes.add(
         const DeviceScreenSize(width: 2400, height: 1080),
@@ -184,7 +205,7 @@ void main() {
         android.onConnect = (_) => connecting.future;
         final device = await plugInto(android, 'android-states-2');
 
-        final attempt = repository.toggleConnection(device);
+        final attempt = repository.connect(device);
         await pumpEventQueue();
 
         expect(
@@ -203,7 +224,7 @@ void main() {
       final device = await plugInto(android, 'android-states-5');
 
       await expectLater(
-        () => repository.toggleConnection(device),
+        () => repository.connect(device),
         throwsA(isA<CameraAccessDeniedException>()),
       );
 
@@ -222,7 +243,7 @@ void main() {
       final device = await plugInto(android, 'android-states-setup');
 
       await expectLater(
-        () => repository.toggleConnection(device),
+        () => repository.connect(device),
         throwsA(isA<DeviceSetupException>()),
       );
 
@@ -239,7 +260,7 @@ void main() {
       final device = await plugInto(android, 'android-states-4');
 
       await expectLater(
-        () => repository.toggleConnection(device),
+        () => repository.connect(device),
         throwsA(isA<_MarkerException>()),
       );
 
@@ -257,7 +278,7 @@ void main() {
       final device = await plugInto(android, 'android-states-5');
 
       await expectLater(
-        () => repository.toggleConnection(device),
+        () => repository.connect(device),
         throwsA(isA<_MarkerException>()),
       );
       expect(repository.connectionStates.value, contains(device.id));
@@ -275,7 +296,7 @@ void main() {
         android.onConnect = (_) => connecting.future;
         final device = await plugInto(android, 'android-states-6');
 
-        final attempt = repository.toggleConnection(device);
+        final attempt = repository.connect(device);
         await pumpEventQueue();
 
         android.plug([]);
@@ -303,7 +324,7 @@ void main() {
       );
       final pixel = await plugInto(android, 'android-1');
 
-      await repository.toggleConnection(pixel);
+      await repository.connect(pixel);
 
       final options = android.connectOptions.single;
       expect(options.maxFps, 30);
@@ -315,11 +336,11 @@ void main() {
       final pixel = await plugInto(android, 'android-1');
 
       settings.update((it) => it.copyWith(frameRate: MirrorFrameRate.fps30));
-      await repository.toggleConnection(pixel);
-      await repository.toggleConnection(pixel);
+      await repository.connect(pixel);
+      await repository.disconnect(pixel);
 
       settings.update((it) => it.copyWith(frameRate: MirrorFrameRate.fps60));
-      await repository.toggleConnection(pixel);
+      await repository.connect(pixel);
 
       expect(
         android.connectOptions.map((options) => options.maxFps),
@@ -335,7 +356,7 @@ void main() {
       settings.update((it) => it.copyWith(muteOnConnect: muteOnConnect));
       final pixel = await plugInto(android, 'android-1');
 
-      await repository.toggleConnection(pixel);
+      await repository.connect(pixel);
 
       return audio;
     }
@@ -360,7 +381,7 @@ void main() {
       final device = _buildDevice('android-1');
       platform.plug([device]);
       await pumpEventQueue();
-      await repository.toggleConnection(device);
+      await repository.connect(device);
 
       await repository.dispose();
 

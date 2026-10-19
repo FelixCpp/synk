@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
 import 'package:synk/feat_tool_validation/domain/usecases/validate_tools_interactor.dart';
@@ -47,8 +48,15 @@ class ToolValidationBloc(
 
           emit(.toolsAvailable(warnings: issues));
         })
-        .intercept((e) {
-          notifications.notify(.new(message: 'Failed to validate tools: $e'));
+        .intercept((error) {
+          notifications.notify(
+            .new(
+              message: userMessageFor(
+                error,
+                'Die benötigten Werkzeuge ließen sich nicht prüfen.',
+              ),
+            ),
+          );
           emit(const .toolsUnavailable(issues: []));
         })
         .run(unit);

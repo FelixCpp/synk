@@ -2,10 +2,12 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
-import 'package:synk/feat_device_connections/domain/usecases/toggle_connection_interactor.dart';
+import 'package:synk/feat_device_connections/domain/usecases/connect_device_interactor.dart';
+import 'package:synk/feat_device_connections/domain/usecases/disconnect_device_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_sidebar/domain/usecases/open_camera_privacy_settings_interactor.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
@@ -24,7 +26,8 @@ class SidebarBloc(
   final NotificationService notifications,
   final SystemFileOpener fileOpener,
 ) extends Bloc<SidebarEvent, SidebarState> {
-  final toggleConnection = ToggleConnectionInteractor(
+  final connectDevice = ConnectDeviceInteractor(deviceConnectionsRepository);
+  final disconnectDevice = DisconnectDeviceInteractor(
     deviceConnectionsRepository,
   );
   final openCameraPrivacySettings = OpenCameraPrivacySettingsInteractor(
@@ -41,14 +44,17 @@ class SidebarBloc(
       );
     }, transformer: droppable());
 
-    on<_OnConnect>((event, emit) {
-      return toggleConnection
+    on<_OnConnectRequested>((event, emit) {
+      return connectDevice
           .logger()
-          .intercept((e) {
-            notifications.notify(
-              AppNotification(message: 'Verbindung fehlgeschlagen: $e'),
-            );
-          })
+          .intercept(_notify('Das Gerät ließ sich nicht verbinden.'))
+          .run(event.device);
+    }, transformer: droppable());
+
+    on<_OnDisconnectRequested>((event, emit) {
+      return disconnectDevice
+          .logger()
+          .intercept(_notify('Das Gerät ließ sich nicht trennen.'))
           .run(event.device);
     }, transformer: droppable());
 
@@ -66,5 +72,11 @@ class SidebarBloc(
     }, transformer: droppable());
 
     add(const SidebarEvent.onSetup());
+  }
+
+  void Function(Object) _notify(String fallback) {
+    return (error) => notifications.notify(
+      AppNotification(message: userMessageFor(error, fallback)),
+    );
   }
 }

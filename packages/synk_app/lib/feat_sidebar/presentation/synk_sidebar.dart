@@ -262,8 +262,7 @@ class const _Trailing({
   }
 }
 
-/// The single place the sidebar turns an action into an event, so connecting,
-/// disconnecting and retrying stay one decision.
+/// The single place the sidebar turns an action into an event.
 void _dispatch(
   BuildContext context,
   _EntryAction action,
@@ -272,8 +271,10 @@ void _dispatch(
   final bloc = BlocProvider.of<SidebarBloc>(context);
 
   switch (action) {
-    case .connect || .disconnect || .retry:
-      bloc.add(SidebarEvent.onConnect(device));
+    case .connect || .retry:
+      bloc.add(SidebarEvent.onConnectRequested(device));
+    case .disconnect:
+      bloc.add(SidebarEvent.onDisconnectRequested(device));
     case .cameraSettings:
       bloc.add(const SidebarEvent.onOpenCameraPrivacySettings());
   }

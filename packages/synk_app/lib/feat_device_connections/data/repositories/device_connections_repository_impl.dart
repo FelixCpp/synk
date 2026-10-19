@@ -48,10 +48,7 @@ class DeviceConnectionsRepositoryImpl({
     }
   }
 
-  @override
-  Future<void> toggleConnection(PluggedDevice device) async {
-    await (isConnected(device.id) ? _disconnect(device) : _connect(device));
-  }
+
 
   @override
   bool isConnected(DeviceId id) {
@@ -131,7 +128,8 @@ class DeviceConnectionsRepositoryImpl({
     );
   }
 
-  Future<void> _connect(PluggedDevice device) async {
+  @override
+  Future<void> connect(PluggedDevice device) async {
     final platform = _platformsByDeviceId[device.id];
     if (platform == null) {
       throw DeviceNotPluggedException(deviceId: device.id);
@@ -174,7 +172,8 @@ class DeviceConnectionsRepositoryImpl({
     }
   }
 
-  Future<void> _disconnect(PluggedDevice device) async {
+  @override
+  Future<void> disconnect(PluggedDevice device) async {
     await _sessionsById.remove(device.id)?.dispose();
     _setState(device.id, const DeviceConnectionState.disconnected());
   }

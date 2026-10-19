@@ -1,10 +1,14 @@
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/user_facing_exception.dart';
 
 abstract interface class DeviceConnectionsRepository {
   Future<void> dispose();
-  Future<void> toggleConnection(PluggedDevice device);
+  /// Both are directed on purpose: a button labelled „Trennen“ must never
+  /// connect because the state moved between the render and the click.
+  Future<void> connect(PluggedDevice device);
+  Future<void> disconnect(PluggedDevice device);
   bool isConnected(DeviceId id);
   Stream<List<PluggedDevice>> observePluggedDevices();
   Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates();
@@ -13,14 +17,16 @@ abstract interface class DeviceConnectionsRepository {
 
 class const DeviceAlreadyConnectingException({
   required final DeviceId deviceId,
-}) implements Exception {
+}) implements UserFacingException {
   @override
-  String toString() => 'Device $deviceId is already connected or connecting.';
+  String toString() => 'Das Gerät wird schon verbunden.';
 }
 
 class const DeviceNotPluggedException({
   required final DeviceId deviceId,
-}) implements Exception {
+}) implements UserFacingException {
   @override
-  String toString() => 'Device $deviceId is not plugged in.';
+  String toString() =>
+      'Das Gerät ist nicht mehr angeschlossen. Kabel prüfen und erneut '
+      'versuchen.';
 }

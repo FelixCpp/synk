@@ -5,6 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
 import 'package:synk/feat_screen_capture_preview/domain/usecases/open_in_system_viewer_interactor.dart';
@@ -55,8 +56,13 @@ class ScreenCapturePreviewBloc(
     return openInSystemViewer
         .logger()
         .intercept(
-          (e) => notifications.notify(
-            .new(message: 'Failed to open the capture: $e'),
+          (error) => notifications.notify(
+            .new(
+              message: userMessageFor(
+                error,
+                'Die Aufnahme ließ sich nicht öffnen.',
+              ),
+            ),
           ),
         )
         .run(event.capture);

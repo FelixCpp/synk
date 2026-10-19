@@ -6,6 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
@@ -62,7 +63,8 @@ class SettingsBloc({
         .run(unit);
   }
 
-  void Function(Object) _notify(String message) {
-    return (error) => notifications.notify(.new(message: '$message: $error'));
+  void Function(Object) _notify(String fallback) {
+    return (error) =>
+        notifications.notify(.new(message: userMessageFor(error, fallback)));
   }
 }

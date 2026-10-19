@@ -21,6 +21,7 @@ import 'package:synk/feat_device_frame/domain/usecases/start_recording_interacto
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -88,7 +89,7 @@ class DeviceFrameBloc({
     return simulateKeyEvent
         .logger(level: .trace)
         .after(_reportClipboardSyncFailure)
-        .intercept(_notify('Failed to simulate key stroke'))
+        .intercept(_notify('Die Tastatureingabe kam nicht am Gerät an.'))
         .run(keyEvent);
   }
 
@@ -116,7 +117,7 @@ class DeviceFrameBloc({
   ) {
     return simulatePointerEvent
         .logger(level: .trace)
-        .intercept(_notify('Failed to simulate pointer event'))
+        .intercept(_notify('Die Mauseingabe kam nicht am Gerät an.'))
         .run(
           .new(
             type: event.type,
@@ -132,7 +133,7 @@ class DeviceFrameBloc({
   ) {
     return simulatePinchEvent
         .logger(level: .trace)
-        .intercept(_notify('Failed to simulate pinch gesture'))
+        .intercept(_notify('Die Zoom-Geste kam nicht am Gerät an.'))
         .run((
           type: event.type,
           centerX: event.centerX,
@@ -147,7 +148,7 @@ class DeviceFrameBloc({
   ) {
     return captureScreenshot
         .logger()
-        .intercept(_notify('Failed to capture screenshot'))
+        .intercept(_notify('Der Screenshot ist fehlgeschlagen.'))
         .run(unit);
   }
 
@@ -160,14 +161,14 @@ class DeviceFrameBloc({
 
       return stopRecording
           .logger()
-          .intercept(_notify('Failed to stop recording'))
+          .intercept(_notify('Die Aufnahme ließ sich nicht beenden.'))
           .run(unit);
     }
 
     return startRecording
         .logger()
         .after((_) => emit(state.copyWith(isRecording: true)))
-        .intercept(_notify('Failed to start recording'))
+        .intercept(_notify('Die Aufnahme ließ sich nicht starten.'))
         .run(unit);
   }
 
@@ -180,7 +181,7 @@ class DeviceFrameBloc({
 
     return setAudioMuted
         .logger()
-        .intercept(_notify('Failed to toggle audio'))
+        .intercept(_notify('Der Ton ließ sich nicht umschalten.'))
         .run(muted);
   }
 
@@ -198,13 +199,13 @@ class DeviceFrameBloc({
 
     await setAudioVolume
         .logger(level: .trace)
-        .intercept(_notify('Failed to change the volume'))
+        .intercept(_notify('Die Lautstärke ließ sich nicht ändern.'))
         .run(event.volume);
 
     if (unmute) {
       await setAudioMuted
           .logger()
-          .intercept(_notify('Failed to toggle audio'))
+          .intercept(_notify('Der Ton ließ sich nicht umschalten.'))
           .run(false);
     }
   }
@@ -219,7 +220,7 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after((outcomes) => outcomes.forEach(_reportTransfer))
-        .intercept(_notify('Failed to handle dropped files'))
+        .intercept(_notify('Die abgelegten Dateien ließen sich nicht übertragen.'))
         .run(event.filepaths);
   }
 
@@ -233,7 +234,7 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after(_reportTransfer)
-        .intercept(_notify('Failed to install APK'))
+        .intercept(_notify('Die App ließ sich nicht installieren.'))
         .run(unit);
   }
 
@@ -247,7 +248,7 @@ class DeviceFrameBloc({
           (isBusy) => emit(state.copyWith(isTransferringFiles: isBusy)),
         )
         .after(_reportTransfer)
-        .intercept(_notify('Failed to share file'))
+        .intercept(_notify('Die Datei ließ sich nicht übertragen.'))
         .run(unit);
   }
 
@@ -273,7 +274,7 @@ class DeviceFrameBloc({
   ) {
     return navigate
         .logger()
-        .intercept(_notify('Failed to navigate'))
+        .intercept(_notify('Die Navigation kam nicht am Gerät an.'))
         .run(event.navigation);
   }
 
@@ -283,12 +284,13 @@ class DeviceFrameBloc({
   ) {
     return pressPowerButton
         .logger()
-        .intercept(_notify('Failed to press the power button'))
+        .intercept(_notify('Der Standby-Knopf kam nicht am Gerät an.'))
         .run(unit);
   }
 
-  void Function(Object) _notify(String message) {
-    return (error) => notifications.notify(.new(message: '$message: $error'));
+  void Function(Object) _notify(String fallback) {
+    return (error) =>
+        notifications.notify(.new(message: userMessageFor(error, fallback)));
   }
 }
 

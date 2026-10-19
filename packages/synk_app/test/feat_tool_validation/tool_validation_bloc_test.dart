@@ -89,6 +89,10 @@ void main() {
     await pumpEventQueue();
 
     expect(bloc.state.issues, isEmpty);
-    expect(shown.single.message, contains('boom'));
+    expect(
+      shown.single.message,
+      'Die benötigten Werkzeuge ließen sich nicht prüfen.',
+      reason: 'the FileSystemException belongs in the log, not in a dialog',
+    );
   });
 }

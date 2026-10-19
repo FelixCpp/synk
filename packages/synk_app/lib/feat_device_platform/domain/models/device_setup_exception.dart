@@ -1,3 +1,5 @@
+import 'package:synk/user_facing_exception.dart';
+
 enum DeviceSetupProblem {
   notPaired,
   developerModeDisabled,
@@ -5,7 +7,7 @@ enum DeviceSetupProblem {
 }
 
 class const DeviceSetupException({required final DeviceSetupProblem problem})
-    implements Exception {
+    implements UserFacingException {
   @override
   String toString() => switch (problem) {
     .notPaired =>
