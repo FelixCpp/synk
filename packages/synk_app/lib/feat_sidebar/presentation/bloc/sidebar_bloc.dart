@@ -11,7 +11,7 @@ import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_sidebar/domain/usecases/open_camera_privacy_settings_interactor.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
-import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:use_in_case/use_in_case.dart';
@@ -21,7 +21,7 @@ part 'sidebar_state.dart';
 part 'sidebar_event.dart';
 
 class SidebarBloc(
-  final SidebarRepository sidebarRepository,
+  final SidebarDevices sidebarDevices,
   final DeviceConnectionsRepository deviceConnectionsRepository,
   final NotificationService notifications,
   final SystemFileOpener fileOpener,
@@ -37,7 +37,7 @@ class SidebarBloc(
   this : super(SidebarState.initial()) {
     on<_OnSetup>((event, emit) {
       return emit.forEach(
-        sidebarRepository.observeDevices(),
+        sidebarDevices.observe(),
         onData: (devices) {
           return state.copyWith(devices: devices);
         },

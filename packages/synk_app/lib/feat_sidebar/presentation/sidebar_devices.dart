@@ -5,10 +5,10 @@ import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:rxdart/rxdart.dart';
 
-class const SidebarRepository(
+class const SidebarDevices(
   final DeviceConnectionsRepository _connectionsRepository,
 ) {
-  Stream<List<SidebarDevice>> observeDevices() {
+  Stream<List<SidebarDevice>> observe() {
     return Rx.combineLatest2(
       _connectionsRepository.observePluggedDevices(),
       _connectionsRepository.observeConnectionStates(),

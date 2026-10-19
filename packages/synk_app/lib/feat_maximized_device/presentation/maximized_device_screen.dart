@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_metrics.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository.dart';
+import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
 import 'package:synk/feat_maximized_device/presentation/bloc/maximized_device_bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,9 +19,7 @@ class const MaximizedDeviceScreen({
     return BlocProvider(
       create: (context) => MaximizedDeviceBloc(
         device: device,
-        repository: MaximizedDeviceRepository(
-          connectionsRepository: RepositoryProvider.of(context),
-        ),
+        watch: context.read<MaximizedDeviceWatch>(),
       ),
       child: BlocConsumer<MaximizedDeviceBloc, MaximizedDeviceState>(
         listenWhen: (previous, current) => !previous.isGone && current.isGone,

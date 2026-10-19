@@ -9,7 +9,7 @@ import 'package:synk/feat_device_platform_android/discovery/android_device.dart'
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
-import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,11 +18,11 @@ import 'package:synk/feat_screen_capture_preview/application/system_file_opener.
 
 import '../support/fake_process_manager.dart';
 
-class FakeSidebarRepository implements SidebarRepository {
+class FakeSidebarDevices implements SidebarDevices {
   final _controller = StreamController<List<SidebarDevice>>.broadcast();
 
   @override
-  Stream<List<SidebarDevice>> observeDevices() => _controller.stream;
+  Stream<List<SidebarDevice>> observe() => _controller.stream;
 
   void emit(List<SidebarDevice> devices) => _controller.add(devices);
 
@@ -82,14 +82,14 @@ IosDevice buildIosDevice(String serial) {
 }
 
 void main() {
-  late FakeSidebarRepository sidebarRepository;
+  late FakeSidebarDevices sidebarRepository;
   late FakeDeviceConnectionsRepository connectionsRepository;
   late NotificationService notifications;
   late FakeProcessManager processManager;
   late SidebarBloc bloc;
 
   setUp(() {
-    sidebarRepository = FakeSidebarRepository();
+    sidebarRepository = FakeSidebarDevices();
     connectionsRepository = FakeDeviceConnectionsRepository();
     notifications = NotificationService();
     processManager = FakeProcessManager();

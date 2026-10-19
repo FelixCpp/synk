@@ -12,6 +12,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:platform/testing.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
+import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
 
 import '../support/fake_process_manager.dart';
 
@@ -122,10 +124,15 @@ Future<ScreenCaptureEventChannel> _pumpCorner(WidgetTester tester) async {
           dispose: (service) => service.dispose(),
         ),
         RepositoryProvider<ScreenCaptureEventChannel>.value(value: channel),
-        RepositoryProvider<SystemFileOpener>.value(
-          value: SystemFileOpener(
-            processManager: FakeProcessManager(),
-            platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
+        RepositoryProvider<ScreenCapturePreviewRepository>.value(
+          value: ScreenCapturePreviewRepositoryImpl(
+            channel,
+            SystemFileOpener(
+              processManager: FakeProcessManager(),
+              platform: TestNativePlatform(
+                operatingSystem: NativePlatform.macOS,
+              ),
+            ),
           ),
         ),
       ],

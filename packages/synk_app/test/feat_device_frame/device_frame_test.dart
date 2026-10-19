@@ -3,8 +3,9 @@ import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_clipboard/application/host_clipboard.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository_factory.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
@@ -13,11 +14,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:clock/clock.dart';
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
-import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
 import '../support/fake_device_session.dart';
 import '../support/fake_host_clipboard.dart';
@@ -256,17 +255,17 @@ Future<SynkUiColors> _pumpFrame(
           create: (_) => ScreenCaptureEventChannel(),
           dispose: (channel) => channel.dispose(),
         ),
-        RepositoryProvider<SettingsRepository>(
-          create: (_) => FakeSettingsRepository(),
+        RepositoryProvider<DeviceFrameRepositoryFactory>(
+          create: (context) => DeviceFrameRepositoryFactoryImpl(
+            settingsRepository: FakeSettingsRepository(),
+            screenCaptureEventChannel: context
+                .read<ScreenCaptureEventChannel>(),
+            hostClipboard: FakeHostClipboard(),
+            filePicker: const SystemFilePicker(),
+            fileSystem: MemoryFileSystem(),
+            clock: const Clock(),
+          ),
         ),
-        RepositoryProvider<HostClipboard>(
-          create: (_) => FakeHostClipboard(),
-        ),
-        RepositoryProvider<FilePicker>.value(
-          value: const SystemFilePicker(),
-        ),
-        RepositoryProvider<FileSystem>(create: (_) => MemoryFileSystem()),
-        RepositoryProvider<Clock>.value(value: const Clock()),
       ],
       child: WidgetsApp(
         color: const SynkUiColors.dark().accent,

@@ -3,7 +3,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection.dar
 import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
@@ -11,13 +11,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rxdart/rxdart.dart';
 
 void main() {
-  group('SidebarRepository', () {
+  group('SidebarDevices', () {
     late _FakeConnections connections;
-    late SidebarRepository repository;
+    late SidebarDevices repository;
 
     setUp(() {
       connections = _FakeConnections();
-      repository = SidebarRepository(connections);
+      repository = SidebarDevices(connections);
     });
 
     tearDown(() async {
@@ -25,7 +25,7 @@ void main() {
     });
 
     Future<SidebarDeviceState> stateOf(PluggedDevice device) async {
-      final devices = await repository.observeDevices().first;
+      final devices = await repository.observe().first;
       return devices.singleWhere((entry) => entry.device == device).state;
     }
 
@@ -107,7 +107,7 @@ void main() {
         iosDevice.id: const DeviceConnectionState.connecting(),
       });
 
-      final devices = await repository.observeDevices().first;
+      final devices = await repository.observe().first;
 
       expect(devices, [
         SidebarDevice(

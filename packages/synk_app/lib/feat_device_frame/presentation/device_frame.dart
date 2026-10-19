@@ -1,5 +1,6 @@
 import 'package:synk/app_shortcuts.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository_factory.dart';
+import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
@@ -256,18 +257,10 @@ class const _DeviceFrameBlocProvider({
   Widget build(BuildContext context) {
     return BlocProvider<DeviceFrameBloc>(
       create: (context) => DeviceFrameBloc(
-        repository: DeviceFrameRepositoryImpl(
-          deviceId: connection.device.id,
-          modelName: connection.device.modelName,
-          session: connection.session,
-          settingsRepository: RepositoryProvider.of(context),
-          screenCaptureEventChannel: RepositoryProvider.of(context),
-          hostClipboard: RepositoryProvider.of(context),
-          filePicker: RepositoryProvider.of(context),
-          fileSystem: RepositoryProvider.of(context),
-          clock: RepositoryProvider.of(context),
-        ),
-        notifications: RepositoryProvider.of(context),
+        repository: context
+            .read<DeviceFrameRepositoryFactory>()
+            .forConnection(connection),
+        notifications: context.read<NotificationService>(),
       ),
       child: BlocBuilder<DeviceFrameBloc, DeviceFrameState>(
         builder: builder,

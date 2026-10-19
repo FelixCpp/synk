@@ -8,6 +8,7 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -89,6 +90,10 @@ Future<void> _pumpSidebar(
           ),
           RepositoryProvider<DeviceConnectionsRepository>(
             create: (context) => FakeDeviceConnectionsRepository(devices),
+          ),
+          RepositoryProvider<SidebarDevices>(
+            create: (context) =>
+                SidebarDevices(context.read<DeviceConnectionsRepository>()),
           ),
         ],
         child: WidgetsApp(

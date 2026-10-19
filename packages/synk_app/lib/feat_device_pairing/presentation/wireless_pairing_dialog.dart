@@ -1,7 +1,7 @@
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:synk_ui/synk_ui.dart';
-import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
+import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
 import 'package:flutter/widgets.dart';
@@ -57,7 +57,7 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
     });
 
     final interactor = ConnectWirelesslyInteractor(
-      DevicePairingRepositoryImpl(RepositoryProvider.of(context)),
+      context.read<DevicePairingRepository>(),
     ).logger();
 
     try {

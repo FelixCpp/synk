@@ -30,7 +30,17 @@ import 'package:synk/feat_settings/data/repositories/settings_repository_impl.da
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
+import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/repositories/device_frame_repository_factory.dart';
+import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
+import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
+import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
+import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
+import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
+import 'package:synk/feat_tool_validation/data/repositories/tool_validation_repository_impl.dart';
 import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
+import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/presentation/widgets/tool_issue_message.dart';
@@ -139,12 +149,37 @@ Future<void> main() async {
         RepositoryProvider<AppVersionRepository>.value(
           value: appVersionRepository,
         ),
+        RepositoryProvider<ToolValidationRepository>.value(
+          value: ToolValidationRepositoryImpl(
+            adbPath: adbPaths.active,
+            fileSystem: fileSystem,
+            processManager: processManager,
+            platform: platform,
+          ),
+        ),
+        RepositoryProvider<ScreenCapturePreviewRepository>(
+          create: (context) => ScreenCapturePreviewRepositoryImpl(
+            context.read<ScreenCaptureEventChannel>(),
+            fileOpener,
+          ),
+        ),
+        RepositoryProvider<DeviceFrameRepositoryFactory>(
+          create: (context) => DeviceFrameRepositoryFactoryImpl(
+            settingsRepository: settingsRepository,
+            screenCaptureEventChannel: context
+                .read<ScreenCaptureEventChannel>(),
+            hostClipboard: context.read<HostClipboard>(),
+            filePicker: context.read<FilePicker>(),
+            fileSystem: fileSystem,
+            clock: context.read<Clock>(),
+          ),
+        ),
       ],
       child: BlocProvider(
         create: (context) => AppVersionBloc(
           currentAppVersion,
-          RepositoryProvider.of(context),
-          RepositoryProvider.of(context),
+          context.read<AppVersionRepository>(),
+          context.read<NotificationService>(),
         ),
         lazy: false,
         child: _Root(defaults: defaults),
@@ -205,11 +240,9 @@ class const _Root({required final Settings defaults}) extends StatelessWidget {
                 );
               },
               home: AppNotificationListener(
-                notifications: RepositoryProvider.of<NotificationService>(
-                  context,
-                ),
+                notifications: context.read<NotificationService>(),
                 child: ToolValidationGate(
-                  adbPath: RepositoryProvider.of<AdbPaths>(context).active,
+                  adbPath: context.read<AdbPaths>().active,
                   builder: (context, warnings) {
                     return _ToolProviders(
                       availability: ToolAvailability.fromIssues(warnings),
@@ -237,22 +270,35 @@ class const _ToolProviders({
         RepositoryProvider.value(value: availability),
         RepositoryProvider(
           create: (context) => AdbApi(
-            adbPath: RepositoryProvider.of<AdbPaths>(context).active,
-            processManager: RepositoryProvider.of(context),
+            adbPath: context.read<AdbPaths>().active,
+            processManager: context.read<ProcessManager>(),
           ),
         ),
         RepositoryProvider(
-          create: (context) => DevicectlApi(
-            processManager: RepositoryProvider.of(context),
-          ),
+          create: (context) =>
+              DevicectlApi(processManager: context.read<ProcessManager>()),
         ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) => DeviceConnectionsRepositoryImpl(
             platforms: _availablePlatforms(context, availability),
-            settingsRepository: RepositoryProvider.of(context),
+            settingsRepository: context.read<SettingsRepository>(),
           ),
           lazy: false,
           dispose: (repository) => repository.dispose(),
+        ),
+        RepositoryProvider<DevicePairingRepository>(
+          create: (context) =>
+              DevicePairingRepositoryImpl(context.read<AdbApi>()),
+        ),
+        RepositoryProvider<SidebarDevices>(
+          create: (context) =>
+              SidebarDevices(context.read<DeviceConnectionsRepository>()),
+        ),
+        RepositoryProvider<MaximizedDeviceWatch>(
+          create: (context) => MaximizedDeviceWatch(
+            connectionsRepository: context
+                .read<DeviceConnectionsRepository>(),
+          ),
         ),
       ],
       child: child,
@@ -265,17 +311,17 @@ class const _ToolProviders({
   ) {
     final platforms = <DevicePlatform>[
       AndroidDevicePlatform(
-        RepositoryProvider.of(context),
-        bundledFiles: RepositoryProvider.of(context),
-        clock: RepositoryProvider.of(context),
+        context.read<AdbApi>(),
+        bundledFiles: context.read<BundledFiles>(),
+        clock: context.read<Clock>(),
       ),
       IosDevicePlatform(
         discoveryChannel: IosDeviceDiscoveryChannel(),
         channel: IosMirrorChannel(),
         mediaStreamChannel: IosMediaStreamChannel(),
         hidChannel: IosHidChannel(),
-        devicectl: RepositoryProvider.of(context),
-        fileSystem: RepositoryProvider.of(context),
+        devicectl: context.read<DevicectlApi>(),
+        fileSystem: context.read<FileSystem>(),
       ),
     ];
 

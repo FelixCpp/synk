@@ -4,20 +4,20 @@ import 'package:synk/feat_device_connections/domain/repositories/device_connecti
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
-import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository.dart';
+import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../support/fake_device_session.dart';
 
 void main() {
-  group('MaximizedDeviceRepository.observeDevice', () {
+  group('MaximizedDeviceWatch.observeDevice', () {
     late _FakeConnections connections;
-    late MaximizedDeviceRepository repository;
+    late MaximizedDeviceWatch repository;
 
     setUp(() {
       connections = _FakeConnections();
-      repository = MaximizedDeviceRepository(
+      repository = MaximizedDeviceWatch(
         connectionsRepository: connections,
       );
     });
@@ -30,7 +30,7 @@ void main() {
       final iphone = _connection('ios-1');
       connections.emit([_connection('ios-2'), iphone]);
 
-      expect(await repository.observeDevice(iphone.device.id).first, iphone);
+      expect(await repository.observe(iphone.device.id).first, iphone);
     });
 
     test('reports the device as gone once it is disconnected', () async {
@@ -40,7 +40,7 @@ void main() {
 
       final seen = <DeviceConnection?>[];
       final subscription = repository
-          .observeDevice(iphone.device.id)
+          .observe(iphone.device.id)
           .listen(seen.add);
       addTearDown(subscription.cancel);
       await pumpEventQueue();
@@ -57,7 +57,7 @@ void main() {
 
       final seen = <DeviceConnection?>[];
       final subscription = repository
-          .observeDevice(iphone.device.id)
+          .observe(iphone.device.id)
           .listen(seen.add);
       addTearDown(subscription.cancel);
       await pumpEventQueue();

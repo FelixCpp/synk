@@ -1,8 +1,11 @@
 import 'package:synk/design/theme/device_status_colors.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
+import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_device_pairing/presentation/wireless_pairing_dialog.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_sidebar/data/repositories/sidebar_repository.dart';
+import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
@@ -16,10 +19,10 @@ class const SynkSidebar({super.key}) extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<SidebarBloc>(
       create: (context) => SidebarBloc(
-        SidebarRepository(RepositoryProvider.of(context)),
-        RepositoryProvider.of(context),
-        RepositoryProvider.of(context),
-        RepositoryProvider.of(context),
+        context.read<SidebarDevices>(),
+        context.read<DeviceConnectionsRepository>(),
+        context.read<NotificationService>(),
+        context.read<SystemFileOpener>(),
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
         builder: (context, state) {
