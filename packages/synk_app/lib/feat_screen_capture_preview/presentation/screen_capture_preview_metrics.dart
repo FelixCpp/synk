@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
+import 'package:synk/design/constant_area.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 
 /// Measurements of the capture pile in the canvas corner.
@@ -16,8 +15,7 @@ class ScreenCapturePreviewMetrics {
       referenceWidth * (referenceWidth / referenceAspectRatio);
 
   static Size sizeFor(double aspectRatio) {
-    final width = math.sqrt(area * aspectRatio);
-    return Size(width, width / aspectRatio);
+    return sizeForConstantArea(area, aspectRatio);
   }
 
   /// How far each card below the top one peeks out of the pile.

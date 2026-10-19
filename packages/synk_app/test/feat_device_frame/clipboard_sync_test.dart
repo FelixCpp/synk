@@ -2,18 +2,12 @@ import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:synk/feat_device_frame/domain/models/clipboard_sync_failure.dart';
-import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:clock/clock.dart';
-import 'package:file/memory.dart';
-import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
-import '../support/fake_device_session.dart';
-import '../support/fake_host_clipboard.dart';
-import '../support/fake_settings_repository.dart';
+import '../support/device_frame_harness.dart';
 
 const _deviceId = DeviceId('00008120-0009555001C2601E');
 
@@ -37,10 +31,9 @@ DeviceKeyEvent _shortcut(
 }
 
 void main() {
+  late DeviceFrameHarness harness;
   late _FakeClipboard clipboard;
   late _RecordingInteraction interaction;
-  late FakeSettingsRepository settings;
-  late FakeHostClipboard host;
   late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
@@ -48,22 +41,13 @@ void main() {
 
     clipboard = _FakeClipboard();
     interaction = _RecordingInteraction();
-    settings = FakeSettingsRepository();
-    host = FakeHostClipboard();
-    repository = DeviceFrameRepositoryImpl(
+    harness = DeviceFrameHarness(
+      clipboard: clipboard,
+      interaction: interaction,
       deviceId: _deviceId,
-      modelName: 'Test Device',
-      session: FakeDeviceSession(
-        clipboard: clipboard,
-        interaction: interaction,
-      ),
-      settingsRepository: settings,
-      screenCaptureEventChannel: ScreenCaptureEventChannel(),
-      hostClipboard: host,
-      filePicker: const SystemFilePicker(),
-      fileSystem: MemoryFileSystem(),
-      clock: const Clock(),
     );
+    addTearDown(harness.dispose);
+    repository = harness.repository;
   });
 
   group('clipboard shortcuts', () {
@@ -75,11 +59,11 @@ void main() {
       );
 
       expect(clipboard.reads, 1);
-      expect(host.text, 'from the device');
+      expect(harness.host.text, 'from the device');
     });
 
     test('paste pushes the host clipboard onto the device', () async {
-      host.text = 'from the host';
+      harness.host.text = 'from the host';
 
       await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyV),
@@ -99,20 +83,20 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(host.text, isNull);
+      expect(harness.host.text, isNull);
     });
 
     test(
       'leaves the host clipboard alone when the device has no text',
       () async {
-        host.text = 'keep me';
+        harness.host.text = 'keep me';
         clipboard.content = '';
 
         await repository.simulateKeyEvent(
           _shortcut(LogicalKeyboardKey.keyC),
         );
 
-        expect(host.text, 'keep me');
+        expect(harness.host.text, 'keep me');
       },
     );
 
@@ -131,7 +115,7 @@ void main() {
 
     test('reports a device clipboard it cannot reach', () async {
       clipboard.isReachable = false;
-      host.text = 'keep me';
+      harness.host.text = 'keep me';
 
       final copy = await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyC),
@@ -142,12 +126,12 @@ void main() {
 
       expect(copy, ClipboardSyncFailure.deviceUnreachable);
       expect(paste, ClipboardSyncFailure.deviceUnreachable);
-      expect(host.text, 'keep me');
+      expect(harness.host.text, 'keep me');
     });
 
     test('reports a missing devicectl as an unavailable tool', () async {
       clipboard.failure = const DevicectlCommandException(message: 'no xcode');
-      host.text = 'text';
+      harness.host.text = 'text';
 
       final failure = await repository.simulateKeyEvent(
         _shortcut(LogicalKeyboardKey.keyV),
@@ -157,7 +141,7 @@ void main() {
     });
 
     test('passes ⌘C to the device untouched when sync is off', () async {
-      settings.update((it) => it.copyWith(syncClipboard: false));
+      harness.settings.update((it) => it.copyWith(syncClipboard: false));
       clipboard.content = 'from the device';
 
       await repository.simulateKeyEvent(
@@ -165,13 +149,13 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(host.text, isNull);
+      expect(harness.host.text, isNull);
       expect(interaction.keyEvents, hasLength(1));
     });
 
     test('passes ⌘V to the device untouched when sync is off', () async {
-      settings.update((it) => it.copyWith(syncClipboard: false));
-      host.text = 'from the host';
+      harness.settings.update((it) => it.copyWith(syncClipboard: false));
+      harness.host.text = 'from the host';
       clipboard.content = 'keep me';
 
       await repository.simulateKeyEvent(
@@ -198,7 +182,7 @@ void main() {
       );
 
       expect(clipboard.reads, 0);
-      expect(host.text, isNull);
+      expect(harness.host.text, isNull);
     });
   });
 }

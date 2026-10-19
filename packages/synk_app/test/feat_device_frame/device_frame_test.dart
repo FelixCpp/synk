@@ -26,35 +26,22 @@ import '../support/fake_settings_repository.dart';
 
 void main() {
   group('DeviceFrame', () {
-    testWidgets('mirrors a 9:20 device without distorting it', (tester) async {
-      final mirror = await _layOutMirror(
-        tester,
-        const DeviceScreenSize(width: 1080, height: 2400),
-      );
+    testWidgets('mirrors a device without distorting it', (tester) async {
+      const shapes = [
+        DeviceScreenSize(width: 1080, height: 2400), // 9:20 phone
+        DeviceScreenSize(width: 1080, height: 2340), // 9:19.5 phone
+        DeviceScreenSize(width: 2560, height: 1600), // landscape tablet
+      ];
 
-      expect(mirror.width / mirror.height, closeTo(1080 / 2400, 0.001));
-    });
+      for (final shape in shapes) {
+        final mirror = await _layOutMirror(tester, shape);
 
-    testWidgets('mirrors a 9:19.5 device without distorting it', (
-      tester,
-    ) async {
-      final mirror = await _layOutMirror(
-        tester,
-        const DeviceScreenSize(width: 1080, height: 2340),
-      );
-
-      expect(mirror.width / mirror.height, closeTo(1080 / 2340, 0.001));
-    });
-
-    testWidgets('mirrors a landscape tablet without distorting it', (
-      tester,
-    ) async {
-      final mirror = await _layOutMirror(
-        tester,
-        const DeviceScreenSize(width: 2560, height: 1600),
-      );
-
-      expect(mirror.width / mirror.height, closeTo(2560 / 1600, 0.001));
+        expect(
+          mirror.width / mirror.height,
+          closeTo(shape.width / shape.height, 0.001),
+          reason: '$shape came out stretched',
+        );
+      }
     });
 
     testWidgets('never exceeds the cell it was given', (tester) async {

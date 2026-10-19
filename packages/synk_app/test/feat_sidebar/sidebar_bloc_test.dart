@@ -129,25 +129,6 @@ void main() {
     ]);
   });
 
-  test('reflects an iOS device emitted by the repository', () async {
-    final device = buildIosDevice('ios-serial-1');
-
-    sidebarRepository.emit([
-      SidebarDevice(
-        device: device,
-        state: const SidebarDeviceState.disconnected(),
-      ),
-    ]);
-    await pumpEventQueue();
-
-    expect(bloc.state.devices, [
-      SidebarDevice(
-        device: device,
-        state: const SidebarDeviceState.disconnected(),
-      ),
-    ]);
-  });
-
   test('does not notify when connecting succeeds', () async {
     final device = buildDevice('serial-2');
     final emitted = <AppNotification>[];

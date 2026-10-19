@@ -1,55 +1,28 @@
 import 'dart:typed_data';
 
-import 'package:clock/clock.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 
-import '../support/fake_device_session.dart';
-import '../support/fake_host_clipboard.dart';
-import '../support/fake_settings_repository.dart';
+import '../support/device_frame_harness.dart';
 
 final _poster = Uint8List.fromList([1, 2, 3]);
 final _takenAt = DateTime(2026, 10, 15, 9, 41, 7);
 
 void main() {
-  late MemoryFileSystem fileSystem;
+  late DeviceFrameHarness harness;
   late _FakeScreenCapture screenCapture;
-  late FakeSettingsRepository settings;
-  late ScreenCaptureEventChannel channel;
-  late List<ScreenCaptureEvent> announced;
   late DeviceFrameRepositoryImpl repository;
 
   setUp(() {
-    fileSystem = MemoryFileSystem();
     screenCapture = _FakeScreenCapture();
-    channel = ScreenCaptureEventChannel();
-    announced = [];
-    channel.observeEvents().listen(announced.add);
-
-    settings = FakeSettingsRepository(
-      screenCaptureSavePath: '/captures',
+    harness = DeviceFrameHarness(
+      screenCapture: screenCapture,
+      takenAt: _takenAt,
     );
-    repository = DeviceFrameRepositoryImpl(
-      deviceId: const DeviceId('serial-1'),
-      modelName: 'Test Device',
-      session: FakeDeviceSession(screenCapture: screenCapture),
-      settingsRepository: settings,
-      screenCaptureEventChannel: channel,
-      hostClipboard: FakeHostClipboard(),
-      filePicker: const SystemFilePicker(),
-      fileSystem: fileSystem,
-      clock: Clock.fixed(_takenAt),
-    );
-  });
-
-  tearDown(() async {
-    await channel.dispose();
+    addTearDown(harness.dispose);
+    repository = harness.repository;
   });
 
   group('DeviceFrameRepository recording previews', () {
@@ -58,14 +31,14 @@ void main() {
       await repository.stopRecording();
       await pumpEventQueue();
 
-      expect(announced, hasLength(1));
-      expect(announced.single.filepath, screenCapture.startedPath);
+      expect(harness.announced, hasLength(1));
+      expect(harness.announced.single.filepath, screenCapture.startedPath);
       expect(
-        announced.single.filepath,
+        harness.announced.single.filepath,
         '/captures/Recording Test Device 2026-10-15 at 09.41.07.mp4',
       );
 
-      announced.single.map(
+      harness.announced.single.map(
         png: (_) => fail('a recording must not pose as a screenshot'),
         video: (video) {
           expect(video.posterBytes, _poster);
@@ -81,7 +54,7 @@ void main() {
       await repository.stopRecording();
       await pumpEventQueue();
 
-      announced.single.map(
+      harness.announced.single.map(
         png: (_) => fail('a recording must not pose as a screenshot'),
         video: (video) => expect(video.posterBytes, isNull),
       );
@@ -94,11 +67,11 @@ void main() {
       await expectLater(repository.stopRecording(), throwsA(isA<Exception>()));
       await pumpEventQueue();
 
-      expect(announced, isEmpty);
+      expect(harness.announced, isEmpty);
     });
 
     test('asks for sound when the preference says so', () async {
-      settings.update((it) => it.copyWith(recordAudio: true));
+      harness.settings.update((it) => it.copyWith(recordAudio: true));
 
       await repository.startRecording();
 
@@ -106,7 +79,7 @@ void main() {
     });
 
     test('asks for a silent recording when it does not', () async {
-      settings.update((it) => it.copyWith(recordAudio: false));
+      harness.settings.update((it) => it.copyWith(recordAudio: false));
 
       await repository.startRecording();
 
@@ -119,14 +92,14 @@ void main() {
       await repository.stopRecording();
       await pumpEventQueue();
 
-      expect(announced, hasLength(1));
+      expect(harness.announced, hasLength(1));
     });
 
     test('stays quiet for a stop without a start', () async {
       await repository.stopRecording();
       await pumpEventQueue();
 
-      expect(announced, isEmpty);
+      expect(harness.announced, isEmpty);
     });
   });
 }

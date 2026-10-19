@@ -1,16 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:clock/clock.dart';
-import 'package:file/memory.dart';
-import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
-import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
+import '../support/device_frame_harness.dart';
 import '../support/fake_device_session.dart';
-import '../support/fake_host_clipboard.dart';
-import '../support/fake_settings_repository.dart';
 
 void main() {
   group('DeviceFrameBloc audio', () {
@@ -102,16 +94,9 @@ void main() {
 
     test('says so when the device refuses a mute', () async {
       final audio = FakeAudio()..isAudioMuted = false;
-      final notifications = NotificationService();
-      addTearDown(notifications.dispose);
-      final shown = <String>[];
-      final subscription = notifications
-          .observeNotifications()
-          .listen((notification) => shown.add(notification.message));
-      addTearDown(subscription.cancel);
-
-      final bloc = _blocFor(audio, notifications: notifications);
-      addTearDown(bloc.close);
+      final harness = DeviceFrameHarness(audio: audio);
+      addTearDown(harness.dispose);
+      final bloc = harness.bloc;
       await pumpEventQueue();
 
       audio.failWith = Exception('no audio route');
@@ -120,7 +105,7 @@ void main() {
 
       // Rolling the state back must not cost the user the message: the
       // rollback intercept has to pass consume: false to let this through.
-      expect(shown, ['Der Ton ließ sich nicht umschalten.']);
+      expect(harness.shown, ['Der Ton ließ sich nicht umschalten.']);
     });
 
     test('reports the volume a session already has', () async {
@@ -174,22 +159,9 @@ void main() {
   });
 }
 
-DeviceFrameBloc _blocFor(FakeAudio audio, {NotificationService? notifications}) {
-  final service = notifications ?? NotificationService();
-  if (notifications == null) addTearDown(service.dispose);
+DeviceFrameBloc _blocFor(FakeAudio audio, {DeviceFrameHarness? harness}) {
+  final it = harness ?? DeviceFrameHarness(audio: audio);
+  addTearDown(it.dispose);
 
-  return DeviceFrameBloc(
-    repository: DeviceFrameRepositoryImpl(
-      deviceId: const DeviceId('serial-1'),
-      modelName: 'Test Device',
-      session: FakeDeviceSession(audio: audio),
-      settingsRepository: FakeSettingsRepository(),
-      screenCaptureEventChannel: ScreenCaptureEventChannel(),
-      hostClipboard: FakeHostClipboard(),
-      filePicker: const SystemFilePicker(),
-      fileSystem: MemoryFileSystem(),
-      clock: const Clock(),
-    ),
-    notifications: service,
-  );
+  return it.bloc;
 }

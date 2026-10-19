@@ -1,54 +1,28 @@
-import 'package:flutter/widgets.dart';
-import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
-import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 
-double _mirrorArea(Size tile) {
-  return tile.width * (tile.height - DeviceFrameMetrics.chromeHeight);
-}
-
+// The constant-area rule itself is covered by constant_area_test; what is
+// specific here is the chrome a tile carries on top of its mirror.
 void main() {
   group('DeviceFrameMetrics.sizeFor', () {
-    test('keeps the reference device on the established tile size', () {
-      const portrait = DeviceScreenSize(width: 1080, height: 2400);
-
-      final tile = DeviceFrameMetrics.sizeFor(portrait.aspectRatio);
+    test('puts the reference device on the established tile size', () {
+      final tile = DeviceFrameMetrics.sizeFor(
+        DeviceFrameMetrics.referenceAspectRatio,
+      );
 
       expect(tile.width, closeTo(DeviceFrameMetrics.referenceWidth, 0.01));
       expect(tile.height, closeTo(DeviceFrameMetrics.height, 0.01));
     });
 
-    test('turns the tile sideways when the device is', () {
-      const portrait = DeviceScreenSize(width: 1080, height: 2400);
-      const landscape = DeviceScreenSize(width: 2400, height: 1080);
+    test('adds the chrome on top of a constant mirror area', () {
+      for (final aspectRatio in [9 / 20, 20 / 9, 2560 / 1600]) {
+        final tile = DeviceFrameMetrics.sizeFor(aspectRatio);
+        final mirrorHeight = tile.height - DeviceFrameMetrics.chromeHeight;
 
-      final portraitTile = DeviceFrameMetrics.sizeFor(portrait.aspectRatio);
-      final landscapeTile = DeviceFrameMetrics.sizeFor(landscape.aspectRatio);
-
-      expect(landscapeTile.width, greaterThan(landscapeTile.height));
-      expect(
-        landscapeTile.width,
-        closeTo(portraitTile.height - DeviceFrameMetrics.chromeHeight, 0.01),
-      );
-      expect(
-        landscapeTile.height - DeviceFrameMetrics.chromeHeight,
-        closeTo(portraitTile.width, 0.01),
-      );
-    });
-
-    test('spends the same screen area whatever the orientation', () {
-      const sizes = [
-        DeviceScreenSize(width: 1080, height: 2400),
-        DeviceScreenSize(width: 2400, height: 1080),
-        DeviceScreenSize(width: 2560, height: 1600),
-        DeviceScreenSize(width: 1600, height: 2560),
-      ];
-
-      for (final size in sizes) {
         expect(
-          _mirrorArea(DeviceFrameMetrics.sizeFor(size.aspectRatio)),
+          tile.width * mirrorHeight,
           closeTo(DeviceFrameMetrics.mirrorArea, 1.0),
-          reason: '$size does not get its fair share of canvas',
+          reason: 'the chrome must not eat into the mirror at $aspectRatio',
         );
       }
     });

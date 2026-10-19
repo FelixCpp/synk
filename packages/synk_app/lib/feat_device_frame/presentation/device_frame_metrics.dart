@@ -1,6 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:flutter/widgets.dart';
+import 'package:synk/design/constant_area.dart';
 import 'package:synk_ui/synk_ui.dart';
 
 /// Measurements of the chrome Synk draws around a mirrored screen.
@@ -33,9 +32,11 @@ class DeviceFrameMetrics {
   static const double mirrorArea =
       referenceWidth * (referenceWidth / referenceAspectRatio);
 
+  /// The tile for a device of [aspectRatio]: a constant mirror area, plus the
+  /// chrome above and below it.
   static Size sizeFor(double aspectRatio) {
-    final mirrorWidth = math.sqrt(mirrorArea * aspectRatio);
-    return Size(mirrorWidth, mirrorWidth / aspectRatio + chromeHeight);
+    final mirror = sizeForConstantArea(mirrorArea, aspectRatio);
+    return Size(mirror.width, mirror.height + chromeHeight);
   }
 
   /// Badges drawn on top of the mirrored picture.
