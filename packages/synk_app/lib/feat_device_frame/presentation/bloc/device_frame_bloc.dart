@@ -8,8 +8,6 @@ import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/application/notified_interactor.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:use_in_case/use_in_case.dart';
@@ -54,15 +52,10 @@ class DeviceFrameBloc({
     _OnKeyEvent event,
     Emitter<DeviceFrameState> emit,
   ) {
-    final keyEvent = event.keyEvent.toDeviceKeyEvent();
-    if (keyEvent == null) {
-      return null;
-    }
-
     return device.simulateKeyEvent
         .logger(level: .trace)
         .runReporting(
-          keyEvent,
+          event.keyEvent,
           to: notifications,
           whenItFails: 'Die Tastatureingabe kam nicht am Gerät an.',
         );
@@ -276,50 +269,4 @@ class DeviceFrameBloc({
       whenItFails: 'Der Standby-Knopf kam nicht am Gerät an.',
     );
   }
-}
-
-extension on KeyEvent {
-  DeviceKeyEvent? toDeviceKeyEvent() {
-    final DeviceKeyEventType? type = switch (this) {
-      KeyDownEvent() => .down,
-      KeyRepeatEvent() => .repeat,
-      KeyUpEvent() => .up,
-      _ => null,
-    };
-
-    if (type == null) {
-      return null;
-    }
-
-    return .new(
-      key: logicalKey,
-      physicalKey: physicalKey,
-      type: type,
-      modifiers: _pressedModifiers(HardwareKeyboard.instance),
-      character: character,
-    );
-  }
-}
-
-Set<DeviceKeyModifier> _pressedModifiers(HardwareKeyboard keyboard) {
-  return {
-    for (final key in keyboard.logicalKeysPressed)
-      ?switch (key) {
-        LogicalKeyboardKey.shiftLeft => DeviceKeyModifier.shiftLeft,
-        LogicalKeyboardKey.shiftRight => DeviceKeyModifier.shiftRight,
-        LogicalKeyboardKey.controlLeft => DeviceKeyModifier.controlLeft,
-        LogicalKeyboardKey.controlRight => DeviceKeyModifier.controlRight,
-        LogicalKeyboardKey.altLeft => DeviceKeyModifier.altLeft,
-        LogicalKeyboardKey.altRight => DeviceKeyModifier.altRight,
-        LogicalKeyboardKey.metaLeft => DeviceKeyModifier.metaLeft,
-        LogicalKeyboardKey.metaRight => DeviceKeyModifier.metaRight,
-        _ => null,
-      },
-    for (final lockMode in keyboard.lockModesEnabled)
-      switch (lockMode) {
-        .capsLock => DeviceKeyModifier.capsLock,
-        .numLock => DeviceKeyModifier.numLock,
-        .scrollLock => DeviceKeyModifier.scrollLock,
-      },
-  };
 }

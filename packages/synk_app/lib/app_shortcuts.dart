@@ -9,16 +9,11 @@ abstract final class AppShortcuts {
 
   static const _all = [openSettings];
 
+  /// Whether [event] is one of Synk's own shortcuts, which a mirrored device
+  /// must not swallow.
   static bool owns(KeyEvent event) {
-    final keyboard = HardwareKeyboard.instance;
-
     return _all.any(
-      (shortcut) =>
-          event.logicalKey == shortcut.trigger &&
-          keyboard.isMetaPressed == shortcut.meta &&
-          keyboard.isControlPressed == shortcut.control &&
-          keyboard.isAltPressed == shortcut.alt &&
-          keyboard.isShiftPressed == shortcut.shift,
+      (shortcut) => shortcut.accepts(event, HardwareKeyboard.instance),
     );
   }
 }

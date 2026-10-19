@@ -18,7 +18,8 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
     double centerY,
     double spread,
   ) = _OnPinchEvent;
-  const factory DeviceFrameEvent.onKeyEvent(KeyEvent keyEvent) = _OnKeyEvent;
+  const factory DeviceFrameEvent.onKeyEvent(DeviceKeyEvent keyEvent) =
+      _OnKeyEvent;
   const factory DeviceFrameEvent.onFilesDropped(List<String> filepaths) =
       _OnFilesDropped;
 

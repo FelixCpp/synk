@@ -1,10 +1,10 @@
+import 'dart:async';
+
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
-import 'package:synk/feat_notifications/presentation/bloc/notification_bloc.dart';
 import 'package:synk/feat_notifications/presentation/widgets/notification_toast.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class const AppNotificationListener({
   super.key,
@@ -20,34 +20,37 @@ class _AppNotificationListenerState extends State<AppNotificationListener> {
   final _toasts = <({int id, AppNotification notification})>[];
   var _nextToastId = 0;
   OverlayEntry? _toastEntry;
+  StreamSubscription<AppNotification>? _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _subscription = widget.notifications.observeNotifications().listen(_show);
+  }
 
   @override
   void dispose() {
+    unawaited(_subscription?.cancel());
     _toastEntry?.remove();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider<NotificationBloc>(
-      create: (context) => NotificationBloc(widget.notifications),
-      child: BlocListener<NotificationBloc, NotificationState>(
-        listener: (context, state) {
-          final notification = state.notification;
-          if (notification == null) return;
+  void _show(AppNotification notification) {
+    if (!mounted) {
+      return;
+    }
 
-          switch (notification.severity) {
-            case NotificationSeverity.critical:
-              _showDialog(context, notification);
-            case NotificationSeverity.error:
-            case NotificationSeverity.success:
-              _showToast(context, notification);
-          }
-        },
-        child: widget.child,
-      ),
-    );
+    switch (notification.severity) {
+      case NotificationSeverity.critical:
+        _showDialog(context, notification);
+      case NotificationSeverity.error:
+      case NotificationSeverity.success:
+        _showToast(context, notification);
+    }
   }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 
   void _showToast(BuildContext context, AppNotification notification) {
     _toasts.add((id: _nextToastId++, notification: notification));

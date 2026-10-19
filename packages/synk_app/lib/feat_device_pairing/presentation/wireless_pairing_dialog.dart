@@ -1,21 +1,17 @@
-import 'package:api_adb/adb/adb_api.dart';
-import 'package:app_logger/app_logger.dart';
-import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
-import 'package:synk/feat_notifications/domain/models/user_message.dart';
-import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
+import 'package:synk/feat_device_pairing/presentation/bloc/device_pairing_bloc.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<bool?> showWirelessPairingDialog(BuildContext context) {
-  // The dialog route lives above the providers of the calling context.
-  final adbApi = RepositoryProvider.of<AdbApi>(context);
+  final repository = context.read<DevicePairingRepository>();
 
   return showSynkUiDialog<bool>(
     context: context,
     barrierDismissible: true,
-    builder: (context) => RepositoryProvider.value(
-      value: adbApi,
+    builder: (context) => BlocProvider(
+      create: (context) => DevicePairingBloc(repository),
       child: const WirelessPairingDialog(),
     ),
   );
@@ -30,9 +26,6 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
   final _hostPortController = TextEditingController();
   final _codeController = TextEditingController();
 
-  bool _isSubmitting = false;
-  String? _errorMessage;
-
   @override
   void dispose() {
     _hostPortController.dispose();
@@ -40,45 +33,44 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
     super.dispose();
   }
 
-  Future<void> _submit() async {
-    final hostPort = _hostPortController.text.trim();
-    final code = _codeController.text.trim();
-
-    if (hostPort.isEmpty || code.isEmpty) {
-      setState(
-        () => _errorMessage = 'Bitte IP-Adresse, Port und Code angeben.',
-      );
-      return;
-    }
-
-    setState(() {
-      _isSubmitting = true;
-      _errorMessage = null;
-    });
-
-    final interactor = ConnectWirelesslyInteractor(
-      context.read<DevicePairingRepository>(),
-    ).logger();
-
-    try {
-      await interactor.getOrThrow((hostPort: hostPort, pairingCode: code));
-      if (mounted) Navigator.of(context).pop(true);
-    } on Object catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isSubmitting = false;
-        _errorMessage = userMessageFor(
-          error,
-          'Die Kopplung ist fehlgeschlagen.',
-        );
-      });
-    }
+  void _submit() {
+    context.read<DevicePairingBloc>().add(
+      DevicePairingEvent.onSubmitted(
+        hostPort: _hostPortController.text,
+        pairingCode: _codeController.text,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<DevicePairingBloc, DevicePairingState>(
+      listenWhen: (previous, current) => current is DevicePairingPaired,
+      listener: (context, state) => Navigator.of(context).pop(true),
+      builder: (context, state) => _Content(
+        state: state,
+        hostPortController: _hostPortController,
+        codeController: _codeController,
+        onSubmit: _submit,
+      ),
+    );
+  }
+}
+
+class const _Content({
+  required final DevicePairingState state,
+  required final TextEditingController hostPortController,
+  required final TextEditingController codeController,
+  required final VoidCallback onSubmit,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     final theme = context.synkUi;
-    final colors = theme.colors;
+    final isPairing = state is DevicePairingPairing;
+    final error = switch (state) {
+      DevicePairingEditing(:final error) => error,
+      _ => null,
+    };
 
     return Center(
       child: ConstrainedBox(
@@ -93,28 +85,30 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
             children: [
               Text('Wireless-Gerät koppeln', style: theme.typography.heading),
               Text(
-                'Auf dem Gerät unter "Kabelloses Debugging" > "Mit Pairing-Code koppeln" öffnen und die angezeigte Adresse sowie den Code hier eintragen.',
+                'Auf dem Gerät unter „Kabelloses Debugging“ › „Mit '
+                'Pairing-Code koppeln“ öffnen und die angezeigte Adresse '
+                'sowie den Code hier eintragen.',
                 style: theme.typography.secondary,
               ),
               _LabeledField(
                 label: 'IP-Adresse & Port',
-                controller: _hostPortController,
+                controller: hostPortController,
                 placeholder: '192.168.1.23:41234',
                 autofocus: true,
-                onSubmitted: (_) => _submit(),
+                onSubmitted: (_) => onSubmit(),
               ),
               _LabeledField(
                 label: 'Pairing-Code',
-                controller: _codeController,
+                controller: codeController,
                 placeholder: '123456',
                 keyboardType: TextInputType.number,
-                onSubmitted: (_) => _submit(),
+                onSubmitted: (_) => onSubmit(),
               ),
-              if (_errorMessage != null)
+              if (error != null)
                 Text(
-                  _errorMessage!,
+                  error,
                   style: theme.typography.secondary.copyWith(
-                    color: colors.error,
+                    color: theme.colors.error,
                   ),
                 ),
               Padding(
@@ -126,13 +120,13 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
                     SynkUiButton(
                       label: 'Abbrechen',
                       variant: SynkUiButtonVariant.secondary,
-                      onPressed: _isSubmitting
+                      onPressed: isPairing
                           ? null
                           : () => Navigator.of(context).pop(),
                     ),
                     SynkUiButton(
-                      label: _isSubmitting ? 'Verbinde…' : 'Koppeln',
-                      onPressed: _isSubmitting ? null : _submit,
+                      label: isPairing ? 'Verbinde…' : 'Koppeln',
+                      onPressed: isPairing ? null : onSubmit,
                     ),
                   ],
                 ),

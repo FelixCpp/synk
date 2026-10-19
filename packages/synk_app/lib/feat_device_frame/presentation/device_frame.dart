@@ -4,6 +4,7 @@ import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
+import 'package:synk/feat_device_frame/presentation/host_keystroke.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_feedback.dart';
@@ -243,7 +244,12 @@ class const _FocusableFrame({
       return .ignored;
     }
 
-    context.read<DeviceFrameBloc>().add(.onKeyEvent(event));
+    final keystroke = event.toDeviceKeyEvent(HardwareKeyboard.instance);
+    if (keystroke == null) {
+      return .ignored;
+    }
+
+    context.read<DeviceFrameBloc>().add(.onKeyEvent(keystroke));
     return .handled;
   }
 }
