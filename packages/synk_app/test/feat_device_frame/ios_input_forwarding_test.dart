@@ -20,7 +20,8 @@ void main() {
   group('what the frame forwards to the device', () {
     test('passes navigation and the power button on to the device', () async {
       final interaction = _RecordingInteraction();
-      final repository = DeviceFrameHarness(interaction: interaction).repository;
+      final repository = DeviceFrameHarness(interaction: interaction)
+          .repository;
 
       await repository.navigate(.back);
       await repository.navigate(.home);
@@ -36,8 +37,6 @@ void main() {
     });
 
     test('drops input for a device that does not take any', () async {
-      // A device with no interaction at all: the calls must simply
-      // go nowhere instead of throwing.
       final repository = DeviceFrameHarness().repository;
 
       await repository.simulatePointerEvent(
@@ -48,7 +47,6 @@ void main() {
     });
   });
 }
-
 
 class _RecordingInteraction implements DeviceInteraction {
   final navigations = <DeviceNavigation>[];

@@ -60,10 +60,7 @@ void main() {
           );
         });
 
-        test('reads a label on an accent-filled control', () {
-          // WCAG 1.4.11: a control has to stand out at 3:1. The stricter
-          // 4.5:1 text bar is checked separately below, where dark
-          // appearance currently falls short.
+        test('stands an accent-filled control out from its label, at 3:1', () {
           expect(
             _contrast(colors.onAccent, colors.accent),
             greaterThanOrEqualTo(3.0),
@@ -77,33 +74,36 @@ void main() {
       });
     }
 
-    // Known gap, kept visible rather than lowered away: the light accent
-    // clears the 4.5:1 text bar at 5.50:1, the dark one only reaches 3.73:1.
-    // Fixing it means darkening the dark accent (#4D7CFE → #3563E8 gives
-    // 5.12:1) — a palette decision, so the test stays skipped until it is
-    // made.
-    test('reads a button label on the accent at full text contrast', () {
-      for (final brightness in Brightness.values) {
-        final colors = SynkUiThemeData.forBrightness(brightness).colors;
-        expect(
-          _contrast(colors.onAccent, colors.accent),
-          greaterThanOrEqualTo(4.5),
-          reason: '${brightness.name}: onAccent on ${_hex(colors.accent)}',
-        );
-      }
-    }, skip: 'Dark accent #4D7CFE reaches 3.73:1; needs a palette decision.');
+    test(
+      'reads a button label on the accent at full text contrast',
+      () {
+        for (final brightness in Brightness.values) {
+          final colors = SynkUiThemeData.forBrightness(brightness).colors;
+          expect(
+            _contrast(colors.onAccent, colors.accent),
+            greaterThanOrEqualTo(4.5),
+            reason: '${brightness.name}: onAccent on ${_hex(colors.accent)}',
+          );
+        }
+      },
+      skip:
+          'Light clears it at 5.50:1, dark reaches only 3.73:1. Darkening the '
+          'dark accent to #3563E8 would give 5.12:1 — a palette decision, so '
+          'this stays skipped until it is made.',
+    );
 
-    test('keeps scrim chrome readable over device imagery', () {
-      // Theme-independent on purpose: it covers the device picture, not an
-      // app surface.
-      for (final below in [SynkUiScrim.below, const Color(0xFFFFFFFF)]) {
-        expect(
-          _contrastOn(SynkUiScrim.label, SynkUiScrim.surface, below),
-          greaterThanOrEqualTo(4.5),
-          reason: 'scrim label over ${_hex(below)}',
-        );
-      }
-    });
+    test(
+      'keeps scrim chrome readable over any device picture, light or dark',
+      () {
+        for (final below in [SynkUiScrim.below, const Color(0xFFFFFFFF)]) {
+          expect(
+            _contrastOn(SynkUiScrim.label, SynkUiScrim.surface, below),
+            greaterThanOrEqualTo(4.5),
+            reason: 'scrim label over ${_hex(below)}',
+          );
+        }
+      },
+    );
   });
 }
 

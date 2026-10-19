@@ -69,7 +69,6 @@ void main() {
     });
 
     test('falls back when a stored value has the wrong type', () async {
-      // An older build could have written something else under this key.
       SharedPreferences.setMockInitialValues({'show_capture_preview': 'yes'});
 
       final settings = await repository.read();

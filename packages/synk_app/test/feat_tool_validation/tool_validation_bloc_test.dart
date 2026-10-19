@@ -74,7 +74,8 @@ void main() {
     expect((await next).warnings, isEmpty);
   });
 
-  test('surfaces a throwing validation instead of loading forever', () async {
+  test('surfaces a throwing validation as a message of its own, not as the '
+      'exception text', () async {
     final notifications = NotificationService();
     final shown = <AppNotification>[];
     final subscription = notifications.observeNotifications().listen(shown.add);
@@ -92,7 +93,6 @@ void main() {
     expect(
       shown.single.message,
       'Die benötigten Werkzeuge ließen sich nicht prüfen.',
-      reason: 'the FileSystemException belongs in the log, not in a dialog',
     );
   });
 }

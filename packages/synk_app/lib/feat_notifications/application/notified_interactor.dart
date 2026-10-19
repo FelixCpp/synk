@@ -5,28 +5,19 @@ import 'package:use_in_case/use_in_case.dart';
 
 extension NotifiedInteractor<Input, Output>
     on ParameterizedResultInteractor<Input, Output> {
-  /// Runs the interactor and tells the user when it fails.
-  ///
-  /// Prefer this over [run]: that one swallows every exception without a
-  /// trace, so a forgotten `intercept` turns a failure into nothing happening
-  /// at all. Here the report is part of running it.
-  ///
-  /// [whenItFails] is shown for a developer-facing error; an exception written
-  /// for the user speaks for itself. Either way the raw error stays in the log.
-  ///
-  /// Chain this last. Anything intercepting ahead of it has to pass
-  /// `consume: false`, or the exception arrives here wrapped in a
-  /// `HandledException` and the user is told nothing at all — `consume`
-  /// defaults to `true`.
+  /// Runs the interactor, tells the user when it fails, and calls [andUndo]
+  /// first so an optimistic state can step back.
   Future<void> runReporting(
     Input input, {
     required NotificationService to,
     required String whenItFails,
+    void Function()? andUndo,
   }) {
-    return intercept(
-      (error) => to.notify(
+    return intercept((error) {
+      andUndo?.call();
+      to.notify(
         AppNotification(message: userMessageFor(error, whenItFails)),
-      ),
-    ).run(input);
+      );
+    }).run(input);
   }
 }

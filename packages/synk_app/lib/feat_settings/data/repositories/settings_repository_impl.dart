@@ -16,9 +16,6 @@ class SettingsRepositoryImpl({
 
   @override
   Stream<Settings> observe() {
-    // Saving touches several keys, and every one of them makes
-    // rx_shared_preferences emit again. Settings has value equality, so the
-    // repeats can simply be dropped.
     return preferences.observeAll().map(_decode).distinct();
   }
 
@@ -34,9 +31,6 @@ class SettingsRepositoryImpl({
   }
 
   /// The counterpart of [_decode]: one entry per stored key.
-  ///
-  /// Going through this map rather than writing all eleven keys every time
-  /// keeps a single toggle from waking every listener eleven times over.
   Map<String, Object?> _encode(Settings settings) {
     return {
       _Key.themeMode: settings.themeMode.name,
@@ -58,16 +52,11 @@ class SettingsRepositoryImpl({
       return preferences.setBool(key, value);
     }
 
-    // The only other thing [_encode] produces is a String, and a null one is
-    // how a custom adb location is taken back.
     return preferences.setString(key, value as String?);
   }
 
   Settings _decode(Map<String, Object?> stored) {
-    T read<T extends Object>(String key, T fallback) {
-      // Not a cast: a key that holds the wrong type — an older build wrote a
-      // bool where a String is read now — must fall back, not throw and take
-      // the whole settings screen with it.
+    T readOrFallBack<T extends Object>(String key, T fallback) {
       final value = stored[key];
       return value is T ? value : fallback;
     }
@@ -88,31 +77,31 @@ class SettingsRepositoryImpl({
         ThemeMode.values,
         defaults.themeMode,
       ),
-      screenCaptureSavePath: read(
+      screenCaptureSavePath: readOrFallBack(
         _Key.screenCaptureSavePath,
         defaults.screenCaptureSavePath,
       ),
-      showCapturePreview: read(
+      showCapturePreview: readOrFallBack(
         _Key.showCapturePreview,
         defaults.showCapturePreview,
       ),
-      copyScreenshotToClipboard: read(
+      copyScreenshotToClipboard: readOrFallBack(
         _Key.copyScreenshotToClipboard,
         defaults.copyScreenshotToClipboard,
       ),
-      recordAudio: read(_Key.recordAudio, defaults.recordAudio),
+      recordAudio: readOrFallBack(_Key.recordAudio, defaults.recordAudio),
       frameRate: readEnum(
         _Key.frameRate,
         MirrorFrameRate.values,
         defaults.frameRate,
       ),
       quality: readEnum(_Key.quality, MirrorQuality.values, defaults.quality),
-      turnDeviceScreenOff: read(
+      turnDeviceScreenOff: readOrFallBack(
         _Key.turnDeviceScreenOff,
         defaults.turnDeviceScreenOff,
       ),
-      muteOnConnect: read(_Key.muteOnConnect, defaults.muteOnConnect),
-      syncClipboard: read(_Key.syncClipboard, defaults.syncClipboard),
+      muteOnConnect: readOrFallBack(_Key.muteOnConnect, defaults.muteOnConnect),
+      syncClipboard: readOrFallBack(_Key.syncClipboard, defaults.syncClipboard),
       customAdbPath: stored[_Key.customAdbPath] as String?,
     );
   }

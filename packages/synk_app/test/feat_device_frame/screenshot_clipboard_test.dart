@@ -24,7 +24,9 @@ void main() {
 
   group('DeviceFrameRepository.captureScreenshot', () {
     test('copies the screenshot when the preference asks for it', () async {
-      harness.settings.update((it) => it.copyWith(copyScreenshotToClipboard: true));
+      harness.settings.update(
+        (it) => it.copyWith(copyScreenshotToClipboard: true),
+      );
 
       await repository.captureScreenshot();
 
@@ -33,7 +35,9 @@ void main() {
     });
 
     test('leaves the clipboard alone when it does not', () async {
-      harness.settings.update((it) => it.copyWith(copyScreenshotToClipboard: false));
+      harness.settings.update(
+        (it) => it.copyWith(copyScreenshotToClipboard: false),
+      );
 
       await repository.captureScreenshot();
 
@@ -41,13 +45,18 @@ void main() {
     });
 
     test('writes the file either way', () async {
-      harness.settings.update((it) => it.copyWith(copyScreenshotToClipboard: true));
+      harness.settings.update(
+        (it) => it.copyWith(copyScreenshotToClipboard: true),
+      );
 
       await repository.captureScreenshot();
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));
-      expect(harness.fileSystem.file(harness.announced.single.filepath).existsSync(), isTrue);
+      expect(
+        harness.fileSystem.file(harness.announced.single.filepath).existsSync(),
+        isTrue,
+      );
     });
 
     test('names the file after the device and when it was taken', () async {
@@ -61,7 +70,9 @@ void main() {
     });
 
     test('survives a clipboard that refuses the image', () async {
-      harness.settings.update((it) => it.copyWith(copyScreenshotToClipboard: true));
+      harness.settings.update(
+        (it) => it.copyWith(copyScreenshotToClipboard: true),
+      );
       harness.host.fails = true;
 
       // The file is already saved by then — a pasteboard problem must not be
@@ -70,7 +81,10 @@ void main() {
       await pumpEventQueue();
 
       expect(harness.announced, hasLength(1));
-      expect(harness.fileSystem.file(harness.announced.single.filepath).existsSync(), isTrue);
+      expect(
+        harness.fileSystem.file(harness.announced.single.filepath).existsSync(),
+        isTrue,
+      );
     });
   });
 }

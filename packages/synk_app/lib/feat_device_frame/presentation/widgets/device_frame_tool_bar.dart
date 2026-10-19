@@ -240,8 +240,6 @@ class const _AudioControls({
         children: [
           SynkUiTooltip(
             message: isAudioMuted ? 'Ton ein' : 'Ton aus',
-            // The menu stays open on purpose, so the sound can be toggled
-            // back and the volume adjusted without reopening it.
             child: SynkUiIconButton(
               icon: icon,
               onPressed: () => context.read<DeviceFrameBloc>().add(
@@ -256,9 +254,9 @@ class const _AudioControls({
                 opacity: isAudioMuted ? 0.5 : 1.0,
                 child: SynkUiSlider(
                   value: audioVolume,
-                  onChanged: (volume) => context
-                      .read<DeviceFrameBloc>()
-                      .add(.onAudioVolumeChanged(volume)),
+                  onChanged: (volume) => context.read<DeviceFrameBloc>().add(
+                    .onAudioVolumeChanged(volume),
+                  ),
                 ),
               ),
             ),

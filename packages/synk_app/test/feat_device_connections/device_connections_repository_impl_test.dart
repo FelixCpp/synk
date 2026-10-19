@@ -80,9 +80,8 @@ void main() {
       expect(android.connectCalls, [pixel.id]);
     });
 
-    test('refuses to connect a device that is already connected', () async {
-      // The directed call is the point: a second „Verbinden“ must not quietly
-      // tear the session down the way the old toggle did.
+    test('refuses to connect a device that is already connected, rather than '
+        'tearing it down', () async {
       final device = await plugInto(android, 'android-1');
       await repository.connect(device);
 

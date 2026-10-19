@@ -255,7 +255,6 @@ void main() {
         expect(calls.single.arguments['usage'], 0x33);
       },
     );
-
   });
 
   group('orientation refresh', () {
@@ -350,5 +349,4 @@ void main() {
       expect(calls, isEmpty);
     });
   });
-
 }

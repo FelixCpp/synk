@@ -92,7 +92,7 @@ void main() {
       expect(bloc.state.audioVolume, 0.8);
     });
 
-    test('says so when the device refuses a mute', () async {
+    test('still says so when it rolled the mute back', () async {
       final audio = FakeAudio()..isAudioMuted = false;
       final harness = DeviceFrameHarness(audio: audio);
       addTearDown(harness.dispose);
@@ -103,8 +103,6 @@ void main() {
       bloc.add(const DeviceFrameEvent.onToggleAudioMute());
       await pumpEventQueue();
 
-      // Rolling the state back must not cost the user the message: the
-      // rollback intercept has to pass consume: false to let this through.
       expect(harness.shown, ['Der Ton ließ sich nicht umschalten.']);
     });
 

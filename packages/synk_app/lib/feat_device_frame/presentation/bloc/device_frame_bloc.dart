@@ -118,8 +118,6 @@ class DeviceFrameBloc({
     _OnPointerEvent event,
     Emitter<DeviceFrameState> emit,
   ) {
-    // No trace log here: pointer moves arrive at pointer frequency, and one
-    // line per move buries everything else instead of saying anything.
     return simulatePointerEvent.runReporting(
       .new(
         type: event.type,
@@ -162,8 +160,6 @@ class DeviceFrameBloc({
     _OnToggleRecording event,
     Emitter<DeviceFrameState> emit,
   ) {
-    // Both directions report after the fact. A stop that failed leaves the
-    // device recording, so the button has to keep saying so.
     if (state.isRecording) {
       return stopRecording
           .logger()
@@ -189,32 +185,22 @@ class DeviceFrameBloc({
     _OnToggleAudioMute event,
     Emitter<DeviceFrameState> emit,
   ) {
-    // A toggle has to feel instant, so the state leads — and steps back if
-    // the device did not follow. `consume: false`, or the report below never
-    // reaches the user.
     final previous = state.isAudioMuted;
     final muted = !previous;
     emit(state.copyWith(isAudioMuted: muted));
 
-    return setAudioMuted
-        .logger()
-        .intercept(
-          (_) => emit(state.copyWith(isAudioMuted: previous)),
-          consume: false,
-        )
-        .runReporting(
-          muted,
-          to: notifications,
-          whenItFails: 'Der Ton ließ sich nicht umschalten.',
-        );
+    return setAudioMuted.logger().runReporting(
+      muted,
+      to: notifications,
+      whenItFails: 'Der Ton ließ sich nicht umschalten.',
+      andUndo: () => emit(state.copyWith(isAudioMuted: previous)),
+    );
   }
 
   Future<void> _onAudioVolumeChanged(
     _OnAudioVolumeChanged event,
     Emitter<DeviceFrameState> emit,
   ) async {
-    // The slider has to track the thumb, so the state leads here too, and
-    // steps back together with the mute flag if the device did not follow.
     final previousVolume = state.audioVolume;
     final previouslyMuted = state.isAudioMuted;
     final unmute = previouslyMuted && event.volume > 0.0;
@@ -226,35 +212,25 @@ class DeviceFrameBloc({
       ),
     );
 
-    // Dragging the slider sends a stream of these, so no trace log per step.
-    await setAudioVolume
-        .intercept(
-          (_) => emit(
-            state.copyWith(
-              audioVolume: previousVolume,
-              isAudioMuted: previouslyMuted,
-            ),
-          ),
-          consume: false,
-        )
-        .runReporting(
-          event.volume,
-          to: notifications,
-          whenItFails: 'Die Lautstärke ließ sich nicht ändern.',
-        );
+    await setAudioVolume.runReporting(
+      event.volume,
+      to: notifications,
+      whenItFails: 'Die Lautstärke ließ sich nicht ändern.',
+      andUndo: () => emit(
+        state.copyWith(
+          audioVolume: previousVolume,
+          isAudioMuted: previouslyMuted,
+        ),
+      ),
+    );
 
     if (unmute) {
-      await setAudioMuted
-          .logger()
-          .intercept(
-            (_) => emit(state.copyWith(isAudioMuted: previouslyMuted)),
-            consume: false,
-          )
-          .runReporting(
-            false,
-            to: notifications,
-            whenItFails: 'Der Ton ließ sich nicht umschalten.',
-          );
+      await setAudioMuted.logger().runReporting(
+        false,
+        to: notifications,
+        whenItFails: 'Der Ton ließ sich nicht umschalten.',
+        andUndo: () => emit(state.copyWith(isAudioMuted: previouslyMuted)),
+      );
     }
   }
 
@@ -346,7 +322,6 @@ class DeviceFrameBloc({
       whenItFails: 'Der Standby-Knopf kam nicht am Gerät an.',
     );
   }
-
 }
 
 extension on KeyEvent {

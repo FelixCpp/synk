@@ -48,8 +48,6 @@ class DeviceConnectionsRepositoryImpl({
     }
   }
 
-
-
   @override
   bool isConnected(DeviceId id) {
     return _sessionsById.containsKey(id);

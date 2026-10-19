@@ -1,8 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 
-// The constant-area rule itself is covered by constant_area_test; what is
-// specific here is the chrome a tile carries on top of its mirror.
 void main() {
   group('DeviceFrameMetrics.sizeFor', () {
     test('puts the reference device on the established tile size', () {

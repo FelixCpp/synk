@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/device_frame_harness.dart';
 
-
 final _usPositionOf = {
   LogicalKeyboardKey.keyA: PhysicalKeyboardKey.keyA,
   LogicalKeyboardKey.keyC: PhysicalKeyboardKey.keyC,
@@ -81,7 +80,6 @@ void main() {
         });
       },
     );
-
   });
 }
 

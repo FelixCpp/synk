@@ -52,5 +52,4 @@ void main() {
       expect(swipe.to.x, greaterThan(swipe.from.x));
     });
   });
-
 }

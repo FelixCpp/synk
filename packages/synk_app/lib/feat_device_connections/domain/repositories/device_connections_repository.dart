@@ -5,8 +5,6 @@ import 'package:synk/user_facing_exception.dart';
 
 abstract interface class DeviceConnectionsRepository {
   Future<void> dispose();
-  /// Both are directed on purpose: a button labelled „Trennen“ must never
-  /// connect because the state moved between the render and the click.
   Future<void> connect(PluggedDevice device);
   Future<void> disconnect(PluggedDevice device);
   bool isConnected(DeviceId id);

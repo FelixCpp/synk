@@ -122,8 +122,6 @@ class _DeviceFrameState extends State<DeviceFrame>
     );
   }
 
-  /// The flash is the view's own doing, so it starts here rather than waiting
-  /// for the capture to come back.
   void _captureScreenshot(BuildContext context) {
     _screenshotFlashController.forward(from: 0);
     context.read<DeviceFrameBloc>().add(const .onCaptureScreenshot());

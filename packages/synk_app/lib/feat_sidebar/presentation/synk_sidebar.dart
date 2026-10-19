@@ -127,9 +127,7 @@ _EntryLook _lookOf(BuildContext context, SidebarDeviceState state) {
     SidebarDeviceFailedToConnect(:final failure) => (
       status: colors.error,
       statusText: _labelOf(failure),
-      // A denied camera is the one failure the user can only clear outside
-      // of Synk, so that entry offers the shortcut there next to the retry.
-      actions: failure == ConnectionFailure.cameraAccessDenied
+      actions: _isClearedOutsideOfSynk(failure)
           ? const [_EntryAction.cameraSettings, _EntryAction.retry]
           : const [_EntryAction.retry],
       isBusy: false,
@@ -143,6 +141,10 @@ _EntryLook _lookOf(BuildContext context, SidebarDeviceState state) {
       isUnauthorized: true,
     ),
   };
+}
+
+bool _isClearedOutsideOfSynk(ConnectionFailure failure) {
+  return failure == ConnectionFailure.cameraAccessDenied;
 }
 
 String _labelOf(ConnectionFailure failure) => switch (failure) {
@@ -198,7 +200,6 @@ class const _TitleRow({
       overflow: .ellipsis,
     );
 
-    // A field of a public name does not promote, so read it into a local.
     final color = tagColor;
     if (color == null) {
       return name;
@@ -369,7 +370,11 @@ class const _EntryFrame({
         padding: const .all(SynkUiSpace.s8),
         child: Row(
           spacing: SynkUiSpace.s8,
-          children: [leading, Expanded(child: title), trailing],
+          children: [
+            leading,
+            Expanded(child: title),
+            trailing,
+          ],
         ),
       ),
     );
