@@ -24,7 +24,7 @@ class const SettingsDevicesPage({super.key}) extends StatelessWidget {
     return BlocBuilder<SettingsBloc, Settings>(
       builder: (context, settings) {
         final colors = context.synkUi.colors;
-        final bloc = context.read<SettingsBloc>();
+        final bloc = BlocProvider.of<SettingsBloc>(context);
 
         return SettingsPage(
           title: 'Geräte',

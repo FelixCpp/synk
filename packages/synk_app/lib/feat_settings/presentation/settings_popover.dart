@@ -38,7 +38,7 @@ class const _Content({
 
     return BlocBuilder<SettingsBloc, Settings>(
       builder: (context, settings) {
-        final bloc = context.read<SettingsBloc>();
+        final bloc = BlocProvider.of<SettingsBloc>(context);
 
         return Column(
           mainAxisSize: MainAxisSize.min,
@@ -226,7 +226,7 @@ class const _SavePath({required final Settings settings})
   }
 
   Future<void> _pickSavePath(BuildContext context, Settings settings) async {
-    final bloc = context.read<SettingsBloc>();
+    final bloc = BlocProvider.of<SettingsBloc>(context);
 
     final directory = await getDirectoryPath(
       initialDirectory: settings.screenCaptureSavePath,

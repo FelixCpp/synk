@@ -65,7 +65,10 @@ void main() {
       screenCapture.stopResult = false;
 
       await device.startRecording.getOrThrow(unit);
-      await expectLater(device.stopRecording.getOrThrow(unit), throwsA(isA<Exception>()));
+      await expectLater(
+        device.stopRecording.getOrThrow(unit),
+        throwsA(isA<Exception>()),
+      );
       await pumpEventQueue();
 
       expect(harness.announced, isEmpty);

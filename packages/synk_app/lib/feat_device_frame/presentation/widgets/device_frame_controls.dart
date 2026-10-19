@@ -68,7 +68,8 @@ class const _NavigationButton({
         size: 38.0,
         iconSize: iconSize,
         onPressed: () =>
-            context.read<DeviceFrameBloc>().add(.onNavigate(navigation)),
+            BlocProvider.of<DeviceFrameBloc>(context)
+                .add(.onNavigate(navigation)),
       ),
     );
   }

@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<bool?> showWirelessPairingDialog(BuildContext context) {
-  final repository = context.read<DevicePairingRepository>();
+  final repository = RepositoryProvider.of<DevicePairingRepository>(context);
 
   return showSynkUiDialog<bool>(
     context: context,
@@ -34,7 +34,7 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
   }
 
   void _submit() {
-    context.read<DevicePairingBloc>().add(
+    BlocProvider.of<DevicePairingBloc>(context).add(
       DevicePairingEvent.onSubmitted(
         hostPort: _hostPortController.text,
         pairingCode: _codeController.text,

@@ -46,20 +46,21 @@ final class DeviceFrameHarness {
       fileTransfer: fileTransfer,
     );
 
-    device = DeviceFrameFactoryImpl(
-      settingsRepository: settings,
-      screenCaptureEventChannel: events,
-      hostClipboard: host,
-      filePicker: filePicker,
-      fileSystem: fileSystem,
-      clock: takenAt == null ? const Clock() : Clock.fixed(takenAt),
-    ).forConnection(
-      DeviceConnection(
-        device: _TestDevice(deviceId, modelName),
-        session: session,
-        screenSize: session.screenSize,
-      ),
-    );
+    device =
+        DeviceFrameFactoryImpl(
+          settingsRepository: settings,
+          screenCaptureEventChannel: events,
+          hostClipboard: host,
+          filePicker: filePicker,
+          fileSystem: fileSystem,
+          clock: takenAt == null ? const Clock() : Clock.fixed(takenAt),
+        ).forConnection(
+          DeviceConnection(
+            device: _TestDevice(deviceId, modelName),
+            session: session,
+            screenSize: session.screenSize,
+          ),
+        );
 
     events.observeEvents().listen(announced.add);
     notifications.observeNotifications().listen(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:synk/design/widgets/reflow_grid.dart';
 import 'package:synk/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
@@ -21,7 +22,7 @@ class const DeviceCanvasContainer({super.key}) extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<DeviceCanvasBloc>(
       create: (context) => DeviceCanvasBloc(
-        RepositoryProvider.of(context),
+        RepositoryProvider.of<DeviceConnectionsRepository>(context),
         RepositoryProvider.of<NotificationService>(context),
       ),
       child: const _MaximizableCanvas(),

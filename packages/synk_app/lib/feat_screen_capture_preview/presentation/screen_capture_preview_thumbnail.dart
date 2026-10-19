@@ -17,8 +17,8 @@ class const ScreenCapturePreviewThumbnail({
   Widget build(BuildContext _) {
     return BlocProvider(
       create: (context) => ScreenCapturePreviewBloc(
-        context.read<ScreenCapturePreviewRepository>(),
-        context.read<NotificationService>(),
+        RepositoryProvider.of<ScreenCapturePreviewRepository>(context),
+        RepositoryProvider.of<NotificationService>(context),
       ),
       child: BlocBuilder<ScreenCapturePreviewBloc, ScreenCapturePreviewState>(
         builder: (context, state) {

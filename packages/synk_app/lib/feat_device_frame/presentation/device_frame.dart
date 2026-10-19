@@ -126,7 +126,7 @@ class _DeviceFrameState extends State<DeviceFrame>
 
   void _captureScreenshot(BuildContext context) {
     _screenshotFlashController.forward(from: 0);
-    context.read<DeviceFrameBloc>().add(const .onCaptureScreenshot());
+    BlocProvider.of<DeviceFrameBloc>(context).add(const .onCaptureScreenshot());
   }
 }
 
@@ -205,7 +205,8 @@ class const _FrameDropTarget({
 
     return DeviceFrameDropDetector(
       onFilesDropped: (filepaths) {
-        context.read<DeviceFrameBloc>().add(.onFilesDropped(filepaths));
+        BlocProvider.of<DeviceFrameBloc>(context)
+            .add(.onFilesDropped(filepaths));
       },
       builder: builder,
     );
@@ -249,7 +250,7 @@ class const _FocusableFrame({
       return .ignored;
     }
 
-    context.read<DeviceFrameBloc>().add(.onKeyEvent(keystroke));
+    BlocProvider.of<DeviceFrameBloc>(context).add(.onKeyEvent(keystroke));
     return .handled;
   }
 }
@@ -263,8 +264,9 @@ class const _DeviceFrameBlocProvider({
   Widget build(BuildContext context) {
     return BlocProvider<DeviceFrameBloc>(
       create: (context) => DeviceFrameBloc(
-        device: context.read<DeviceFrameFactory>().forConnection(connection),
-        notifications: context.read<NotificationService>(),
+        device: RepositoryProvider.of<DeviceFrameFactory>(context)
+            .forConnection(connection),
+        notifications: RepositoryProvider.of<NotificationService>(context),
       ),
       child: BlocBuilder<DeviceFrameBloc, DeviceFrameState>(
         builder: builder,

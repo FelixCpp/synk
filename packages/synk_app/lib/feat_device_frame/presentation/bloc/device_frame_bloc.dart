@@ -20,7 +20,6 @@ class DeviceFrameBloc({
   required final DeviceFrameInteractors device,
   required final NotificationService notifications,
 }) extends Bloc<DeviceFrameEvent, DeviceFrameState> {
-
   this
     : super(
         .initial(

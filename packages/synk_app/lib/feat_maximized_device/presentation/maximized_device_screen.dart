@@ -19,7 +19,7 @@ class const MaximizedDeviceScreen({
     return BlocProvider(
       create: (context) => MaximizedDeviceBloc(
         device: device,
-        watch: context.read<MaximizedDeviceWatch>(),
+        watch: RepositoryProvider.of<MaximizedDeviceWatch>(context),
       ),
       child: BlocConsumer<MaximizedDeviceBloc, MaximizedDeviceState>(
         listenWhen: (previous, current) => !previous.isGone && current.isGone,

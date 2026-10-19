@@ -21,8 +21,8 @@ class const ToolValidationGate({
   Widget build(BuildContext context) {
     return BlocProvider<ToolValidationBloc>(
       create: (context) => ToolValidationBloc(
-        context.read<ToolValidationRepository>(),
-        context.read<NotificationService>(),
+        RepositoryProvider.of<ToolValidationRepository>(context),
+        RepositoryProvider.of<NotificationService>(context),
       ),
       child: _Gate(builder: builder),
     );

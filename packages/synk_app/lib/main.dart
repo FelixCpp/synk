@@ -159,27 +159,27 @@ Future<void> main() async {
         ),
         RepositoryProvider<ScreenCapturePreviewRepository>(
           create: (context) => ScreenCapturePreviewRepositoryImpl(
-            context.read<ScreenCaptureEventChannel>(),
+            RepositoryProvider.of<ScreenCaptureEventChannel>(context),
             fileOpener,
           ),
         ),
         RepositoryProvider<DeviceFrameFactory>(
           create: (context) => DeviceFrameFactoryImpl(
             settingsRepository: settingsRepository,
-            screenCaptureEventChannel: context
-                .read<ScreenCaptureEventChannel>(),
-            hostClipboard: context.read<HostClipboard>(),
-            filePicker: context.read<FilePicker>(),
+            screenCaptureEventChannel:
+                RepositoryProvider.of<ScreenCaptureEventChannel>(context),
+            hostClipboard: RepositoryProvider.of<HostClipboard>(context),
+            filePicker: RepositoryProvider.of<FilePicker>(context),
             fileSystem: fileSystem,
-            clock: context.read<Clock>(),
+            clock: RepositoryProvider.of<Clock>(context),
           ),
         ),
       ],
       child: BlocProvider(
         create: (context) => AppVersionBloc(
           currentAppVersion,
-          context.read<AppVersionRepository>(),
-          context.read<NotificationService>(),
+          RepositoryProvider.of<AppVersionRepository>(context),
+          RepositoryProvider.of<NotificationService>(context),
         ),
         lazy: false,
         child: _Root(defaults: defaults),
@@ -240,9 +240,11 @@ class const _Root({required final Settings defaults}) extends StatelessWidget {
                 );
               },
               home: AppNotificationListener(
-                notifications: context.read<NotificationService>(),
+                notifications: RepositoryProvider.of<NotificationService>(
+                  context,
+                ),
                 child: ToolValidationGate(
-                  adbPath: context.read<AdbPaths>().active,
+                  adbPath: RepositoryProvider.of<AdbPaths>(context).active,
                   builder: (context, warnings) {
                     return _ToolProviders(
                       availability: ToolAvailability.fromIssues(warnings),
@@ -270,34 +272,39 @@ class const _ToolProviders({
         RepositoryProvider.value(value: availability),
         RepositoryProvider(
           create: (context) => AdbApi(
-            adbPath: context.read<AdbPaths>().active,
-            processManager: context.read<ProcessManager>(),
+            adbPath: RepositoryProvider.of<AdbPaths>(context).active,
+            processManager: RepositoryProvider.of<ProcessManager>(context),
           ),
         ),
         RepositoryProvider(
-          create: (context) =>
-              DevicectlApi(processManager: context.read<ProcessManager>()),
+          create: (context) => DevicectlApi(
+            processManager: RepositoryProvider.of<ProcessManager>(context),
+          ),
         ),
         RepositoryProvider<DeviceConnectionsRepository>(
           create: (context) => DeviceConnectionsRepositoryImpl(
             platforms: _availablePlatforms(context, availability),
-            settingsRepository: context.read<SettingsRepository>(),
+            settingsRepository: RepositoryProvider.of<SettingsRepository>(
+              context,
+            ),
           ),
           lazy: false,
           dispose: (repository) => repository.dispose(),
         ),
         RepositoryProvider<DevicePairingRepository>(
-          create: (context) =>
-              DevicePairingRepositoryImpl(context.read<AdbApi>()),
+          create: (context) => DevicePairingRepositoryImpl(
+            RepositoryProvider.of<AdbApi>(context),
+          ),
         ),
         RepositoryProvider<SidebarDevices>(
-          create: (context) =>
-              SidebarDevices(context.read<DeviceConnectionsRepository>()),
+          create: (context) => SidebarDevices(
+            RepositoryProvider.of<DeviceConnectionsRepository>(context),
+          ),
         ),
         RepositoryProvider<MaximizedDeviceWatch>(
           create: (context) => MaximizedDeviceWatch(
-            connectionsRepository: context
-                .read<DeviceConnectionsRepository>(),
+            connectionsRepository:
+                RepositoryProvider.of<DeviceConnectionsRepository>(context),
           ),
         ),
       ],
@@ -311,17 +318,17 @@ class const _ToolProviders({
   ) {
     final platforms = <DevicePlatform>[
       AndroidDevicePlatform(
-        context.read<AdbApi>(),
-        bundledFiles: context.read<BundledFiles>(),
-        clock: context.read<Clock>(),
+        RepositoryProvider.of<AdbApi>(context),
+        bundledFiles: RepositoryProvider.of<BundledFiles>(context),
+        clock: RepositoryProvider.of<Clock>(context),
       ),
       IosDevicePlatform(
         discoveryChannel: IosDeviceDiscoveryChannel(),
         channel: IosMirrorChannel(),
         mediaStreamChannel: IosMediaStreamChannel(),
         hidChannel: IosHidChannel(),
-        devicectl: context.read<DevicectlApi>(),
-        fileSystem: context.read<FileSystem>(),
+        devicectl: RepositoryProvider.of<DevicectlApi>(context),
+        fileSystem: RepositoryProvider.of<FileSystem>(context),
       ),
     ];
 
@@ -354,7 +361,7 @@ class _SynkScreenState extends State<_SynkScreen> {
       return;
     }
 
-    final notifications = context.read<NotificationService>();
+    final notifications = RepositoryProvider.of<NotificationService>(context);
     for (final warning in widget.warnings) {
       notifications.notify(
         AppNotification(

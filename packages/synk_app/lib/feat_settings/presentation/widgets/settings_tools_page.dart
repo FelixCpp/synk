@@ -25,7 +25,7 @@ class const SettingsToolsPage({super.key}) extends StatelessWidget {
         return BlocBuilder<SettingsBloc, Settings>(
           builder: (context, settings) {
             final customAdbPath = settings.customAdbPath;
-            final bloc = context.read<SettingsBloc>();
+            final bloc = BlocProvider.of<SettingsBloc>(context);
 
             return SettingsPage(
               title: 'Tools',
@@ -71,9 +71,11 @@ class const SettingsToolsPage({super.key}) extends StatelessWidget {
                           variant: SynkUiButtonVariant.secondary,
                           onPressed: issues == null
                               ? null
-                              : () => context.read<ToolValidationBloc>().add(
-                                  const .onValidate(),
-                                ),
+                              : () =>
+                                    BlocProvider.of<ToolValidationBloc>(context)
+                                        .add(
+                                          const .onValidate(),
+                                        ),
                         ),
                       ],
                     ),

@@ -115,7 +115,7 @@ class const _Actions({
                 ? CupertinoIcons.stop_fill
                 : CupertinoIcons.video_camera,
             color: isRecording ? context.synkUi.colors.error : null,
-            onPressed: () => context.read<DeviceFrameBloc>().add(
+            onPressed: () => BlocProvider.of<DeviceFrameBloc>(context).add(
               const .onToggleRecording(),
             ),
           ),
@@ -172,7 +172,8 @@ class const _OverflowButton({
               label: 'APK Installieren',
               onPressed: () {
                 controller.close();
-                context.read<DeviceFrameBloc>().add(const .onInstallApk());
+                BlocProvider.of<DeviceFrameBloc>(context)
+                    .add(const .onInstallApk());
               },
             ),
           ),
@@ -183,7 +184,8 @@ class const _OverflowButton({
               label: 'Datei senden',
               onPressed: () {
                 controller.close();
-                context.read<DeviceFrameBloc>().add(const .onShareFile());
+                BlocProvider.of<DeviceFrameBloc>(context)
+                    .add(const .onShareFile());
               },
             ),
           ),
@@ -201,7 +203,7 @@ class const _OverflowButton({
               label: 'Standby',
               onPressed: () {
                 controller.close();
-                context.read<DeviceFrameBloc>().add(
+                BlocProvider.of<DeviceFrameBloc>(context).add(
                   const .onPowerButtonPressed(),
                 );
               },
@@ -242,7 +244,7 @@ class const _AudioControls({
             message: isAudioMuted ? 'Ton ein' : 'Ton aus',
             child: SynkUiIconButton(
               icon: icon,
-              onPressed: () => context.read<DeviceFrameBloc>().add(
+              onPressed: () => BlocProvider.of<DeviceFrameBloc>(context).add(
                 const .onToggleAudioMute(),
               ),
             ),
@@ -254,9 +256,10 @@ class const _AudioControls({
                 opacity: isAudioMuted ? 0.5 : 1.0,
                 child: SynkUiSlider(
                   value: audioVolume,
-                  onChanged: (volume) => context.read<DeviceFrameBloc>().add(
-                    .onAudioVolumeChanged(volume),
-                  ),
+                  onChanged: (volume) =>
+                      BlocProvider.of<DeviceFrameBloc>(context).add(
+                        .onAudioVolumeChanged(volume),
+                      ),
                 ),
               ),
             ),

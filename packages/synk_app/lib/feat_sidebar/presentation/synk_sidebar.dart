@@ -19,10 +19,10 @@ class const SynkSidebar({super.key}) extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider<SidebarBloc>(
       create: (context) => SidebarBloc(
-        context.read<SidebarDevices>(),
-        context.read<DeviceConnectionsRepository>(),
-        context.read<NotificationService>(),
-        context.read<SystemFileOpener>(),
+        RepositoryProvider.of<SidebarDevices>(context),
+        RepositoryProvider.of<DeviceConnectionsRepository>(context),
+        RepositoryProvider.of<NotificationService>(context),
+        RepositoryProvider.of<SystemFileOpener>(context),
       ),
       child: BlocBuilder<SidebarBloc, SidebarState>(
         builder: (context, state) {
@@ -43,7 +43,7 @@ class const _Content({required final SidebarState state})
         crossAxisAlignment: .stretch,
         spacing: SynkUiSpace.s8,
         children: [
-          if (context.read<ToolAvailability>().isAdbAvailable)
+          if (RepositoryProvider.of<ToolAvailability>(context).isAdbAvailable)
             const _ConnectWirelessDeviceButton(),
           const _SectionHeader(title: 'VERBUNDENE GERÄTE'),
           if (state.devices.isEmpty)

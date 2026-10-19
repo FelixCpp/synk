@@ -92,8 +92,9 @@ Future<void> _pumpSidebar(
             create: (context) => FakeDeviceConnectionsRepository(devices),
           ),
           RepositoryProvider<SidebarDevices>(
-            create: (context) =>
-                SidebarDevices(context.read<DeviceConnectionsRepository>()),
+            create: (context) => SidebarDevices(
+              RepositoryProvider.of<DeviceConnectionsRepository>(context),
+            ),
           ),
         ],
         child: WidgetsApp(

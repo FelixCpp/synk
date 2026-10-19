@@ -15,7 +15,7 @@ class const SettingsCapturePage({super.key}) extends StatelessWidget {
       builder: (context, settings) {
         final theme = context.synkUi;
         final colors = theme.colors;
-        final bloc = context.read<SettingsBloc>();
+        final bloc = BlocProvider.of<SettingsBloc>(context);
 
         return SettingsPage(
           title: 'Aufnahmen',

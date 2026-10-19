@@ -37,11 +37,13 @@ void main() {
 
     test('does not depend on Flutter, bar the listed exception', () {
       _expectNoImports(
-        sources.where(_isDomain).where(
-          (source) => !_domainFilesAllowedToUseFlutter.contains(
-            _featureRelative(source),
-          ),
-        ),
+        sources
+            .where(_isDomain)
+            .where(
+              (source) => !_domainFilesAllowedToUseFlutter.contains(
+                _featureRelative(source),
+              ),
+            ),
         matching: RegExp(r'package:(flutter|flutter_bloc)/'),
       );
     });

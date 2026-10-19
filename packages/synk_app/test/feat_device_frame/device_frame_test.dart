@@ -258,8 +258,8 @@ Future<SynkUiColors> _pumpFrame(
         RepositoryProvider<DeviceFrameFactory>(
           create: (context) => DeviceFrameFactoryImpl(
             settingsRepository: FakeSettingsRepository(),
-            screenCaptureEventChannel: context
-                .read<ScreenCaptureEventChannel>(),
+            screenCaptureEventChannel:
+                RepositoryProvider.of<ScreenCaptureEventChannel>(context),
             hostClipboard: FakeHostClipboard(),
             filePicker: const SystemFilePicker(),
             fileSystem: MemoryFileSystem(),
