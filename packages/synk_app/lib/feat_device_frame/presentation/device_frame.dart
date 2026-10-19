@@ -1,5 +1,5 @@
 import 'package:synk/app_shortcuts.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';

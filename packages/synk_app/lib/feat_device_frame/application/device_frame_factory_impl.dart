@@ -1,14 +1,12 @@
 import 'package:clock/clock.dart';
 import 'package:file/file.dart';
-import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
+import 'package:synk/feat_device_frame/application/device_frame_feature_impl.dart';
 import 'package:synk/feat_device_frame/data/screen_capture_store.dart';
-import 'package:synk/feat_device_frame/domain/device_clipboard_sync.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
-import 'package:synk/feat_device_frame/domain/models/running_recording.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
@@ -28,18 +26,13 @@ import 'package:synk/feat_settings/domain/repositories/settings_repository.dart'
 class const DeviceFrameFactoryImpl({
   required final SettingsRepository settingsRepository,
   required final ScreenCaptureEventChannel screenCaptureEventChannel,
-  required final HostClipboard hostClipboard,
+  required final ClipboardFeature clipboard,
   required final FilePicker filePicker,
   required final FileSystem fileSystem,
   required final Clock clock,
 }) implements DeviceFrameFactory {
   @override
   DeviceFrameInteractors forConnection(DeviceConnection connection) {
-    final device = DeviceFrameRepositoryImpl(
-      deviceId: connection.device.id,
-      session: connection.session,
-    );
-
     final captures = ScreenCaptureStore(
       deviceId: connection.device.id,
       modelName: connection.device.modelName,
@@ -49,49 +42,31 @@ class const DeviceFrameFactoryImpl({
       clock: clock,
     );
 
-    final running = RunningRecording();
-    final sendFiles = SendFilesInteractor(device);
+    final feature = DeviceFrameFeatureImpl(
+      deviceId: connection.device.id,
+      session: connection.session,
+      captures: captures,
+      settingsRepository: settingsRepository,
+      clipboard: clipboard,
+      filePicker: filePicker,
+    );
 
     return DeviceFrameInteractors(
-      isAudioMuted: device.isAudioMuted,
-      audioVolume: device.audioVolume,
-      simulateKeyEvent: SimulateKeyEventInteractor(
-        repository: device,
-        clipboardSync: DeviceClipboardSync(hostClipboard),
-        settingsRepository: settingsRepository,
-      ),
-      simulatePointerEvent: SimulatePointerEventInteractor(device),
-      simulatePinchEvent: SimulatePinchEventInteractor(device),
-      captureScreenshot: CaptureScreenshotInteractor(
-        repository: device,
-        captures: captures,
-        hostClipboard: hostClipboard,
-        settingsRepository: settingsRepository,
-      ),
-      startRecording: StartRecordingInteractor(
-        repository: device,
-        captures: captures,
-        settingsRepository: settingsRepository,
-        running: running,
-      ),
-      stopRecording: StopRecordingInteractor(
-        repository: device,
-        captures: captures,
-        running: running,
-      ),
-      setAudioMuted: SetAudioMutedInteractor(device),
-      setAudioVolume: SetAudioVolumeInteractor(device),
-      sendFiles: sendFiles,
-      sendPickedApk: SendPickedApkInteractor(
-        filePicker: filePicker,
-        sendFiles: sendFiles,
-      ),
-      sendPickedFile: SendPickedFileInteractor(
-        filePicker: filePicker,
-        sendFiles: sendFiles,
-      ),
-      navigate: NavigateInteractor(device),
-      pressPowerButton: PressPowerButtonInteractor(device),
+      isAudioMuted: feature.isAudioMuted,
+      audioVolume: feature.audioVolume,
+      simulateKeyEvent: SimulateKeyEventInteractor(feature),
+      simulatePointerEvent: SimulatePointerEventInteractor(feature),
+      simulatePinchEvent: SimulatePinchEventInteractor(feature),
+      captureScreenshot: CaptureScreenshotInteractor(feature),
+      startRecording: StartRecordingInteractor(feature),
+      stopRecording: StopRecordingInteractor(feature),
+      setAudioMuted: SetAudioMutedInteractor(feature),
+      setAudioVolume: SetAudioVolumeInteractor(feature),
+      sendFiles: SendFilesInteractor(feature),
+      sendPickedApk: SendPickedApkInteractor(feature),
+      sendPickedFile: SendPickedFileInteractor(feature),
+      navigate: NavigateInteractor(feature),
+      pressPowerButton: PressPowerButtonInteractor(feature),
     );
   }
 }

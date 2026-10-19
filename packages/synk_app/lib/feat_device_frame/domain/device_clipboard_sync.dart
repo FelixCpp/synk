@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 
@@ -20,7 +20,7 @@ enum ClipboardShortcut {
   }
 }
 
-class const DeviceClipboardSync(final HostClipboard _hostClipboard) {
+class const DeviceClipboardSync(final ClipboardFeature _clipboard) {
   Future<void> perform(
     ClipboardShortcut shortcut,
     DeviceClipboard clipboard,
@@ -37,11 +37,11 @@ class const DeviceClipboardSync(final HostClipboard _hostClipboard) {
       return;
     }
 
-    await _hostClipboard.writeText(text);
+    await _clipboard.writeText(text);
   }
 
   Future<void> _pasteToDevice(DeviceClipboard clipboard) async {
-    final text = await _hostClipboard.readText();
+    final text = await _clipboard.readText();
     if (text == null) {
       return;
     }

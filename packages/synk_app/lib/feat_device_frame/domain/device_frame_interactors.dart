@@ -12,7 +12,13 @@ import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_in
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
 
-/// Everything one frame can ask of its device, already wired.
+/// The interactors a frame dispatches through, one per entry in
+/// [DeviceFrameFeature].
+///
+/// They hold no rules — those live in the feature. What they add is the
+/// decorator chain the blocs rely on: `.logger()`, `.busyStateChange()` and
+/// `runReporting`, so a failure becomes a logged line and a message to the
+/// user instead of a crash.
 class const DeviceFrameInteractors({
   required final bool isAudioMuted,
   required final double audioVolume,

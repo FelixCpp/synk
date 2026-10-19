@@ -8,7 +8,8 @@ import 'package:clock/clock.dart';
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
-import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_clipboard/application/clipboard_feature_impl.dart';
+import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
@@ -30,8 +31,8 @@ import 'package:synk/feat_settings/data/repositories/settings_repository_impl.da
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
+import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
@@ -136,8 +137,8 @@ Future<void> main() async {
           lazy: false,
         ),
         RepositoryProvider<AdbPaths>.value(value: adbPaths),
-        RepositoryProvider<HostClipboard>.value(
-          value: const SystemHostClipboard(),
+        RepositoryProvider<ClipboardFeature>.value(
+          value: const ClipboardFeatureImpl(),
         ),
         RepositoryProvider<FilePicker>.value(value: const SystemFilePicker()),
         RepositoryProvider<FileSystem>.value(value: fileSystem),
@@ -168,7 +169,7 @@ Future<void> main() async {
             settingsRepository: settingsRepository,
             screenCaptureEventChannel:
                 RepositoryProvider.of<ScreenCaptureEventChannel>(context),
-            hostClipboard: RepositoryProvider.of<HostClipboard>(context),
+            clipboard: RepositoryProvider.of<ClipboardFeature>(context),
             filePicker: RepositoryProvider.of<FilePicker>(context),
             fileSystem: fileSystem,
             clock: RepositoryProvider.of<Clock>(context),

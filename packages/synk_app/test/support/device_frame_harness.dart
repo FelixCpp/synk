@@ -1,7 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:file/memory.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
@@ -12,7 +12,7 @@ import 'package:synk/feat_screen_capture_event/application/screen_capture_event_
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 
 import 'fake_device_session.dart';
-import 'fake_host_clipboard.dart';
+import 'fake_clipboard_feature.dart';
 import 'fake_settings_repository.dart';
 
 /// One device frame, wired to fakes a test can both set up and interrogate.
@@ -50,7 +50,7 @@ final class DeviceFrameHarness {
         DeviceFrameFactoryImpl(
           settingsRepository: settings,
           screenCaptureEventChannel: events,
-          hostClipboard: host,
+          clipboard: host,
           filePicker: filePicker,
           fileSystem: fileSystem,
           clock: takenAt == null ? const Clock() : Clock.fixed(takenAt),
@@ -72,7 +72,7 @@ final class DeviceFrameHarness {
   final String modelName;
 
   final FakeSettingsRepository settings;
-  final host = FakeHostClipboard();
+  final host = FakeClipboardFeature();
   final fileSystem = MemoryFileSystem();
   final events = ScreenCaptureEventChannel();
   final notifications = NotificationService();

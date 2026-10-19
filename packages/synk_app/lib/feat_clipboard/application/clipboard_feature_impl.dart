@@ -1,13 +1,8 @@
 import 'package:flutter/services.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 
-abstract interface class HostClipboard {
-  Future<String?> readText();
-  Future<void> writeText(String text);
-  Future<void> writeImage(Uint8List bytes);
-}
-
-class const SystemHostClipboard() implements HostClipboard {
+class const ClipboardFeatureImpl() implements ClipboardFeature {
   @override
   Future<String?> readText() async {
     final data = await Clipboard.getData(Clipboard.kTextPlain);

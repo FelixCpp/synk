@@ -4,8 +4,8 @@ import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
-import 'package:synk/feat_device_frame/data/repositories/device_frame_factory_impl.dart';
-import 'package:synk/feat_device_frame/domain/repositories/device_frame_factory.dart';
+import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
+import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
@@ -19,7 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 
 import '../support/fake_device_session.dart';
-import '../support/fake_host_clipboard.dart';
+import '../support/fake_clipboard_feature.dart';
 
 import '../support/fake_settings_repository.dart';
 
@@ -260,7 +260,7 @@ Future<SynkUiColors> _pumpFrame(
             settingsRepository: FakeSettingsRepository(),
             screenCaptureEventChannel:
                 RepositoryProvider.of<ScreenCaptureEventChannel>(context),
-            hostClipboard: FakeHostClipboard(),
+            clipboard: FakeClipboardFeature(),
             filePicker: const SystemFilePicker(),
             fileSystem: MemoryFileSystem(),
             clock: const Clock(),

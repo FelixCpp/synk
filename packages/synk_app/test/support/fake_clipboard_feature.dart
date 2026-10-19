@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
-import 'package:synk/feat_clipboard/application/host_clipboard.dart';
+import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 
 /// A clipboard that keeps whatever it is handed, and can refuse on demand.
-class FakeHostClipboard implements HostClipboard {
-  FakeHostClipboard({this.text});
+class FakeClipboardFeature implements ClipboardFeature {
+  FakeClipboardFeature({this.text});
 
   String? text;
   final images = <Uint8List>[];
