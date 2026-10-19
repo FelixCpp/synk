@@ -2,8 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:synk/design/theme/synk_colors.dart';
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
@@ -67,9 +66,9 @@ class const _Layered({
   @override
   Widget build(BuildContext context) {
     return Transform.translate(
-      offset: SynkTheme.screenCapturePreviewStackOffset * depth.toDouble(),
+      offset: ScreenCapturePreviewMetrics.stackOffset * depth.toDouble(),
       child: Transform.scale(
-        scale: 1.0 - SynkTheme.screenCapturePreviewStackScaleStep * depth,
+        scale: 1.0 - ScreenCapturePreviewMetrics.stackScaleStep * depth,
         child: Opacity(opacity: 0.75, child: child),
       ),
     );
@@ -149,14 +148,14 @@ class const _DismissButton({
       onPressed: onPressed,
       builder: (context, states) {
         return Container(
-          width: SynkTheme.screenCapturePreviewDismissSlot,
-          height: SynkTheme.screenCapturePreviewDismissSlot,
+          width: ScreenCapturePreviewMetrics.dismissSlot,
+          height: ScreenCapturePreviewMetrics.dismissSlot,
           alignment: .center,
           decoration: BoxDecoration(
             shape: .circle,
             color: states.contains(WidgetState.hovered)
                 ? colors.raised
-                : SynkColors.statusOverlayBackground,
+                : SynkUiScrim.surface,
           ),
           child: Icon(
             CupertinoIcons.xmark,
@@ -206,7 +205,7 @@ class const _Poster({
 
   @override
   Widget build(BuildContext context) {
-    final size = SynkTheme.screenCapturePreviewSizeFor(aspectRatio);
+    final size = ScreenCapturePreviewMetrics.sizeFor(aspectRatio);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -244,19 +243,19 @@ class const _PlayBadge() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: SynkTheme.screenCapturePreviewPlaySlot,
-      height: SynkTheme.screenCapturePreviewPlaySlot,
+      width: ScreenCapturePreviewMetrics.playSlot,
+      height: ScreenCapturePreviewMetrics.playSlot,
       alignment: .center,
       decoration: const BoxDecoration(
         shape: .circle,
-        color: SynkColors.statusOverlayBackground,
+        color: SynkUiScrim.surface,
       ),
       child: const Padding(
         padding: EdgeInsets.only(left: 2.0),
         child: Icon(
           CupertinoIcons.play_fill,
           size: SynkUiSize.icon,
-          color: SynkColors.statusOverlayLabel,
+          color: SynkUiScrim.label,
         ),
       ),
     );
@@ -288,17 +287,17 @@ class const _DeviceLabel({
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: const BoxDecoration(
-        color: SynkColors.statusOverlayBackground,
+        color: SynkUiScrim.surface,
       ),
       child: Padding(
-        padding: SynkTheme.statusOverlayInsets,
+        padding: SynkUiScrim.insets,
         child: Text(
           modelName,
           maxLines: 1,
           overflow: .ellipsis,
           textAlign: .center,
           style: context.synkUi.typography.secondary.copyWith(
-            color: const Color(0xFFFFFFFF),
+            color: SynkUiScrim.label,
           ),
         ),
       ),

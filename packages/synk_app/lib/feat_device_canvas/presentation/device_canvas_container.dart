@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:synk/design/theme/synk_theme.dart';
 import 'package:synk/design/widgets/reflow_grid.dart';
 import 'package:synk/feat_device_canvas/presentation/bloc/device_canvas_bloc.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_maximized_device/presentation/maximized_device_metrics.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
@@ -68,8 +70,8 @@ class _MaximizableCanvasState extends State<_MaximizableCanvas> {
     final route = PageRouteBuilder<void>(
       opaque: false,
       barrierDismissible: false,
-      transitionDuration: SynkTheme.maximizeTransitionDuration,
-      reverseTransitionDuration: SynkTheme.maximizeTransitionDuration,
+      transitionDuration: MaximizedDeviceMetrics.transitionDuration,
+      reverseTransitionDuration: MaximizedDeviceMetrics.transitionDuration,
       pageBuilder: (context, animation, secondaryAnimation) {
         return MaximizedDeviceScreen(
           device: device,
@@ -111,11 +113,12 @@ class const _Content({
             behavior: ScrollConfiguration.of(context)
                 .copyWith(scrollbars: false),
             child: ReflowGrid<DeviceConnection>(
-              padding: SynkTheme.pagePadding,
-              mainAxisSpacing: SynkTheme.verticalComponentSpacingMedium,
-              crossAxisSpacing: SynkTheme.horizontalComponentSpacingMedium,
+              padding: SynkUiInsets.page,
+              mainAxisSpacing: SynkUiSpace.s8,
+              crossAxisSpacing: SynkUiSpace.s8,
               items: state.devices,
-              cellSizeOf: (item) => deviceFrameSizeFor(item.screenSize),
+              cellSizeOf: (item) =>
+                  DeviceFrameMetrics.sizeFor(item.screenSize.aspectRatio),
               duration: const Duration(milliseconds: 150),
               keyOf: (item) => item.device.id,
               itemBuilder: (context, item) {
@@ -135,7 +138,7 @@ class const _Content({
         Align(
           alignment: .bottomRight,
           child: Padding(
-            padding: SynkTheme.cardPadding,
+            padding: SynkUiInsets.card,
             child: BlocSelector<SettingsBloc, Settings, bool>(
               selector: (settings) => settings.showCapturePreview,
               builder: (context, showPreview) => showPreview

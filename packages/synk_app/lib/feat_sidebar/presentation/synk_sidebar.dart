@@ -1,5 +1,4 @@
-import 'package:synk/design/build_context.dart';
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/design/theme/device_status_colors.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_pairing/presentation/wireless_pairing_dialog.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -36,14 +35,14 @@ class const _Content({required final SidebarState state})
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: SynkTheme.pagePadding,
+      padding: SynkUiInsets.page,
       child: Column(
         crossAxisAlignment: .stretch,
-        spacing: SynkTheme.verticalComponentSpacingMedium,
+        spacing: SynkUiSpace.s8,
         children: [
           if (context.read<ToolAvailability>().isAdbAvailable)
             const _ConnectWirelessDeviceButton(),
-          _SectionHeader(title: "VERBUNDENE GERÄTE"),
+          const _SectionHeader(title: 'VERBUNDENE GERÄTE'),
           if (state.devices.isEmpty)
             const _NoDevicesPlugged()
           else
@@ -54,19 +53,229 @@ class const _Content({required final SidebarState state})
   }
 }
 
+/// The control an entry offers on its right-hand side.
+enum _EntryAction {
+  connect(
+    icon: CupertinoIcons.bolt_fill,
+    tooltip: 'Verbinden',
+    isDestructive: false,
+  ),
+  disconnect(
+    icon: CupertinoIcons.bolt_slash_fill,
+    tooltip: 'Trennen',
+    isDestructive: true,
+  ),
+  retry(
+    icon: CupertinoIcons.arrow_clockwise,
+    tooltip: 'Erneut verbinden',
+    isDestructive: false,
+  ),
+  cameraSettings(
+    icon: CupertinoIcons.gear_alt,
+    tooltip: 'Kamerazugriff in den Systemeinstellungen erlauben',
+    isDestructive: false,
+  );
+
+  const _EntryAction({
+    required this.icon,
+    required this.tooltip,
+    required this.isDestructive,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final bool isDestructive;
+}
+
+/// Everything a [SidebarDeviceState] decides about how its entry looks.
+///
+/// [statusText] of `null` means the entry shows the device id instead, in the
+/// secondary text color; a text is shown in [status] instead.
+typedef _EntryLook = ({
+  Color status,
+  String? statusText,
+  List<_EntryAction> actions,
+  bool isBusy,
+  bool isUnauthorized,
+});
+
+_EntryLook _lookOf(BuildContext context, SidebarDeviceState state) {
+  final colors = context.synkUi.colors;
+
+  return switch (state) {
+    SidebarDeviceDisconnected() => (
+      status: colors.deviceDisconnected,
+      statusText: null,
+      actions: const [_EntryAction.connect],
+      isBusy: false,
+      isUnauthorized: false,
+    ),
+    SidebarDeviceConnecting() => (
+      status: colors.deviceConnecting,
+      statusText: 'Verbinde …',
+      actions: const [],
+      isBusy: true,
+      isUnauthorized: false,
+    ),
+    SidebarDeviceConnected() => (
+      status: colors.deviceConnected,
+      statusText: null,
+      actions: const [_EntryAction.disconnect],
+      isBusy: false,
+      isUnauthorized: false,
+    ),
+    SidebarDeviceFailedToConnect(:final failure) => (
+      status: colors.error,
+      statusText: _labelOf(failure),
+      // A denied camera is the one failure the user can only clear outside
+      // of Synk, so that entry offers the shortcut there next to the retry.
+      actions: failure == ConnectionFailure.cameraAccessDenied
+          ? const [_EntryAction.cameraSettings, _EntryAction.retry]
+          : const [_EntryAction.retry],
+      isBusy: false,
+      isUnauthorized: false,
+    ),
+    SidebarDeviceUnableToConnect() => (
+      status: colors.deviceUnauthorized,
+      statusText: null,
+      actions: const [],
+      isBusy: false,
+      isUnauthorized: true,
+    ),
+  };
+}
+
+String _labelOf(ConnectionFailure failure) => switch (failure) {
+  ConnectionFailure.connectionRefused => 'Verbindung abgelehnt',
+  ConnectionFailure.cameraAccessDenied => 'Kamerazugriff verweigert',
+  ConnectionFailure.deviceNotPaired => 'Nicht gekoppelt',
+  ConnectionFailure.developerModeDisabled => 'Entwicklermodus aus',
+  ConnectionFailure.developerDiskImageUnavailable =>
+    'Nicht für Entwicklung vorbereitet',
+  ConnectionFailure.unknown => 'Verbindung fehlgeschlagen',
+};
+
 class const _DeviceEntry({
   required final SidebarDevice device,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return device.state.map(
-      disconnected: (_) => _DisconnectedDeviceEntry(device: device),
-      connecting: (_) => _ConnectingDeviceEntry(device: device),
-      connected: (_) => _ConnectedDeviceEntry(device: device),
-      failedToConnect: (state) =>
-          _FailedToConnectDeviceEntry(device: device, failure: state.failure),
-      unableToConnect: (_) => _UnableToConnectDeviceEntry(device: device),
+    final look = _lookOf(context, device.state);
+    final plugged = device.device;
+
+    return _EntryFrame(
+      leading: _LeadingIcon(statusColor: look.status),
+      title: Column(
+        crossAxisAlignment: .start,
+        spacing: SynkUiSpace.s2,
+        children: [
+          _TitleRow(
+            modelName: plugged.modelName,
+            tagColor: look.isUnauthorized ? look.status : null,
+          ),
+          _StatusLine(
+            text: look.statusText ?? plugged.id,
+            color: look.statusText == null
+                ? context.synkUi.colors.textSecondary
+                : look.status,
+          ),
+        ],
+      ),
+      trailing: _Trailing(look: look, device: plugged),
     );
+  }
+}
+
+class const _TitleRow({
+  required final String modelName,
+  required final Color? tagColor,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final name = Text(
+      modelName,
+      style: context.synkUi.typography.label,
+      overflow: .ellipsis,
+    );
+
+    // A field of a public name does not promote, so read it into a local.
+    final color = tagColor;
+    if (color == null) {
+      return name;
+    }
+
+    return Row(
+      spacing: SynkUiSpace.s4,
+      children: [
+        Flexible(child: name),
+        SynkUiTag(label: 'Nicht autorisiert', color: color),
+      ],
+    );
+  }
+}
+
+class const _StatusLine({
+  required final String text,
+  required final Color color,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: context.synkUi.typography.secondary.copyWith(color: color),
+      overflow: .ellipsis,
+    );
+  }
+}
+
+class const _Trailing({
+  required final _EntryLook look,
+  required final PluggedDevice device,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    if (look.isBusy) {
+      return SynkUiSpinner(color: look.status);
+    }
+
+    if (look.actions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final colors = context.synkUi.colors;
+
+    return Row(
+      mainAxisSize: .min,
+      children: [
+        for (final action in look.actions)
+          SynkUiTooltip(
+            message: action.tooltip,
+            child: SynkUiIconButton(
+              icon: action.icon,
+              iconSize: 15.0,
+              color: action.isDestructive ? colors.error : colors.accent,
+              onPressed: () => _dispatch(context, action, device),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// The single place the sidebar turns an action into an event, so connecting,
+/// disconnecting and retrying stay one decision.
+void _dispatch(
+  BuildContext context,
+  _EntryAction action,
+  PluggedDevice device,
+) {
+  final bloc = BlocProvider.of<SidebarBloc>(context);
+
+  switch (action) {
+    case .connect || .disconnect || .retry:
+      bloc.add(SidebarEvent.onConnect(device));
+    case .cameraSettings:
+      bloc.add(const SidebarEvent.onOpenCameraPrivacySettings());
   }
 }
 
@@ -77,7 +286,6 @@ class const _ConnectWirelessDeviceButton() extends StatelessWidget {
       onPressed: () => showWirelessPairingDialog(context),
       builder: (context, state) {
         final colors = context.synkUi.colors;
-        final foregroundColor = colors.text;
 
         return SynkUiCard(
           padding: const .all(SynkUiSpace.s12),
@@ -90,12 +298,12 @@ class const _ConnectWirelessDeviceButton() extends StatelessWidget {
               Icon(
                 CupertinoIcons.add,
                 size: SynkUiSize.icon,
-                color: foregroundColor,
+                color: colors.text,
               ),
               Text(
-                "Wireless-Gerät verbinden",
+                'Wireless-Gerät verbinden',
                 style: context.synkUi.typography.label.copyWith(
-                  color: foregroundColor,
+                  color: colors.text,
                 ),
               ),
             ],
@@ -112,14 +320,12 @@ class const _SectionHeader({
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .only(
-        left: 4.0,
-        top: SynkTheme.verticalComponentSpacingSmall,
-      ),
+      padding: const .only(left: SynkUiSpace.s4, top: SynkUiSpace.s4),
       child: Text(
         title,
-        style: context.typo.caption2.copyWith(
-          color: context.colors.secondaryLabel,
+        style: context.synkUi.typography.secondary.copyWith(
+          fontSize: 11.0,
+          color: context.synkUi.colors.textSecondary,
           fontWeight: .w800,
           letterSpacing: 0.8,
         ),
@@ -135,51 +341,47 @@ class const _NoDevicesPlugged() extends StatelessWidget {
       icon: CupertinoIcons.device_phone_portrait,
       iconSize: 28.0,
       title: 'Kein Gerät angeschlossen',
-      message: 'Verbinde ein Android- oder iOS-Gerät per USB und aktiviere USB-Debugging.',
+      message:
+          'Verbinde ein Android- oder iOS-Gerät per USB und aktiviere '
+          'USB-Debugging.',
     );
   }
 }
 
-class const _DeviceEntryFrame({
+class const _EntryFrame({
   required final Widget leading,
   required final Widget title,
-  required final Widget? trailing,
+  required final Widget trailing,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: .circular(
-          SynkTheme.smallCornerRadius,
-        ),
+        color: context.synkUi.colors.surface,
+        borderRadius: .circular(SynkUiRadius.card),
         border: .all(
-          color: context.colors.divider,
-          width: SynkTheme.hairlineThickness,
+          color: context.synkUi.colors.line,
+          width: SynkUiSize.hairline,
         ),
       ),
       child: Padding(
-        padding: const .all(8.0),
+        padding: const .all(SynkUiSpace.s8),
         child: Row(
-          spacing: SynkTheme.horizontalComponentSpacingMedium,
-          children: [
-            leading,
-            Expanded(child: title),
-            ?trailing,
-          ],
+          spacing: SynkUiSpace.s8,
+          children: [leading, Expanded(child: title), trailing],
         ),
       ),
     );
   }
 }
 
-class const _LeadingDeviceFrameIcon({required final Color statusColor})
+class const _LeadingIcon({required final Color statusColor})
     extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        borderRadius: .circular(SynkTheme.smallCornerRadius),
+        borderRadius: .circular(SynkUiRadius.card),
         color: statusColor.withAlpha(38),
       ),
       child: Padding(
@@ -189,306 +391,6 @@ class const _LeadingDeviceFrameIcon({required final Color statusColor})
           size: 18.0,
           color: statusColor,
         ),
-      ),
-    );
-  }
-}
-
-class const _DisconnectedDeviceEntry({
-  required final SidebarDevice device,
-}) extends StatelessWidget {
-  PluggedDevice get pluggedDevice => device.device;
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceEntryFrame(
-      leading: _LeadingDeviceFrameIcon(
-        statusColor: context.colors.deviceDisconnected,
-      ),
-      title: Column(
-        crossAxisAlignment: .start,
-        spacing: 2.0,
-        children: [
-          Text(
-            pluggedDevice.modelName,
-            style: context.typo.headline,
-            overflow: .ellipsis,
-          ),
-          Text(
-            pluggedDevice.id,
-            style: context.typo.caption1.copyWith(
-              color: context.colors.secondaryLabel,
-            ),
-            overflow: .ellipsis,
-          ),
-        ],
-      ),
-      trailing: _ConnectButton(
-        onPressed: () {
-          BlocProvider.of<SidebarBloc>(context).add(
-            .onConnect(pluggedDevice),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class const _ConnectedDeviceEntry({
-  required final SidebarDevice device,
-}) extends StatelessWidget {
-  PluggedDevice get pluggedDevice => device.device;
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceEntryFrame(
-      leading: _LeadingDeviceFrameIcon(
-        statusColor: context.colors.deviceConnected,
-      ),
-      title: Column(
-        crossAxisAlignment: .start,
-        spacing: 2.0,
-        children: [
-          Text(
-            pluggedDevice.modelName,
-            style: context.typo.headline,
-            overflow: .ellipsis,
-          ),
-          Text(
-            pluggedDevice.id,
-            style: context.typo.caption1.copyWith(
-              color: context.colors.secondaryLabel,
-            ),
-            overflow: .ellipsis,
-          ),
-        ],
-      ),
-      trailing: _DisconnectButton(
-        onPressed: () {
-          BlocProvider.of<SidebarBloc>(context)
-              .add(SidebarEvent.onConnect(pluggedDevice));
-        },
-      ),
-    );
-  }
-}
-
-class const _ConnectingDeviceEntry({
-  required final SidebarDevice device,
-}) extends StatelessWidget {
-  PluggedDevice get pluggedDevice => device.device;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceEntryFrame(
-      leading: _LeadingDeviceFrameIcon(
-        statusColor: context.colors.deviceConnecting,
-      ),
-      title: Column(
-        crossAxisAlignment: .start,
-        spacing: 2.0,
-        children: [
-          Text(
-            pluggedDevice.modelName,
-            style: context.typo.headline,
-            overflow: .ellipsis,
-          ),
-          Text(
-            'Verbinde ...',
-            style: context.typo.caption1.copyWith(
-              color: context.colors.deviceConnecting,
-            ),
-            overflow: .ellipsis,
-          ),
-        ],
-      ),
-      trailing: _ConnectingIndicator(),
-    );
-  }
-}
-
-class const _ConnectingIndicator() extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SynkUiSpinner(
-      color: context.colors.deviceConnecting,
-    );
-  }
-}
-
-class const _FailedToConnectDeviceEntry({
-  required final SidebarDevice device,
-  required final ConnectionFailure failure,
-}) extends StatelessWidget {
-  PluggedDevice get pluggedDevice => device.device;
-
-  @override
-  Widget build(BuildContext context) {
-    return _DeviceEntryFrame(
-      leading: _LeadingDeviceFrameIcon(
-        statusColor: context.colors.error,
-      ),
-      title: Column(
-        crossAxisAlignment: .start,
-        spacing: 2.0,
-        children: [
-          Text(
-            pluggedDevice.modelName,
-            style: context.typo.headline,
-            overflow: .ellipsis,
-          ),
-          Text(
-            _labelOf(failure),
-            style: context.typo.caption1.copyWith(
-              color: context.colors.error,
-            ),
-            overflow: .ellipsis,
-          ),
-        ],
-      ),
-      trailing: Row(
-        mainAxisSize: .min,
-        children: [
-          if (failure == ConnectionFailure.cameraAccessDenied)
-            _OpenCameraSettingsButton(
-              onPressed: () {
-                BlocProvider.of<SidebarBloc>(context)
-                    .add(const SidebarEvent.onOpenCameraPrivacySettings());
-              },
-            ),
-          _RetryButton(
-            onPressed: () {
-              BlocProvider.of<SidebarBloc>(context)
-                  .add(SidebarEvent.onConnect(pluggedDevice));
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _labelOf(ConnectionFailure failure) => switch (failure) {
-    ConnectionFailure.connectionRefused => 'Verbindung abgelehnt',
-    ConnectionFailure.cameraAccessDenied => 'Kamerazugriff verweigert',
-    ConnectionFailure.deviceNotPaired => 'Nicht gekoppelt',
-    ConnectionFailure.developerModeDisabled => 'Entwicklermodus aus',
-    ConnectionFailure.developerDiskImageUnavailable =>
-      'Nicht für Entwicklung vorbereitet',
-    ConnectionFailure.unknown => 'Verbindung fehlgeschlagen',
-  };
-}
-
-class const _UnableToConnectDeviceEntry({
-  required final SidebarDevice device,
-}) extends StatelessWidget {
-  PluggedDevice get pluggedDevice => device.device;
-
-  @override
-  Widget build(BuildContext context) {
-    final statusColor = context.colors.deviceUnauthorized;
-
-    return _DeviceEntryFrame(
-      leading: _LeadingDeviceFrameIcon(statusColor: statusColor),
-      title: Column(
-        crossAxisAlignment: .start,
-        spacing: 2.0,
-        children: [
-          Row(
-            spacing: SynkTheme.horizontalComponentSpacingSmall,
-            children: [
-              Flexible(
-                child: Text(
-                  pluggedDevice.modelName,
-                  style: context.typo.headline,
-                  overflow: .ellipsis,
-                ),
-              ),
-              SynkUiTag(label: 'Nicht autorisiert', color: statusColor),
-            ],
-          ),
-          Text(
-            pluggedDevice.id,
-            style: context.typo.caption1.copyWith(
-              color: context.colors.secondaryLabel,
-            ),
-            overflow: .ellipsis,
-          ),
-        ],
-      ),
-      trailing: null,
-    );
-  }
-}
-
-class const _OpenCameraSettingsButton({
-  required final VoidCallback onPressed,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.synkUiTheme.colors;
-
-    return SynkUiTooltip(
-      message: 'Kamerazugriff in den Systemeinstellungen erlauben',
-      child: SynkUiIconButton(
-        icon: CupertinoIcons.gear_alt,
-        iconSize: 15.0,
-        color: colors.accent,
-        onPressed: onPressed,
-      ),
-    );
-  }
-}
-
-class const _RetryButton({
-  required final VoidCallback onPressed,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.synkUiTheme.colors;
-
-    return SynkUiTooltip(
-      message: 'Erneut verbinden',
-      child: SynkUiIconButton(
-        icon: CupertinoIcons.arrow_clockwise,
-        iconSize: 15.0,
-        color: colors.accent,
-        onPressed: onPressed,
-      ),
-    );
-  }
-}
-
-class const _DisconnectButton({
-  required final VoidCallback onPressed,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.synkUiTheme.colors;
-
-    return SynkUiTooltip(
-      message: 'Trennen',
-      child: SynkUiIconButton(
-        icon: CupertinoIcons.bolt_slash_fill,
-        iconSize: 15.0,
-        color: colors.error,
-        onPressed: onPressed,
-      ),
-    );
-  }
-}
-
-class const _ConnectButton({
-  required final VoidCallback onPressed,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.synkUiTheme.colors;
-
-    return SynkUiTooltip(
-      message: 'Verbinden',
-      child: SynkUiIconButton(
-        icon: CupertinoIcons.bolt_fill,
-        iconSize: 15.0,
-        color: colors.accent,
-        onPressed: onPressed,
       ),
     );
   }

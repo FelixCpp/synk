@@ -79,3 +79,13 @@ class SynkUiMotion {
   static const standard = Curves.easeOutCubic;
   static const emphasized = Cubic(0.2, 0.0, 0.0, 1.0);
 }
+
+class SynkUiInsets {
+  const SynkUiInsets._();
+
+  /// Breathing room between a scrollable page and the window chrome.
+  static const EdgeInsets page = .all(SynkUiSpace.s12);
+
+  /// Inner padding of a card that holds content rather than a single control.
+  static const EdgeInsets card = .all(SynkUiSpace.s12);
+}

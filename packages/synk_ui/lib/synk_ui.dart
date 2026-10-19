@@ -22,4 +22,5 @@ export 'src/components/synk_ui_tooltip.dart';
 export 'src/layout/synk_ui_shell.dart';
 export 'src/tokens/synk_ui_colors.dart';
 export 'src/tokens/synk_ui_metrics.dart';
+export 'src/tokens/synk_ui_scrim.dart';
 export 'src/tokens/synk_ui_typography.dart';

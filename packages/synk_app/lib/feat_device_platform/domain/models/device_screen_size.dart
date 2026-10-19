@@ -9,3 +9,8 @@ sealed class DeviceScreenSize with _$DeviceScreenSize {
     required int height,
   }) = _DeviceScreenSize;
 }
+
+extension DeviceScreenSizeAspectRatio on DeviceScreenSize {
+  /// Width over height, the way layout code wants it.
+  double get aspectRatio => width / height;
+}

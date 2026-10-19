@@ -1,10 +1,17 @@
-import 'package:synk/design/build_context.dart';
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/design/theme/device_status_colors.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
+import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// The strip above a mirrored screen.
+///
+/// Everything the bloc can carry out is dispatched by the control that offers
+/// it, so only what lives outside the frame — maximizing, closing, and the
+/// screenshot flash the view owns — arrives as a callback.
 class const DeviceFrameToolBar({
   super.key,
   required final DeviceConnection connection,
@@ -13,79 +20,76 @@ class const DeviceFrameToolBar({
   required final bool isAudioMuted,
   required final double audioVolume,
   required final VoidCallback onCaptureScreenshot,
-  required final VoidCallback onToggleRecording,
-  required final VoidCallback onToggleAudioMute,
-  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onToggleMaximize,
-  required final VoidCallback onInstallApk,
-  required final VoidCallback onShareFile,
   required final VoidCallback onClose,
-  required final VoidCallback onStandby,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        border: .symmetric(
-          horizontal: BorderSide(
-            color: context.colors.divider,
-            width: SynkTheme.hairlineThickness,
+    return SizedBox(
+      height: DeviceFrameMetrics.toolBarHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.synkUi.colors.surface,
+          border: .symmetric(
+            horizontal: BorderSide(
+              color: context.synkUi.colors.line,
+              width: SynkUiSize.hairline,
+            ),
+          ),
+        ),
+        child: Padding(
+          padding: DeviceFrameMetrics.toolBarPadding,
+          child: Row(
+            mainAxisAlignment: .spaceBetween,
+            spacing: SynkUiSpace.s4,
+            children: [
+              Expanded(child: _DeviceName(connection: connection)),
+              Flexible(
+                child: FittedBox(
+                  fit: .scaleDown,
+                  child: _Actions(
+                    connection: connection,
+                    isMaximized: isMaximized,
+                    isRecording: isRecording,
+                    isAudioMuted: isAudioMuted,
+                    audioVolume: audioVolume,
+                    onCaptureScreenshot: onCaptureScreenshot,
+                    onToggleMaximize: onToggleMaximize,
+                    onClose: onClose,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
-      child: Padding(
-        padding: SynkTheme.deviceFrameToolBarPadding,
-        child: Row(
-          mainAxisAlignment: .spaceBetween,
-          spacing: SynkTheme.horizontalComponentSpacingSmall,
-          children: [
-            Expanded(
-              child: Row(
-                spacing: SynkTheme.horizontalComponentSpacingSmall,
-                children: [
-                  const _StatusDot(),
-                  Flexible(
-                    child: SynkUiTooltip(
-                      message: connection.device.id,
-                      child: Text(
-                        connection.device.modelName,
-                        style: context.typo.headline,
-                        overflow: .ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                  if (connection.interactionUnavailableReason
-                      case final reason?)
-                    _ViewOnlyTag(reason: reason),
-                ],
-              ),
+    );
+  }
+}
+
+class const _DeviceName({
+  required final DeviceConnection connection,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: SynkUiSpace.s4,
+      children: [
+        const _StatusDot(),
+        Flexible(
+          child: SynkUiTooltip(
+            message: connection.device.id,
+            child: Text(
+              connection.device.modelName,
+              style: context.synkUi.typography.label,
+              overflow: .ellipsis,
+              maxLines: 1,
             ),
-            Flexible(
-              child: FittedBox(
-                fit: .scaleDown,
-                child: _Actions(
-                  connection: connection,
-                  isMaximized: isMaximized,
-                  isRecording: isRecording,
-                  isAudioMuted: isAudioMuted,
-                  audioVolume: audioVolume,
-                  onCaptureScreenshot: onCaptureScreenshot,
-                  onToggleRecording: onToggleRecording,
-                  onToggleAudioMute: onToggleAudioMute,
-                  onAudioVolumeChanged: onAudioVolumeChanged,
-                  onToggleMaximize: onToggleMaximize,
-                  onClose: onClose,
-                  onInstallApk: onInstallApk,
-                  onShareFile: onShareFile,
-                  onStandby: onStandby,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
-      ),
+        if (connection.interactionUnavailableReason case final reason?)
+          _ViewOnlyTag(reason: reason),
+      ],
     );
   }
 }
@@ -97,14 +101,8 @@ class const _Actions({
   required final bool isAudioMuted,
   required final double audioVolume,
   required final VoidCallback onCaptureScreenshot,
-  required final VoidCallback onToggleRecording,
-  required final VoidCallback onToggleAudioMute,
-  required final ValueChanged<double> onAudioVolumeChanged,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
-  required final VoidCallback onInstallApk,
-  required final VoidCallback onShareFile,
-  required final VoidCallback onStandby,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -116,8 +114,10 @@ class const _Actions({
             icon: isRecording
                 ? CupertinoIcons.stop_fill
                 : CupertinoIcons.video_camera,
-            color: isRecording ? context.colors.error : null,
-            onPressed: onToggleRecording,
+            color: isRecording ? context.synkUi.colors.error : null,
+            onPressed: () => context.read<DeviceFrameBloc>().add(
+              const .onToggleRecording(),
+            ),
           ),
         ),
         SynkUiTooltip(
@@ -141,11 +141,6 @@ class const _Actions({
             connection: connection,
             isAudioMuted: isAudioMuted,
             audioVolume: audioVolume,
-            onToggleAudioMute: onToggleAudioMute,
-            onAudioVolumeChanged: onAudioVolumeChanged,
-            onInstallApk: onInstallApk,
-            onShareFile: onShareFile,
-            onStandby: onStandby,
           ),
         SynkUiTooltip(
           message: 'Spiegelung beenden',
@@ -163,11 +158,6 @@ class const _OverflowButton({
   required final DeviceConnection connection,
   required final bool isAudioMuted,
   required final double audioVolume,
-  required final VoidCallback onToggleAudioMute,
-  required final ValueChanged<double> onAudioVolumeChanged,
-  required final VoidCallback onInstallApk,
-  required final VoidCallback onShareFile,
-  required final VoidCallback onStandby,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -182,7 +172,7 @@ class const _OverflowButton({
               label: 'APK Installieren',
               onPressed: () {
                 controller.close();
-                onInstallApk();
+                context.read<DeviceFrameBloc>().add(const .onInstallApk());
               },
             ),
           ),
@@ -193,7 +183,7 @@ class const _OverflowButton({
               label: 'Datei senden',
               onPressed: () {
                 controller.close();
-                onShareFile();
+                context.read<DeviceFrameBloc>().add(const .onShareFile());
               },
             ),
           ),
@@ -202,8 +192,6 @@ class const _OverflowButton({
           _AudioControls(
             isAudioMuted: isAudioMuted,
             audioVolume: audioVolume,
-            onToggleAudioMute: onToggleAudioMute,
-            onAudioVolumeChanged: onAudioVolumeChanged,
           ),
         if (connection.supportsInteraction)
           SynkUiTooltip(
@@ -213,7 +201,9 @@ class const _OverflowButton({
               label: 'Standby',
               onPressed: () {
                 controller.close();
-                onStandby();
+                context.read<DeviceFrameBloc>().add(
+                  const .onPowerButtonPressed(),
+                );
               },
             ),
           ),
@@ -233,8 +223,6 @@ class const _OverflowButton({
 class const _AudioControls({
   required final bool isAudioMuted,
   required final double audioVolume,
-  required final VoidCallback onToggleAudioMute,
-  required final ValueChanged<double> onAudioVolumeChanged,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -252,9 +240,13 @@ class const _AudioControls({
         children: [
           SynkUiTooltip(
             message: isAudioMuted ? 'Ton ein' : 'Ton aus',
+            // The menu stays open on purpose, so the sound can be toggled
+            // back and the volume adjusted without reopening it.
             child: SynkUiIconButton(
               icon: icon,
-              onPressed: onToggleAudioMute,
+              onPressed: () => context.read<DeviceFrameBloc>().add(
+                const .onToggleAudioMute(),
+              ),
             ),
           ),
           Expanded(
@@ -264,7 +256,9 @@ class const _AudioControls({
                 opacity: isAudioMuted ? 0.5 : 1.0,
                 child: SynkUiSlider(
                   value: audioVolume,
-                  onChanged: onAudioVolumeChanged,
+                  onChanged: (volume) => context
+                      .read<DeviceFrameBloc>()
+                      .add(.onAudioVolumeChanged(volume)),
                 ),
               ),
             ),
@@ -301,7 +295,7 @@ class const _ViewOnlyTag({required final InteractionUnavailableReason reason})
       },
       child: SynkUiTag(
         label: 'Nur Ansicht',
-        color: context.synkUiTheme.colors.warn,
+        color: context.synkUi.colors.warn,
       ),
     );
   }
@@ -310,19 +304,11 @@ class const _ViewOnlyTag({required final InteractionUnavailableReason reason})
 class const _StatusDot() extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final color = context.colors.deviceConnected;
-
     return Padding(
-      padding: const EdgeInsets.only(right: 2.0),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          shape: .circle,
-          color: color,
-          boxShadow: [
-            BoxShadow(color: color.withAlpha(90), blurRadius: 6.0),
-          ],
-        ),
-        child: const SizedBox.square(dimension: 7.0),
+      padding: const EdgeInsets.only(right: SynkUiSpace.s2),
+      child: SynkUiStatusDot(
+        color: context.synkUi.colors.deviceConnected,
+        glow: true,
       ),
     );
   }

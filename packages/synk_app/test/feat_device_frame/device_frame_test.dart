@@ -1,7 +1,5 @@
 import 'package:synk_ui/synk_ui.dart';
-import 'package:synk/design/build_context.dart';
-import 'package:synk/design/theme/synk_colors.dart';
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
@@ -71,12 +69,12 @@ void main() {
 
         expect(
           mirror.width,
-          lessThanOrEqualTo(SynkTheme.deviceFrameWidth + 0.01),
+          lessThanOrEqualTo(DeviceFrameMetrics.referenceWidth + 0.01),
           reason: '$size is wider than its cell',
         );
         expect(
-          mirror.height + SynkTheme.deviceFrameToolBarHeight,
-          lessThanOrEqualTo(SynkTheme.deviceFrameHeight + 0.01),
+          mirror.height + DeviceFrameMetrics.toolBarHeight,
+          lessThanOrEqualTo(DeviceFrameMetrics.height + 0.01),
           reason: '$size is taller than its cell',
         );
       }
@@ -92,7 +90,7 @@ void main() {
         const DeviceScreenSize(width: 900, height: 2000),
       );
 
-      expect(mirror.width, closeTo(SynkTheme.deviceFrameWidth, 0.01));
+      expect(mirror.width, closeTo(DeviceFrameMetrics.referenceWidth, 0.01));
     });
 
     testWidgets('leaves an unfocused device on the plain card outline', (
@@ -102,7 +100,7 @@ void main() {
 
       expect(
         _frameBorderOf(tester).top.color.toARGB32(),
-        colors.divider.toARGB32(),
+        colors.line.toARGB32(),
       );
     });
 
@@ -114,7 +112,7 @@ void main() {
 
       expect(
         _frameBorderOf(tester).top.color.toARGB32(),
-        colors.focusRing.toARGB32(),
+        colors.accent.toARGB32(),
       );
     });
 
@@ -131,7 +129,7 @@ void main() {
 
       expect(
         _frameBorderOf(tester).top.color.toARGB32(),
-        colors.focusRing.toARGB32(),
+        colors.accent.toARGB32(),
       );
     });
 
@@ -241,7 +239,7 @@ Future<Size> _layOutMirror(
   return tester.getSize(find.byType(Texture));
 }
 
-Future<SynkColors> _pumpFrame(
+Future<SynkUiColors> _pumpFrame(
   WidgetTester tester,
   DeviceScreenSize screenSize, {
   ValueChanged<KeyEvent>? onKeyEscapedFrame,
@@ -252,13 +250,13 @@ Future<SynkColors> _pumpFrame(
   // squash the frame and make every assertion here meaningless.
   await tester.binding.setSurfaceSize(
     const Size(
-      SynkTheme.deviceFrameWidth + 100,
-      SynkTheme.deviceFrameHeight + 100,
+      DeviceFrameMetrics.referenceWidth + 100,
+      DeviceFrameMetrics.height + 100,
     ),
   );
   addTearDown(() => tester.binding.setSurfaceSize(null));
 
-  late SynkColors colors;
+  late SynkUiColors colors;
 
   await tester.pumpWidget(
     MultiRepositoryProvider(
@@ -297,7 +295,7 @@ Future<SynkColors> _pumpFrame(
             style: SynkUiThemeData.dark.typography.body,
             child: Builder(
               builder: (context) {
-                colors = context.colors;
+                colors = context.synkUi.colors;
 
                 return Focus(
                   autofocus: true,
@@ -307,8 +305,8 @@ Future<SynkColors> _pumpFrame(
                   },
                   child: Center(
                     child: SizedBox(
-                      width: SynkTheme.deviceFrameWidth,
-                      height: SynkTheme.deviceFrameHeight,
+                      width: DeviceFrameMetrics.referenceWidth,
+                      height: DeviceFrameMetrics.height,
                       child: DeviceFrame(
                         connection: DeviceConnection(
                           device: _device,

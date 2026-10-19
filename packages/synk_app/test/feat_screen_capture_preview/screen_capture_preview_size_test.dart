@@ -1,27 +1,27 @@
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_metrics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('screenCapturePreviewSizeFor', () {
     test('keeps the reference device on the established thumbnail size', () {
       const referenceAspectRatio =
-          SynkTheme.screenCapturePreviewReferenceAspectRatio;
+          ScreenCapturePreviewMetrics.referenceAspectRatio;
 
-      final size = SynkTheme.screenCapturePreviewSizeFor(referenceAspectRatio);
+      final size = ScreenCapturePreviewMetrics.sizeFor(referenceAspectRatio);
 
-      expect(size.width, closeTo(SynkTheme.screenCapturePreviewWidth, 0.01));
+      expect(size.width, closeTo(ScreenCapturePreviewMetrics.referenceWidth, 0.01));
       expect(
         size.height,
         closeTo(
-          SynkTheme.screenCapturePreviewWidth / referenceAspectRatio,
+          ScreenCapturePreviewMetrics.referenceWidth / referenceAspectRatio,
           0.01,
         ),
       );
     });
 
     test('turns the thumbnail sideways when the device is', () {
-      final portrait = SynkTheme.screenCapturePreviewSizeFor(1080 / 2400);
-      final landscape = SynkTheme.screenCapturePreviewSizeFor(2400 / 1080);
+      final portrait = ScreenCapturePreviewMetrics.sizeFor(1080 / 2400);
+      final landscape = ScreenCapturePreviewMetrics.sizeFor(2400 / 1080);
 
       expect(landscape.width, greaterThan(landscape.height));
       expect(landscape.width, closeTo(portrait.height, 0.01));
@@ -37,11 +37,11 @@ void main() {
       ];
 
       for (final aspectRatio in aspectRatios) {
-        final size = SynkTheme.screenCapturePreviewSizeFor(aspectRatio);
+        final size = ScreenCapturePreviewMetrics.sizeFor(aspectRatio);
 
         expect(
           size.width * size.height,
-          closeTo(SynkTheme.screenCapturePreviewArea, 1.0),
+          closeTo(ScreenCapturePreviewMetrics.area, 1.0),
           reason: '$aspectRatio does not get its fair share of the corner',
         );
       }

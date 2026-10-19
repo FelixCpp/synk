@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:synk/design/build_context.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
@@ -36,7 +35,7 @@ class _NotificationToastState extends State<NotificationToast> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.synkUiTheme.colors;
+    final colors = context.synkUi.colors;
 
     return SynkUiToast(
       icon: _isSuccess

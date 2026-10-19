@@ -1,10 +1,8 @@
-import 'package:synk/design/theme/synk_theme.dart';
-import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/app_shortcuts.dart';
 import 'package:synk/feat_device_frame/data/repositories/device_frame_repository_impl.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_feedback.dart';
@@ -12,7 +10,7 @@ import 'package:synk/feat_device_frame/presentation/widgets/device_frame_pointer
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_surface.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_tool_bar.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_screen_mirror.dart';
-import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -75,53 +73,47 @@ class _DeviceFrameState extends State<DeviceFrame>
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
-            onFocusChanged: () => setState(() {}),
             onEscape: widget.onEscape,
-            child: _FrameSurface(
-              hasFocus: focusNode.hasFocus,
-              isDragHovered: isDragHovered,
-              isTransferringFiles: state.isTransferringFiles,
-              child: Column(
-                children: [
-                  _ToolBar(
-                    connection: connection,
-                    isMaximized: widget.isMaximized,
-                    isRecording: state.isRecording,
-                    isAudioMuted: state.isAudioMuted,
-                    audioVolume: state.audioVolume,
-                    onCaptureScreenshot: () => _captureScreenshot(context),
-                    onToggleRecording: () => _toggleRecording(context),
-                    onToggleAudioMute: () => _toggleAudioMute(context),
-                    onAudioVolumeChanged: (volume) =>
-                        _changeAudioVolume(context, volume),
-                    onToggleMaximize: widget.onToggleMaximize,
-                    onInstallApk: () => _installApk(context),
-                    onShareFile: () => _shareFile(context),
-                    onStandby: () {
-                      BlocProvider.of<DeviceFrameBloc>(context).add(
-                        const .onPowerButtonPressed(),
-                      );
-                    },
-                    onClose: widget.onClose,
-                  ),
-                  Expanded(
-                    child: _ScreenMirror(
-                      textureId: connection.textureId,
-                      modelName: connection.device.modelName,
-                      hasFocus: focusNode.hasFocus,
-                      flash: _screenshotFlash,
+            child: _FocusAware(
+              focusNode: focusNode,
+              builder: (hasFocus, child) => DeviceFrameSurface(
+                hasFocus: hasFocus,
+                child: child,
+              ),
+              child: DeviceFrameDropFeedback(
+                isDragHovered: isDragHovered,
+                isProcessing: state.isTransferringFiles,
+                child: Column(
+                  children: [
+                    DeviceFrameToolBar(
+                      connection: connection,
+                      isMaximized: widget.isMaximized,
+                      isRecording: state.isRecording,
+                      isAudioMuted: state.isAudioMuted,
+                      audioVolume: state.audioVolume,
+                      onCaptureScreenshot: () => _captureScreenshot(context),
+                      onToggleMaximize: widget.onToggleMaximize,
+                      onClose: widget.onClose,
                     ),
-                  ),
-                  if (connection.navigations.isNotEmpty)
-                    _ControlsBar(
-                      onBackPressed: _navigationCallback(context, .back),
-                      onHomePressed: _navigationCallback(context, .home),
-                      onAppSwitchPressed: _navigationCallback(
-                        context,
-                        .appSwitch,
+                    Expanded(
+                      child: DeviceFramePointerListener(
+                        child: _FocusAware(
+                          focusNode: focusNode,
+                          builder: (hasFocus, child) => DeviceScreenMirror(
+                            textureId: connection.textureId,
+                            modelName: connection.device.modelName,
+                            hasFocus: hasFocus,
+                            flash: _screenshotFlash,
+                          ),
+                        ),
                       ),
                     ),
-                ],
+                    if (connection.navigations.isNotEmpty)
+                      DeviceFrameControls(
+                        navigations: connection.navigations,
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -130,43 +122,27 @@ class _DeviceFrameState extends State<DeviceFrame>
     );
   }
 
-  VoidCallback? _navigationCallback(
-    BuildContext context,
-    DeviceNavigation navigation,
-  ) {
-    if (!widget.connection.navigations.contains(navigation)) {
-      return null;
-    }
-
-    return () {
-      BlocProvider.of<DeviceFrameBloc>(context).add(.onNavigate(navigation));
-    };
-  }
-
+  /// The flash is the view's own doing, so it starts here rather than waiting
+  /// for the capture to come back.
   void _captureScreenshot(BuildContext context) {
     _screenshotFlashController.forward(from: 0);
-    BlocProvider.of<DeviceFrameBloc>(context).add(const .onCaptureScreenshot());
+    context.read<DeviceFrameBloc>().add(const .onCaptureScreenshot());
   }
+}
 
-  void _toggleRecording(BuildContext context) {
-    BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleRecording());
-  }
-
-  void _toggleAudioMute(BuildContext context) {
-    BlocProvider.of<DeviceFrameBloc>(context).add(const .onToggleAudioMute());
-  }
-
-  void _changeAudioVolume(BuildContext context, double volume) {
-    BlocProvider.of<DeviceFrameBloc>(context)
-        .add(.onAudioVolumeChanged(volume));
-  }
-
-  void _installApk(BuildContext context) {
-    BlocProvider.of<DeviceFrameBloc>(context).add(const .onInstallApk());
-  }
-
-  void _shareFile(BuildContext context) {
-    BlocProvider.of<DeviceFrameBloc>(context).add(const .onShareFile());
+/// Rebuilds only what cares about the focus, and leaves [child] untouched.
+class const _FocusAware({
+  required final FocusNode focusNode,
+  required final Widget Function(bool hasFocus, Widget child) builder,
+  final Widget child = const SizedBox.shrink(),
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: focusNode,
+      builder: (context, child) => builder(focusNode.hasFocus, child!),
+      child: child,
+    );
   }
 }
 
@@ -195,10 +171,10 @@ class const _FrameLayout({
   }
 
   Size _frameSizeFor(BoxConstraints constraints, DeviceScreenSize screenSize) {
-    const chromeHeight = SynkTheme.deviceFrameChromeHeight;
+    const chromeHeight = DeviceFrameMetrics.chromeHeight;
 
     final mirrorSize = _fitToAspectRatio(
-      deviceAspectRatioOf(screenSize),
+      screenSize.aspectRatio,
       Size(constraints.maxWidth, constraints.maxHeight - chromeHeight),
     );
 
@@ -229,8 +205,7 @@ class const _FrameDropTarget({
 
     return DeviceFrameDropDetector(
       onFilesDropped: (filepaths) {
-        BlocProvider.of<DeviceFrameBloc>(context)
-            .add(.onFilesDropped(filepaths));
+        context.read<DeviceFrameBloc>().add(.onFilesDropped(filepaths));
       },
       builder: builder,
     );
@@ -240,7 +215,6 @@ class const _FrameDropTarget({
 class const _FocusableFrame({
   required final FocusNode focusNode,
   required final bool autofocus,
-  required final VoidCallback onFocusChanged,
   required final VoidCallback? onEscape,
   required final Widget child,
 }) extends StatelessWidget {
@@ -249,7 +223,6 @@ class const _FocusableFrame({
     return Focus(
       focusNode: focusNode,
       autofocus: autofocus,
-      onFocusChange: (_) => onFocusChanged(),
       onKeyEvent: (node, event) => _handleKeyEvent(context, event),
       child: GestureDetector(
         onTapDown: (details) => focusNode.requestFocus(),
@@ -271,107 +244,8 @@ class const _FocusableFrame({
       return .ignored;
     }
 
-    BlocProvider.of<DeviceFrameBloc>(context).add(.onKeyEvent(event));
+    context.read<DeviceFrameBloc>().add(.onKeyEvent(event));
     return .handled;
-  }
-}
-
-class const _FrameSurface({
-  required final bool hasFocus,
-  required final bool isDragHovered,
-  required final bool isTransferringFiles,
-  required final Widget child,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DeviceFrameSurface(
-      hasFocus: hasFocus,
-      child: DeviceFrameDropFeedback(
-        isDragHovered: isDragHovered,
-        isProcessing: isTransferringFiles,
-        child: child,
-      ),
-    );
-  }
-}
-
-class const _ToolBar({
-  required final DeviceConnection connection,
-  required final bool isMaximized,
-  required final bool isRecording,
-  required final bool isAudioMuted,
-  required final double audioVolume,
-  required final VoidCallback onCaptureScreenshot,
-  required final VoidCallback onToggleRecording,
-  required final VoidCallback onToggleAudioMute,
-  required final ValueChanged<double> onAudioVolumeChanged,
-  required final VoidCallback onToggleMaximize,
-  required final VoidCallback onInstallApk,
-  required final VoidCallback onShareFile,
-  required final VoidCallback onStandby,
-  required final VoidCallback onClose,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: SynkTheme.deviceFrameToolBarHeight,
-      child: DeviceFrameToolBar(
-        connection: connection,
-        isMaximized: isMaximized,
-        isRecording: isRecording,
-        isAudioMuted: isAudioMuted,
-        audioVolume: audioVolume,
-        onCaptureScreenshot: onCaptureScreenshot,
-        onToggleRecording: onToggleRecording,
-        onToggleAudioMute: onToggleAudioMute,
-        onAudioVolumeChanged: onAudioVolumeChanged,
-        onToggleMaximize: onToggleMaximize,
-        onInstallApk: onInstallApk,
-        onShareFile: onShareFile,
-        onClose: onClose,
-        onStandby: onStandby,
-      ),
-    );
-  }
-}
-
-class const _ScreenMirror({
-  required final NativeTextureId textureId,
-  required final String modelName,
-  required final bool hasFocus,
-  required final Animation<double> flash,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DeviceFramePointerListener(
-      child: DeviceScreenMirror(
-        textureId: textureId,
-        modelName: modelName,
-        hasFocus: hasFocus,
-        flash: flash,
-      ),
-    );
-  }
-}
-
-class const _ControlsBar({
-  final VoidCallback? onBackPressed,
-  final VoidCallback? onHomePressed,
-  final VoidCallback? onAppSwitchPressed,
-}) extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: SynkTheme.deviceFrameControlsBarHeight,
-      child: Padding(
-        padding: SynkTheme.deviceFrameControlsBarPadding,
-        child: DeviceFrameControls(
-          onBackPressed: onBackPressed,
-          onHomePressed: onHomePressed,
-          onAppLibraryPressed: onAppSwitchPressed,
-        ),
-      ),
-    );
   }
 }
 
@@ -405,11 +279,3 @@ class const _DeviceFrameBlocProvider({
 }
 
 String _heroTagOf(DeviceId deviceId) => 'device-frame-$deviceId';
-
-double deviceAspectRatioOf(DeviceScreenSize screenSize) {
-  return screenSize.width / screenSize.height;
-}
-
-Size deviceFrameSizeFor(DeviceScreenSize screenSize) {
-  return SynkTheme.deviceFrameSizeFor(deviceAspectRatioOf(screenSize));
-}

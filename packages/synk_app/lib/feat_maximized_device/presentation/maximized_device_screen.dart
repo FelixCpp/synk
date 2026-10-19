@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_maximized_device/presentation/maximized_device_metrics.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_maximized_device/data/repositories/maximized_device_repository.dart';
@@ -62,13 +62,13 @@ class const _Content({
                 final t = Curves.easeOutCubic.transform(
                   animation.value.clamp(0.0, 1.0),
                 );
-                final blur = SynkTheme.maximizeBackdropBlur * t;
+                final blur = MaximizedDeviceMetrics.backdropBlur * t;
 
                 return BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                   child: ColoredBox(
                     color: const Color(0xFF000000).withAlpha(
-                      (SynkTheme.maximizeScrimAlpha * t).round(),
+                      (MaximizedDeviceMetrics.scrimAlpha * t).round(),
                     ),
                   ),
                 );
@@ -78,7 +78,7 @@ class const _Content({
         ),
         Positioned.fill(
           child: Padding(
-            padding: SynkTheme.maximizeDevicePadding,
+            padding: MaximizedDeviceMetrics.devicePadding,
             child: DeviceFrame(
               connection: device,
               isMaximized: true,

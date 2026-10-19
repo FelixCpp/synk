@@ -1,8 +1,10 @@
-import 'package:synk/design/build_context.dart';
-import 'package:synk/design/theme/synk_colors.dart';
-import 'package:synk/design/theme/synk_theme.dart';
+import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
+
+/// A single white frame, flashed when a screenshot is taken.
+const _screenshotFlash = Color(0xFFFFFFFF);
 
 class const DeviceScreenMirror({
   super.key,
@@ -17,42 +19,24 @@ class const DeviceScreenMirror({
       fit: .expand,
       children: [
         ColoredBox(
-          color: SynkColors.mirrorBackground,
+          color: SynkUiScrim.below,
           child: Texture(textureId: textureId),
         ),
         Positioned(
           top: 0.0,
           right: 0.0,
           child: Padding(
-            padding: SynkTheme.statusOverlayPadding,
-            child: _StatusOverlay(hasFocus: hasFocus),
+            padding: DeviceFrameMetrics.overlayPadding,
+            child: _KeyboardTargetBadge(hasFocus: hasFocus),
           ),
         ),
         IgnorePointer(
           child: FadeTransition(
             opacity: flash,
-            child: const ColoredBox(
-              color: SynkColors.screenshotFlash,
-            ),
+            child: const ColoredBox(color: _screenshotFlash),
           ),
         ),
       ],
-    );
-  }
-}
-
-class const _StatusOverlay({required final bool hasFocus})
-    extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Row(
-        mainAxisSize: .min,
-        spacing: SynkTheme.horizontalComponentSpacingSmall,
-        children: [
-          _KeyboardTargetBadge(hasFocus: hasFocus),
-        ],
-      ),
     );
   }
 }
@@ -62,14 +46,14 @@ class const _KeyboardTargetBadge({required final bool hasFocus})
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      duration: SynkTheme.focusTransitionDuration,
+      duration: SynkUiMotion.state,
       curve: Curves.easeOut,
       opacity: hasFocus ? 1.0 : 0.0,
       child: _StatusBadge(
         child: Icon(
           CupertinoIcons.keyboard,
-          size: SynkTheme.statusOverlayIconSize,
-          color: context.synkUiTheme.colors.accent,
+          size: DeviceFrameMetrics.overlayIconSize,
+          color: context.synkUi.colors.accent,
         ),
       ),
     );
@@ -82,13 +66,11 @@ class const _StatusBadge({required final Widget child})
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: SynkColors.statusOverlayBackground,
-        borderRadius: BorderRadius.circular(
-          SynkTheme.statusOverlayRadius,
-        ),
+        color: SynkUiScrim.surface,
+        borderRadius: BorderRadius.circular(SynkUiScrim.radius),
       ),
       child: Padding(
-        padding: SynkTheme.statusOverlayInsets,
+        padding: SynkUiScrim.insets,
         child: child,
       ),
     );
