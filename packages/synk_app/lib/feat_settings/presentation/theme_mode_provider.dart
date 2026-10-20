@@ -1,4 +1,4 @@
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/settings_feature.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
@@ -17,7 +17,7 @@ class const ThemeModeProvider({
       create: (context) => SettingsBloc(
         defaults: defaults,
         feature: RepositoryProvider.of<SettingsFeature>(context),
-        notifications: RepositoryProvider.of<NotificationService>(context),
+        notifications: RepositoryProvider.of<NotificationFeature>(context),
       ),
       child: BlocSelector<SettingsBloc, Settings, ThemeMode>(
         selector: (settings) => settings.themeMode,

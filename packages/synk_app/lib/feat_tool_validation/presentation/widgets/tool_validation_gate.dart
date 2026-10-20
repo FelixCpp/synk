@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
 import 'package:synk/feat_tool_validation/presentation/bloc/tool_validation_bloc.dart';
@@ -22,7 +22,7 @@ class const ToolValidationGate({
     return BlocProvider<ToolValidationBloc>(
       create: (context) => ToolValidationBloc(
         RepositoryProvider.of<ToolValidationRepository>(context),
-        RepositoryProvider.of<NotificationService>(context),
+        RepositoryProvider.of<NotificationFeature>(context),
       ),
       child: _Gate(builder: builder),
     );

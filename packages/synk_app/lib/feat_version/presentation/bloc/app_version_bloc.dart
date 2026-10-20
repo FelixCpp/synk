@@ -5,7 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_version/domain/models/app_version.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
 import 'package:synk/feat_version/domain/repositories/app_version_repository.dart';
@@ -20,7 +20,7 @@ part 'app_version_event.dart';
 class AppVersionBloc(
   AppVersion currentAppVersion,
   final AppVersionRepository repository,
-  final NotificationService notifications,
+  final NotificationFeature notifications,
 ) extends Bloc<AppVersionEvent, AppVersionState> {
   final getNewerAppVersion = GetNewerAppVersionInteractor(repository);
 

@@ -6,7 +6,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection.dar
 import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_connections/domain/usecases/disconnect_device_interactor.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:use_in_case/use_in_case.dart';
@@ -17,7 +17,7 @@ part 'device_canvas_event.dart';
 
 class DeviceCanvasBloc(
   final DeviceConnectionsFeature connectionsRepository,
-  final NotificationService notifications,
+  final NotificationFeature notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
   final disconnectDevice = DisconnectDeviceInteractor(connectionsRepository);
 

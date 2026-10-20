@@ -5,7 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
@@ -18,7 +18,7 @@ part 'tool_validation_state.dart';
 
 class ToolValidationBloc(
   final ToolValidationRepository repository,
-  final NotificationService notifications,
+  final NotificationFeature notifications,
 ) extends Bloc<ToolValidationEvent, ToolValidationState> {
   final validateTools = ValidateToolsInteractor(repository);
 

@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/bloc/screen_capture_preview_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -18,7 +18,7 @@ class const ScreenCapturePreviewThumbnail({
     return BlocProvider(
       create: (context) => ScreenCapturePreviewBloc(
         RepositoryProvider.of<ScreenCapturePreviewFeature>(context),
-        RepositoryProvider.of<NotificationService>(context),
+        RepositoryProvider.of<NotificationFeature>(context),
       ),
       child: BlocBuilder<ScreenCapturePreviewBloc, ScreenCapturePreviewState>(
         builder: (context, state) {

@@ -40,6 +40,9 @@ class SynkUiSize {
   static const toggleKnob = 16.0;
   static const sliderKnob = 14.0;
   static const sliderTrack = 4.0;
+  static const toastWidth = 360.0;
+  static const toastRail = 3.0;
+  static const toastProgress = 2.0;
   static const titleStrip = 52.0;
   static const trafficGutter = 88.0;
   static const sidebarWidth = 248.0;
@@ -58,6 +61,23 @@ class SynkUiElevation {
       offset: Offset(0, 8),
     ),
   ];
+
+  static const List<BoxShadow> overlayOnLight = [
+    BoxShadow(
+      color: Color(0x14000000),
+      blurRadius: 4.0,
+      offset: Offset(0, 1),
+    ),
+    BoxShadow(
+      color: Color(0x1F000000),
+      blurRadius: 20.0,
+      offset: Offset(0, 6),
+    ),
+  ];
+
+  static List<BoxShadow> overlayFor(Brightness brightness) {
+    return brightness == Brightness.dark ? overlay : overlayOnLight;
+  }
 
   static const List<BoxShadow> modal = [
     BoxShadow(

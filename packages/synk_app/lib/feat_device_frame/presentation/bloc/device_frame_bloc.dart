@@ -6,7 +6,7 @@ import 'package:dartz/dartz.dart';
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/application/notified_interactor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
@@ -18,7 +18,7 @@ part 'device_frame_state.dart';
 
 class DeviceFrameBloc({
   required final DeviceFrameInteractors device,
-  required final NotificationService notifications,
+  required final NotificationFeature notifications,
 }) extends Bloc<DeviceFrameEvent, DeviceFrameState> {
   this
     : super(

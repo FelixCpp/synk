@@ -22,7 +22,8 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:synk/feat_device_connections/application/device_connections_feature_impl.dart';
 import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
@@ -120,8 +121,8 @@ Future<void> main() async {
   runApp(
     MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<NotificationService>(
-          create: (_) => NotificationService(),
+        RepositoryProvider<NotificationFeature>(
+          create: (_) => NotificationFeatureImpl(),
           lazy: false,
           dispose: (repository) => repository.dispose(),
         ),
@@ -191,7 +192,7 @@ Future<void> main() async {
         create: (context) => AppVersionBloc(
           currentAppVersion,
           RepositoryProvider.of<AppVersionRepository>(context),
-          RepositoryProvider.of<NotificationService>(context),
+          RepositoryProvider.of<NotificationFeature>(context),
         ),
         lazy: false,
         child: _Root(defaults: defaults),
@@ -252,7 +253,7 @@ class const _Root({required final Settings defaults}) extends StatelessWidget {
                 );
               },
               home: AppNotificationListener(
-                notifications: RepositoryProvider.of<NotificationService>(
+                notifications: RepositoryProvider.of<NotificationFeature>(
                   context,
                 ),
                 child: ToolValidationGate(
@@ -376,12 +377,12 @@ class _SynkScreenState extends State<_SynkScreen> {
       return;
     }
 
-    final notifications = RepositoryProvider.of<NotificationService>(context);
+    final notifications = RepositoryProvider.of<NotificationFeature>(context);
     for (final warning in widget.warnings) {
       notifications.notify(
         AppNotification(
           message: warning.message,
-          severity: NotificationSeverity.critical,
+          severity: NotificationSeverity.warning,
         ),
       );
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -56,12 +57,12 @@ AndroidDevice buildDevice(String serial) {
 
 void main() {
   late FakeSidebarFeature feature;
-  late NotificationService notifications;
+  late NotificationFeature notifications;
   late SidebarBloc bloc;
 
   setUp(() {
     feature = FakeSidebarFeature();
-    notifications = NotificationService();
+    notifications = NotificationFeatureImpl();
     bloc = SidebarBloc(feature, notifications);
   });
 

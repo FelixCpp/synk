@@ -1,6 +1,6 @@
-import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 extension NotifiedInteractor<Input, Output>
@@ -9,7 +9,7 @@ extension NotifiedInteractor<Input, Output>
   /// first so an optimistic state can step back.
   Future<void> runReporting(
     Input input, {
-    required NotificationService to,
+    required NotificationFeature to,
     required String whenItFails,
     void Function()? andUndo,
   }) {

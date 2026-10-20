@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
@@ -34,12 +35,12 @@ class _RecordingFeature implements ScreenCapturePreviewFeature {
 
 void main() {
   late _RecordingFeature repository;
-  late NotificationService notifications;
+  late NotificationFeature notifications;
   late ScreenCapturePreviewBloc bloc;
 
   setUp(() {
     repository = _RecordingFeature();
-    notifications = NotificationService();
+    notifications = NotificationFeatureImpl();
     bloc = ScreenCapturePreviewBloc(repository, notifications);
   });
 

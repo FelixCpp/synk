@@ -7,7 +7,8 @@ import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/cupertino.dart';
@@ -247,8 +248,8 @@ Future<SynkUiColors> _pumpFrame(
   await tester.pumpWidget(
     MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<NotificationService>(
-          create: (_) => NotificationService(),
+        RepositoryProvider<NotificationFeature>(
+          create: (_) => NotificationFeatureImpl(),
           dispose: (service) => service.dispose(),
         ),
         RepositoryProvider<ScreenCaptureEventChannel>(

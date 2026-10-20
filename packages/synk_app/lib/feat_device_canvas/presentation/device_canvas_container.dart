@@ -9,7 +9,7 @@ import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_metrics.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
@@ -23,7 +23,7 @@ class const DeviceCanvasContainer({super.key}) extends StatelessWidget {
     return BlocProvider<DeviceCanvasBloc>(
       create: (context) => DeviceCanvasBloc(
         RepositoryProvider.of<DeviceConnectionsFeature>(context),
-        RepositoryProvider.of<NotificationService>(context),
+        RepositoryProvider.of<NotificationFeature>(context),
       ),
       child: const _MaximizableCanvas(),
     );

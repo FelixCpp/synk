@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 import 'package:synk/feat_sidebar/domain/usecases/connect_device_interactor.dart';
 import 'package:synk/feat_sidebar/domain/usecases/disconnect_device_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/application/notified_interactor.dart';
 import 'package:synk/feat_sidebar/domain/usecases/open_camera_privacy_settings_interactor.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
@@ -18,7 +18,7 @@ part 'sidebar_event.dart';
 
 class SidebarBloc(
   final SidebarFeature feature,
-  final NotificationService notifications,
+  final NotificationFeature notifications,
 ) extends Bloc<SidebarEvent, SidebarState> {
   final connectDevice = ConnectDeviceInteractor(feature);
   final disconnectDevice = DisconnectDeviceInteractor(feature);

@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
@@ -119,8 +120,8 @@ Future<ScreenCaptureEventChannel> _pumpCorner(WidgetTester tester) async {
   await tester.pumpWidget(
     MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<NotificationService>(
-          create: (_) => NotificationService(),
+        RepositoryProvider<NotificationFeature>(
+          create: (_) => NotificationFeatureImpl(),
           dispose: (service) => service.dispose(),
         ),
         RepositoryProvider<ScreenCaptureEventChannel>.value(value: channel),

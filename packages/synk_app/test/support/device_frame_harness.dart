@@ -7,7 +7,7 @@ import 'package:synk/feat_device_connections/domain/models/device_connection.dar
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 
@@ -75,7 +75,7 @@ final class DeviceFrameHarness {
   final host = FakeClipboardFeature();
   final fileSystem = MemoryFileSystem();
   final events = ScreenCaptureEventChannel();
-  final notifications = NotificationService();
+  final notifications = NotificationFeatureImpl();
 
   late final FakeDeviceSession session;
   late final DeviceFrameInteractors device;

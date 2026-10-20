@@ -4,7 +4,7 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
@@ -19,7 +19,7 @@ const maxStackedCaptures = 4;
 
 class ScreenCapturePreviewBloc(
   final ScreenCapturePreviewFeature feature,
-  final NotificationService notifications,
+  final NotificationFeature notifications,
 ) extends Bloc<ScreenCapturePreviewEvent, ScreenCapturePreviewState> {
   final openInSystemViewer = OpenInSystemViewerInteractor(feature);
 

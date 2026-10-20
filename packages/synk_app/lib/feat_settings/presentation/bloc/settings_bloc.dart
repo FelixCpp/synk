@@ -5,7 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/settings_feature.dart';
@@ -19,7 +19,7 @@ part 'settings_event.dart';
 class SettingsBloc({
   required final Settings defaults,
   required final SettingsFeature feature,
-  required final NotificationService notifications,
+  required final NotificationFeature notifications,
 }) extends Bloc<SettingsEvent, Settings> {
   final saveSettings = SaveSettingsInteractor(feature);
   final revealScreenCaptureSavePath = RevealScreenCaptureSavePathInteractor(

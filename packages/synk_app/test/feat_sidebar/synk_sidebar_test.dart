@@ -5,7 +5,8 @@ import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/application/sidebar_feature_impl.dart';
@@ -71,8 +72,8 @@ Future<void> _pumpSidebar(
       data: SynkUiThemeData.forBrightness(Brightness.dark),
       child: MultiRepositoryProvider(
         providers: [
-          RepositoryProvider<NotificationService>(
-            create: (context) => NotificationService(),
+          RepositoryProvider<NotificationFeature>(
+            create: (context) => NotificationFeatureImpl(),
           ),
           RepositoryProvider.value(
             value: const ToolAvailability(

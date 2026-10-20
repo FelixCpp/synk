@@ -1,6 +1,6 @@
 import 'package:synk/app_shortcuts.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
@@ -266,7 +266,7 @@ class const _DeviceFrameBlocProvider({
       create: (context) => DeviceFrameBloc(
         device: RepositoryProvider.of<DeviceFrameFactory>(context)
             .forConnection(connection),
-        notifications: RepositoryProvider.of<NotificationService>(context),
+        notifications: RepositoryProvider.of<NotificationFeature>(context),
       ),
       child: BlocBuilder<DeviceFrameBloc, DeviceFrameState>(
         builder: builder,

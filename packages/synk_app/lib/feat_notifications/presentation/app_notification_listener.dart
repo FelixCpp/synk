@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_notifications/domain/models/app_notification.dart';
-import 'package:synk/feat_notifications/presentation/widgets/notification_toast.dart';
+import 'package:synk/feat_notifications/domain/models/notification_stack.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
+import 'package:synk/feat_notifications/presentation/widgets/notification_stack_view.dart';
 import 'package:synk_ui/synk_ui.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/widgets.dart';
 
 class const AppNotificationListener({
   super.key,
-  required final NotificationService notifications,
+  required final NotificationFeature notifications,
   required final Widget child,
 }) extends StatefulWidget {
   @override
@@ -17,105 +17,61 @@ class const AppNotificationListener({
 }
 
 class _AppNotificationListenerState extends State<AppNotificationListener> {
-  final _toasts = <({int id, AppNotification notification})>[];
-  var _nextToastId = 0;
-  OverlayEntry? _toastEntry;
-  StreamSubscription<AppNotification>? _subscription;
+  StreamSubscription<NotificationStack>? _subscription;
+  OverlayEntry? _overlayEntry;
+  var _stack = NotificationStack.empty;
 
   @override
   void initState() {
     super.initState();
-    _subscription = widget.notifications.observeNotifications().listen(_show);
+    _subscription = widget.notifications.observeStack().listen(_onStack);
   }
 
   @override
   void dispose() {
     unawaited(_subscription?.cancel());
-    _toastEntry?.remove();
+    _overlayEntry?.remove();
+    _overlayEntry = null;
     super.dispose();
   }
 
-  void _show(AppNotification notification) {
+  void _onStack(NotificationStack stack) {
     if (!mounted) {
       return;
     }
 
-    switch (notification.severity) {
-      case NotificationSeverity.critical:
-        _showDialog(context, notification);
-      case NotificationSeverity.error:
-      case NotificationSeverity.success:
-        _showToast(context, notification);
-    }
-  }
+    _stack = stack;
 
-  @override
-  Widget build(BuildContext context) => widget.child;
-
-  void _showToast(BuildContext context, AppNotification notification) {
-    _toasts.add((id: _nextToastId++, notification: notification));
-
-    final entry = _toastEntry;
+    final entry = _overlayEntry;
     if (entry != null) {
       entry.markNeedsBuild();
       return;
     }
 
-    final newEntry = OverlayEntry(builder: _buildToasts);
-    _toastEntry = newEntry;
-    Overlay.of(context).insert(newEntry);
-  }
-
-  void _dismissToast(int id) {
-    _toasts.removeWhere((toast) => toast.id == id);
-
-    if (_toasts.isEmpty) {
-      _toastEntry?.remove();
-      _toastEntry = null;
-    } else {
-      _toastEntry?.markNeedsBuild();
+    if (stack.entries.isEmpty) {
+      return;
     }
+
+    final inserted = OverlayEntry(builder: _buildStack);
+    _overlayEntry = inserted;
+    Overlay.of(context).insert(inserted);
   }
 
-  Widget _buildToasts(BuildContext context) {
+  @override
+  Widget build(BuildContext context) => widget.child;
+
+  Widget _buildStack(BuildContext context) {
     return Positioned(
+      top: SynkUiSize.titleStrip + SynkUiSpace.s16,
       right: SynkUiSpace.s16,
-      bottom: SynkUiSpace.s16,
       child: SafeArea(
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .end,
-          spacing: SynkUiSpace.s8,
-          children: [
-            for (final toast in _toasts)
-              NotificationToast(
-                key: ValueKey(toast.id),
-                message: toast.notification.message,
-                severity: toast.notification.severity,
-                onDismissed: () => _dismissToast(toast.id),
-              ),
-          ],
+        child: NotificationStackView(
+          stack: _stack,
+          onDismiss: widget.notifications.dismiss,
+          onDismissAll: widget.notifications.dismissAll,
+          onPausedChanged: widget.notifications.setPaused,
         ),
       ),
     );
   }
-}
-
-void _showDialog(BuildContext context, AppNotification notification) {
-  showSynkUiDialog<void>(
-    context: context,
-    builder: (context) {
-      return SynkUiDialog(
-        icon: CupertinoIcons.exclamationmark_triangle,
-        title: 'Fehler',
-        message: notification.message,
-        actions: [
-          SynkUiButton(
-            label: 'OK',
-            onPressed: Navigator.of(context).pop,
-          ),
-        ],
-      );
-    },
-  );
 }

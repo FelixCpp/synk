@@ -4,8 +4,8 @@ part 'app_notification.freezed.dart';
 
 enum NotificationSeverity {
   success,
+  warning,
   error,
-  critical,
 }
 
 @freezed

@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
+import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
@@ -24,11 +25,11 @@ extension on ToolValidationState {
 
 ToolValidationBloc _bloc(
   List<ToolIssue> Function() issues, [
-  NotificationService? notifications,
+  NotificationFeature? notifications,
 ]) {
   return ToolValidationBloc(
     _Repository(issues),
-    notifications ?? NotificationService(),
+    notifications ?? NotificationFeatureImpl(),
   );
 }
 
@@ -76,7 +77,7 @@ void main() {
 
   test('surfaces a throwing validation as a message of its own, not as the '
       'exception text', () async {
-    final notifications = NotificationService();
+    final notifications = NotificationFeatureImpl();
     final shown = <AppNotification>[];
     final subscription = notifications.observeNotifications().listen(shown.add);
     addTearDown(subscription.cancel);

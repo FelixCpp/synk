@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:synk/feat_notifications/application/notification_service.dart';
+import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_version/domain/models/app_version.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
@@ -42,7 +42,7 @@ void main() {
       _Repository(
         newerAppVersion: () async => const .updateAvailable('0.2.0'),
       ),
-      NotificationService(),
+      NotificationFeatureImpl(),
     );
     addTearDown(bloc.close);
 
@@ -57,7 +57,7 @@ void main() {
     final bloc = AppVersionBloc(
       _currentAppVersion,
       _Repository(newerAppVersion: () async => throw Exception('offline')),
-      NotificationService(),
+      NotificationFeatureImpl(),
     );
     addTearDown(bloc.close);
 
@@ -74,7 +74,7 @@ void main() {
     final bloc = AppVersionBloc(
       _currentAppVersion,
       repository,
-      NotificationService(),
+      NotificationFeatureImpl(),
     );
     addTearDown(bloc.close);
 
@@ -97,7 +97,7 @@ void main() {
           await pumpEventQueue();
         },
       ),
-      NotificationService(),
+      NotificationFeatureImpl(),
     );
     addTearDown(bloc.close);
 
@@ -119,7 +119,7 @@ void main() {
     final bloc = AppVersionBloc(
       _currentAppVersion,
       repository,
-      NotificationService(),
+      NotificationFeatureImpl(),
     );
     addTearDown(bloc.close);
 
@@ -133,7 +133,7 @@ void main() {
   });
 
   test('notifies when the update fails', () async {
-    final notifications = NotificationService();
+    final notifications = NotificationFeatureImpl();
     final received = <AppNotification>[];
     notifications.observeNotifications().listen(received.add);
     final bloc = AppVersionBloc(
