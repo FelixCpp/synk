@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
-import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
+import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
 import 'package:synk/feat_screen_capture_preview/domain/usecases/open_in_system_viewer_interactor.dart';
 import 'package:use_in_case/use_in_case.dart';
 
@@ -18,10 +18,10 @@ part 'screen_capture_preview_state.dart';
 const maxStackedCaptures = 4;
 
 class ScreenCapturePreviewBloc(
-  final ScreenCapturePreviewRepository repository,
+  final ScreenCapturePreviewFeature feature,
   final NotificationService notifications,
 ) extends Bloc<ScreenCapturePreviewEvent, ScreenCapturePreviewState> {
-  final openInSystemViewer = OpenInSystemViewerInteractor(repository);
+  final openInSystemViewer = OpenInSystemViewerInteractor(feature);
 
   this : super(ScreenCapturePreviewState.initial()) {
     on<_OnSetup>(_onSetup);
@@ -35,7 +35,7 @@ class ScreenCapturePreviewBloc(
     Emitter<ScreenCapturePreviewState> emit,
   ) {
     return emit.forEach(
-      repository.observeEvents(),
+      feature.observeCaptures(),
       onData: (capture) {
         return state.copyWith(
           captures: [

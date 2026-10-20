@@ -1,6 +1,6 @@
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
@@ -78,7 +78,7 @@ DeviceConnection _connection(String id) {
   );
 }
 
-class _FakeConnections implements DeviceConnectionsRepository {
+class _FakeConnections implements DeviceConnectionsFeature {
   final _connections = BehaviorSubject.seeded(<DeviceConnection>[]);
 
   void emit(List<DeviceConnection> connections) {

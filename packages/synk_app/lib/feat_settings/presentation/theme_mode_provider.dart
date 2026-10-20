@@ -1,7 +1,6 @@
 import 'package:synk/feat_notifications/application/notification_service.dart';
-import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
-import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
+import 'package:synk/feat_settings/domain/settings_feature.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:flutter/widgets.dart';
@@ -17,9 +16,8 @@ class const ThemeModeProvider({
     return BlocProvider<SettingsBloc>(
       create: (context) => SettingsBloc(
         defaults: defaults,
-        repository: RepositoryProvider.of<SettingsRepository>(context),
+        feature: RepositoryProvider.of<SettingsFeature>(context),
         notifications: RepositoryProvider.of<NotificationService>(context),
-        fileOpener: RepositoryProvider.of<SystemFileOpener>(context),
       ),
       child: BlocSelector<SettingsBloc, Settings, ThemeMode>(
         selector: (settings) => settings.themeMode,

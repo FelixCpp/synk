@@ -3,7 +3,8 @@ import 'package:synk/feat_device_connections/domain/models/device_connection_sta
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/user_facing_exception.dart';
 
-abstract interface class DeviceConnectionsRepository {
+/// What Synk can do with the devices that are plugged in.
+abstract interface class DeviceConnectionsFeature {
   Future<void> dispose();
   Future<void> connect(PluggedDevice device);
   Future<void> disconnect(PluggedDevice device);

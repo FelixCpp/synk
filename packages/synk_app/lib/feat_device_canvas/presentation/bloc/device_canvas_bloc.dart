@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_connections/domain/usecases/disconnect_device_interactor.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
@@ -16,7 +16,7 @@ part 'device_canvas_state.dart';
 part 'device_canvas_event.dart';
 
 class DeviceCanvasBloc(
-  final DeviceConnectionsRepository connectionsRepository,
+  final DeviceConnectionsFeature connectionsRepository,
   final NotificationService notifications,
 ) extends Bloc<DeviceCanvasEvent, DeviceCanvasState> {
   final disconnectDevice = DisconnectDeviceInteractor(connectionsRepository);

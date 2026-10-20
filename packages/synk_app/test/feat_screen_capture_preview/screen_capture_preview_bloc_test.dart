@@ -5,7 +5,7 @@ import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
-import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
+import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
 import 'package:synk/feat_screen_capture_preview/presentation/bloc/screen_capture_preview_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,12 +19,12 @@ ScreenCaptureEvent _capture(String device) {
   );
 }
 
-class _RecordingRepository implements ScreenCapturePreviewRepository {
+class _RecordingFeature implements ScreenCapturePreviewFeature {
   final captures = StreamController<ScreenCaptureEvent>.broadcast();
   final handedToTheSystem = <ScreenCaptureEvent>[];
 
   @override
-  Stream<ScreenCaptureEvent> observeEvents() => captures.stream;
+  Stream<ScreenCaptureEvent> observeCaptures() => captures.stream;
 
   @override
   Future<void> openInSystemViewer(ScreenCaptureEvent event) async {
@@ -33,12 +33,12 @@ class _RecordingRepository implements ScreenCapturePreviewRepository {
 }
 
 void main() {
-  late _RecordingRepository repository;
+  late _RecordingFeature repository;
   late NotificationService notifications;
   late ScreenCapturePreviewBloc bloc;
 
   setUp(() {
-    repository = _RecordingRepository();
+    repository = _RecordingFeature();
     notifications = NotificationService();
     bloc = ScreenCapturePreviewBloc(repository, notifications);
   });

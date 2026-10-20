@@ -20,8 +20,8 @@ import 'package:synk/feat_device_platform_ios/ios_device_platform.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
-import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/application/device_connections_feature_impl.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/presentation/app_notification_listener.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
@@ -29,16 +29,19 @@ import 'package:synk/feat_screen_capture_preview/application/system_file_opener.
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_settings/data/repositories/settings_repository_impl.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
+import 'package:synk/feat_settings/application/settings_feature_impl.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
+import 'package:synk/feat_settings/domain/settings_feature.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
-import 'package:synk/feat_screen_capture_preview/data/repositories/screen_capture_preview_repository_impl.dart';
-import 'package:synk/feat_screen_capture_preview/domain/repositories/screen_capture_preview_repository.dart';
-import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
+import 'package:synk/feat_screen_capture_preview/application/screen_capture_preview_feature_impl.dart';
+import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
+import 'package:synk/feat_sidebar/application/sidebar_feature_impl.dart';
+import 'package:synk/feat_sidebar/domain/sidebar_feature.dart';
 import 'package:synk/feat_tool_validation/data/repositories/tool_validation_repository_impl.dart';
 import 'package:synk/feat_tool_validation/domain/models/adb_paths.dart';
 import 'package:synk/feat_tool_validation/domain/repositories/tool_validation_repository.dart';
@@ -136,6 +139,12 @@ Future<void> main() async {
           create: (_) => settingsRepository,
           lazy: false,
         ),
+        RepositoryProvider<SettingsFeature>.value(
+          value: SettingsFeatureImpl(
+            settings: settingsRepository,
+            fileOpener: fileOpener,
+          ),
+        ),
         RepositoryProvider<AdbPaths>.value(value: adbPaths),
         RepositoryProvider<ClipboardFeature>.value(
           value: const ClipboardFeatureImpl(),
@@ -158,10 +167,12 @@ Future<void> main() async {
             platform: platform,
           ),
         ),
-        RepositoryProvider<ScreenCapturePreviewRepository>(
-          create: (context) => ScreenCapturePreviewRepositoryImpl(
-            RepositoryProvider.of<ScreenCaptureEventChannel>(context),
-            fileOpener,
+        RepositoryProvider<ScreenCapturePreviewFeature>(
+          create: (context) => ScreenCapturePreviewFeatureImpl(
+            captures: RepositoryProvider.of<ScreenCaptureEventChannel>(
+              context,
+            ),
+            fileOpener: fileOpener,
           ),
         ),
         RepositoryProvider<DeviceFrameFactory>(
@@ -282,8 +293,8 @@ class const _ToolProviders({
             processManager: RepositoryProvider.of<ProcessManager>(context),
           ),
         ),
-        RepositoryProvider<DeviceConnectionsRepository>(
-          create: (context) => DeviceConnectionsRepositoryImpl(
+        RepositoryProvider<DeviceConnectionsFeature>(
+          create: (context) => DeviceConnectionsFeatureImpl(
             platforms: _availablePlatforms(context, availability),
             settingsRepository: RepositoryProvider.of<SettingsRepository>(
               context,
@@ -297,15 +308,18 @@ class const _ToolProviders({
             RepositoryProvider.of<AdbApi>(context),
           ),
         ),
-        RepositoryProvider<SidebarDevices>(
-          create: (context) => SidebarDevices(
-            RepositoryProvider.of<DeviceConnectionsRepository>(context),
+        RepositoryProvider<SidebarFeature>(
+          create: (context) => SidebarFeatureImpl(
+            connections: RepositoryProvider.of<DeviceConnectionsFeature>(
+              context,
+            ),
+            fileOpener: RepositoryProvider.of<SystemFileOpener>(context),
           ),
         ),
         RepositoryProvider<MaximizedDeviceWatch>(
           create: (context) => MaximizedDeviceWatch(
             connectionsRepository:
-                RepositoryProvider.of<DeviceConnectionsRepository>(context),
+                RepositoryProvider.of<DeviceConnectionsFeature>(context),
           ),
         ),
       ],

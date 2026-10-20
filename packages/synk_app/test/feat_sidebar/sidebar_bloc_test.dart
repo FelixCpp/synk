@@ -1,71 +1,48 @@
 import 'dart:async';
 
-import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
-import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
+import 'package:synk/feat_sidebar/domain/sidebar_feature.dart';
 import 'package:synk/feat_sidebar/presentation/bloc/sidebar_bloc.dart';
-import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:platform/testing.dart';
-import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 
-import '../support/fake_process_manager.dart';
-
-class FakeSidebarDevices implements SidebarDevices {
-  final _controller = StreamController<List<SidebarDevice>>.broadcast();
-
-  @override
-  Stream<List<SidebarDevice>> observe() => _controller.stream;
-
-  void emit(List<SidebarDevice> devices) => _controller.add(devices);
-
-  Future<void> close() => _controller.close();
-}
-
-class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
-  @override
-  Stream<List<PluggedDevice>> observePluggedDevices() {
-    return Stream.value(const []);
-  }
+class FakeSidebarFeature implements SidebarFeature {
+  final _devices = StreamController<List<SidebarDevice>>.broadcast();
 
   Object? errorToThrow;
   PluggedDevice? lastConnected;
   PluggedDevice? lastDisconnected;
+  var cameraSettingsOpened = 0;
+
+  @override
+  Stream<List<SidebarDevice>> observeDevices() => _devices.stream;
 
   @override
   Future<void> connect(PluggedDevice device) async {
     lastConnected = device;
-    if (errorToThrow != null) throw errorToThrow!;
+    if (errorToThrow case final error?) throw error;
   }
 
   @override
   Future<void> disconnect(PluggedDevice device) async {
     lastDisconnected = device;
-    if (errorToThrow != null) throw errorToThrow!;
+    if (errorToThrow case final error?) throw error;
   }
 
   @override
-  Future<void> dispose() async {}
-
-  @override
-  bool isConnected(DeviceId id) => false;
-
-  @override
-  Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
-    return Stream.value(const {});
+  Future<void> openCameraPrivacySettings() async {
+    cameraSettingsOpened++;
+    if (errorToThrow case final error?) throw error;
   }
 
-  @override
-  Stream<List<DeviceConnection>> observeDeviceConnections() {
-    return const Stream.empty();
-  }
+  void emit(List<SidebarDevice> devices) => _devices.add(devices);
+
+  Future<void> close() => _devices.close();
 }
 
 AndroidDevice buildDevice(String serial) {
@@ -77,43 +54,27 @@ AndroidDevice buildDevice(String serial) {
   );
 }
 
-IosDevice buildIosDevice(String serial) {
-  return IosDevice(id: DeviceId(serial), modelName: 'iPhone');
-}
-
 void main() {
-  late FakeSidebarDevices sidebarRepository;
-  late FakeDeviceConnectionsRepository connectionsRepository;
+  late FakeSidebarFeature feature;
   late NotificationService notifications;
-  late FakeProcessManager processManager;
   late SidebarBloc bloc;
 
   setUp(() {
-    sidebarRepository = FakeSidebarDevices();
-    connectionsRepository = FakeDeviceConnectionsRepository();
+    feature = FakeSidebarFeature();
     notifications = NotificationService();
-    processManager = FakeProcessManager();
-    bloc = SidebarBloc(
-      sidebarRepository,
-      connectionsRepository,
-      notifications,
-      SystemFileOpener(
-        processManager: processManager,
-        platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
-      ),
-    );
+    bloc = SidebarBloc(feature, notifications);
   });
 
   tearDown(() async {
     await bloc.close();
-    await sidebarRepository.close();
+    await feature.close();
     await notifications.dispose();
   });
 
   test('reflects the devices emitted by the repository', () async {
     final device = buildDevice('serial-1');
 
-    sidebarRepository.emit([
+    feature.emit([
       SidebarDevice(
         device: device,
         state: const SidebarDeviceState.disconnected(),
@@ -139,7 +100,7 @@ void main() {
     bloc.add(SidebarEvent.onConnectRequested(device));
     await pumpEventQueue();
 
-    expect(connectionsRepository.lastConnected, device);
+    expect(feature.lastConnected, device);
     expect(emitted, isEmpty);
 
     await subscription.cancel();
@@ -147,7 +108,7 @@ void main() {
 
   test('passes a message meant for the user through as it is', () async {
     final device = buildDevice('serial-5');
-    connectionsRepository.errorToThrow = DeviceNotPluggedException(
+    feature.errorToThrow = DeviceNotPluggedException(
       deviceId: device.id,
     );
 
@@ -170,13 +131,13 @@ void main() {
     bloc.add(SidebarEvent.onDisconnectRequested(device));
     await pumpEventQueue();
 
-    expect(connectionsRepository.lastDisconnected, device);
-    expect(connectionsRepository.lastConnected, isNull);
+    expect(feature.lastDisconnected, device);
+    expect(feature.lastConnected, isNull);
   });
 
   test('notifies when connecting fails', () async {
     final device = buildDevice('serial-3');
-    connectionsRepository.errorToThrow = Exception('boom');
+    feature.errorToThrow = Exception('boom');
 
     final emitted = <AppNotification>[];
     final subscription = notifications.observeNotifications().listen(
@@ -196,15 +157,10 @@ void main() {
     await subscription.cancel();
   });
 
-  test('opens the camera privacy settings of macOS', () async {
+  test('asks the feature for the camera privacy settings', () async {
     bloc.add(const SidebarEvent.onOpenCameraPrivacySettings());
     await pumpEventQueue();
 
-    expect(processManager.commands, [
-      [
-        'open',
-        'x-apple.systempreferences:com.apple.preference.security?Privacy_Camera',
-      ],
-    ]);
+    expect(feature.cameraSettingsOpened, 1);
   });
 }

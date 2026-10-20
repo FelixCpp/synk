@@ -1,23 +1,37 @@
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
+import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+import 'package:synk/feat_sidebar/application/sidebar_feature_impl.dart';
+import 'package:synk/feat_sidebar/domain/sidebar_feature.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device.dart';
 import 'package:synk/feat_sidebar/domain/models/sidebar_device_state.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:platform/testing.dart';
+
+import '../support/fake_process_manager.dart';
+
 import 'package:rxdart/rxdart.dart';
 
 void main() {
-  group('SidebarDevices', () {
+  group('SidebarFeatureImpl', () {
     late _FakeConnections connections;
-    late SidebarDevices repository;
+    late FakeProcessManager processManager;
+    late SidebarFeature feature;
 
     setUp(() {
       connections = _FakeConnections();
-      repository = SidebarDevices(connections);
+      processManager = FakeProcessManager();
+      feature = SidebarFeatureImpl(
+        connections: connections,
+        fileOpener: SystemFileOpener(
+          processManager: processManager,
+          platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
+        ),
+      );
     });
 
     tearDown(() async {
@@ -25,7 +39,7 @@ void main() {
     });
 
     Future<SidebarDeviceState> stateOf(PluggedDevice device) async {
-      final devices = await repository.observe().first;
+      final devices = await feature.observeDevices().first;
       return devices.singleWhere((entry) => entry.device == device).state;
     }
 
@@ -107,7 +121,7 @@ void main() {
         iosDevice.id: const DeviceConnectionState.connecting(),
       });
 
-      final devices = await repository.observe().first;
+      final devices = await feature.observeDevices().first;
 
       expect(devices, [
         SidebarDevice(
@@ -118,6 +132,18 @@ void main() {
           device: iosDevice,
           state: const SidebarDeviceState.connecting(),
         ),
+      ]);
+    });
+
+    test('opens the camera pane of the system settings', () async {
+      await feature.openCameraPrivacySettings();
+
+      expect(processManager.commands, [
+        [
+          'open',
+          'x-apple.systempreferences:com.apple.preference.security'
+              '?Privacy_Camera',
+        ],
       ]);
     });
   });
@@ -135,7 +161,7 @@ AndroidDevice _buildAndroidDevice(
   );
 }
 
-class _FakeConnections implements DeviceConnectionsRepository {
+class _FakeConnections implements DeviceConnectionsFeature {
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
     return _devices;

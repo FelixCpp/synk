@@ -7,9 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
-import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
-import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
+import 'package:synk/feat_settings/domain/settings_feature.dart';
 import 'package:synk/feat_settings/domain/usecases/reveal_screen_capture_save_path_interactor.dart';
 import 'package:synk/feat_settings/domain/usecases/save_settings_interactor.dart';
 import 'package:use_in_case/use_in_case.dart';
@@ -19,14 +18,12 @@ part 'settings_event.dart';
 
 class SettingsBloc({
   required final Settings defaults,
-  required final SettingsRepository repository,
+  required final SettingsFeature feature,
   required final NotificationService notifications,
-  required final SystemFileOpener fileOpener,
 }) extends Bloc<SettingsEvent, Settings> {
-  final saveSettings = SaveSettingsInteractor(repository);
+  final saveSettings = SaveSettingsInteractor(feature);
   final revealScreenCaptureSavePath = RevealScreenCaptureSavePathInteractor(
-    repository,
-    fileOpener,
+    feature,
   );
 
   this : super(defaults) {
@@ -41,7 +38,7 @@ class SettingsBloc({
   }
 
   FutureOr<void> _onSetup(_OnSetup event, Emitter<Settings> emit) {
-    return emit.forEach(repository.observe(), onData: (settings) => settings);
+    return emit.forEach(feature.observe(), onData: (settings) => settings);
   }
 
   FutureOr<void> _onSave(_OnSave event, Emitter<Settings> emit) {

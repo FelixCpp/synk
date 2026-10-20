@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
-import 'package:synk/feat_device_connections/data/repositories/device_connections_repository_impl.dart';
+import 'package:synk/feat_device_connections/application/device_connections_feature_impl.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
@@ -22,13 +22,13 @@ void main() {
   late FakePlatform android;
   late FakePlatform ios;
   late FakeSettingsRepository settings;
-  late DeviceConnectionsRepositoryImpl repository;
+  late DeviceConnectionsFeatureImpl repository;
 
   setUp(() {
     android = FakePlatform();
     ios = FakePlatform();
     settings = FakeSettingsRepository();
-    repository = DeviceConnectionsRepositoryImpl(
+    repository = DeviceConnectionsFeatureImpl(
       platforms: [android, ios],
       settingsRepository: settings,
     );
@@ -46,7 +46,7 @@ void main() {
     return device;
   }
 
-  group('DeviceConnectionsRepositoryImpl.observePluggedDevices', () {
+  group('DeviceConnectionsFeatureImpl.observePluggedDevices', () {
     test('lists the devices of every platform', () async {
       final pixel = await plugInto(android, 'android-1');
       final iphone = await plugInto(ios, 'ios-1');
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('lists nothing without any platform', () async {
-      final empty = DeviceConnectionsRepositoryImpl(
+      final empty = DeviceConnectionsFeatureImpl(
         platforms: const [],
         settingsRepository: FakeSettingsRepository(),
       );
@@ -65,7 +65,7 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl.connect', () {
+  group('DeviceConnectionsFeatureImpl.connect', () {
     test('connects a device through the platform that reported it', () async {
       final pixel = await plugInto(android, 'android-1');
       final iphone = await plugInto(ios, 'ios-1');
@@ -143,7 +143,7 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl.observeDeviceConnections', () {
+  group('DeviceConnectionsFeatureImpl.observeDeviceConnections', () {
     test('offers what the session of a connection can do', () async {
       final session = FakeDeviceSession(interaction: _HomeOnlyInteraction());
       android.onConnect = (_) async => session;
@@ -184,7 +184,7 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl.observeConnectionStates', () {
+  group('DeviceConnectionsFeatureImpl.observeConnectionStates', () {
     test(
       'reports a plugged device without an attempt as disconnected',
       () async {
@@ -312,7 +312,7 @@ void main() {
     );
   });
 
-  group('DeviceConnectionsRepositoryImpl mirror options', () {
+  group('DeviceConnectionsFeatureImpl mirror options', () {
     test('hands the stored options to the platform it connects', () async {
       settings.update(
         (it) => it.copyWith(
@@ -348,7 +348,7 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl connect-time audio', () {
+  group('DeviceConnectionsFeatureImpl connect-time audio', () {
     Future<FakeAudio> connectWith({required bool muteOnConnect}) async {
       final audio = FakeAudio()..isAudioMuted = false;
       android.onConnect = (_) async => FakeDeviceSession(audio: audio);
@@ -369,11 +369,11 @@ void main() {
     });
   });
 
-  group('DeviceConnectionsRepositoryImpl.dispose', () {
+  group('DeviceConnectionsFeatureImpl.dispose', () {
     test('disposes the connected sessions and the platforms', () async {
       final session = FakeDeviceSession();
       final platform = FakePlatform(onConnect: (_) async => session);
-      final repository = DeviceConnectionsRepositoryImpl(
+      final repository = DeviceConnectionsFeatureImpl(
         platforms: [platform],
         settingsRepository: FakeSettingsRepository(),
       );

@@ -1,7 +1,7 @@
 import 'package:synk/feat_device_canvas/presentation/device_canvas_container.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -39,7 +39,7 @@ Future<void> _pumpCanvas(
           RepositoryProvider<NotificationService>(
             create: (context) => NotificationService(),
           ),
-          RepositoryProvider<DeviceConnectionsRepository>.value(
+          RepositoryProvider<DeviceConnectionsFeature>.value(
             value: connections,
           ),
         ],
@@ -58,7 +58,7 @@ Future<void> _pumpCanvas(
   );
 }
 
-class _FakeConnections implements DeviceConnectionsRepository {
+class _FakeConnections implements DeviceConnectionsFeature {
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
     return Stream.value(const []);

@@ -4,17 +4,17 @@ import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exc
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 import 'package:rxdart/rxdart.dart';
 
-class DeviceConnectionsRepositoryImpl({
+class DeviceConnectionsFeatureImpl({
   required final List<DevicePlatform> platforms,
   required final SettingsRepository settingsRepository,
-}) implements DeviceConnectionsRepository {
+}) implements DeviceConnectionsFeature {
   final _sessionsById = <DeviceId, DeviceSession>{};
   final connectionStates = BehaviorSubject.seeded(
     <DeviceId, DeviceConnectionState>{},

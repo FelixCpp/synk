@@ -4,11 +4,12 @@ import 'package:synk/feat_tool_validation/domain/models/tool_availability.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection_state.dart';
-import 'package:synk/feat_device_connections/domain/repositories/device_connections_repository.dart';
+import 'package:synk/feat_device_connections/domain/device_connections_feature.dart';
 import 'package:synk/feat_notifications/application/notification_service.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
-import 'package:synk/feat_sidebar/presentation/sidebar_devices.dart';
+import 'package:synk/feat_sidebar/application/sidebar_feature_impl.dart';
+import 'package:synk/feat_sidebar/domain/sidebar_feature.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,8 +17,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../support/fake_process_manager.dart';
 
-class FakeDeviceConnectionsRepository implements DeviceConnectionsRepository {
-  FakeDeviceConnectionsRepository(this.devices);
+class FakeDeviceConnectionsFeature implements DeviceConnectionsFeature {
+  FakeDeviceConnectionsFeature(this.devices);
 
   final List<PluggedDevice> devices;
 
@@ -88,12 +89,15 @@ Future<void> _pumpSidebar(
               ),
             ),
           ),
-          RepositoryProvider<DeviceConnectionsRepository>(
-            create: (context) => FakeDeviceConnectionsRepository(devices),
+          RepositoryProvider<DeviceConnectionsFeature>(
+            create: (context) => FakeDeviceConnectionsFeature(devices),
           ),
-          RepositoryProvider<SidebarDevices>(
-            create: (context) => SidebarDevices(
-              RepositoryProvider.of<DeviceConnectionsRepository>(context),
+          RepositoryProvider<SidebarFeature>(
+            create: (context) => SidebarFeatureImpl(
+              connections: RepositoryProvider.of<DeviceConnectionsFeature>(
+                context,
+              ),
+              fileOpener: RepositoryProvider.of<SystemFileOpener>(context),
             ),
           ),
         ],
