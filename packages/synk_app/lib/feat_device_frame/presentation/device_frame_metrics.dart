@@ -32,10 +32,16 @@ class DeviceFrameMetrics {
   static const double mirrorArea =
       referenceWidth * (referenceWidth / referenceAspectRatio);
 
+  static const double minScale = 0.75;
+  static const double maxScale = 2.0;
+
   /// The tile for a device of [aspectRatio]: a constant mirror area, plus the
   /// chrome above and below it.
-  static Size sizeFor(double aspectRatio) {
-    final mirror = sizeForConstantArea(mirrorArea, aspectRatio);
+  static Size sizeFor(double aspectRatio, {double scale = 1}) {
+    final mirror = sizeForConstantArea(
+      mirrorArea * scale * scale,
+      aspectRatio,
+    );
     return Size(mirror.width, mirror.height + chromeHeight);
   }
 }

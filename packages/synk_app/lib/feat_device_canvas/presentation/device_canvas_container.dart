@@ -118,8 +118,12 @@ class const _Content({
               mainAxisSpacing: SynkUiSpace.s8,
               crossAxisSpacing: SynkUiSpace.s8,
               items: state.devices,
-              cellSizeOf: (item) =>
-                  DeviceFrameMetrics.sizeFor(item.screenSize.aspectRatio),
+              cellSizeOf: (item, scale) => DeviceFrameMetrics.sizeFor(
+                item.screenSize.aspectRatio,
+                scale: scale,
+              ),
+              minScale: DeviceFrameMetrics.minScale,
+              maxScale: DeviceFrameMetrics.maxScale,
               duration: const Duration(milliseconds: 150),
               keyOf: (item) => item.device.id,
               itemBuilder: (context, item) {

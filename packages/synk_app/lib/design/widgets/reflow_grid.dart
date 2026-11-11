@@ -9,7 +9,7 @@ typedef ReflowGridItemBuilder<T> = Widget Function(
 
 typedef ReflowGridKeyOf<T> = Object Function(T item);
 
-typedef ReflowGridCellSizeOf<T> = Size Function(T item);
+typedef ReflowGridCellSizeOf<T> = Size Function(T item, double scale);
 
 class ReflowGrid<T> extends StatefulWidget {
   const ReflowGrid({
@@ -24,17 +24,18 @@ class ReflowGrid<T> extends StatefulWidget {
     this.curve = Curves.easeInCubic,
     this.scrollController,
     this.padding = EdgeInsets.zero,
-  });
+    this.minScale = 1,
+    this.maxScale = 1,
+  }) : assert(minScale <= maxScale);
 
   final List<T> items;
   final ReflowGridItemBuilder<T> itemBuilder;
   final ReflowGridKeyOf<T> keyOf;
 
-  /// A cell's size depends on its item alone, never on the window or on how
-  /// many other items there are - so a tile never grows or shrinks just
-  /// because another device connected or disconnected elsewhere in the grid.
-  /// Items flow left to right and wrap onto further rows, which scroll; each
-  /// row is as tall as the tallest cell in it.
+  /// Every cell is sized at one shared scale: the largest between [minScale]
+  /// and [maxScale] at which all items fit the viewport. Items flow left to
+  /// right and wrap onto further rows; only below [minScale] do the rows
+  /// scroll.
   final ReflowGridCellSizeOf<T> cellSizeOf;
 
   final double mainAxisSpacing;
@@ -43,6 +44,8 @@ class ReflowGrid<T> extends StatefulWidget {
   final Curve curve;
   final ScrollController? scrollController;
   final EdgeInsets padding;
+  final double minScale;
+  final double maxScale;
 
   @override
   State<ReflowGrid<T>> createState() => _ReflowGridState<T>();
@@ -67,11 +70,31 @@ class _Cell<T> {
   final T item;
   final Rect rect;
   final bool isExiting;
+
+  _Cell<T> shiftedBy(double dy) => _Cell(
+    key: key,
+    item: item,
+    rect: rect.translate(0, dy),
+    isExiting: isExiting,
+  );
+}
+
+class _Layout<T> {
+  _Layout({
+    required this.cells,
+    required this.height,
+    required this.overflowsWidth,
+  });
+
+  final List<_Cell<T>> cells;
+  final double height;
+  final bool overflowsWidth;
 }
 
 class _ReflowGridState<T> extends State<ReflowGrid<T>> {
   final _exiting = <Object, _ExitingEntry<T>>{};
   var _previousItems = <T>[];
+  Size? _previousAvailable;
 
   @override
   void initState() {
@@ -125,61 +148,146 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
     return ordered;
   }
 
-  List<_Cell<T>> _layout(double maxWidth) {
-    final cells = <_Cell<T>>[];
-
-    var rowTop = 0.0;
-    var rowHeight = 0.0;
+  _Layout<T> _layout(
+    List<({Object key, T item, bool isExiting})> entries,
+    double maxWidth,
+    double scale,
+  ) {
+    final rows = <List<({Object key, T item, bool isExiting, Size size})>>[];
     var x = 0.0;
+    var overflowsWidth = false;
 
-    for (final entry in _orderedItems()) {
-      final size = widget.cellSizeOf(entry.item);
+    for (final entry in entries) {
+      final size = widget.cellSizeOf(entry.item, scale);
+      overflowsWidth |= size.width > maxWidth;
       final width = math.min(size.width, maxWidth);
 
-      if (x > 0 && x + width > maxWidth) {
-        rowTop += rowHeight + widget.mainAxisSpacing;
-        rowHeight = 0.0;
+      if (rows.isEmpty || (x > 0 && x + width > maxWidth)) {
+        rows.add([]);
         x = 0.0;
       }
 
-      cells.add(
-        _Cell(
-          key: entry.key,
-          item: entry.item,
-          rect: Rect.fromLTWH(x, rowTop, width, size.height),
-          isExiting: entry.isExiting,
-        ),
-      );
-
+      rows.last.add((
+        key: entry.key,
+        item: entry.item,
+        isExiting: entry.isExiting,
+        size: Size(width, size.height),
+      ));
       x += width + widget.crossAxisSpacing;
-      rowHeight = math.max(rowHeight, size.height);
     }
 
-    return cells;
+    final cells = <_Cell<T>>[];
+    var rowTop = 0.0;
+
+    for (final row in rows) {
+      final rowWidth =
+          row.fold(0.0, (width, cell) => width + cell.size.width) +
+          widget.crossAxisSpacing * (row.length - 1);
+      final rowHeight = row.fold(
+        0.0,
+        (height, cell) => math.max(height, cell.size.height),
+      );
+      var left = (maxWidth - rowWidth) / 2;
+
+      for (final cell in row) {
+        cells.add(
+          _Cell(
+            key: cell.key,
+            item: cell.item,
+            rect: Rect.fromLTWH(
+              left,
+              rowTop + (rowHeight - cell.size.height) / 2,
+              cell.size.width,
+              cell.size.height,
+            ),
+            isExiting: cell.isExiting,
+          ),
+        );
+        left += cell.size.width + widget.crossAxisSpacing;
+      }
+
+      rowTop += rowHeight + widget.mainAxisSpacing;
+    }
+
+    return _Layout(
+      cells: cells,
+      height: rows.isEmpty ? 0.0 : rowTop - widget.mainAxisSpacing,
+      overflowsWidth: overflowsWidth,
+    );
+  }
+
+  _Layout<T> _fittingLayout(
+    List<({Object key, T item, bool isExiting})> entries,
+    Size available,
+  ) {
+    bool fits(_Layout<T> layout) =>
+        !layout.overflowsWidth && layout.height <= available.height;
+
+    final largest = _layout(entries, available.width, widget.maxScale);
+    if (fits(largest)) return largest;
+
+    final smallest = _layout(entries, available.width, widget.minScale);
+    if (!fits(smallest)) return smallest;
+
+    var fitting = smallest;
+    var low = widget.minScale;
+    var high = widget.maxScale;
+
+    for (var i = 0; i < 12; i++) {
+      final scale = (low + high) / 2;
+      final layout = _layout(entries, available.width, scale);
+
+      if (fits(layout)) {
+        fitting = layout;
+        low = scale;
+      } else {
+        high = scale;
+      }
+    }
+
+    return fitting;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, viewportConstraints) {
-        final cells = _layout(viewportConstraints.maxWidth);
-        final totalHeight = cells.fold(
-          0.0,
-          (height, cell) => math.max(height, cell.rect.bottom),
+        final available = Size(
+          math.max(
+            0.0,
+            viewportConstraints.maxWidth - widget.padding.horizontal,
+          ),
+          math.max(
+            0.0,
+            viewportConstraints.maxHeight - widget.padding.vertical,
+          ),
         );
+
+        final isResizing =
+            _previousAvailable != null && _previousAvailable != available;
+        _previousAvailable = available;
+
+        final layout = _fittingLayout(_orderedItems(), available);
+        final top = available.height.isFinite
+            ? math.max(0.0, (available.height - layout.height) / 2)
+            : 0.0;
 
         return SingleChildScrollView(
           controller: widget.scrollController,
           padding: widget.padding,
           child: SizedBox(
-            height: totalHeight,
+            height: layout.height + top,
             child: Stack(
               children: [
-                for (final cell in cells)
+                for (final cell in layout.cells)
                   if (cell.isExiting)
-                    _buildExitingCell(context, cell)
+                    _buildExitingCell(context, cell.shiftedBy(top))
                   else
-                    _buildPresentCell(context, cell),
+                    _buildPresentCell(
+                      context,
+                      cell.shiftedBy(top),
+                      isResizing: isResizing,
+                    ),
               ],
             ),
           ),
@@ -188,10 +296,14 @@ class _ReflowGridState<T> extends State<ReflowGrid<T>> {
     );
   }
 
-  Widget _buildPresentCell(BuildContext context, _Cell<T> cell) {
+  Widget _buildPresentCell(
+    BuildContext context,
+    _Cell<T> cell, {
+    required bool isResizing,
+  }) {
     return AnimatedPositioned(
       key: ValueKey(cell.key),
-      duration: widget.duration,
+      duration: isResizing ? Duration.zero : widget.duration,
       curve: widget.curve,
       left: cell.rect.left,
       top: cell.rect.top,
