@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SimulatePinchEventInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<PinchEvent> {
   @override
-  FutureOr<void> getOrThrow(PinchEvent input) {
+  FutureOr<void> execute(PinchEvent input) {
     return feature.simulatePinchEvent(input);
   }
 }

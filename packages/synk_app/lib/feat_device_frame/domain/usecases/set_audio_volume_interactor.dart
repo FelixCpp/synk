@@ -6,7 +6,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SetAudioVolumeInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<double> {
   @override
-  FutureOr<void> getOrThrow(double input) {
+  FutureOr<void> execute(double input) {
     return feature.setAudioVolume(input);
   }
 }

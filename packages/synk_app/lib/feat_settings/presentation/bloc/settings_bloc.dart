@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
@@ -57,7 +56,7 @@ class SettingsBloc({
     return revealScreenCaptureSavePath
         .logger()
         .intercept(_notify('Der Ordner konnte nicht geöffnet werden'))
-        .run(unit);
+        .run();
   }
 
   void Function(Object) _notify(String fallback) {

@@ -98,30 +98,30 @@ void main() {
 
 class _EchoInteractor implements ParameterizedResultInteractor<String, String> {
   @override
-  FutureOr<String> getOrThrow(String input) => 'echo:$input';
+  FutureOr<String> execute(String input) => 'echo:$input';
 }
 
 class _SilentInteractor implements ParameterizedInteractor<String> {
   @override
-  FutureOr<void> getOrThrow(String input) {}
+  FutureOr<void> execute(String input) {}
 }
 
 class _FailingInteractor implements ParameterizedInteractor<String> {
   @override
-  FutureOr<void> getOrThrow(String input) {
+  FutureOr<void> execute(String input) {
     throw const FormatException('device went away mid-handshake');
   }
 }
 
 class _GenericInteractor<T> implements ParameterizedInteractor<T> {
   @override
-  FutureOr<void> getOrThrow(T input) {}
+  FutureOr<void> execute(T input) {}
 }
 
 class _MutedInputInteractor
     implements ParameterizedInteractor<_ExplodingInput> {
   @override
-  FutureOr<void> getOrThrow(_ExplodingInput input) {}
+  FutureOr<void> execute(_ExplodingInput input) {}
 }
 
 /// Blows up if anyone puts it in a log message.

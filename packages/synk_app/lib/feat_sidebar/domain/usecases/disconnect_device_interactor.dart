@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const DisconnectDeviceInteractor(final SidebarFeature feature)
     implements ParameterizedInteractor<PluggedDevice> {
   @override
-  FutureOr<void> getOrThrow(PluggedDevice input) {
+  FutureOr<void> execute(PluggedDevice input) {
     return feature.disconnect(input);
   }
 }

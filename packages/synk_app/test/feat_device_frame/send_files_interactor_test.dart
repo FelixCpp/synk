@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:use_in_case/use_in_case.dart';
 
 import '../support/device_frame_harness.dart';
 

@@ -8,7 +8,7 @@ class const SendFilesInteractor(final DeviceFrameFeature feature)
     implements
         ParameterizedResultInteractor<List<String>, List<FileTransferOutcome>> {
   @override
-  FutureOr<List<FileTransferOutcome>> getOrThrow(List<String> input) {
+  FutureOr<List<FileTransferOutcome>> execute(List<String> input) {
     return feature.sendFiles(input);
   }
 }

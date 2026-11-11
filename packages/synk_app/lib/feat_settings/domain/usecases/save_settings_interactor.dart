@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SaveSettingsInteractor(final SettingsFeature feature)
     implements ParameterizedInteractor<Settings> {
   @override
-  FutureOr<void> getOrThrow(Settings input) {
+  FutureOr<void> execute(Settings input) {
     return feature.save(input);
   }
 }

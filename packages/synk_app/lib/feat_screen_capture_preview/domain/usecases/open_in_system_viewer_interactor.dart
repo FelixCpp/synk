@@ -8,7 +8,7 @@ class const OpenInSystemViewerInteractor(
   final ScreenCapturePreviewFeature feature,
 ) implements ParameterizedInteractor<ScreenCaptureEvent> {
   @override
-  FutureOr<void> getOrThrow(ScreenCaptureEvent input) {
+  FutureOr<void> execute(ScreenCaptureEvent input) {
     return feature.openInSystemViewer(input);
   }
 }

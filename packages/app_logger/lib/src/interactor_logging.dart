@@ -3,7 +3,7 @@ import 'package:logger/logger.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 extension InteractorLoggingExt<Input, Output>
-    on ParameterizedResultInteractor<Input, Output> {
+    on InteractorContract<Input, Output> {
   ParameterizedResultInteractor<Input, Output> logger({
     String? tag,
     Level level = Level.debug,

@@ -56,14 +56,14 @@ extension SidebarDeviceStatePatterns on SidebarDeviceState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SidebarDeviceDisconnected value)?  disconnected,TResult Function( SidebarDeviceConnecting value)?  connecting,TResult Function( SidebarDeviceConnected value)?  connected,TResult Function( SidebarDeviceFailedToConnect value)?  failedToConnect,TResult Function( SidebarDeviceUnableToConnect value)?  unableToConnect,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Disconnected value)?  disconnected,TResult Function( _Connecting value)?  connecting,TResult Function( _Connected value)?  connected,TResult Function( _FailedToConnect value)?  failedToConnect,TResult Function( _UnableToConnect value)?  unableToConnect,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected() when disconnected != null:
-return disconnected(_that);case SidebarDeviceConnecting() when connecting != null:
-return connecting(_that);case SidebarDeviceConnected() when connected != null:
-return connected(_that);case SidebarDeviceFailedToConnect() when failedToConnect != null:
-return failedToConnect(_that);case SidebarDeviceUnableToConnect() when unableToConnect != null:
+case _Disconnected() when disconnected != null:
+return disconnected(_that);case _Connecting() when connecting != null:
+return connecting(_that);case _Connected() when connected != null:
+return connected(_that);case _FailedToConnect() when failedToConnect != null:
+return failedToConnect(_that);case _UnableToConnect() when unableToConnect != null:
 return unableToConnect(_that);case _:
   return orElse();
 
@@ -82,14 +82,14 @@ return unableToConnect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SidebarDeviceDisconnected value)  disconnected,required TResult Function( SidebarDeviceConnecting value)  connecting,required TResult Function( SidebarDeviceConnected value)  connected,required TResult Function( SidebarDeviceFailedToConnect value)  failedToConnect,required TResult Function( SidebarDeviceUnableToConnect value)  unableToConnect,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Disconnected value)  disconnected,required TResult Function( _Connecting value)  connecting,required TResult Function( _Connected value)  connected,required TResult Function( _FailedToConnect value)  failedToConnect,required TResult Function( _UnableToConnect value)  unableToConnect,}){
 final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected():
-return disconnected(_that);case SidebarDeviceConnecting():
-return connecting(_that);case SidebarDeviceConnected():
-return connected(_that);case SidebarDeviceFailedToConnect():
-return failedToConnect(_that);case SidebarDeviceUnableToConnect():
+case _Disconnected():
+return disconnected(_that);case _Connecting():
+return connecting(_that);case _Connected():
+return connected(_that);case _FailedToConnect():
+return failedToConnect(_that);case _UnableToConnect():
 return unableToConnect(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -104,14 +104,14 @@ return unableToConnect(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SidebarDeviceDisconnected value)?  disconnected,TResult? Function( SidebarDeviceConnecting value)?  connecting,TResult? Function( SidebarDeviceConnected value)?  connected,TResult? Function( SidebarDeviceFailedToConnect value)?  failedToConnect,TResult? Function( SidebarDeviceUnableToConnect value)?  unableToConnect,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Disconnected value)?  disconnected,TResult? Function( _Connecting value)?  connecting,TResult? Function( _Connected value)?  connected,TResult? Function( _FailedToConnect value)?  failedToConnect,TResult? Function( _UnableToConnect value)?  unableToConnect,}){
 final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected() when disconnected != null:
-return disconnected(_that);case SidebarDeviceConnecting() when connecting != null:
-return connecting(_that);case SidebarDeviceConnected() when connected != null:
-return connected(_that);case SidebarDeviceFailedToConnect() when failedToConnect != null:
-return failedToConnect(_that);case SidebarDeviceUnableToConnect() when unableToConnect != null:
+case _Disconnected() when disconnected != null:
+return disconnected(_that);case _Connecting() when connecting != null:
+return connecting(_that);case _Connected() when connected != null:
+return connected(_that);case _FailedToConnect() when failedToConnect != null:
+return failedToConnect(_that);case _UnableToConnect() when unableToConnect != null:
 return unableToConnect(_that);case _:
   return null;
 
@@ -131,11 +131,11 @@ return unableToConnect(_that);case _:
 
 @optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  disconnected,TResult Function()?  connecting,TResult Function()?  connected,TResult Function( ConnectionFailure failure)?  failedToConnect,TResult Function()?  unableToConnect,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected() when disconnected != null:
-return disconnected();case SidebarDeviceConnecting() when connecting != null:
-return connecting();case SidebarDeviceConnected() when connected != null:
-return connected();case SidebarDeviceFailedToConnect() when failedToConnect != null:
-return failedToConnect(_that.failure);case SidebarDeviceUnableToConnect() when unableToConnect != null:
+case _Disconnected() when disconnected != null:
+return disconnected();case _Connecting() when connecting != null:
+return connecting();case _Connected() when connected != null:
+return connected();case _FailedToConnect() when failedToConnect != null:
+return failedToConnect(_that.failure);case _UnableToConnect() when unableToConnect != null:
 return unableToConnect();case _:
   return orElse();
 
@@ -156,11 +156,11 @@ return unableToConnect();case _:
 
 @optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  disconnected,required TResult Function()  connecting,required TResult Function()  connected,required TResult Function( ConnectionFailure failure)  failedToConnect,required TResult Function()  unableToConnect,}) {final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected():
-return disconnected();case SidebarDeviceConnecting():
-return connecting();case SidebarDeviceConnected():
-return connected();case SidebarDeviceFailedToConnect():
-return failedToConnect(_that.failure);case SidebarDeviceUnableToConnect():
+case _Disconnected():
+return disconnected();case _Connecting():
+return connecting();case _Connected():
+return connected();case _FailedToConnect():
+return failedToConnect(_that.failure);case _UnableToConnect():
 return unableToConnect();}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -177,11 +177,11 @@ return unableToConnect();}
 
 @optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  disconnected,TResult? Function()?  connecting,TResult? Function()?  connected,TResult? Function( ConnectionFailure failure)?  failedToConnect,TResult? Function()?  unableToConnect,}) {final _that = this;
 switch (_that) {
-case SidebarDeviceDisconnected() when disconnected != null:
-return disconnected();case SidebarDeviceConnecting() when connecting != null:
-return connecting();case SidebarDeviceConnected() when connected != null:
-return connected();case SidebarDeviceFailedToConnect() when failedToConnect != null:
-return failedToConnect(_that.failure);case SidebarDeviceUnableToConnect() when unableToConnect != null:
+case _Disconnected() when disconnected != null:
+return disconnected();case _Connecting() when connecting != null:
+return connecting();case _Connected() when connected != null:
+return connected();case _FailedToConnect() when failedToConnect != null:
+return failedToConnect(_that.failure);case _UnableToConnect() when unableToConnect != null:
 return unableToConnect();case _:
   return null;
 
@@ -193,8 +193,8 @@ return unableToConnect();case _:
 /// @nodoc
 
 
-class SidebarDeviceDisconnected implements SidebarDeviceState {
-  const SidebarDeviceDisconnected();
+class _Disconnected implements SidebarDeviceState {
+  const _Disconnected();
   
 
 
@@ -204,7 +204,7 @@ class SidebarDeviceDisconnected implements SidebarDeviceState {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDeviceDisconnected);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Disconnected);
 }
 
 
@@ -225,8 +225,8 @@ String toString() {
 /// @nodoc
 
 
-class SidebarDeviceConnecting implements SidebarDeviceState {
-  const SidebarDeviceConnecting();
+class _Connecting implements SidebarDeviceState {
+  const _Connecting();
   
 
 
@@ -236,7 +236,7 @@ class SidebarDeviceConnecting implements SidebarDeviceState {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDeviceConnecting);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Connecting);
 }
 
 
@@ -257,8 +257,8 @@ String toString() {
 /// @nodoc
 
 
-class SidebarDeviceConnected implements SidebarDeviceState {
-  const SidebarDeviceConnected();
+class _Connected implements SidebarDeviceState {
+  const _Connected();
   
 
 
@@ -268,7 +268,7 @@ class SidebarDeviceConnected implements SidebarDeviceState {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDeviceConnected);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Connected);
 }
 
 
@@ -289,8 +289,8 @@ String toString() {
 /// @nodoc
 
 
-class SidebarDeviceFailedToConnect implements SidebarDeviceState {
-  const SidebarDeviceFailedToConnect({required this.failure});
+class _FailedToConnect implements SidebarDeviceState {
+  const _FailedToConnect({required this.failure});
   
 
  final  ConnectionFailure failure;
@@ -299,13 +299,13 @@ class SidebarDeviceFailedToConnect implements SidebarDeviceState {
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$SidebarDeviceFailedToConnectCopyWith<SidebarDeviceFailedToConnect> get copyWith => _$SidebarDeviceFailedToConnectCopyWithImpl<SidebarDeviceFailedToConnect>(this, _$identity);
+_$FailedToConnectCopyWith<_FailedToConnect> get copyWith => __$FailedToConnectCopyWithImpl<_FailedToConnect>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDeviceFailedToConnect&&(identical(other.failure, failure) || other.failure == failure));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FailedToConnect&&(identical(other.failure, failure) || other.failure == failure));
 }
 
 
@@ -323,8 +323,8 @@ String toString() {
 }
 
 /// @nodoc
-abstract mixin class $SidebarDeviceFailedToConnectCopyWith<$Res> implements $SidebarDeviceStateCopyWith<$Res> {
-  factory $SidebarDeviceFailedToConnectCopyWith(SidebarDeviceFailedToConnect value, $Res Function(SidebarDeviceFailedToConnect) _then) = _$SidebarDeviceFailedToConnectCopyWithImpl;
+abstract mixin class _$FailedToConnectCopyWith<$Res> implements $SidebarDeviceStateCopyWith<$Res> {
+  factory _$FailedToConnectCopyWith(_FailedToConnect value, $Res Function(_FailedToConnect) _then) = __$FailedToConnectCopyWithImpl;
 @useResult
 $Res call({
  ConnectionFailure failure
@@ -335,17 +335,17 @@ $Res call({
 
 }
 /// @nodoc
-class _$SidebarDeviceFailedToConnectCopyWithImpl<$Res>
-    implements $SidebarDeviceFailedToConnectCopyWith<$Res> {
-  _$SidebarDeviceFailedToConnectCopyWithImpl(this._self, this._then);
+class __$FailedToConnectCopyWithImpl<$Res>
+    implements _$FailedToConnectCopyWith<$Res> {
+  __$FailedToConnectCopyWithImpl(this._self, this._then);
 
-  final SidebarDeviceFailedToConnect _self;
-  final $Res Function(SidebarDeviceFailedToConnect) _then;
+  final _FailedToConnect _self;
+  final $Res Function(_FailedToConnect) _then;
 
 /// Create a copy of SidebarDeviceState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? failure = null,}) {
-  return _then(SidebarDeviceFailedToConnect(
+  return _then(_FailedToConnect(
 failure: null == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
 as ConnectionFailure,
   ));
@@ -357,8 +357,8 @@ as ConnectionFailure,
 /// @nodoc
 
 
-class SidebarDeviceUnableToConnect implements SidebarDeviceState {
-  const SidebarDeviceUnableToConnect();
+class _UnableToConnect implements SidebarDeviceState {
+  const _UnableToConnect();
   
 
 
@@ -368,7 +368,7 @@ class SidebarDeviceUnableToConnect implements SidebarDeviceState {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is SidebarDeviceUnableToConnect);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UnableToConnect);
 }
 
 

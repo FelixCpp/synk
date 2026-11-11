@@ -7,6 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
+import 'package:use_in_case/use_in_case.dart';
 
 part 'device_pairing_bloc.freezed.dart';
 part 'device_pairing_event.dart';

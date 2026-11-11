@@ -5,6 +5,7 @@ import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:use_in_case/use_in_case.dart';
 
 import '../support/device_frame_harness.dart';
 

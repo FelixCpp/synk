@@ -101,45 +101,45 @@ typedef _EntryLook = ({
 _EntryLook _lookOf(BuildContext context, SidebarDeviceState state) {
   final colors = context.synkUi.colors;
 
-  return switch (state) {
-    SidebarDeviceDisconnected() => (
+  return state.map(
+    disconnected: (_) => (
       status: colors.deviceDisconnected,
       statusText: null,
       actions: const [_EntryAction.connect],
       isBusy: false,
       isUnauthorized: false,
     ),
-    SidebarDeviceConnecting() => (
+    connecting: (_) => (
       status: colors.deviceConnecting,
       statusText: 'Verbinde …',
       actions: const [],
       isBusy: true,
       isUnauthorized: false,
     ),
-    SidebarDeviceConnected() => (
+    connected: (_) => (
       status: colors.deviceConnected,
       statusText: null,
       actions: const [_EntryAction.disconnect],
       isBusy: false,
       isUnauthorized: false,
     ),
-    SidebarDeviceFailedToConnect(:final failure) => (
+    failedToConnect: (state) => (
       status: colors.error,
-      statusText: _labelOf(failure),
-      actions: _isClearedOutsideOfSynk(failure)
+      statusText: _labelOf(state.failure),
+      actions: _isClearedOutsideOfSynk(state.failure)
           ? const [_EntryAction.cameraSettings, _EntryAction.retry]
           : const [_EntryAction.retry],
       isBusy: false,
       isUnauthorized: false,
     ),
-    SidebarDeviceUnableToConnect() => (
+    unableToConnect: (_) => (
       status: colors.deviceUnauthorized,
       statusText: null,
       actions: const [],
       isBusy: false,
       isUnauthorized: true,
     ),
-  };
+  );
 }
 
 bool _isClearedOutsideOfSynk(ConnectionFailure failure) {
@@ -272,11 +272,11 @@ void _dispatch(
 
   switch (action) {
     case .connect || .retry:
-      bloc.add(SidebarEvent.onConnectRequested(device));
+      bloc.add(.onConnectRequested(device));
     case .disconnect:
-      bloc.add(SidebarEvent.onDisconnectRequested(device));
+      bloc.add(.onDisconnectRequested(device));
     case .cameraSettings:
-      bloc.add(const SidebarEvent.onOpenCameraPrivacySettings());
+      bloc.add(const .onOpenCameraPrivacySettings());
   }
 }
 

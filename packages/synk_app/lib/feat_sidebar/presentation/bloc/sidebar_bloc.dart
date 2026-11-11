@@ -1,6 +1,5 @@
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:dartz/dartz.dart';
 import 'package:synk/feat_sidebar/domain/usecases/connect_device_interactor.dart';
 import 'package:synk/feat_sidebar/domain/usecases/disconnect_device_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -54,7 +53,6 @@ class SidebarBloc(
 
     on<_OnOpenCameraPrivacySettings>((event, emit) {
       return openCameraPrivacySettings.logger().runReporting(
-        unit,
         to: notifications,
         whenItFails: 'Die Systemeinstellungen ließen sich nicht öffnen.',
       );

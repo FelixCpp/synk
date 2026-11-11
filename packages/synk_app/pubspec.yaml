@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^2.0.0
   freezed_annotation: ^3.1.0
 
   api_adb:
@@ -34,13 +34,12 @@ dependencies:
   intl: ^0.20.3
   async: ^2.13.1
   path_provider: ^2.1.6
-  use_in_case: ^1.4.3
-  dartz: ^0.10.1
+  use_in_case: ^3.0.0
   desktop_drop: ^0.8.4
   shared_preferences: ^2.5.5
   json_annotation: ^4.12.0
   rx_shared_preferences: ^4.0.0
-  pasteboard: ^0.5.0
+  pasteboard: ^0.6.0
   file: ^7.0.1
   process: ^5.0.6
   platform: ^3.2.0

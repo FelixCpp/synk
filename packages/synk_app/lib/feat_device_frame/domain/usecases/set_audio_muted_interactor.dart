@@ -6,7 +6,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SetAudioMutedInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<bool> {
   @override
-  FutureOr<void> getOrThrow(bool input) {
+  FutureOr<void> execute(bool input) {
     return feature.setAudioMuted(input);
   }
 }

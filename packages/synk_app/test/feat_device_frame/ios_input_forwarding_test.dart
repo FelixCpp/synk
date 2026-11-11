@@ -1,7 +1,7 @@
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:use_in_case/use_in_case.dart';
 
 import '../support/device_frame_harness.dart';
 
@@ -26,7 +26,7 @@ void main() {
       await device.navigate.getOrThrow(.back);
       await device.navigate.getOrThrow(.home);
       await device.navigate.getOrThrow(.appSwitch);
-      await device.pressPowerButton.getOrThrow(unit);
+      await device.pressPowerButton.getOrThrow();
 
       expect(interaction.navigations, [
         DeviceNavigation.back,
@@ -43,7 +43,7 @@ void main() {
         _pointer(.down, 0.5, 0.5),
       );
       await device.navigate.getOrThrow(.home);
-      await device.pressPowerButton.getOrThrow(unit);
+      await device.pressPowerButton.getOrThrow();
     });
   });
 }

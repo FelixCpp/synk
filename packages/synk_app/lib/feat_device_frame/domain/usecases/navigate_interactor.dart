@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const NavigateInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<DeviceNavigation> {
   @override
-  FutureOr<void> getOrThrow(DeviceNavigation input) {
+  FutureOr<void> execute(DeviceNavigation input) {
     return feature.navigate(input);
   }
 }

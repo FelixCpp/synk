@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SimulatePointerEventInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<DevicePointerEvent> {
   @override
-  FutureOr<void> getOrThrow(DevicePointerEvent input) {
+  FutureOr<void> execute(DevicePointerEvent input) {
     return feature.simulatePointerEvent(input);
   }
 }

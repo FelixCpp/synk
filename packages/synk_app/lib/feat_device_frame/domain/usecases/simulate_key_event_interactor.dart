@@ -7,7 +7,7 @@ import 'package:use_in_case/use_in_case.dart';
 class const SimulateKeyEventInteractor(final DeviceFrameFeature feature)
     implements ParameterizedInteractor<DeviceKeyEvent> {
   @override
-  FutureOr<void> getOrThrow(DeviceKeyEvent input) {
+  FutureOr<void> execute(DeviceKeyEvent input) {
     return feature.simulateKeyEvent(input);
   }
 }

@@ -6,7 +6,7 @@ class const DisconnectDeviceInteractor(
   final DeviceConnectionsFeature repository,
 ) implements ParameterizedInteractor<PluggedDevice> {
   @override
-  Future<void> getOrThrow(PluggedDevice input) {
+  Future<void> execute(PluggedDevice input) {
     return repository.disconnect(input);
   }
 }

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:dartz/dartz.dart';
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
@@ -96,7 +95,6 @@ class DeviceFrameBloc({
     Emitter<DeviceFrameState> emit,
   ) {
     return device.captureScreenshot.logger().runReporting(
-      unit,
       to: notifications,
       whenItFails: 'Der Screenshot ist fehlgeschlagen.',
     );
@@ -111,7 +109,6 @@ class DeviceFrameBloc({
           .logger()
           .after((_) => emit(state.copyWith(isRecording: false)))
           .runReporting(
-            unit,
             to: notifications,
             whenItFails: 'Die Aufnahme ließ sich nicht beenden.',
           );
@@ -121,7 +118,6 @@ class DeviceFrameBloc({
         .logger()
         .after((_) => emit(state.copyWith(isRecording: true)))
         .runReporting(
-          unit,
           to: notifications,
           whenItFails: 'Die Aufnahme ließ sich nicht starten.',
         );
@@ -208,7 +204,6 @@ class DeviceFrameBloc({
         )
         .after(_reportTransfer)
         .runReporting(
-          unit,
           to: notifications,
           whenItFails: 'Die App ließ sich nicht installieren.',
         );
@@ -225,7 +220,6 @@ class DeviceFrameBloc({
         )
         .after(_reportTransfer)
         .runReporting(
-          unit,
           to: notifications,
           whenItFails: 'Die Datei ließ sich nicht übertragen.',
         );
@@ -263,7 +257,6 @@ class DeviceFrameBloc({
     Emitter<DeviceFrameState> emit,
   ) {
     return device.pressPowerButton.logger().runReporting(
-      unit,
       to: notifications,
       whenItFails: 'Der Standby-Knopf kam nicht am Gerät an.',
     );

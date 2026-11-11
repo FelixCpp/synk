@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
-import 'package:dartz/dartz.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
@@ -40,10 +39,7 @@ class AppVersionBloc(
     final newerAppVersion = await getNewerAppVersion
         .logger()
         .ensureMinExecutionTimeOnSuccess(const .new(milliseconds: 500))
-        .getOrElse(
-          unit,
-          (_) => const NewerAppVersion.failedToFetch(),
-        );
+        .getOrElse((_) => const NewerAppVersion.failedToFetch());
 
     emit(state.copyWith(newerAppVersion: newerAppVersion));
   }
@@ -62,6 +58,6 @@ class AppVersionBloc(
         .intercept((e) {
           notifications.notify(.new(message: 'Update fehlgeschlagen: $e'));
         })
-        .run(unit);
+        .run();
   }
 }

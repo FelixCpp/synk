@@ -11,7 +11,7 @@ typedef ConnectWirelesslyInput = ({
 class const ConnectWirelesslyInteractor(final DevicePairingRepository repositoy)
     implements ParameterizedInteractor<ConnectWirelesslyInput> {
   @override
-  FutureOr<void> getOrThrow(ConnectWirelesslyInput input) {
+  FutureOr<void> execute(ConnectWirelesslyInput input) {
     return repositoy.pair(input.hostPort, input.pairingCode);
   }
 }

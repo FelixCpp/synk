@@ -4,7 +4,7 @@ import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 extension NotifiedInteractor<Input, Output>
-    on ParameterizedResultInteractor<Input, Output> {
+    on InteractorContract<Input, Output> {
   /// Runs the interactor, tells the user when it fails, and calls [andUndo]
   /// first so an optimistic state can step back.
   Future<void> runReporting(
@@ -19,5 +19,21 @@ extension NotifiedInteractor<Input, Output>
         AppNotification(message: userMessageFor(error, whenItFails)),
       );
     }).run(input);
+  }
+}
+
+extension NoInputNotifiedInteractor<Output>
+    on InteractorContract<NoInput, Output> {
+  Future<void> runReporting({
+    required NotificationFeature to,
+    required String whenItFails,
+    void Function()? andUndo,
+  }) {
+    return NotifiedInteractor(this).runReporting(
+      NoInput.instance,
+      to: to,
+      whenItFails: whenItFails,
+      andUndo: andUndo,
+    );
   }
 }
