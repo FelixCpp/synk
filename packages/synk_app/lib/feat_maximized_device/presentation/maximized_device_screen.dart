@@ -82,7 +82,6 @@ class const _Content({
               isMaximized: true,
               onToggleMaximize: minimize,
               onClose: onClose,
-              onEscape: minimize,
             ),
           ),
         ),

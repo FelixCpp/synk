@@ -8,13 +8,13 @@ class const GitHubReleasesApi({
 }) {
   Future<GitHubReleaseDto> fetchLatestRelease() async {
     final response = await dio.getUri<Map<String, dynamic>>(
-      Uri.https('api.github.com', '/repos/$owner/$repository/releases/latest'),
-      options: Options(
+      .https('api.github.com', '/repos/$owner/$repository/releases/latest'),
+      options: .new(
         headers: const {'Accept': 'application/vnd.github+json'},
       ),
     );
 
-    return GitHubReleaseDto.fromJson(response.data!);
+    return .fromJson(response.data!);
   }
 
   Future<void> downloadAsset(

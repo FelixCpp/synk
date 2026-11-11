@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -39,11 +40,33 @@ void main() {
     ]);
   });
 
-  test('refuses text longer than the server reads', () {
+  test('splits text longer than the server reads into several messages', () {
+    layer.injectText('x' * (TextInteractionLayer.maxTextBytes * 2 + 1));
+
     expect(
-      () => layer.injectText('x' * (TextInteractionLayer.maxTextBytes + 1)),
-      throwsArgumentError,
+      socket.writes.map((message) => message.length - 5),
+      [TextInteractionLayer.maxTextBytes, TextInteractionLayer.maxTextBytes, 1],
     );
+  });
+
+  test('never cuts a character in half between two messages', () {
+    final text = 'ö' * TextInteractionLayer.maxTextBytes;
+
+    layer.injectText(text);
+
+    final typed = socket.writes
+        .map((message) => utf8.decode(message.sublist(5)))
+        .join();
+    expect(typed, text);
+    expect(
+      socket.writes.map((message) => message.length - 5),
+      everyElement(lessThanOrEqualTo(TextInteractionLayer.maxTextBytes)),
+    );
+  });
+
+  test('sends nothing for empty text', () {
+    layer.injectText('');
+
     expect(socket.writes, isEmpty);
   });
 }

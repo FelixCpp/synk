@@ -20,7 +20,7 @@ class ScrcpyInteraction({
 
   /// Keeps the device's own display dark for the whole session.
   final bool keepDisplayOff = false,
-}) implements DeviceInteraction, DeviceClipboard {
+}) implements DeviceInteraction, DeviceClipboard, DeviceTextInput {
   final _clipboard = ClipboardInteractionLayer(interactionSocket);
   final _key = KeyEventInteractionLayer(interactionSocket);
   final _text = TextInteractionLayer(interactionSocket);
@@ -30,6 +30,7 @@ class ScrcpyInteraction({
   /// Keys whose press went out as text. Their release must not reach the
   /// device as a key code for a press it never saw.
   final _keysTypedAsText = <PhysicalKeyboardKey>{};
+  final _keyCodesAtPress = <PhysicalKeyboardKey, ScrcpyKeyCode>{};
 
   this {
     _clipboard.listenForDeviceMessages();
@@ -52,9 +53,18 @@ class ScrcpyInteraction({
       return;
     }
 
-    if (event.toScrcpyKeyEvent() case final keyEvent?) {
-      _key.simulateKeyEvent(keyEvent);
+    final keyEvent = event.toScrcpyKeyEvent();
+    if (keyEvent == null) {
+      return;
     }
+
+    final pressedAs = switch (event.type) {
+      .down => _keyCodesAtPress[event.physicalKey] = keyEvent.key,
+      .repeat => _keyCodesAtPress[event.physicalKey] ?? keyEvent.key,
+      .up => _keyCodesAtPress.remove(event.physicalKey) ?? keyEvent.key,
+    };
+
+    _key.simulateKeyEvent(keyEvent.copyWith(key: pressedAs));
   }
 
   @override
@@ -101,6 +111,11 @@ class ScrcpyInteraction({
   @override
   Future<void> setClipboard(String content) async {
     _clipboard.setClipboard(text: content);
+  }
+
+  @override
+  Future<void> typeText(String text) async {
+    _text.injectText(text);
   }
 
   @override

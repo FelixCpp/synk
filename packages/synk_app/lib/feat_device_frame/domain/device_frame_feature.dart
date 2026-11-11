@@ -9,6 +9,9 @@ abstract interface class DeviceFrameFeature {
   Future<void> setAudioVolume(double volume);
 
   Future<void> simulateKeyEvent(DeviceKeyEvent event);
+  Future<void> releasePressedKeys();
+  Future<void> typeText(String text);
+  Future<void> typeHostClipboard();
   Future<void> simulatePointerEvent(DevicePointerEvent event);
   Future<void> simulatePinchEvent(PinchEvent event);
   Future<void> navigate(DeviceNavigation navigation);

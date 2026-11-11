@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:app_logger/app_logger.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_clipboard/domain/clipboard_feature.dart';
 import 'package:synk/feat_device_frame/application/file_picker.dart';
@@ -8,6 +7,7 @@ import 'package:synk/feat_device_frame/data/screen_capture_store.dart';
 import 'package:synk/feat_device_frame/domain/device_clipboard_sync.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_feature.dart';
 import 'package:synk/feat_device_frame/domain/models/device_frame_exception.dart';
+import 'package:synk/feat_device_frame/domain/models/empty_host_clipboard_exception.dart';
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
@@ -27,6 +27,9 @@ class DeviceFrameFeatureImpl({
 
   String? _runningRecording;
 
+  final _pressedKeys = <PhysicalKeyboardKey, DeviceKeyEvent>{};
+  Future<void> _lastKeyAction = Future.value();
+
   @override
   bool get isAudioMuted => session.audio?.isAudioMuted ?? true;
 
@@ -44,18 +47,22 @@ class DeviceFrameFeatureImpl({
   }
 
   @override
-  Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
+  Future<void> simulateKeyEvent(DeviceKeyEvent event) {
+    return _inKeyOrder(() => _simulateKeyEvent(event));
+  }
+
+  Future<void> _simulateKeyEvent(DeviceKeyEvent event) async {
     final shortcut = ClipboardShortcut.of(event);
     final deviceClipboard = session.clipboard;
 
     if (shortcut == null || deviceClipboard == null) {
-      await session.interaction?.simulateKeyEvent(event);
+      await _forwardKeyEvent(event);
       return;
     }
 
     final settings = await settingsRepository.read();
     if (!settings.syncClipboard) {
-      await session.interaction?.simulateKeyEvent(event);
+      await _forwardKeyEvent(event);
       return;
     }
 
@@ -64,6 +71,60 @@ class DeviceFrameFeatureImpl({
     }
 
     await _clipboardSync.perform(shortcut, deviceClipboard);
+  }
+
+  @override
+  Future<void> releasePressedKeys() {
+    return _inKeyOrder(_releasePressedKeys);
+  }
+
+  Future<void> _releasePressedKeys() async {
+    final pressed = _pressedKeys.values.toList().reversed;
+    _pressedKeys.clear();
+
+    for (final event in pressed) {
+      await session.interaction?.simulateKeyEvent(
+        event.copyWith(type: .up, modifiers: const {}),
+      );
+    }
+  }
+
+  @override
+  Future<void> typeText(String text) {
+    final textInput = session.textInput;
+    if (textInput == null) {
+      throw DeviceFrameException('Device $deviceId cannot type text');
+    }
+
+    return _inKeyOrder(() => textInput.typeText(text));
+  }
+
+  @override
+  Future<void> typeHostClipboard() async {
+    final text = await clipboard.readText();
+    if (text == null || text.isEmpty) {
+      throw const EmptyHostClipboardException();
+    }
+
+    await typeText(text);
+  }
+
+  Future<void> _inKeyOrder(Future<void> Function() action) {
+    final result = _lastKeyAction.then((_) => action());
+    _lastKeyAction = result.then((_) {}, onError: (_) {});
+    return result;
+  }
+
+  Future<void> _forwardKeyEvent(DeviceKeyEvent event) async {
+    if (event.type == .up) {
+      if (_pressedKeys.remove(event.physicalKey) == null) {
+        return;
+      }
+    } else {
+      _pressedKeys[event.physicalKey] = event;
+    }
+
+    await session.interaction?.simulateKeyEvent(event);
   }
 
   @override

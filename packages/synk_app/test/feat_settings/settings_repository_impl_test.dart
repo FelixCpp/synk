@@ -4,6 +4,7 @@ import 'package:synk/feat_settings/data/repositories/settings_repository_impl.da
 import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
 import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
+import 'package:synk/feat_settings/domain/models/settings_category.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 
 final _defaults = Settings.defaults(screenCaptureSavePath: '/tmp/captures');
@@ -43,6 +44,7 @@ void main() {
         muteOnConnect: false,
         syncClipboard: false,
         customAdbPath: '/usr/local/bin/adb',
+        settingsCategory: SettingsCategory.tools,
       );
 
       await repository.save(saved);
@@ -64,7 +66,7 @@ void main() {
       expect(
         (await preferences.readAll()).keys,
         ['sync_clipboard'],
-        reason: 'one toggle must not rewrite all eleven keys',
+        reason: 'one toggle must not rewrite all twelve keys',
       );
     });
 

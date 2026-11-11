@@ -56,7 +56,7 @@ extension DeviceFrameEventPatterns on DeviceFrameEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnToggleRecording value)?  onToggleRecording,TResult Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult Function( _OnAudioVolumeChanged value)?  onAudioVolumeChanged,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnPinchEvent value)?  onPinchEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnFilesDropped value)?  onFilesDropped,TResult Function( _OnNavigate value)?  onNavigate,TResult Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult Function( _OnInstallApk value)?  onInstallApk,TResult Function( _OnShareFile value)?  onShareFile,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult Function( _OnToggleRecording value)?  onToggleRecording,TResult Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult Function( _OnAudioVolumeChanged value)?  onAudioVolumeChanged,TResult Function( _OnPointerEvent value)?  onPointerEvent,TResult Function( _OnPinchEvent value)?  onPinchEvent,TResult Function( _OnKeyEvent value)?  onKeyEvent,TResult Function( _OnKeyboardLeft value)?  onKeyboardLeft,TResult Function( _OnTypeHostClipboard value)?  onTypeHostClipboard,TResult Function( _OnTextComposed value)?  onTextComposed,TResult Function( _OnFilesDropped value)?  onFilesDropped,TResult Function( _OnNavigate value)?  onNavigate,TResult Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult Function( _OnInstallApk value)?  onInstallApk,TResult Function( _OnShareFile value)?  onShareFile,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
@@ -66,7 +66,10 @@ return onToggleAudioMute(_that);case _OnAudioVolumeChanged() when onAudioVolumeC
 return onAudioVolumeChanged(_that);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that);case _OnPinchEvent() when onPinchEvent != null:
 return onPinchEvent(_that);case _OnKeyEvent() when onKeyEvent != null:
-return onKeyEvent(_that);case _OnFilesDropped() when onFilesDropped != null:
+return onKeyEvent(_that);case _OnKeyboardLeft() when onKeyboardLeft != null:
+return onKeyboardLeft(_that);case _OnTypeHostClipboard() when onTypeHostClipboard != null:
+return onTypeHostClipboard(_that);case _OnTextComposed() when onTextComposed != null:
+return onTextComposed(_that);case _OnFilesDropped() when onFilesDropped != null:
 return onFilesDropped(_that);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed(_that);case _OnInstallApk() when onInstallApk != null:
@@ -89,7 +92,7 @@ return onShareFile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnToggleRecording value)  onToggleRecording,required TResult Function( _OnToggleAudioMute value)  onToggleAudioMute,required TResult Function( _OnAudioVolumeChanged value)  onAudioVolumeChanged,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnPinchEvent value)  onPinchEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnFilesDropped value)  onFilesDropped,required TResult Function( _OnNavigate value)  onNavigate,required TResult Function( _OnPowerButtonPressed value)  onPowerButtonPressed,required TResult Function( _OnInstallApk value)  onInstallApk,required TResult Function( _OnShareFile value)  onShareFile,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnCaptureScreenshot value)  onCaptureScreenshot,required TResult Function( _OnToggleRecording value)  onToggleRecording,required TResult Function( _OnToggleAudioMute value)  onToggleAudioMute,required TResult Function( _OnAudioVolumeChanged value)  onAudioVolumeChanged,required TResult Function( _OnPointerEvent value)  onPointerEvent,required TResult Function( _OnPinchEvent value)  onPinchEvent,required TResult Function( _OnKeyEvent value)  onKeyEvent,required TResult Function( _OnKeyboardLeft value)  onKeyboardLeft,required TResult Function( _OnTypeHostClipboard value)  onTypeHostClipboard,required TResult Function( _OnTextComposed value)  onTextComposed,required TResult Function( _OnFilesDropped value)  onFilesDropped,required TResult Function( _OnNavigate value)  onNavigate,required TResult Function( _OnPowerButtonPressed value)  onPowerButtonPressed,required TResult Function( _OnInstallApk value)  onInstallApk,required TResult Function( _OnShareFile value)  onShareFile,}){
 final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot():
@@ -99,7 +102,10 @@ return onToggleAudioMute(_that);case _OnAudioVolumeChanged():
 return onAudioVolumeChanged(_that);case _OnPointerEvent():
 return onPointerEvent(_that);case _OnPinchEvent():
 return onPinchEvent(_that);case _OnKeyEvent():
-return onKeyEvent(_that);case _OnFilesDropped():
+return onKeyEvent(_that);case _OnKeyboardLeft():
+return onKeyboardLeft(_that);case _OnTypeHostClipboard():
+return onTypeHostClipboard(_that);case _OnTextComposed():
+return onTextComposed(_that);case _OnFilesDropped():
 return onFilesDropped(_that);case _OnNavigate():
 return onNavigate(_that);case _OnPowerButtonPressed():
 return onPowerButtonPressed(_that);case _OnInstallApk():
@@ -118,7 +124,7 @@ return onShareFile(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnToggleRecording value)?  onToggleRecording,TResult? Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult? Function( _OnAudioVolumeChanged value)?  onAudioVolumeChanged,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnPinchEvent value)?  onPinchEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnFilesDropped value)?  onFilesDropped,TResult? Function( _OnNavigate value)?  onNavigate,TResult? Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult? Function( _OnInstallApk value)?  onInstallApk,TResult? Function( _OnShareFile value)?  onShareFile,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnCaptureScreenshot value)?  onCaptureScreenshot,TResult? Function( _OnToggleRecording value)?  onToggleRecording,TResult? Function( _OnToggleAudioMute value)?  onToggleAudioMute,TResult? Function( _OnAudioVolumeChanged value)?  onAudioVolumeChanged,TResult? Function( _OnPointerEvent value)?  onPointerEvent,TResult? Function( _OnPinchEvent value)?  onPinchEvent,TResult? Function( _OnKeyEvent value)?  onKeyEvent,TResult? Function( _OnKeyboardLeft value)?  onKeyboardLeft,TResult? Function( _OnTypeHostClipboard value)?  onTypeHostClipboard,TResult? Function( _OnTextComposed value)?  onTextComposed,TResult? Function( _OnFilesDropped value)?  onFilesDropped,TResult? Function( _OnNavigate value)?  onNavigate,TResult? Function( _OnPowerButtonPressed value)?  onPowerButtonPressed,TResult? Function( _OnInstallApk value)?  onInstallApk,TResult? Function( _OnShareFile value)?  onShareFile,}){
 final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
@@ -128,7 +134,10 @@ return onToggleAudioMute(_that);case _OnAudioVolumeChanged() when onAudioVolumeC
 return onAudioVolumeChanged(_that);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that);case _OnPinchEvent() when onPinchEvent != null:
 return onPinchEvent(_that);case _OnKeyEvent() when onKeyEvent != null:
-return onKeyEvent(_that);case _OnFilesDropped() when onFilesDropped != null:
+return onKeyEvent(_that);case _OnKeyboardLeft() when onKeyboardLeft != null:
+return onKeyboardLeft(_that);case _OnTypeHostClipboard() when onTypeHostClipboard != null:
+return onTypeHostClipboard(_that);case _OnTextComposed() when onTextComposed != null:
+return onTextComposed(_that);case _OnFilesDropped() when onFilesDropped != null:
 return onFilesDropped(_that);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed(_that);case _OnInstallApk() when onInstallApk != null:
@@ -150,7 +159,7 @@ return onShareFile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( double volume)?  onAudioVolumeChanged,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( double volume)?  onAudioVolumeChanged,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult Function()?  onKeyboardLeft,TResult Function()?  onTypeHostClipboard,TResult Function( String text)?  onTextComposed,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
@@ -159,7 +168,10 @@ return onToggleAudioMute();case _OnAudioVolumeChanged() when onAudioVolumeChange
 return onAudioVolumeChanged(_that.volume);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnPinchEvent() when onPinchEvent != null:
 return onPinchEvent(_that.type,_that.centerX,_that.centerY,_that.spread);case _OnKeyEvent() when onKeyEvent != null:
-return onKeyEvent(_that.keyEvent);case _OnFilesDropped() when onFilesDropped != null:
+return onKeyEvent(_that.keyEvent);case _OnKeyboardLeft() when onKeyboardLeft != null:
+return onKeyboardLeft();case _OnTypeHostClipboard() when onTypeHostClipboard != null:
+return onTypeHostClipboard();case _OnTextComposed() when onTextComposed != null:
+return onTextComposed(_that.text);case _OnFilesDropped() when onFilesDropped != null:
 return onFilesDropped(_that.filepaths);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that.navigation);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed();case _OnInstallApk() when onInstallApk != null:
@@ -182,7 +194,7 @@ return onShareFile();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( double volume)  onAudioVolumeChanged,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( DeviceKeyEvent keyEvent)  onKeyEvent,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( double volume)  onAudioVolumeChanged,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( DeviceKeyEvent keyEvent)  onKeyEvent,required TResult Function()  onKeyboardLeft,required TResult Function()  onTypeHostClipboard,required TResult Function( String text)  onTextComposed,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot():
 return onCaptureScreenshot();case _OnToggleRecording():
@@ -191,7 +203,10 @@ return onToggleAudioMute();case _OnAudioVolumeChanged():
 return onAudioVolumeChanged(_that.volume);case _OnPointerEvent():
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnPinchEvent():
 return onPinchEvent(_that.type,_that.centerX,_that.centerY,_that.spread);case _OnKeyEvent():
-return onKeyEvent(_that.keyEvent);case _OnFilesDropped():
+return onKeyEvent(_that.keyEvent);case _OnKeyboardLeft():
+return onKeyboardLeft();case _OnTypeHostClipboard():
+return onTypeHostClipboard();case _OnTextComposed():
+return onTextComposed(_that.text);case _OnFilesDropped():
 return onFilesDropped(_that.filepaths);case _OnNavigate():
 return onNavigate(_that.navigation);case _OnPowerButtonPressed():
 return onPowerButtonPressed();case _OnInstallApk():
@@ -210,7 +225,7 @@ return onShareFile();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( double volume)?  onAudioVolumeChanged,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( double volume)?  onAudioVolumeChanged,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult? Function()?  onKeyboardLeft,TResult? Function()?  onTypeHostClipboard,TResult? Function( String text)?  onTextComposed,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
@@ -219,7 +234,10 @@ return onToggleAudioMute();case _OnAudioVolumeChanged() when onAudioVolumeChange
 return onAudioVolumeChanged(_that.volume);case _OnPointerEvent() when onPointerEvent != null:
 return onPointerEvent(_that.type,_that.normalizedPointerX,_that.normalizedPointerY);case _OnPinchEvent() when onPinchEvent != null:
 return onPinchEvent(_that.type,_that.centerX,_that.centerY,_that.spread);case _OnKeyEvent() when onKeyEvent != null:
-return onKeyEvent(_that.keyEvent);case _OnFilesDropped() when onFilesDropped != null:
+return onKeyEvent(_that.keyEvent);case _OnKeyboardLeft() when onKeyboardLeft != null:
+return onKeyboardLeft();case _OnTypeHostClipboard() when onTypeHostClipboard != null:
+return onTypeHostClipboard();case _OnTextComposed() when onTextComposed != null:
+return onTextComposed(_that.text);case _OnFilesDropped() when onFilesDropped != null:
 return onFilesDropped(_that.filepaths);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that.navigation);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed();case _OnInstallApk() when onInstallApk != null:
@@ -617,6 +635,138 @@ $DeviceKeyEventCopyWith<$Res> get keyEvent {
     return _then(_self.copyWith(keyEvent: value));
   });
 }
+}
+
+/// @nodoc
+
+
+class _OnKeyboardLeft implements DeviceFrameEvent {
+  const _OnKeyboardLeft();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnKeyboardLeft);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'DeviceFrameEvent.onKeyboardLeft()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _OnTypeHostClipboard implements DeviceFrameEvent {
+  const _OnTypeHostClipboard();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnTypeHostClipboard);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'DeviceFrameEvent.onTypeHostClipboard()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _OnTextComposed implements DeviceFrameEvent {
+  const _OnTextComposed(this.text);
+  
+
+ final  String text;
+
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnTextComposedCopyWith<_OnTextComposed> get copyWith => __$OnTextComposedCopyWithImpl<_OnTextComposed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnTextComposed&&(identical(other.text, text) || other.text == text));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,text);
+}
+
+@override
+String toString() {
+    return 'DeviceFrameEvent.onTextComposed(text: $text)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnTextComposedCopyWith<$Res> implements $DeviceFrameEventCopyWith<$Res> {
+  factory _$OnTextComposedCopyWith(_OnTextComposed value, $Res Function(_OnTextComposed) _then) = __$OnTextComposedCopyWithImpl;
+@useResult
+$Res call({
+ String text
+});
+
+
+
+
+}
+/// @nodoc
+class __$OnTextComposedCopyWithImpl<$Res>
+    implements _$OnTextComposedCopyWith<$Res> {
+  __$OnTextComposedCopyWithImpl(this._self, this._then);
+
+  final _OnTextComposed _self;
+  final $Res Function(_OnTextComposed) _then;
+
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? text = null,}) {
+  return _then(_OnTextComposed(
+null == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
 }
 
 /// @nodoc

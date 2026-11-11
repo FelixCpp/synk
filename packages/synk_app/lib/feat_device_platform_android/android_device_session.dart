@@ -69,6 +69,9 @@ class AndroidDeviceSession({
   DeviceClipboard? get clipboard => _interaction;
 
   @override
+  DeviceTextInput? get textInput => _interaction;
+
+  @override
   DeviceInteraction? get interaction => _interaction;
 
   @override

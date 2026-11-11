@@ -10,6 +10,7 @@ import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/release_pressed_keys_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_file_interactor.dart';
@@ -20,6 +21,8 @@ import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_inte
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/type_host_clipboard_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/type_text_interactor.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
@@ -55,6 +58,9 @@ class const DeviceFrameFactoryImpl({
       isAudioMuted: feature.isAudioMuted,
       audioVolume: feature.audioVolume,
       simulateKeyEvent: SimulateKeyEventInteractor(feature),
+      releasePressedKeys: ReleasePressedKeysInteractor(feature),
+      typeText: TypeTextInteractor(feature),
+      typeHostClipboard: TypeHostClipboardInteractor(feature),
       simulatePointerEvent: SimulatePointerEventInteractor(feature),
       simulatePinchEvent: SimulatePinchEventInteractor(feature),
       captureScreenshot: CaptureScreenshotInteractor(feature),

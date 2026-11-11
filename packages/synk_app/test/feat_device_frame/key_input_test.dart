@@ -82,6 +82,61 @@ void main() {
       },
     );
   });
+
+  group('leaving the keyboard', () {
+    test('releases every key still held, the last pressed first', () async {
+      await device.simulateKeyEvent.getOrThrow(_key(LogicalKeyboardKey.keyA));
+      await device.simulateKeyEvent.getOrThrow(_key(LogicalKeyboardKey.keyC));
+      interaction.keyEvents.clear();
+
+      await device.releasePressedKeys.getOrThrow();
+
+      expect(
+        interaction.keyEvents.map((event) => (event.key, event.type)),
+        [
+          (LogicalKeyboardKey.keyC, DeviceKeyEventType.up),
+          (LogicalKeyboardKey.keyA, DeviceKeyEventType.up),
+        ],
+      );
+    });
+
+    test('leaves keys alone that were already let go', () async {
+      await device.simulateKeyEvent.getOrThrow(_key(LogicalKeyboardKey.keyA));
+      await device.simulateKeyEvent.getOrThrow(
+        _key(LogicalKeyboardKey.keyA, type: .up),
+      );
+      interaction.keyEvents.clear();
+
+      await device.releasePressedKeys.getOrThrow();
+
+      expect(interaction.keyEvents, isEmpty);
+    });
+
+    test('releases a key only once', () async {
+      await device.simulateKeyEvent.getOrThrow(_key(LogicalKeyboardKey.keyA));
+      await device.releasePressedKeys.getOrThrow();
+      interaction.keyEvents.clear();
+
+      await device.releasePressedKeys.getOrThrow();
+      await device.simulateKeyEvent.getOrThrow(
+        _key(LogicalKeyboardKey.keyA, type: .up),
+      );
+
+      expect(
+        interaction.keyEvents,
+        isEmpty,
+        reason: 'the host reports the release once it is back in front',
+      );
+    });
+
+    test('does not hold a release for a press the device never saw', () async {
+      await device.simulateKeyEvent.getOrThrow(
+        _key(LogicalKeyboardKey.keyA, type: .up),
+      );
+
+      expect(interaction.keyEvents, isEmpty);
+    });
+  });
 }
 
 class _RecordingInteraction implements DeviceInteraction {

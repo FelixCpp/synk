@@ -75,6 +75,9 @@ class IosDeviceSession({
   DeviceClipboard? get clipboard => _clipboard;
 
   @override
+  DeviceTextInput? get textInput => null;
+
+  @override
   DeviceInteraction? get interaction => _interaction;
 
   @override

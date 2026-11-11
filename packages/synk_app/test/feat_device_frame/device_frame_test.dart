@@ -7,6 +7,7 @@ import 'package:synk/feat_device_frame/application/file_picker.dart';
 import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame.dart';
+import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_notifications/application/notification_feature_impl.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
@@ -106,7 +107,11 @@ void main() {
     testWidgets('takes focus from a swipe, not just from a tap', (
       tester,
     ) async {
-      final colors = await _pumpFrame(tester, _referenceScreenSize);
+      final colors = await _pumpFrame(
+        tester,
+        _referenceScreenSize,
+        insideScrollingCanvas: true,
+      );
 
       final mirror = tester.getCenter(find.byType(Texture));
       final gesture = await tester.startGesture(mirror);
@@ -178,6 +183,152 @@ void main() {
       );
     });
 
+    testWidgets('mirrors escape to a maximized device', (tester) async {
+      final reachedTheCanvas = <KeyEvent>[];
+      await _pumpFrame(
+        tester,
+        _referenceScreenSize,
+        isMaximized: true,
+        onKeyEscapedFrame: reachedTheCanvas.add,
+      );
+      await tester.tap(find.byType(Texture));
+      await tester.pumpAndSettle();
+      reachedTheCanvas.clear();
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+
+      expect(
+        reachedTheCanvas,
+        isEmpty,
+        reason: 'escape is back on android, the frame has to mirror it',
+      );
+    });
+
+    group('the mac input system', () {
+      testWidgets('is open while an android device has the focus', (
+        tester,
+      ) async {
+        await _pumpFrame(
+          tester,
+          _referenceScreenSize,
+          textInput: _RecordingTextInput(),
+        );
+        expect(tester.testTextInput.hasAnyClients, isFalse);
+
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+        expect(tester.testTextInput.hasAnyClients, isTrue);
+
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
+        expect(tester.testTextInput.hasAnyClients, isFalse);
+      });
+
+      testWidgets('stays closed for a device that cannot take text', (
+        tester,
+      ) async {
+        await _pumpFrame(tester, _referenceScreenSize);
+
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+
+        expect(tester.testTextInput.hasAnyClients, isFalse);
+      });
+
+      testWidgets('types what it composed on the device', (tester) async {
+        final textInput = _RecordingTextInput();
+        await _pumpFrame(tester, _referenceScreenSize, textInput: textInput);
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(text: '😀'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(textInput.typed, ['😀']);
+      });
+
+      testWidgets('types nothing while a composition is still open', (
+        tester,
+      ) async {
+        final textInput = _RecordingTextInput();
+        await _pumpFrame(tester, _referenceScreenSize, textInput: textInput);
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: '´',
+            composing: TextRange(start: 0, end: 1),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(textInput.typed, isEmpty);
+
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(text: 'é'),
+        );
+        await tester.pumpAndSettle();
+        expect(textInput.typed, ['é']);
+      });
+
+      testWidgets('gets the keys while it composes, not the device', (
+        tester,
+      ) async {
+        final reachedTheCanvas = <KeyEvent>[];
+        final interaction = _RecordingInteraction();
+        await _pumpFrame(
+          tester,
+          _referenceScreenSize,
+          onKeyEscapedFrame: reachedTheCanvas.add,
+          interaction: interaction,
+          textInput: _RecordingTextInput(),
+        );
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+        tester.testTextInput.updateEditingValue(
+          const TextEditingValue(
+            text: 'n',
+            composing: TextRange(start: 0, end: 1),
+          ),
+        );
+        await tester.pumpAndSettle();
+        reachedTheCanvas.clear();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyI);
+        await tester.pumpAndSettle();
+
+        expect(interaction.keyEvents, isEmpty);
+        expect(
+          reachedTheCanvas,
+          isEmpty,
+          reason: 'shortcuts above the frame must not steal a composing key',
+        );
+      });
+
+      testWidgets('leaves ordinary keys to the device', (tester) async {
+        final interaction = _RecordingInteraction();
+        await _pumpFrame(
+          tester,
+          _referenceScreenSize,
+          interaction: interaction,
+          textInput: _RecordingTextInput(),
+        );
+        await tester.tap(find.byType(Texture));
+        await tester.pumpAndSettle();
+
+        await tester.sendKeyEvent(LogicalKeyboardKey.keyA);
+        await tester.pumpAndSettle();
+
+        expect(
+          interaction.keyEvents.map((event) => event.key),
+          everyElement(LogicalKeyboardKey.keyA),
+        );
+        expect(interaction.keyEvents, isNotEmpty);
+      });
+    });
+
     testWidgets('lets ⌘, past a focused frame instead of typing it', (
       tester,
     ) async {
@@ -232,6 +383,9 @@ Future<SynkUiColors> _pumpFrame(
   ValueChanged<KeyEvent>? onKeyEscapedFrame,
   bool isMaximized = false,
   bool supportsInteraction = true,
+  bool insideScrollingCanvas = false,
+  DeviceInteraction? interaction,
+  DeviceTextInput? textInput,
 }) async {
   // The default test surface is shorter than a cell, which would silently
   // squash the frame and make every assertion here meaningless.
@@ -294,25 +448,33 @@ Future<SynkUiColors> _pumpFrame(
                     child: SizedBox(
                       width: DeviceFrameMetrics.referenceWidth,
                       height: DeviceFrameMetrics.height,
-                      child: DeviceFrame(
-                        connection: DeviceConnection(
-                          device: _device,
-                          session: supportsInteraction
-                              ? FakeDeviceSession(
-                                  interaction: FakeInteraction(
-                                    supportedNavigations: DeviceNavigation
-                                        .values
-                                        .toSet(),
-                                  ),
-                                  fileTransfer: const FakeFileTransfer(),
-                                  audio: FakeAudio(),
-                                )
-                              : FakeDeviceSession(),
-                          screenSize: screenSize,
+                      child: GestureDetector(
+                        onVerticalDragUpdate: insideScrollingCanvas
+                            ? (details) {}
+                            : null,
+                        child: DeviceFrame(
+                          connection: DeviceConnection(
+                            device: _device,
+                            session: supportsInteraction
+                                ? FakeDeviceSession(
+                                    interaction:
+                                        interaction ??
+                                        FakeInteraction(
+                                          supportedNavigations: DeviceNavigation
+                                              .values
+                                              .toSet(),
+                                        ),
+                                    textInput: textInput,
+                                    fileTransfer: const FakeFileTransfer(),
+                                    audio: FakeAudio(),
+                                  )
+                                : FakeDeviceSession(),
+                            screenSize: screenSize,
+                          ),
+                          isMaximized: isMaximized,
+                          onToggleMaximize: () {},
+                          onClose: () {},
                         ),
-                        isMaximized: isMaximized,
-                        onToggleMaximize: () {},
-                        onClose: () {},
                       ),
                     ),
                   ),
@@ -348,3 +510,19 @@ BoxDecoration _frameDecorationOf(WidgetTester tester) {
 
 Border _frameBorderOf(WidgetTester tester) =>
     _frameDecorationOf(tester).border! as Border;
+
+class _RecordingTextInput implements DeviceTextInput {
+  final typed = <String>[];
+
+  @override
+  Future<void> typeText(String text) async => typed.add(text);
+}
+
+class _RecordingInteraction extends FakeInteraction {
+  final keyEvents = <DeviceKeyEvent>[];
+
+  @override
+  Future<void> simulateKeyEvent(DeviceKeyEvent event) async {
+    keyEvents.add(event);
+  }
+}

@@ -23,6 +23,7 @@ sealed class DeviceConnection with _$DeviceConnection {
       session.interactionUnavailableReason;
   bool get supportsFileTransfer => session.fileTransfer != null;
   bool get supportsAudio => session.audio != null;
+  bool get supportsTextInput => session.textInput != null;
 
   Set<DeviceNavigation> get navigations {
     return session.interaction?.supportedNavigations ?? const {};

@@ -1,7 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:synk/feat_settings/domain/models/settings.dart';
+import 'package:synk/feat_settings/domain/models/settings_category.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
-import 'package:synk/feat_settings/presentation/settings_category.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_capture_page.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_devices_page.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_general_page.dart';
@@ -20,39 +21,37 @@ const _windowHeight = 560.0;
 const _headerHeight = 48.0;
 
 Future<void> showSettingsWindow(BuildContext context) {
+  final toolValidationBloc = BlocProvider.of<ToolValidationBloc>(context);
+  final settingsBloc = BlocProvider.of<SettingsBloc>(context);
+  final appVersionBloc = BlocProvider.of<AppVersionBloc>(context);
+  final adbPaths = RepositoryProvider.of<AdbPaths>(context);
+
   return showSynkUiDialog<void>(
     context: context,
     barrierDismissible: true,
     builder: (dialogContext) => MultiBlocProvider(
       providers: [
-        BlocProvider.value(value: BlocProvider.of<ToolValidationBloc>(context)),
-        BlocProvider.value(value: BlocProvider.of<SettingsBloc>(context)),
-        BlocProvider.value(value: BlocProvider.of<AppVersionBloc>(context)),
+        BlocProvider.value(value: toolValidationBloc),
+        BlocProvider.value(value: settingsBloc),
+        BlocProvider.value(value: appVersionBloc),
       ],
       child: RepositoryProvider.value(
-        value: RepositoryProvider.of<AdbPaths>(context),
+        value: adbPaths,
         child: const SettingsWindow(),
       ),
     ),
   );
 }
 
-class const SettingsWindow({super.key}) extends StatefulWidget {
-  @override
-  State<SettingsWindow> createState() => _SettingsWindowState();
-}
-
-class _SettingsWindowState extends State<SettingsWindow> {
-  var _category = SettingsCategory.general; // TODO(Felix): Persist
-
-  void _close() => Navigator.of(context).pop();
-
+class const SettingsWindow({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    void close() => Navigator.of(context).pop();
+
     return Center(
       child: CallbackShortcuts(
         bindings: {
-          const SingleActivator(LogicalKeyboardKey.escape): _close,
+          const SingleActivator(LogicalKeyboardKey.escape): close,
         },
         child: FocusScope(
           autofocus: true,
@@ -67,21 +66,8 @@ class _SettingsWindowState extends State<SettingsWindow> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      _Header(onClose: _close),
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SettingsNav(
-                              selected: _category,
-                              onSelected: (category) {
-                                setState(() => _category = category);
-                              },
-                            ),
-                            Expanded(child: _Body(category: _category)),
-                          ],
-                        ),
-                      ),
+                      _Header(onClose: close),
+                      const Expanded(child: _Content()),
                     ],
                   ),
                 ),
@@ -136,6 +122,31 @@ class const _Header({required final VoidCallback onClose})
           ),
         ),
       ),
+    );
+  }
+}
+
+class const _Content() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final bloc = BlocProvider.of<SettingsBloc>(context);
+
+    return BlocSelector<SettingsBloc, Settings, SettingsCategory>(
+      selector: (settings) => settings.settingsCategory,
+      builder: (context, category) {
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SettingsNav(
+              selected: category,
+              onSelected: (category) => bloc.add(
+                .onSave(bloc.state.copyWith(settingsCategory: category)),
+              ),
+            ),
+            Expanded(child: _Body(category: category)),
+          ],
+        );
+      },
     );
   }
 }

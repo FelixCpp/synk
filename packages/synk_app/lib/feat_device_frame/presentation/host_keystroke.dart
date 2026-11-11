@@ -28,6 +28,22 @@ extension HostKeystroke on KeyEvent {
   }
 }
 
+extension HostComposition on KeyEvent {
+  bool startsComposition(HardwareKeyboard keyboard) {
+    if (this is! KeyDownEvent || character != null) {
+      return false;
+    }
+
+    if (keyboard.isMetaPressed || keyboard.isControlPressed) {
+      return false;
+    }
+
+    final plane = logicalKey.keyId & LogicalKeyboardKey.planeMask;
+    return plane == LogicalKeyboardKey.unicodePlane ||
+        plane == LogicalKeyboardKey.macosPlane;
+  }
+}
+
 Set<DeviceKeyModifier> _pressedModifiers(HardwareKeyboard keyboard) {
   return {
     for (final key in keyboard.logicalKeysPressed)

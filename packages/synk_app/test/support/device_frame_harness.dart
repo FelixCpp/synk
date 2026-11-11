@@ -25,6 +25,7 @@ final class DeviceFrameHarness {
   DeviceFrameHarness({
     DeviceInteraction? interaction,
     DeviceClipboard? clipboard,
+    DeviceTextInput? textInput,
     DeviceAudio? audio,
     DeviceScreenCapture? screenCapture,
     DeviceFileTransfer? fileTransfer,
@@ -41,6 +42,7 @@ final class DeviceFrameHarness {
     session = FakeDeviceSession(
       interaction: interaction,
       clipboard: clipboard,
+      textInput: textInput,
       audio: audio,
       screenCapture: screenCapture,
       fileTransfer: fileTransfer,

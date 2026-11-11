@@ -27,6 +27,9 @@ class DeviceFrameBloc({
         ),
       ) {
     on<_OnKeyEvent>(_onKeyEvent, transformer: sequential());
+    on<_OnKeyboardLeft>(_onKeyboardLeft, transformer: sequential());
+    on<_OnTextComposed>(_onTextComposed, transformer: sequential());
+    on<_OnTypeHostClipboard>(_onTypeHostClipboard, transformer: droppable());
     on<_OnPointerEvent>(_onPointerEvent, transformer: sequential());
     on<_OnPinchEvent>(_onPinchEvent, transformer: sequential());
     on<_OnCaptureScreenshot>(_onCaptureScreenshot, transformer: sequential());
@@ -57,6 +60,34 @@ class DeviceFrameBloc({
           to: notifications,
           whenItFails: 'Die Tastatureingabe kam nicht am Gerät an.',
         );
+  }
+
+  FutureOr<void> _onKeyboardLeft(
+    _OnKeyboardLeft event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return device.releasePressedKeys.logger().run();
+  }
+
+  FutureOr<void> _onTextComposed(
+    _OnTextComposed event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return device.typeText.logger().runReporting(
+      event.text,
+      to: notifications,
+      whenItFails: 'Der Text kam nicht am Gerät an.',
+    );
+  }
+
+  FutureOr<void> _onTypeHostClipboard(
+    _OnTypeHostClipboard event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return device.typeHostClipboard.logger().runReporting(
+      to: notifications,
+      whenItFails: 'Die Zwischenablage ließ sich nicht eintippen.',
+    );
   }
 
   FutureOr<void> _onPointerEvent(

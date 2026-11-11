@@ -9,7 +9,7 @@ import 'fake_http_client_adapter.dart';
 
 final _dmg = GitHubAssetDto(
   name: 'synk-macos-v0.2.0.dmg',
-  downloadUrl: Uri.parse(
+  downloadUrl: .parse(
     'https://github.com/FelixCpp/synk/releases/download/v0.2.0/synk-macos-v0.2.0.dmg',
   ),
 );
@@ -30,7 +30,8 @@ void main() {
 
   GitHubReleasesApi apiAnswering(FakeHttpResponse response) {
     adapter = FakeHttpClientAdapter((_) => response);
-    return GitHubReleasesApi(
+
+    return .new(
       owner: 'FelixCpp',
       repository: 'synk',
       dio: Dio()..httpClientAdapter = adapter,

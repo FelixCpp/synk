@@ -21,6 +21,7 @@ abstract interface class DeviceSession {
 
   DeviceAudio? get audio;
   DeviceClipboard? get clipboard;
+  DeviceTextInput? get textInput;
   DeviceScreenCapture? get screenCapture;
   DeviceInteraction? get interaction;
   InteractionUnavailableReason? get interactionUnavailableReason;
@@ -42,6 +43,10 @@ abstract interface class DeviceInteraction {
 abstract interface class DeviceClipboard {
   Future<void> setClipboard(String content);
   Future<String> getClipboard();
+}
+
+abstract interface class DeviceTextInput {
+  Future<void> typeText(String text);
 }
 
 abstract interface class DeviceAudio {

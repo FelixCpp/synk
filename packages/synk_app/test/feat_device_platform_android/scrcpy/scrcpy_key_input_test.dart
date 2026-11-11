@@ -39,6 +39,17 @@ void main() {
       expect(_scrcpyEventOf(key: LogicalKeyboardKey.keyA)!.key, 29);
     });
 
+    test('does not exist for command, which the mac keeps for itself', () {
+      for (final key in [
+        LogicalKeyboardKey.metaLeft,
+        LogicalKeyboardKey.metaRight,
+      ]) {
+        for (final DeviceKeyEventType type in [.down, .repeat, .up]) {
+          expect(_scrcpyEventOf(key: key, type: type), isNull);
+        }
+      }
+    });
+
     test('does not exist for a key android has no code for', () {
       expect(
         _scrcpyEventOf(key: const LogicalKeyboardKey(0x1ffffdead)),
@@ -54,12 +65,12 @@ void main() {
 
     test('sets the side flag together with the generic one', () {
       final metaState = _scrcpyEventOf(
-        modifiers: const {DeviceKeyModifier.metaLeft},
+        modifiers: const {DeviceKeyModifier.shiftLeft},
       )!.metaState;
 
-      expect(metaState & ScrcpyKeyMetaState.metaLeftOn, isNonZero);
-      expect(metaState & ScrcpyKeyMetaState.metaOn, isNonZero);
-      expect(metaState & ScrcpyKeyMetaState.metaRightOn, isZero);
+      expect(metaState & ScrcpyKeyMetaState.shiftLeftOn, isNonZero);
+      expect(metaState & ScrcpyKeyMetaState.shiftOn, isNonZero);
+      expect(metaState & ScrcpyKeyMetaState.shiftRightOn, isZero);
     });
 
     test('ors several modifiers into one state', () {
@@ -152,6 +163,106 @@ void main() {
 
     test('does not exist for a release', () {
       expect(_scrcpyTextOf(':', type: .up), isNull);
+    });
+  });
+
+  group('a mac shortcut on android', () {
+    const command = {DeviceKeyModifier.metaLeft};
+    const option = {DeviceKeyModifier.altLeft};
+
+    bool holds(ScrcpyKeyEvent event, ScrcpyKeyMetaState flag) {
+      return event.metaState & flag != 0;
+    }
+
+    test('turns command into control', () {
+      for (final key in [
+        LogicalKeyboardKey.keyA,
+        LogicalKeyboardKey.keyZ,
+        LogicalKeyboardKey.keyX,
+      ]) {
+        final event = _scrcpyEventOf(key: key, modifiers: command)!;
+
+        expect(holds(event, ScrcpyKeyMetaState.ctrlLeftOn), isTrue);
+        expect(holds(event, ScrcpyKeyMetaState.ctrlOn), isTrue);
+        expect(holds(event, ScrcpyKeyMetaState.metaOn), isFalse);
+      }
+    });
+
+    test('keeps shift, for redo and for selecting', () {
+      final event = _scrcpyEventOf(
+        key: LogicalKeyboardKey.keyZ,
+        modifiers: const {...command, DeviceKeyModifier.shiftLeft},
+      )!;
+
+      expect(holds(event, ScrcpyKeyMetaState.ctrlOn), isTrue);
+      expect(holds(event, ScrcpyKeyMetaState.shiftOn), isTrue);
+    });
+
+    test('jumps to the start and end of the line with the arrows', () {
+      final start = _scrcpyEventOf(
+        key: LogicalKeyboardKey.arrowLeft,
+        modifiers: command,
+      )!;
+      final end = _scrcpyEventOf(
+        key: LogicalKeyboardKey.arrowRight,
+        modifiers: command,
+      )!;
+
+      expect(start.key, 122);
+      expect(end.key, 123);
+      expect(start.metaState, ScrcpyKeyMetaState.none);
+      expect(end.metaState, ScrcpyKeyMetaState.none);
+    });
+
+    test('jumps to the start and end of the text with up and down', () {
+      final start = _scrcpyEventOf(
+        key: LogicalKeyboardKey.arrowUp,
+        modifiers: command,
+      )!;
+      final end = _scrcpyEventOf(
+        key: LogicalKeyboardKey.arrowDown,
+        modifiers: command,
+      )!;
+
+      expect(start.key, 122);
+      expect(end.key, 123);
+      expect(holds(start, ScrcpyKeyMetaState.ctrlOn), isTrue);
+      expect(holds(end, ScrcpyKeyMetaState.ctrlOn), isTrue);
+    });
+
+    test('deletes back to the start of the line', () {
+      final event = _scrcpyEventOf(
+        key: LogicalKeyboardKey.backspace,
+        modifiers: command,
+      )!;
+
+      expect(event.key, 67);
+      expect(holds(event, ScrcpyKeyMetaState.altOn), isTrue);
+      expect(holds(event, ScrcpyKeyMetaState.metaOn), isFalse);
+    });
+
+    test('moves and deletes word by word with option', () {
+      for (final key in [
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowRight,
+        LogicalKeyboardKey.backspace,
+        LogicalKeyboardKey.delete,
+      ]) {
+        final event = _scrcpyEventOf(key: key, modifiers: option)!;
+
+        expect(holds(event, ScrcpyKeyMetaState.ctrlOn), isTrue);
+        expect(holds(event, ScrcpyKeyMetaState.altOn), isFalse);
+      }
+    });
+
+    test('leaves option alone on other keys', () {
+      final event = _scrcpyEventOf(
+        key: LogicalKeyboardKey.arrowUp,
+        modifiers: option,
+      )!;
+
+      expect(holds(event, ScrcpyKeyMetaState.altOn), isTrue);
+      expect(holds(event, ScrcpyKeyMetaState.ctrlOn), isFalse);
     });
   });
 

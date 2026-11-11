@@ -96,6 +96,31 @@ void main() {
     ]);
   });
 
+  test('releases a translated shortcut as the key it was pressed as', () async {
+    DeviceKeyEvent arrowLeft(
+      DeviceKeyEventType type,
+      Set<DeviceKeyModifier> modifiers,
+    ) {
+      return DeviceKeyEvent(
+        key: LogicalKeyboardKey.arrowLeft,
+        physicalKey: PhysicalKeyboardKey.arrowLeft,
+        type: type,
+        modifiers: modifiers,
+      );
+    }
+
+    await interaction.simulateKeyEvent(
+      arrowLeft(.down, const {DeviceKeyModifier.metaLeft}),
+    );
+    await interaction.simulateKeyEvent(arrowLeft(.up, const {}));
+
+    int keyCodeOf(List<int> message) {
+      return ByteData.sublistView(Uint8List.fromList(message)).getUint32(2);
+    }
+
+    expect(socket.writes.map(keyCodeOf), [122, 122]);
+  });
+
   test('sends the release of a key that went out as a key code', () async {
     // A text keystroke on one key must not swallow the release of another.
     await interaction.simulateKeyEvent(_colon(.down));

@@ -4,6 +4,7 @@ import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_device_connections/domain/models/device_connection.dart';
 import 'package:synk/feat_device_frame/presentation/bloc/device_frame_bloc.dart';
 import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
+import 'package:synk/feat_device_frame/presentation/device_text_input_client.dart';
 import 'package:synk/feat_device_frame/presentation/host_keystroke.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_controls.dart';
 import 'package:synk/feat_device_frame/presentation/widgets/device_frame_drop_detector.dart';
@@ -24,7 +25,6 @@ class const DeviceFrame({
   required final bool isMaximized,
   required final VoidCallback onToggleMaximize,
   required final VoidCallback onClose,
-  final VoidCallback? onEscape,
 }) extends StatefulWidget {
   @override
   State<DeviceFrame> createState() => _DeviceFrameState();
@@ -75,7 +75,7 @@ class _DeviceFrameState extends State<DeviceFrame>
           builder: (context, isDragHovered) => _FocusableFrame(
             focusNode: focusNode,
             autofocus: widget.isMaximized,
-            onEscape: widget.onEscape,
+            acceptsText: connection.supportsTextInput,
             child: _FocusAware(
               focusNode: focusNode,
               builder: (hasFocus, child) => DeviceFrameSurface(
@@ -216,33 +216,86 @@ class const _FrameDropTarget({
 class const _FocusableFrame({
   required final FocusNode focusNode,
   required final bool autofocus,
-  required final VoidCallback? onEscape,
+  required final bool acceptsText,
   required final Widget child,
-}) extends StatelessWidget {
+}) extends StatefulWidget {
+  @override
+  State<_FocusableFrame> createState() => _FocusableFrameState();
+}
+
+class _FocusableFrameState extends State<_FocusableFrame> {
+  late final AppLifecycleListener _lifecycle;
+  late final _textInput = DeviceTextInputClient(
+    onTextComposed: (text) => BlocProvider.of<DeviceFrameBloc>(
+      context,
+    ).add(.onTextComposed(text)),
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onInactive: _leaveKeyboard);
+  }
+
+  @override
+  void dispose() {
+    _textInput.detach();
+    _lifecycle.dispose();
+    super.dispose();
+  }
+
+  void _onFocusChange(bool hasFocus) {
+    if (!hasFocus) {
+      _textInput.detach();
+      _leaveKeyboard();
+      return;
+    }
+
+    if (!widget.acceptsText) {
+      return;
+    }
+
+    if (context.findRenderObject() case final RenderBox box when box.hasSize) {
+      _textInput.attach(size: box.size, transform: box.getTransformTo(null));
+    }
+  }
+
+  void _leaveKeyboard() {
+    if (!mounted) return;
+    BlocProvider.of<DeviceFrameBloc>(context).add(const .onKeyboardLeft());
+  }
+
   @override
   Widget build(BuildContext context) {
+    final focusNode = widget.focusNode;
+
     return Focus(
       focusNode: focusNode,
-      autofocus: autofocus,
+      autofocus: widget.autofocus,
+      onFocusChange: _onFocusChange,
       onKeyEvent: (node, event) => _handleKeyEvent(context, event),
-      child: GestureDetector(
-        onTapDown: (details) => focusNode.requestFocus(),
-        onTap: () {},
+      child: Listener(
+        onPointerDown: (event) => focusNode.requestFocus(),
+        onPointerPanZoomStart: (event) => focusNode.requestFocus(),
         behavior: .translucent,
-        child: child,
+        child: GestureDetector(
+          onTap: () {},
+          behavior: .translucent,
+          child: widget.child,
+        ),
       ),
     );
   }
 
   KeyEventResult _handleKeyEvent(BuildContext context, KeyEvent event) {
-    final escape = onEscape;
-    if (escape != null && event.logicalKey == LogicalKeyboardKey.escape) {
-      if (event is KeyDownEvent) escape();
-      return .handled;
-    }
-
     if (AppShortcuts.owns(event)) {
       return .ignored;
+    }
+
+    if (widget.acceptsText &&
+        (_textInput.isComposing ||
+            event.startsComposition(HardwareKeyboard.instance))) {
+      return .skipRemainingHandlers;
     }
 
     final keystroke = event.toDeviceKeyEvent(HardwareKeyboard.instance);

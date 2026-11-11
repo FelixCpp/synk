@@ -49,17 +49,96 @@ sealed class ScrcpyKeyEvent with _$ScrcpyKeyEvent {
 
 extension DeviceKeyEventToScrcpy on DeviceKeyEvent {
   ScrcpyKeyEvent? toScrcpyKeyEvent() {
-    if (_scrcpyKeyCodeOf(key) case final key?) {
+    final event = _asAndroidShortcut();
+
+    if (_scrcpyKeyCodeOf(event.key) case final key?) {
       return .new(
         key: key,
-        type: _scrcpyKeyEventTypeOf(type),
-        metaState: _scrcpyMetaStateOf(modifiers),
+        type: _scrcpyKeyEventTypeOf(event.type),
+        metaState: _scrcpyMetaStateOf(event.modifiers),
       );
     }
 
     return null;
   }
 }
+
+extension on DeviceKeyEvent {
+  DeviceKeyEvent _asAndroidShortcut() {
+    if (isMetaPressed) {
+      return switch (key) {
+        LogicalKeyboardKey.arrowLeft => copyWith(
+          key: LogicalKeyboardKey.home,
+          modifiers: _commandReplacedBy(null),
+        ),
+        LogicalKeyboardKey.arrowRight => copyWith(
+          key: LogicalKeyboardKey.end,
+          modifiers: _commandReplacedBy(null),
+        ),
+        LogicalKeyboardKey.arrowUp => copyWith(
+          key: LogicalKeyboardKey.home,
+          modifiers: _commandReplacedBy(_control),
+        ),
+        LogicalKeyboardKey.arrowDown => copyWith(
+          key: LogicalKeyboardKey.end,
+          modifiers: _commandReplacedBy(_control),
+        ),
+        LogicalKeyboardKey.backspace => copyWith(
+          modifiers: _commandReplacedBy(_alt),
+        ),
+        _ => copyWith(modifiers: _commandReplacedBy(_control)),
+      };
+    }
+
+    if (_isOptionPressed && _wordKeys.contains(key)) {
+      return copyWith(modifiers: _replacingOptionWithControl());
+    }
+
+    return this;
+  }
+
+  bool get _isOptionPressed =>
+      modifiers.contains(DeviceKeyModifier.altLeft) ||
+      modifiers.contains(DeviceKeyModifier.altRight);
+
+  Set<DeviceKeyModifier> _commandReplacedBy(
+    DeviceKeyModifier Function(DeviceKeyModifier command)? replacement,
+  ) {
+    return {
+      for (final modifier in modifiers)
+        if (modifier == .metaLeft || modifier == .metaRight)
+          ?replacement?.call(modifier)
+        else
+          modifier,
+    };
+  }
+
+  Set<DeviceKeyModifier> _replacingOptionWithControl() {
+    return {
+      for (final modifier in modifiers)
+        switch (modifier) {
+          .altLeft => .controlLeft,
+          .altRight => .controlRight,
+          _ => modifier,
+        },
+    };
+  }
+}
+
+DeviceKeyModifier _control(DeviceKeyModifier command) {
+  return command == .metaRight ? .controlRight : .controlLeft;
+}
+
+DeviceKeyModifier _alt(DeviceKeyModifier command) {
+  return command == .metaRight ? .altRight : .altLeft;
+}
+
+final _wordKeys = {
+  LogicalKeyboardKey.arrowLeft,
+  LogicalKeyboardKey.arrowRight,
+  LogicalKeyboardKey.backspace,
+  LogicalKeyboardKey.delete,
+};
 
 extension DeviceKeyEventToScrcpyText on DeviceKeyEvent {
   /// The text this keystroke types, for a keystroke scrcpy should inject as
@@ -110,6 +189,11 @@ final _scrcpyKeyCodeByLogicalKey = Map.fromEntries(
 );
 
 ScrcpyKeyCode? _scrcpyKeyCodeOf(LogicalKeyboardKey key) {
+  if (key == LogicalKeyboardKey.metaLeft ||
+      key == LogicalKeyboardKey.metaRight) {
+    return null;
+  }
+
   return _scrcpyKeyCodeByLogicalKey[key];
 }
 

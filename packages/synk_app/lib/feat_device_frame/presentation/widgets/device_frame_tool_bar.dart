@@ -190,6 +190,19 @@ class const _OverflowButton({
             ),
           ),
         ],
+        if (connection.supportsTextInput)
+          SynkUiTooltip(
+            message: 'Text aus der Mac-Zwischenablage auf dem Gerät eintippen',
+            child: SynkUiMenuItem(
+              icon: CupertinoIcons.keyboard,
+              label: 'Zwischenablage eintippen',
+              onPressed: () {
+                controller.close();
+                BlocProvider.of<DeviceFrameBloc>(context)
+                    .add(const .onTypeHostClipboard());
+              },
+            ),
+          ),
         if (connection.supportsAudio)
           _AudioControls(
             isAudioMuted: isAudioMuted,
@@ -317,5 +330,8 @@ class const _StatusDot() extends StatelessWidget {
 
 extension on DeviceConnection {
   bool get hasMenuActions =>
-      supportsFileTransfer || supportsAudio || supportsInteraction;
+      supportsFileTransfer ||
+      supportsTextInput ||
+      supportsAudio ||
+      supportsInteraction;
 }

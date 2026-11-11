@@ -1,6 +1,7 @@
 import 'package:rx_shared_preferences/rx_shared_preferences.dart';
 import 'package:synk/feat_settings/domain/models/mirror_frame_rate.dart';
 import 'package:synk/feat_settings/domain/models/mirror_quality.dart';
+import 'package:synk/feat_settings/domain/models/settings_category.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
@@ -44,6 +45,7 @@ class SettingsRepositoryImpl({
       _Key.muteOnConnect: settings.muteOnConnect,
       _Key.syncClipboard: settings.syncClipboard,
       _Key.customAdbPath: settings.customAdbPath,
+      _Key.settingsCategory: settings.settingsCategory.name,
     };
   }
 
@@ -103,6 +105,11 @@ class SettingsRepositoryImpl({
       muteOnConnect: readOrFallBack(_Key.muteOnConnect, defaults.muteOnConnect),
       syncClipboard: readOrFallBack(_Key.syncClipboard, defaults.syncClipboard),
       customAdbPath: stored[_Key.customAdbPath] as String?,
+      settingsCategory: readEnum(
+        _Key.settingsCategory,
+        SettingsCategory.values,
+        defaults.settingsCategory,
+      ),
     );
   }
 }
@@ -119,4 +126,5 @@ abstract final class _Key {
   static const muteOnConnect = 'mute_on_connect';
   static const syncClipboard = 'sync_clipboard';
   static const customAdbPath = 'adb_path';
+  static const settingsCategory = 'settings_category';
 }

@@ -1,13 +1,18 @@
 import 'package:flutter/cupertino.dart';
+import 'package:synk/feat_settings/domain/models/settings_category.dart';
 
-enum SettingsCategory {
-  general(label: 'Allgemein', icon: CupertinoIcons.gear_alt),
-  capture(label: 'Aufnahmen', icon: CupertinoIcons.camera),
-  devices(label: 'Geräte', icon: CupertinoIcons.device_phone_portrait),
-  tools(label: 'Tools', icon: CupertinoIcons.wrench);
+extension SettingsCategoryLook on SettingsCategory {
+  String get label => switch (this) {
+    .general => 'Allgemein',
+    .capture => 'Aufnahmen',
+    .devices => 'Geräte',
+    .tools => 'Tools',
+  };
 
-  const SettingsCategory({required this.label, required this.icon});
-
-  final String label;
-  final IconData icon;
+  IconData get icon => switch (this) {
+    .general => CupertinoIcons.gear_alt,
+    .capture => CupertinoIcons.camera,
+    .devices => CupertinoIcons.device_phone_portrait,
+    .tools => CupertinoIcons.wrench,
+  };
 }

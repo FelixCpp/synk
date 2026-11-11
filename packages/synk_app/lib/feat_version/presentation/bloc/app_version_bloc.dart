@@ -22,6 +22,9 @@ class AppVersionBloc(
   final NotificationFeature notifications,
 ) extends Bloc<AppVersionEvent, AppVersionState> {
   final getNewerAppVersion = GetNewerAppVersionInteractor(repository);
+  final updateToNewestAppVersion = UpdateToNewestAppVersionInteractor(
+    repository,
+  );
 
   this : super(AppVersionState.initial(currentAppVersion)) {
     on<_OnCheckForUpdates>(_onCheckForUpdates, transformer: droppable());
@@ -39,13 +42,13 @@ class AppVersionBloc(
     final newerAppVersion = await getNewerAppVersion
         .logger()
         .ensureMinExecutionTimeOnSuccess(const .new(milliseconds: 500))
-        .getOrElse((_) => const NewerAppVersion.failedToFetch());
+        .getOrElse((_) => const .failedToFetch());
 
     emit(state.copyWith(newerAppVersion: newerAppVersion));
   }
 
   FutureOr<void> _onUpdate(_OnUpdate event, Emitter<AppVersionState> emit) {
-    return UpdateToNewestAppVersionInteractor(repository)
+    return updateToNewestAppVersion
         .receiveProgress((progress) {
           if (!emit.isDone) {
             emit(state.copyWith(downloadProgress: progress));

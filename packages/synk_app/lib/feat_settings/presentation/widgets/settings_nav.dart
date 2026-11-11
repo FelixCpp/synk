@@ -1,3 +1,4 @@
+import 'package:synk/feat_settings/domain/models/settings_category.dart';
 import 'package:synk/feat_settings/presentation/settings_category.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/widgets.dart';

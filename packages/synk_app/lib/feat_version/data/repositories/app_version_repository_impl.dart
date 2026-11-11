@@ -51,6 +51,7 @@ class const AppVersionRepositoryImpl({
 
     final savePath = path.join(downloadDirectory, dmg.name);
     var reportedPercent = -1;
+
     await releasesApi.downloadAsset(
       dmg,
       savePath,

@@ -8,15 +8,12 @@ class TextInteractionLayer(final Socket interactionSocket) {
   static const _headerLength = 5;
 
   void injectText(String text) {
-    final textBytes = utf8.encode(text);
-    if (textBytes.length > maxTextBytes) {
-      throw ArgumentError.value(
-        text,
-        'text',
-        'is longer than the $maxTextBytes bytes scrcpy accepts',
-      );
+    for (final chunk in _chunksOf(text)) {
+      _injectChunk(chunk);
     }
+  }
 
+  void _injectChunk(List<int> textBytes) {
     final message = Uint8List(_headerLength + textBytes.length)
       ..setRange(_headerLength, _headerLength + textBytes.length, textBytes);
 
@@ -25,5 +22,22 @@ class TextInteractionLayer(final Socket interactionSocket) {
       ..setUint32(1, textBytes.length, .big);
 
     interactionSocket.add(message);
+  }
+
+  Iterable<List<int>> _chunksOf(String text) sync* {
+    var chunk = <int>[];
+
+    for (final rune in text.runes) {
+      final bytes = utf8.encode(String.fromCharCode(rune));
+      if (chunk.length + bytes.length > maxTextBytes) {
+        yield chunk;
+        chunk = <int>[];
+      }
+      chunk.addAll(bytes);
+    }
+
+    if (chunk.isNotEmpty) {
+      yield chunk;
+    }
   }
 }

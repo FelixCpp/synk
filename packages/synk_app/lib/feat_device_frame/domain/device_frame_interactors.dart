@@ -1,6 +1,7 @@
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/release_pressed_keys_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_file_interactor.dart';
@@ -11,6 +12,8 @@ import 'package:synk/feat_device_frame/domain/usecases/simulate_pinch_event_inte
 import 'package:synk/feat_device_frame/domain/usecases/simulate_pointer_event_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/start_recording_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/stop_recording_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/type_host_clipboard_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/type_text_interactor.dart';
 
 /// The interactors a frame dispatches through, one per entry in
 /// [DeviceFrameFeature].
@@ -23,6 +26,9 @@ class const DeviceFrameInteractors({
   required final bool isAudioMuted,
   required final double audioVolume,
   required final SimulateKeyEventInteractor simulateKeyEvent,
+  required final ReleasePressedKeysInteractor releasePressedKeys,
+  required final TypeTextInteractor typeText,
+  required final TypeHostClipboardInteractor typeHostClipboard,
   required final SimulatePointerEventInteractor simulatePointerEvent,
   required final SimulatePinchEventInteractor simulatePinchEvent,
   required final CaptureScreenshotInteractor captureScreenshot,

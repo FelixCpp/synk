@@ -13,6 +13,7 @@ class FakeDeviceSession implements DeviceSession {
     ),
     this.audio,
     this.clipboard,
+    this.textInput,
     this.screenCapture,
     this.interaction,
     this.interactionUnavailableReason,
@@ -30,6 +31,9 @@ class FakeDeviceSession implements DeviceSession {
 
   @override
   final DeviceClipboard? clipboard;
+
+  @override
+  final DeviceTextInput? textInput;
 
   @override
   final DeviceScreenCapture? screenCapture;

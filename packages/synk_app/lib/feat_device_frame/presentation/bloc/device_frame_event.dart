@@ -20,6 +20,9 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   ) = _OnPinchEvent;
   const factory DeviceFrameEvent.onKeyEvent(DeviceKeyEvent keyEvent) =
       _OnKeyEvent;
+  const factory DeviceFrameEvent.onKeyboardLeft() = _OnKeyboardLeft;
+  const factory DeviceFrameEvent.onTypeHostClipboard() = _OnTypeHostClipboard;
+  const factory DeviceFrameEvent.onTextComposed(String text) = _OnTextComposed;
   const factory DeviceFrameEvent.onFilesDropped(List<String> filepaths) =
       _OnFilesDropped;
 
