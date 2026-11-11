@@ -10,7 +10,7 @@ import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart'
 import 'package:synk/feat_maximized_device/presentation/maximized_device_metrics.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_screen.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
-import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
+import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_list.dart';
 import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -143,7 +143,7 @@ class const _Content({
             child: BlocSelector<SettingsBloc, Settings, bool>(
               selector: (settings) => settings.showCapturePreview,
               builder: (context, showPreview) => showPreview
-                  ? const ScreenCapturePreviewThumbnail()
+                  ? const ScreenCapturePreviewList()
                   : const SizedBox.shrink(),
             ),
           ),

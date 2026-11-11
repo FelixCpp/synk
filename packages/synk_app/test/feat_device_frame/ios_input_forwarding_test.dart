@@ -76,4 +76,7 @@ class _RecordingInteraction implements DeviceInteraction {
   Future<void> pressPowerButton() async {
     powerButtonPresses++;
   }
+
+  @override
+  Future<void> rotate() async {}
 }

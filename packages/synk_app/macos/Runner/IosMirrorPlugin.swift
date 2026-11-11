@@ -149,9 +149,10 @@ private final class IosMirrorSession: NSObject, FlutterTexture,
     latestPixelBuffer = nil
     bufferLock.unlock()
 
-    if isRecording || isRecordingArmed {
+    if isRecording || isRecordingArmed, let writer = assetWriter {
       assetWriterInput?.markAsFinished()
-      assetWriter?.cancelWriting()
+      writer.cancelWriting()
+      try? FileManager.default.removeItem(at: writer.outputURL)
     }
     assetWriter = nil
     assetWriterInput = nil

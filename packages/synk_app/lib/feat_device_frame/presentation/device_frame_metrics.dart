@@ -38,8 +38,4 @@ class DeviceFrameMetrics {
     final mirror = sizeForConstantArea(mirrorArea, aspectRatio);
     return Size(mirror.width, mirror.height + chromeHeight);
   }
-
-  /// Badges drawn on top of the mirrored picture.
-  static const EdgeInsets overlayPadding = EdgeInsets.all(SynkUiSpace.s8);
-  static const double overlayIconSize = 13.0;
 }

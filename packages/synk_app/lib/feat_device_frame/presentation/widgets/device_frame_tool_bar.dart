@@ -127,6 +127,16 @@ class const _Actions({
             onPressed: onCaptureScreenshot,
           ),
         ),
+        if (connection.supportsInteraction)
+          SynkUiTooltip(
+            message: 'Gerät drehen',
+            child: SynkUiIconButton(
+              icon: CupertinoIcons.rotate_left,
+              onPressed: () => BlocProvider.of<DeviceFrameBloc>(context).add(
+                const .onRotate(),
+              ),
+            ),
+          ),
         SynkUiTooltip(
           message: isMaximized ? 'Vollbild verlassen' : 'Gerät maximieren',
           child: SynkUiIconButton(

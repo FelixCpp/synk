@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:api_adb/api_adb.dart';
 
 import 'fake_process_manager.dart';
@@ -6,10 +8,16 @@ import 'fake_process_manager.dart';
 /// hands out [portForward] for every forward. Without one, forwarding fails
 /// the way it does for a device that went away.
 class FakeAdbDeviceCommunicator implements AdbDeviceCommunicator {
-  FakeAdbDeviceCommunicator({required this.process, this.portForward});
+  FakeAdbDeviceCommunicator({
+    required this.process,
+    this.portForward,
+    this.shellOutput = _noOutput,
+  });
 
   final FakeProcess process;
   final AdbPortForward? portForward;
+  final String Function(List<String> arguments) shellOutput;
+  final shells = <List<String>>[];
 
   final pushes = <({String localFilepath, String remoteFilepath})>[];
   final startedShells = <List<String>>[];
@@ -20,6 +28,16 @@ class FakeAdbDeviceCommunicator implements AdbDeviceCommunicator {
     required String remoteFilepath,
   }) async {
     pushes.add((localFilepath: localFilepath, remoteFilepath: remoteFilepath));
+  }
+
+  @override
+  Future<AdbShellResult> shell(List<String> arguments) async {
+    shells.add(arguments);
+    return AdbShellResult(
+      exitCode: 0,
+      stdout: utf8.encode(shellOutput(arguments)),
+      stderr: utf8.encode(''),
+    );
   }
 
   @override
@@ -49,3 +67,5 @@ class FakeAdbDeviceCommunicator implements AdbDeviceCommunicator {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
+
+String _noOutput(List<String> arguments) => '';

@@ -7,6 +7,7 @@ import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_mirror.dart';
 class AndroidScreenCapture({
   required final ScrcpyMirror mirror,
   required final AndroidDeviceAgentCommunicator communicator,
+  required final void Function() requestKeyframe,
 }) implements DeviceScreenCapture {
   @override
   Future<Uint8List> captureScreenshot() async {
@@ -15,12 +16,21 @@ class AndroidScreenCapture({
   }
 
   @override
-  Future<void> startRecording(String path, {required bool withAudio}) {
-    return mirror.startRecording(path, withAudio: withAudio);
+  String? recordingPath;
+
+  @override
+  Future<void> startRecording(String path, {required bool withAudio}) async {
+    await mirror.startRecording(path, withAudio: withAudio);
+    recordingPath = path;
+    requestKeyframe();
   }
 
   @override
-  Future<bool> stopRecording() {
-    return mirror.stopRecording();
+  Future<bool> stopRecording() async {
+    try {
+      return await mirror.stopRecording();
+    } finally {
+      recordingPath = null;
+    }
   }
 }

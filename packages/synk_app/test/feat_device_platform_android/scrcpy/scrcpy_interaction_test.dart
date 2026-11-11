@@ -52,6 +52,7 @@ void main() {
       screenSize: BehaviorSubject.seeded(
         const DeviceScreenSize(width: 1080, height: 2400),
       ),
+      rotateDevice: () async {},
     );
   });
 

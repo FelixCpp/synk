@@ -25,10 +25,11 @@ class DeviceFrameFeatureImpl({
 }) implements DeviceFrameFeature {
   final _clipboardSync = DeviceClipboardSync(clipboard);
 
-  String? _runningRecording;
-
   final _pressedKeys = <PhysicalKeyboardKey, DeviceKeyEvent>{};
   Future<void> _lastKeyAction = Future.value();
+
+  @override
+  bool get isRecording => session.screenCapture?.recordingPath != null;
 
   @override
   bool get isAudioMuted => session.audio?.isAudioMuted ?? true;
@@ -148,6 +149,11 @@ class DeviceFrameFeatureImpl({
   }
 
   @override
+  Future<void> rotate() async {
+    await session.interaction?.rotate();
+  }
+
+  @override
   Future<void> captureScreenshot() async {
     final pngBytes = await _screenCaptureOrThrow(
       'capture its screen',
@@ -178,8 +184,6 @@ class DeviceFrameFeatureImpl({
       filepath,
       withAudio: settings.recordAudio,
     );
-
-    _runningRecording = filepath;
   }
 
   @override
@@ -189,8 +193,7 @@ class DeviceFrameFeatureImpl({
       return;
     }
 
-    final filepath = _runningRecording;
-    _runningRecording = null;
+    final filepath = screenCapture.recordingPath;
 
     if (!await screenCapture.stopRecording()) {
       throw const DeviceFrameException(
@@ -226,10 +229,14 @@ class DeviceFrameFeatureImpl({
         outcomes.add((
           action: FileTransferAction.installed,
           filename: filename,
+          destination: null,
         ));
       } else {
-        await fileTransfer.pushFile(filepath);
-        outcomes.add((action: FileTransferAction.pushed, filename: filename));
+        outcomes.add((
+          action: FileTransferAction.pushed,
+          filename: filename,
+          destination: await fileTransfer.pushFile(filepath),
+        ));
       }
     }
 

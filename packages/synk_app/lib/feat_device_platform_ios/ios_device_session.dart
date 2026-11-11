@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:api_devicectl/api_devicectl.dart';
-import 'package:app_logger/app_logger.dart';
 import 'package:file/file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/application/teardown.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/devicectl/ios_clipboard.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
@@ -25,14 +25,6 @@ class IosDeviceSession({
   @override
   required final InteractionUnavailableReason? interactionUnavailableReason,
 }) implements DeviceSession {
-  final IosInteraction? _interaction = interactionUnavailableReason == null
-      ? IosInteraction(
-          hidChannel: hidChannel,
-          deviceId: deviceId,
-          screenSizeChanges: transport.screenSizeChanges(textureId),
-        )
-      : null;
-
   /// The capture session is silent; sound only exists where the CoreDevice
   /// audio stream could be started beside it.
   final IosAudio? _audio = transport.supportsAudio
@@ -48,10 +40,19 @@ class IosDeviceSession({
   );
 
   final _screenSize = BehaviorSubject.seeded(initialScreenSize);
+  late final IosInteraction? _interaction;
   late final IosClipboard _clipboard;
   late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;
 
   this {
+    _interaction = interactionUnavailableReason == null
+        ? IosInteraction(
+            hidChannel: hidChannel,
+            devicectl: devicectl,
+            deviceId: deviceId,
+            screenSize: _screenSize,
+          )
+        : null;
     _clipboard = IosClipboard(
       devicectl: devicectl,
       deviceId: deviceId,
@@ -87,21 +88,13 @@ class IosDeviceSession({
   DeviceFileTransfer? get fileTransfer => null;
 
   @override
-  Future<void> dispose() async {
-    await _interaction?.dispose();
-    await _screenSizeSubscription.cancel();
-    await _screenSize.close();
-
-    try {
-      await hidChannel.releaseInput(deviceId);
-    } on Object catch (error, stackTrace) {
-      appLogger.w(
-        'Failed to release the touch input of $deviceId',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-
-    await transport.stopMirror(textureId);
+  Future<void> dispose() {
+    return tearDownEach('the session of $deviceId', [
+      () => transport.stopMirror(textureId),
+      () async => _interaction?.dispose(),
+      _screenSizeSubscription.cancel,
+      _screenSize.close,
+      () => hidChannel.releaseInput(deviceId),
+    ]);
   }
 }

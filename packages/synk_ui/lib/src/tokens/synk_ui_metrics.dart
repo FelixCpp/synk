@@ -28,6 +28,7 @@ class SynkUiSize {
   const SynkUiSize._();
 
   static const hairline = 1.0;
+  static const focusRing = 3.0;
   static const iconButton = 26.0;
   static const icon = 14.0;
   static const control = 28.0;

@@ -7,7 +7,7 @@ import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_transport.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
-class const IosScreenCapture({
+class IosScreenCapture({
   required final IosMirrorTransport transport,
   required final DevicectlApi devicectl,
   required final DeviceId deviceId,
@@ -48,12 +48,20 @@ class const IosScreenCapture({
   }
 
   @override
-  Future<void> startRecording(String path, {required bool withAudio}) {
-    return transport.startRecording(textureId, path);
+  String? recordingPath;
+
+  @override
+  Future<void> startRecording(String path, {required bool withAudio}) async {
+    await transport.startRecording(textureId, path);
+    recordingPath = path;
   }
 
   @override
-  Future<bool> stopRecording() {
-    return transport.stopRecording(textureId);
+  Future<bool> stopRecording() async {
+    try {
+      return await transport.stopRecording(textureId);
+    } finally {
+      recordingPath = null;
+    }
   }
 }

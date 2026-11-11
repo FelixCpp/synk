@@ -8,7 +8,9 @@ import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/domain/models/user_message.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
 import 'package:synk/feat_screen_capture_preview/domain/screen_capture_preview_feature.dart';
+import 'package:synk/feat_screen_capture_preview/domain/usecases/move_to_trash_interactor.dart';
 import 'package:synk/feat_screen_capture_preview/domain/usecases/open_in_system_viewer_interactor.dart';
+import 'package:synk/feat_screen_capture_preview/domain/usecases/reveal_in_file_manager_interactor.dart';
 import 'package:use_in_case/use_in_case.dart';
 
 part 'screen_capture_preview_bloc.freezed.dart';
@@ -22,10 +24,14 @@ class ScreenCapturePreviewBloc(
   final NotificationFeature notifications,
 ) extends Bloc<ScreenCapturePreviewEvent, ScreenCapturePreviewState> {
   final openInSystemViewer = OpenInSystemViewerInteractor(feature);
+  final revealInFileManager = RevealInFileManagerInteractor(feature);
+  final moveToTrash = MoveToTrashInteractor(feature);
 
   this : super(ScreenCapturePreviewState.initial()) {
     on<_OnSetup>(_onSetup);
     on<_OnPreviewPressed>(_onPreviewPressed, transformer: sequential());
+    on<_OnRevealPressed>(_onRevealPressed, transformer: sequential());
+    on<_OnTrashPressed>(_onTrashPressed, transformer: sequential());
     on<_OnPreviewDismissed>(_onPreviewDismissed);
     add(const .onSetup());
   }
@@ -61,6 +67,48 @@ class ScreenCapturePreviewBloc(
               message: userMessageFor(
                 error,
                 'Die Aufnahme ließ sich nicht öffnen.',
+              ),
+            ),
+          ),
+        )
+        .run(event.capture);
+  }
+
+  FutureOr<void> _onRevealPressed(
+    _OnRevealPressed event,
+    Emitter<ScreenCapturePreviewState> emit,
+  ) {
+    emit(state.copyWith(captures: _without(event.capture)));
+
+    return revealInFileManager
+        .logger()
+        .intercept(
+          (error) => notifications.notify(
+            .new(
+              message: userMessageFor(
+                error,
+                'Die Aufnahme ließ sich nicht im Finder zeigen.',
+              ),
+            ),
+          ),
+        )
+        .run(event.capture);
+  }
+
+  FutureOr<void> _onTrashPressed(
+    _OnTrashPressed event,
+    Emitter<ScreenCapturePreviewState> emit,
+  ) {
+    emit(state.copyWith(captures: _without(event.capture)));
+
+    return moveToTrash
+        .logger()
+        .intercept(
+          (error) => notifications.notify(
+            .new(
+              message: userMessageFor(
+                error,
+                'Die Aufnahme ließ sich nicht in den Papierkorb legen.',
               ),
             ),
           ),

@@ -14,4 +14,14 @@ class const ScreenCapturePreviewFeatureImpl({
   Future<void> openInSystemViewer(ScreenCaptureEvent capture) {
     return fileOpener.open(capture.filepath);
   }
+
+  @override
+  Future<void> revealInFileManager(ScreenCaptureEvent capture) {
+    return fileOpener.reveal(capture.filepath);
+  }
+
+  @override
+  Future<void> moveToTrash(ScreenCaptureEvent capture) {
+    return fileOpener.moveToTrash(capture.filepath);
+  }
 }

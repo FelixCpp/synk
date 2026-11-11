@@ -312,6 +312,78 @@ void main() {
     );
   });
 
+  group('DeviceConnectionsFeatureImpl unplugging', () {
+    test('ends the session of a device that was unplugged', () async {
+      final session = FakeDeviceSession();
+      android.onConnect = (_) async => session;
+      final device = await plugInto(android, 'android-unplug-1');
+      await repository.connect(device);
+
+      android.plug([]);
+      await pumpEventQueue();
+
+      expect(session.isDisposed, isTrue);
+      expect(repository.isConnected(device.id), isFalse);
+      expect(repository.connectionStates.value, isEmpty);
+    });
+
+    test('starts a fresh session once it is plugged back in', () async {
+      final sessions = [FakeDeviceSession(), FakeDeviceSession()];
+      var attempts = 0;
+      android.onConnect = (_) async => sessions[attempts++];
+      final device = await plugInto(android, 'android-unplug-2');
+      await repository.connect(device);
+
+      android.plug([]);
+      await pumpEventQueue();
+      android.plug([device]);
+      await pumpEventQueue();
+      await repository.connect(device);
+
+      final connections = await repository.observeDeviceConnections().first;
+      expect(connections.single.session, same(sessions[1]));
+      expect(sessions[0].isDisposed, isTrue);
+      expect(sessions[1].isDisposed, isFalse);
+    });
+
+    test('keeps the sessions of the devices still plugged in', () async {
+      final kept = FakeDeviceSession();
+      final dropped = FakeDeviceSession();
+      final iphone = _buildDevice('ios-unplug-3');
+      ios.onConnect = (_) async => kept;
+      android.onConnect = (_) async => dropped;
+      ios.plug([iphone]);
+      final pixel = await plugInto(android, 'android-unplug-3');
+      await repository.connect(iphone);
+      await repository.connect(pixel);
+
+      android.plug([]);
+      await pumpEventQueue();
+
+      expect(dropped.isDisposed, isTrue);
+      expect(kept.isDisposed, isFalse);
+      expect(repository.isConnected(iphone.id), isTrue);
+    });
+
+    test('throws away a session that arrives after its device left', () async {
+      final connecting = Completer<DeviceSession>();
+      final session = FakeDeviceSession();
+      android.onConnect = (_) => connecting.future;
+      final device = await plugInto(android, 'android-unplug-4');
+
+      final attempt = repository.connect(device);
+      await pumpEventQueue();
+      android.plug([]);
+      await pumpEventQueue();
+      connecting.complete(session);
+
+      await expectLater(attempt, throwsA(isA<DeviceNotPluggedException>()));
+      expect(session.isDisposed, isTrue);
+      expect(repository.isConnected(device.id), isFalse);
+      expect(repository.connectionStates.value, isEmpty);
+    });
+  });
+
   group('DeviceConnectionsFeatureImpl mirror options', () {
     test('hands the stored options to the platform it connects', () async {
       settings.update(

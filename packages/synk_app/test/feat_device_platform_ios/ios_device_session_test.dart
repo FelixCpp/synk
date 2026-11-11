@@ -41,6 +41,10 @@ void main() {
   Future<IosDeviceSession> buildSession({
     bool supportsInteraction = true,
     bool hasAudio = false,
+    DeviceScreenSize screenSize = const DeviceScreenSize(
+      width: 1179,
+      height: 2556,
+    ),
   }) async {
     final session = IosDeviceSession(
       transport: IosMirrorTransport(
@@ -52,7 +56,7 @@ void main() {
       fileSystem: MemoryFileSystem(),
       deviceId: _deviceId,
       textureId: const NativeTextureId(1),
-      initialScreenSize: const DeviceScreenSize(width: 1179, height: 2556),
+      initialScreenSize: screenSize,
       interactionUnavailableReason: supportsInteraction ? null : .unknown,
     );
     sessions.add(session);
@@ -227,6 +231,30 @@ void main() {
 
       expect(press.arguments['usagePage'], 0x0c);
       expect(press.arguments['usageCode'], 0x30);
+    });
+  });
+
+  group('rotating an iOS session', () {
+    List<String> orientationCommand() => processManager.commands.singleWhere(
+      (command) => command.contains('orientation'),
+    );
+
+    test('turns a portrait screen to landscape', () async {
+      final session = await buildSession();
+
+      await session.interaction!.rotate();
+
+      expect(orientationCommand(), contains('landscapeLeft'));
+    });
+
+    test('turns a landscape screen back to portrait', () async {
+      final session = await buildSession(
+        screenSize: const DeviceScreenSize(width: 2556, height: 1179),
+      );
+
+      await session.interaction!.rotate();
+
+      expect(orientationCommand(), contains('portrait'));
     });
   });
 

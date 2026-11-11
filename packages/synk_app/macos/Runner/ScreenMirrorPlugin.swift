@@ -121,10 +121,11 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
     pendingAudioBuffer.removeAll()
     isAudioMuted = true
 
-    if isRecording || isRecordingArmed {
+    if isRecording || isRecordingArmed, let writer = assetWriter {
       assetWriterInput?.markAsFinished()
       audioWriterInput?.markAsFinished()
-      assetWriter?.cancelWriting()
+      writer.cancelWriting()
+      try? FileManager.default.removeItem(at: writer.outputURL)
     }
     assetWriter = nil
     assetWriterInput = nil
@@ -203,6 +204,9 @@ private final class MirrorTextureSession: NSObject, FlutterTexture {
       return
     }
 
+    if isRecording {
+      writer.endSession(atSourceTime: CMClockGetTime(CMClockGetHostTimeClock()))
+    }
     isRecording = false
     isRecordingArmed = false
     assetWriterInput?.markAsFinished()

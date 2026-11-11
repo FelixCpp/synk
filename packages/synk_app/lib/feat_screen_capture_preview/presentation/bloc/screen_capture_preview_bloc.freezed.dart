@@ -56,12 +56,14 @@ extension ScreenCapturePreviewEventPatterns on ScreenCapturePreviewEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnPreviewPressed value)?  onPreviewPressed,TResult Function( _OnPreviewDismissed value)?  onPreviewDismissed,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnPreviewPressed value)?  onPreviewPressed,TResult Function( _OnRevealPressed value)?  onRevealPressed,TResult Function( _OnTrashPressed value)?  onTrashPressed,TResult Function( _OnPreviewDismissed value)?  onPreviewDismissed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnPreviewPressed() when onPreviewPressed != null:
-return onPreviewPressed(_that);case _OnPreviewDismissed() when onPreviewDismissed != null:
+return onPreviewPressed(_that);case _OnRevealPressed() when onRevealPressed != null:
+return onRevealPressed(_that);case _OnTrashPressed() when onTrashPressed != null:
+return onTrashPressed(_that);case _OnPreviewDismissed() when onPreviewDismissed != null:
 return onPreviewDismissed(_that);case _:
   return orElse();
 
@@ -80,12 +82,14 @@ return onPreviewDismissed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnPreviewPressed value)  onPreviewPressed,required TResult Function( _OnPreviewDismissed value)  onPreviewDismissed,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnPreviewPressed value)  onPreviewPressed,required TResult Function( _OnRevealPressed value)  onRevealPressed,required TResult Function( _OnTrashPressed value)  onTrashPressed,required TResult Function( _OnPreviewDismissed value)  onPreviewDismissed,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup(_that);case _OnPreviewPressed():
-return onPreviewPressed(_that);case _OnPreviewDismissed():
+return onPreviewPressed(_that);case _OnRevealPressed():
+return onRevealPressed(_that);case _OnTrashPressed():
+return onTrashPressed(_that);case _OnPreviewDismissed():
 return onPreviewDismissed(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -100,12 +104,14 @@ return onPreviewDismissed(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnPreviewPressed value)?  onPreviewPressed,TResult? Function( _OnPreviewDismissed value)?  onPreviewDismissed,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnPreviewPressed value)?  onPreviewPressed,TResult? Function( _OnRevealPressed value)?  onRevealPressed,TResult? Function( _OnTrashPressed value)?  onTrashPressed,TResult? Function( _OnPreviewDismissed value)?  onPreviewDismissed,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnPreviewPressed() when onPreviewPressed != null:
-return onPreviewPressed(_that);case _OnPreviewDismissed() when onPreviewDismissed != null:
+return onPreviewPressed(_that);case _OnRevealPressed() when onRevealPressed != null:
+return onRevealPressed(_that);case _OnTrashPressed() when onTrashPressed != null:
+return onTrashPressed(_that);case _OnPreviewDismissed() when onPreviewDismissed != null:
 return onPreviewDismissed(_that);case _:
   return null;
 
@@ -123,11 +129,13 @@ return onPreviewDismissed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( ScreenCaptureEvent capture)?  onPreviewPressed,TResult Function( ScreenCaptureEvent capture)?  onPreviewDismissed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( ScreenCaptureEvent capture)?  onPreviewPressed,TResult Function( ScreenCaptureEvent capture)?  onRevealPressed,TResult Function( ScreenCaptureEvent capture)?  onTrashPressed,TResult Function( ScreenCaptureEvent capture)?  onPreviewDismissed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnPreviewPressed() when onPreviewPressed != null:
-return onPreviewPressed(_that.capture);case _OnPreviewDismissed() when onPreviewDismissed != null:
+return onPreviewPressed(_that.capture);case _OnRevealPressed() when onRevealPressed != null:
+return onRevealPressed(_that.capture);case _OnTrashPressed() when onTrashPressed != null:
+return onTrashPressed(_that.capture);case _OnPreviewDismissed() when onPreviewDismissed != null:
 return onPreviewDismissed(_that.capture);case _:
   return orElse();
 
@@ -146,11 +154,13 @@ return onPreviewDismissed(_that.capture);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( ScreenCaptureEvent capture)  onPreviewPressed,required TResult Function( ScreenCaptureEvent capture)  onPreviewDismissed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( ScreenCaptureEvent capture)  onPreviewPressed,required TResult Function( ScreenCaptureEvent capture)  onRevealPressed,required TResult Function( ScreenCaptureEvent capture)  onTrashPressed,required TResult Function( ScreenCaptureEvent capture)  onPreviewDismissed,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnPreviewPressed():
-return onPreviewPressed(_that.capture);case _OnPreviewDismissed():
+return onPreviewPressed(_that.capture);case _OnRevealPressed():
+return onRevealPressed(_that.capture);case _OnTrashPressed():
+return onTrashPressed(_that.capture);case _OnPreviewDismissed():
 return onPreviewDismissed(_that.capture);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -165,11 +175,13 @@ return onPreviewDismissed(_that.capture);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( ScreenCaptureEvent capture)?  onPreviewPressed,TResult? Function( ScreenCaptureEvent capture)?  onPreviewDismissed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( ScreenCaptureEvent capture)?  onPreviewPressed,TResult? Function( ScreenCaptureEvent capture)?  onRevealPressed,TResult? Function( ScreenCaptureEvent capture)?  onTrashPressed,TResult? Function( ScreenCaptureEvent capture)?  onPreviewDismissed,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnPreviewPressed() when onPreviewPressed != null:
-return onPreviewPressed(_that.capture);case _OnPreviewDismissed() when onPreviewDismissed != null:
+return onPreviewPressed(_that.capture);case _OnRevealPressed() when onRevealPressed != null:
+return onRevealPressed(_that.capture);case _OnTrashPressed() when onTrashPressed != null:
+return onTrashPressed(_that.capture);case _OnPreviewDismissed() when onPreviewDismissed != null:
 return onPreviewDismissed(_that.capture);case _:
   return null;
 
@@ -270,6 +282,160 @@ class __$OnPreviewPressedCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? capture = null,}) {
   return _then(_OnPreviewPressed(
+null == capture ? _self.capture : capture // ignore: cast_nullable_to_non_nullable
+as ScreenCaptureEvent,
+  ));
+}
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ScreenCaptureEventCopyWith<$Res> get capture {
+  
+  return $ScreenCaptureEventCopyWith<$Res>(_self.capture, (value) {
+    return _then(_self.copyWith(capture: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class _OnRevealPressed implements ScreenCapturePreviewEvent {
+  const _OnRevealPressed(this.capture);
+  
+
+ final  ScreenCaptureEvent capture;
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnRevealPressedCopyWith<_OnRevealPressed> get copyWith => __$OnRevealPressedCopyWithImpl<_OnRevealPressed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnRevealPressed&&(identical(other.capture, capture) || other.capture == capture));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,capture);
+}
+
+@override
+String toString() {
+    return 'ScreenCapturePreviewEvent.onRevealPressed(capture: $capture)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnRevealPressedCopyWith<$Res> implements $ScreenCapturePreviewEventCopyWith<$Res> {
+  factory _$OnRevealPressedCopyWith(_OnRevealPressed value, $Res Function(_OnRevealPressed) _then) = __$OnRevealPressedCopyWithImpl;
+@useResult
+$Res call({
+ ScreenCaptureEvent capture
+});
+
+
+$ScreenCaptureEventCopyWith<$Res> get capture;
+
+}
+/// @nodoc
+class __$OnRevealPressedCopyWithImpl<$Res>
+    implements _$OnRevealPressedCopyWith<$Res> {
+  __$OnRevealPressedCopyWithImpl(this._self, this._then);
+
+  final _OnRevealPressed _self;
+  final $Res Function(_OnRevealPressed) _then;
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? capture = null,}) {
+  return _then(_OnRevealPressed(
+null == capture ? _self.capture : capture // ignore: cast_nullable_to_non_nullable
+as ScreenCaptureEvent,
+  ));
+}
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ScreenCaptureEventCopyWith<$Res> get capture {
+  
+  return $ScreenCaptureEventCopyWith<$Res>(_self.capture, (value) {
+    return _then(_self.copyWith(capture: value));
+  });
+}
+}
+
+/// @nodoc
+
+
+class _OnTrashPressed implements ScreenCapturePreviewEvent {
+  const _OnTrashPressed(this.capture);
+  
+
+ final  ScreenCaptureEvent capture;
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnTrashPressedCopyWith<_OnTrashPressed> get copyWith => __$OnTrashPressedCopyWithImpl<_OnTrashPressed>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnTrashPressed&&(identical(other.capture, capture) || other.capture == capture));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,capture);
+}
+
+@override
+String toString() {
+    return 'ScreenCapturePreviewEvent.onTrashPressed(capture: $capture)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnTrashPressedCopyWith<$Res> implements $ScreenCapturePreviewEventCopyWith<$Res> {
+  factory _$OnTrashPressedCopyWith(_OnTrashPressed value, $Res Function(_OnTrashPressed) _then) = __$OnTrashPressedCopyWithImpl;
+@useResult
+$Res call({
+ ScreenCaptureEvent capture
+});
+
+
+$ScreenCaptureEventCopyWith<$Res> get capture;
+
+}
+/// @nodoc
+class __$OnTrashPressedCopyWithImpl<$Res>
+    implements _$OnTrashPressedCopyWith<$Res> {
+  __$OnTrashPressedCopyWithImpl(this._self, this._then);
+
+  final _OnTrashPressed _self;
+  final $Res Function(_OnTrashPressed) _then;
+
+/// Create a copy of ScreenCapturePreviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? capture = null,}) {
+  return _then(_OnTrashPressed(
 null == capture ? _self.capture : capture // ignore: cast_nullable_to_non_nullable
 as ScreenCaptureEvent,
   ));

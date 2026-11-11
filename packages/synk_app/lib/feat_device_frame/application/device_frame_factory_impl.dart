@@ -10,6 +10,7 @@ import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
 import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/rotate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/release_pressed_keys_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
@@ -55,6 +56,7 @@ class const DeviceFrameFactoryImpl({
     );
 
     return DeviceFrameInteractors(
+      isRecording: feature.isRecording,
       isAudioMuted: feature.isAudioMuted,
       audioVolume: feature.audioVolume,
       simulateKeyEvent: SimulateKeyEventInteractor(feature),
@@ -73,6 +75,7 @@ class const DeviceFrameFactoryImpl({
       sendPickedFile: SendPickedFileInteractor(feature),
       navigate: NavigateInteractor(feature),
       pressPowerButton: PressPowerButtonInteractor(feature),
+      rotate: RotateInteractor(feature),
     );
   }
 }

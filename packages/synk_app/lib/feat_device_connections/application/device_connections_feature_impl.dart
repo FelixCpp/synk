@@ -29,7 +29,9 @@ class DeviceConnectionsFeatureImpl({
         for (final (:device, :platform) in discoveries) device.id: platform,
       };
 
-      _forgetStatesOfAbsentDevices(_platformsByDeviceId.keys.toSet());
+      final pluggedIds = _platformsByDeviceId.keys.toSet();
+      _dropSessionsOfAbsentDevices(pluggedIds);
+      _forgetStatesOfAbsentDevices(pluggedIds);
     });
   }
 
@@ -141,8 +143,16 @@ class DeviceConnectionsFeatureImpl({
       final session = await platform.connect(device.id, settings.mirrorOptions);
       await session.audio?.setAudioMuted(settings.muteOnConnect);
 
+      if (!_platformsByDeviceId.containsKey(device.id)) {
+        await session.dispose();
+        throw DeviceNotPluggedException(deviceId: device.id);
+      }
+
       _sessionsById[device.id] = session;
       _setState(device.id, const DeviceConnectionState.connected());
+    } on DeviceNotPluggedException {
+      _forgetState(device.id);
+      rethrow;
     } on CameraAccessDeniedException {
       _setState(
         device.id,
@@ -185,6 +195,22 @@ class DeviceConnectionsFeatureImpl({
 
   void _setState(DeviceId id, DeviceConnectionState state) {
     connectionStates.add({...connectionStates.value, id: state});
+  }
+
+  void _forgetState(DeviceId id) {
+    connectionStates.add({...connectionStates.value}..remove(id));
+  }
+
+  void _dropSessionsOfAbsentDevices(Set<DeviceId> pluggedIds) {
+    final absentIds = _sessionsById.keys
+        .where((id) => !pluggedIds.contains(id))
+        .toList();
+
+    for (final id in absentIds) {
+      final session = _sessionsById.remove(id)!;
+      _setState(id, const DeviceConnectionState.disconnected());
+      unawaited(session.dispose());
+    }
   }
 
   void _forgetStatesOfAbsentDevices(Set<DeviceId> pluggedIds) {

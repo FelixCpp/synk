@@ -99,14 +99,10 @@ class _DeviceFrameState extends State<DeviceFrame>
                     ),
                     Expanded(
                       child: DeviceFramePointerListener(
-                        child: _FocusAware(
-                          focusNode: focusNode,
-                          builder: (hasFocus, child) => DeviceScreenMirror(
-                            textureId: connection.textureId,
-                            modelName: connection.device.modelName,
-                            hasFocus: hasFocus,
-                            flash: _screenshotFlash,
-                          ),
+                        child: DeviceScreenMirror(
+                          textureId: connection.textureId,
+                          modelName: connection.device.modelName,
+                          flash: _screenshotFlash,
                         ),
                       ),
                     ),

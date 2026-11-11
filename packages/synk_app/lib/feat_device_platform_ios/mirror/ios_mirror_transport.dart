@@ -4,6 +4,7 @@ import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.da
 import 'package:synk/feat_device_platform_ios/mirror/ios_mirror_channel.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
+import 'package:synk/feat_device_platform/application/teardown.dart';
 
 class const IosAudioSideCar(
   final IosMediaStreamChannel channel,
@@ -54,8 +55,10 @@ class const IosMirrorTransport(
     await audio?.setVolume(volume);
   }
 
-  Future<void> stopMirror(NativeTextureId textureId) async {
-    await audio?.stop();
-    await channel.stopMirror(textureId);
+  Future<void> stopMirror(NativeTextureId textureId) {
+    return tearDownEach('the mirror of texture $textureId', [
+      () => channel.stopMirror(textureId),
+      () async => audio?.stop(),
+    ]);
   }
 }

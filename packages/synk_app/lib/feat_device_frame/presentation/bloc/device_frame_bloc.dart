@@ -22,6 +22,7 @@ class DeviceFrameBloc({
   this
     : super(
         .initial(
+          isRecording: device.isRecording,
           isAudioMuted: device.isAudioMuted,
           audioVolume: device.audioVolume,
         ),
@@ -45,6 +46,7 @@ class DeviceFrameBloc({
       _onPowerButtonPressed,
       transformer: sequential(),
     );
+    on<_OnRotate>(_onRotate, transformer: droppable());
     on<_OnInstallApk>(_onInstallApk, transformer: sequential());
     on<_OnShareFile>(_onShareFile, transformer: sequential());
   }
@@ -136,13 +138,12 @@ class DeviceFrameBloc({
     Emitter<DeviceFrameState> emit,
   ) {
     if (state.isRecording) {
-      return device.stopRecording
-          .logger()
-          .after((_) => emit(state.copyWith(isRecording: false)))
-          .runReporting(
-            to: notifications,
-            whenItFails: 'Die Aufnahme ließ sich nicht beenden.',
-          );
+      emit(state.copyWith(isRecording: false));
+
+      return device.stopRecording.logger().runReporting(
+        to: notifications,
+        whenItFails: 'Die Aufnahme ließ sich nicht beenden.',
+      );
     }
 
     return device.startRecording
@@ -266,7 +267,7 @@ class DeviceFrameBloc({
         severity: .success,
         message: switch (outcome.action) {
           .installed => 'App installiert: ${outcome.filename}',
-          .pushed => 'Datei auf Gerät übertragen: ${outcome.filename}',
+          .pushed => 'Datei auf Gerät übertragen: ${outcome.destination}',
         },
       ),
     );
@@ -290,6 +291,16 @@ class DeviceFrameBloc({
     return device.pressPowerButton.logger().runReporting(
       to: notifications,
       whenItFails: 'Der Standby-Knopf kam nicht am Gerät an.',
+    );
+  }
+
+  FutureOr<void> _onRotate(
+    _OnRotate event,
+    Emitter<DeviceFrameState> emit,
+  ) {
+    return device.rotate.logger().runReporting(
+      to: notifications,
+      whenItFails: 'Das Gerät ließ sich nicht drehen.',
     );
   }
 }

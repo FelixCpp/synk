@@ -9,14 +9,17 @@ import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart'
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/clipboard_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/display_power_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/key_event_interaction_layer.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/interaction/media_scan_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/pointer_event_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/text_interaction_layer.dart';
+import 'package:synk/feat_device_platform_android/scrcpy/interaction/video_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_key_input.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_pointer_input.dart';
 
 class ScrcpyInteraction({
   required final Socket interactionSocket,
   required final ValueStream<DeviceScreenSize> screenSize,
+  required final Future<void> Function() rotateDevice,
 
   /// Keeps the device's own display dark for the whole session.
   final bool keepDisplayOff = false,
@@ -26,6 +29,8 @@ class ScrcpyInteraction({
   final _text = TextInteractionLayer(interactionSocket);
   final _pointer = PointerEventInteractionLayer(interactionSocket);
   final _displayPower = DisplayPowerInteractionLayer(interactionSocket);
+  final _video = VideoInteractionLayer(interactionSocket);
+  final _mediaScan = MediaScanInteractionLayer(interactionSocket);
 
   /// Keys whose press went out as text. Their release must not reach the
   /// device as a key code for a press it never saw.
@@ -35,6 +40,14 @@ class ScrcpyInteraction({
   this {
     _clipboard.listenForDeviceMessages();
     if (keepDisplayOff) _displayPower.setDisplayPower(on: false);
+  }
+
+  void requestKeyframe() {
+    _video.resetVideo();
+  }
+
+  void scanFile(String remoteFilepath) {
+    _mediaScan.scanFile(remoteFilepath);
   }
 
   Future<void> dispose() async {
@@ -100,6 +113,11 @@ class ScrcpyInteraction({
   @override
   Future<void> pressPowerButton() async {
     _pressKey(.power);
+  }
+
+  @override
+  Future<void> rotate() {
+    return rotateDevice();
   }
 
   void _pressKey(ScrcpyKeyCode key) {

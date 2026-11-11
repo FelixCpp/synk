@@ -44,6 +44,18 @@ void main() {
     expect(outcomes.single.filename, 'notes.txt');
   });
 
+  test('tells where a pushed file landed on the device', () async {
+    final outcomes = await harness.device.sendFiles.getOrThrow([
+      '/tmp/app.apk',
+      '/tmp/notes.txt',
+    ]);
+
+    expect(outcomes.map((outcome) => outcome.destination), [
+      null,
+      '/device/tmp/notes.txt',
+    ]);
+  });
+
   test('keeps the order it was handed', () async {
     await harness.device.sendFiles.getOrThrow(['/1.txt', '/2.apk', '/3.txt']);
 
@@ -73,8 +85,9 @@ class _RecordingFileTransfer implements DeviceFileTransfer {
   }
 
   @override
-  Future<void> pushFile(String filepath) async {
+  Future<String> pushFile(String filepath) async {
     pushed.add(filepath);
     calls.add('push $filepath');
+    return '/device$filepath';
   }
 }

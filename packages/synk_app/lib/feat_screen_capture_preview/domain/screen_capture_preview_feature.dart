@@ -4,4 +4,6 @@ import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_even
 abstract interface class ScreenCapturePreviewFeature {
   Stream<ScreenCaptureEvent> observeCaptures();
   Future<void> openInSystemViewer(ScreenCaptureEvent capture);
+  Future<void> revealInFileManager(ScreenCaptureEvent capture);
+  Future<void> moveToTrash(ScreenCaptureEvent capture);
 }

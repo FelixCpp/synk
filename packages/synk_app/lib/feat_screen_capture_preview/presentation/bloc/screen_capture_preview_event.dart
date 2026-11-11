@@ -8,6 +8,14 @@ sealed class ScreenCapturePreviewEvent with _$ScreenCapturePreviewEvent {
     ScreenCaptureEvent capture,
   ) = _OnPreviewPressed;
 
+  const factory ScreenCapturePreviewEvent.onRevealPressed(
+    ScreenCaptureEvent capture,
+  ) = _OnRevealPressed;
+
+  const factory ScreenCapturePreviewEvent.onTrashPressed(
+    ScreenCaptureEvent capture,
+  ) = _OnTrashPressed;
+
   const factory ScreenCapturePreviewEvent.onPreviewDismissed(
     ScreenCaptureEvent capture,
   ) = _OnPreviewDismissed;

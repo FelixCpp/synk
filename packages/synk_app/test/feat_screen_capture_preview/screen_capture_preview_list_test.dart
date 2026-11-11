@@ -6,7 +6,7 @@ import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart'
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_screen_capture_event/application/screen_capture_event_channel.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_event.dart';
-import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_thumbnail.dart';
+import 'package:synk/feat_screen_capture_preview/presentation/screen_capture_preview_list.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -142,7 +142,7 @@ Future<ScreenCaptureEventChannel> _pumpCorner(WidgetTester tester) async {
           data: SynkUiThemeData.dark,
           child: const Align(
             alignment: Alignment.bottomRight,
-            child: ScreenCapturePreviewThumbnail(),
+            child: ScreenCapturePreviewList(),
           ),
         ),
       ),
@@ -161,10 +161,12 @@ void main() {
   ) async {
     await _pumpCorner(tester);
 
-    expect(find.byType(Image), findsNothing);
+    expect(find.text('AUFNAHMEN'), findsNothing);
   });
 
-  testWidgets('piles captures from several devices up', (tester) async {
+  testWidgets('lists captures from several devices, newest first', (
+    tester,
+  ) async {
     final channel = await _pumpCorner(tester);
 
     channel.submit(_capture('a', portrait));
@@ -173,95 +175,77 @@ void main() {
 
     expect(find.byType(Image), findsNWidgets(2));
     expect(
-      find.text('Model b'),
-      findsOneWidget,
-      reason: 'the front capture has to name the device it came from',
+      tester.getTopLeft(find.text('Model b')).dy,
+      lessThan(tester.getTopLeft(find.text('Model a')).dy),
     );
   });
 
-  testWidgets('keeps the pile the size of its largest capture', (
-    tester,
-  ) async {
-    final channel = await _pumpCorner(tester);
-
-    channel.submit(_capture('a', landscape));
-    await tester.pumpAndSettle();
-    final alone = tester.getSize(find.byType(ScreenCapturePreviewThumbnail));
-
-    channel.submit(_capture('b', portrait));
-    await tester.pumpAndSettle();
-    final piled = tester.getSize(find.byType(ScreenCapturePreviewThumbnail));
-
-    expect(
-      piled.width,
-      closeTo(alone.width, 0.01),
-      reason: 'a card sliding behind must not push the corner around',
-    );
-  });
-
-  testWidgets('shows a recording with its poster frame', (tester) async {
-    final channel = await _pumpCorner(tester);
-
-    channel.submit(_recording('a', portrait, poster: _png));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(Image), findsOneWidget);
-    expect(
-      find.byIcon(CupertinoIcons.play_fill),
-      findsOneWidget,
-      reason: 'a still frame alone cannot say that this is a recording',
-    );
-    expect(find.text('Model a'), findsOneWidget);
-  });
-
-  testWidgets('still shows a recording whose poster failed', (tester) async {
-    final channel = await _pumpCorner(tester);
-
-    channel.submit(_recording('a', portrait));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(Image), findsNothing);
-    expect(find.byIcon(CupertinoIcons.video_camera), findsOneWidget);
-    expect(
-      find.byIcon(CupertinoIcons.play_fill),
-      findsOneWidget,
-      reason: 'a missing poster must not cost the card its preview',
-    );
-  });
-
-  testWidgets('leaves a screenshot without the recording badge', (
-    tester,
-  ) async {
-    final channel = await _pumpCorner(tester);
-
-    channel.submit(_capture('a', portrait));
-    await tester.pumpAndSettle();
-
-    expect(find.byIcon(CupertinoIcons.play_fill), findsNothing);
-  });
-
-  testWidgets('piles recordings and screenshots together', (tester) async {
+  testWidgets('tells a screenshot from a recording', (tester) async {
     final channel = await _pumpCorner(tester);
 
     channel.submit(_capture('a', portrait));
     channel.submit(_recording('b', portrait, poster: _png));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Image), findsNWidgets(2));
-    expect(find.text('Model b'), findsOneWidget);
+    expect(find.text('Screenshot'), findsOneWidget);
+    expect(find.text('Video'), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.play_fill), findsOneWidget);
   });
 
-  testWidgets('drops a capture that was dismissed', (tester) async {
+  testWidgets('still lists a recording whose poster failed', (tester) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_recording('a', portrait));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Image), findsNothing);
+    expect(find.text('Model a'), findsOneWidget);
+    expect(find.byIcon(CupertinoIcons.play_fill), findsOneWidget);
+  });
+
+  testWidgets('offers every action on every row without hovering', (
+    tester,
+  ) async {
     final channel = await _pumpCorner(tester);
 
     channel.submit(_capture('a', portrait));
     channel.submit(_capture('b', portrait));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(CupertinoIcons.xmark));
+    expect(find.byIcon(CupertinoIcons.folder), findsNWidgets(2));
+    expect(find.byIcon(CupertinoIcons.trash), findsNWidgets(2));
+    expect(find.byIcon(CupertinoIcons.xmark), findsNWidgets(2));
+  });
+
+  for (final (action, icon) in [
+    ('dismissed', CupertinoIcons.xmark),
+    ('revealed', CupertinoIcons.folder),
+    ('trashed', CupertinoIcons.trash),
+  ]) {
+    testWidgets('drops a capture once it was $action', (tester) async {
+      final channel = await _pumpCorner(tester);
+
+      channel.submit(_capture('a', portrait));
+      channel.submit(_capture('b', portrait));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(icon).first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Model b'), findsNothing);
+      expect(find.text('Model a'), findsOneWidget);
+    });
+  }
+
+  testWidgets('drops a capture once it was opened', (tester) async {
+    final channel = await _pumpCorner(tester);
+
+    channel.submit(_capture('a', portrait));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Image), findsOneWidget);
-    expect(find.text('Model a'), findsOneWidget);
+    await tester.tap(find.text('Model a'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('AUFNAHMEN'), findsNothing);
   });
 }

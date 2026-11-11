@@ -3,6 +3,7 @@ import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 
 /// Everything Synk can do with one mirrored device.
 abstract interface class DeviceFrameFeature {
+  bool get isRecording;
   bool get isAudioMuted;
   double get audioVolume;
   Future<void> setAudioMuted(bool muted);
@@ -16,6 +17,7 @@ abstract interface class DeviceFrameFeature {
   Future<void> simulatePinchEvent(PinchEvent event);
   Future<void> navigate(DeviceNavigation navigation);
   Future<void> pressPowerButton();
+  Future<void> rotate();
 
   Future<void> captureScreenshot();
   Future<void> startRecording();

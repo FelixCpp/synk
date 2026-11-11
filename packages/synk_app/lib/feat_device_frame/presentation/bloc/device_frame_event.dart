@@ -29,6 +29,7 @@ sealed class DeviceFrameEvent with _$DeviceFrameEvent {
   const factory DeviceFrameEvent.onNavigate(DeviceNavigation navigation) =
       _OnNavigate;
   const factory DeviceFrameEvent.onPowerButtonPressed() = _OnPowerButtonPressed;
+  const factory DeviceFrameEvent.onRotate() = _OnRotate;
   const factory DeviceFrameEvent.onInstallApk() = _OnInstallApk;
   const factory DeviceFrameEvent.onShareFile() = _OnShareFile;
 }

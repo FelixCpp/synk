@@ -95,6 +95,9 @@ class _FakeScreenCapture implements DeviceScreenCapture {
   Future<Uint8List> captureScreenshot() async => _png;
 
   @override
+  String? get recordingPath => null;
+
+  @override
   Future<void> startRecording(String path, {required bool withAudio}) async {}
 
   @override

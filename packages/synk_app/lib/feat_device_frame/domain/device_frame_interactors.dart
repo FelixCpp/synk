@@ -2,6 +2,7 @@ import 'package:synk/feat_device_frame/domain/usecases/capture_screenshot_intera
 import 'package:synk/feat_device_frame/domain/usecases/navigate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/press_power_button_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/release_pressed_keys_interactor.dart';
+import 'package:synk/feat_device_frame/domain/usecases/rotate_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_files_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_apk_interactor.dart';
 import 'package:synk/feat_device_frame/domain/usecases/send_picked_file_interactor.dart';
@@ -23,6 +24,7 @@ import 'package:synk/feat_device_frame/domain/usecases/type_text_interactor.dart
 /// `runReporting`, so a failure becomes a logged line and a message to the
 /// user instead of a crash.
 class const DeviceFrameInteractors({
+  required final bool isRecording,
   required final bool isAudioMuted,
   required final double audioVolume,
   required final SimulateKeyEventInteractor simulateKeyEvent,
@@ -41,4 +43,5 @@ class const DeviceFrameInteractors({
   required final SendPickedFileInteractor sendPickedFile,
   required final NavigateInteractor navigate,
   required final PressPowerButtonInteractor pressPowerButton,
+  required final RotateInteractor rotate,
 });

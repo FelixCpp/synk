@@ -193,6 +193,45 @@ void main() {
     });
   });
 
+  group('setOrientation', () {
+    test('invokes devicectl with the device and orientation', () async {
+      final api = apiAnswering();
+
+      await api.setOrientation(
+        deviceId: 'some-device',
+        orientation: .landscapeLeft,
+        timeout: const Duration(seconds: 7),
+      );
+
+      expect(processManager.commands.single, [
+        defaultXcrunPath,
+        'devicectl',
+        'device',
+        'orientation',
+        'set',
+        '--device',
+        'some-device',
+        'landscapeLeft',
+        '--timeout',
+        '7',
+        '--quiet',
+      ]);
+    });
+
+    test('throws when devicectl rejects the orientation', () async {
+      final api = apiAnswering((
+        exitCode: 1,
+        stdout: '',
+        stderr: 'ERROR: device not found',
+      ));
+
+      await expectLater(
+        api.setOrientation(deviceId: 'unknown-device', orientation: .portrait),
+        throwsA(isA<DevicectlCommandException>()),
+      );
+    });
+  });
+
   group('deviceStatus', () {
     String devicesJson({
       String udid = '00008120-0009555001C2601E',

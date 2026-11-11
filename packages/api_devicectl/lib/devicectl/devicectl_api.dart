@@ -16,6 +16,17 @@ class const DevicectlDeviceStatus({
   required final bool? isDeveloperDiskImageAvailable,
 });
 
+enum DevicectlOrientation {
+  portrait('portrait'),
+  portraitUpsideDown('portraitUpsideDown'),
+  landscapeLeft('landscapeLeft'),
+  landscapeRight('landscapeRight');
+
+  const DevicectlOrientation(this.argument);
+
+  final String argument;
+}
+
 class DevicectlApi({
   final String xcrunPath = defaultXcrunPath,
   final ProcessManager processManager = const LocalProcessManager(),
@@ -101,6 +112,32 @@ class DevicectlApi({
       throw DevicectlCommandException(
         message:
             'Failed to write the pasteboard of $deviceId '
+            '(${process.exitCode}): ${_describeOutput(process)}',
+      );
+    }
+  }
+
+  Future<void> setOrientation({
+    required String deviceId,
+    required DevicectlOrientation orientation,
+    Duration timeout = const Duration(seconds: 15),
+  }) async {
+    final process = await processRunner.run([
+      'device',
+      'orientation',
+      'set',
+      '--device',
+      _normalizedDeviceId(deviceId),
+      orientation.argument,
+      '--timeout',
+      '${timeout.inSeconds}',
+      '--quiet',
+    ]);
+
+    if (process.exitCode != 0) {
+      throw DevicectlCommandException(
+        message:
+            'Failed to set the orientation of $deviceId '
             '(${process.exitCode}): ${_describeOutput(process)}',
       );
     }

@@ -103,5 +103,5 @@ class FakeFileTransfer implements DeviceFileTransfer {
   Future<void> installApk(String filepath) async {}
 
   @override
-  Future<void> pushFile(String filepath) async {}
+  Future<String> pushFile(String filepath) async => filepath;
 }

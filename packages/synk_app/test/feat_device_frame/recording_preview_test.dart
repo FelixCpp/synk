@@ -105,12 +105,54 @@ void main() {
 
       expect(harness.announced, isEmpty);
     });
+
+    test('knows about a recording that a frame before it started', () {
+      final running = _FakeScreenCapture()..recordingPath = '/captures/a.mp4';
+      final later = DeviceFrameHarness(screenCapture: running);
+      addTearDown(later.dispose);
+
+      expect(later.bloc.state.isRecording, isTrue);
+    });
+
+    test('finishes a recording that a frame before it started', () async {
+      final running = _FakeScreenCapture()..recordingPath = '/captures/a.mp4';
+      final later = DeviceFrameHarness(screenCapture: running);
+      addTearDown(later.dispose);
+
+      await later.device.stopRecording.getOrThrow();
+      await pumpEventQueue();
+
+      expect(later.announced.single.filepath, '/captures/a.mp4');
+    });
+
+    test('lets go of a recording the recorder failed to finish', () async {
+      final bloc = harness.bloc;
+      screenCapture.stopResult = false;
+
+      bloc.add(const .onToggleRecording());
+      await pumpEventQueue();
+      expect(bloc.state.isRecording, isTrue);
+
+      bloc.add(const .onToggleRecording());
+      await pumpEventQueue();
+      expect(bloc.state.isRecording, isFalse);
+      expect(harness.shown, ['Die Aufnahme ließ sich nicht beenden.']);
+
+      screenCapture.startedPath = null;
+      bloc.add(const .onToggleRecording());
+      await pumpEventQueue();
+      expect(bloc.state.isRecording, isTrue);
+      expect(screenCapture.startedPath, isNotNull);
+    });
   });
 }
 
 class _FakeScreenCapture implements DeviceScreenCapture {
   String? startedPath;
   bool? startedWithAudio;
+
+  @override
+  String? recordingPath;
   bool stopResult = true;
   bool screenshotFails = false;
 
@@ -127,8 +169,12 @@ class _FakeScreenCapture implements DeviceScreenCapture {
   Future<void> startRecording(String path, {required bool withAudio}) async {
     startedPath = path;
     startedWithAudio = withAudio;
+    recordingPath = path;
   }
 
   @override
-  Future<bool> stopRecording() async => stopResult;
+  Future<bool> stopRecording() async {
+    recordingPath = null;
+    return stopResult;
+  }
 }

@@ -6,4 +6,5 @@ enum FileTransferAction {
 typedef FileTransferOutcome = ({
   FileTransferAction action,
   String filename,
+  String? destination,
 });

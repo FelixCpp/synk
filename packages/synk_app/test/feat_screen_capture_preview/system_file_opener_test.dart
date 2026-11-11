@@ -44,6 +44,54 @@ void main() {
     ]);
   });
 
+  test('selects the file in the Finder on macOS', () async {
+    await openerOn(NativePlatform.macOS).reveal('/captures/shot.png');
+
+    expect(processManager.commands, [
+      ['open', '-R', '/captures/shot.png'],
+    ]);
+  });
+
+  test('opens the folder of the file on Windows', () async {
+    await openerOn(NativePlatform.windows).reveal(r'C:\captures\shot.png');
+
+    expect(processManager.commands, [
+      ['cmd', '/c', 'start', '', r'C:\captures'],
+    ]);
+  });
+
+  test('opens the folder of the file on Linux', () async {
+    await openerOn(NativePlatform.linux).reveal('/captures/shot.png');
+
+    expect(processManager.commands, [
+      ['xdg-open', '/captures'],
+    ]);
+  });
+
+  test('moves the file to the trash on macOS', () async {
+    await openerOn(NativePlatform.macOS).moveToTrash('/captures/shot.png');
+
+    expect(processManager.commands, [
+      ['trash', '/captures/shot.png'],
+    ]);
+  });
+
+  test('moves the file to the trash through gio on Linux', () async {
+    await openerOn(NativePlatform.linux).moveToTrash('/captures/shot.png');
+
+    expect(processManager.commands, [
+      ['gio', 'trash', '/captures/shot.png'],
+    ]);
+  });
+
+  test('refuses to trash a file where it knows no trash', () async {
+    await expectLater(
+      openerOn(NativePlatform.windows).moveToTrash(r'C:\captures\shot.png'),
+      throwsUnsupportedError,
+    );
+    expect(processManager.commands, isEmpty);
+  });
+
   test('refuses a platform it has no opener for', () async {
     await expectLater(
       openerOn(NativePlatform.fuchsia).open('/captures/shot.png'),

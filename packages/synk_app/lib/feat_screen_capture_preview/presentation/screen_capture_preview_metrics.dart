@@ -1,27 +1,12 @@
 import 'package:flutter/widgets.dart';
-import 'package:synk/design/constant_area.dart';
-import 'package:synk/feat_device_frame/presentation/device_frame_metrics.dart';
 
-/// Measurements of the capture pile in the canvas corner.
 class ScreenCapturePreviewMetrics {
   const ScreenCapturePreviewMetrics._();
 
-  static const double referenceWidth = 140.0;
-  static const double referenceAspectRatio =
-      DeviceFrameMetrics.referenceAspectRatio;
-
-  /// Like a device tile, a preview keeps its area across orientations.
-  static const double area =
-      referenceWidth * (referenceWidth / referenceAspectRatio);
-
-  static Size sizeFor(double aspectRatio) {
-    return sizeForConstantArea(area, aspectRatio);
-  }
-
-  /// How far each card below the top one peeks out of the pile.
-  static const Offset stackOffset = Offset(-7.0, -7.0);
-  static const double stackScaleStep = 0.04;
-
-  static const double dismissSlot = 22.0;
-  static const double playSlot = 30.0;
+  static const double width = 300.0;
+  static const double posterSlot = 40.0;
+  static const double posterRadius = 4.0;
+  static const double headerHeight = 28.0;
+  static const double actionSize = 24.0;
+  static const EdgeInsets rowPadding = EdgeInsets.fromLTRB(8.0, 6.0, 4.0, 6.0);
 }

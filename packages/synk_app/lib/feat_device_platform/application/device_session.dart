@@ -38,6 +38,7 @@ abstract interface class DeviceInteraction {
   Set<DeviceNavigation> get supportedNavigations;
   Future<void> navigate(DeviceNavigation navigation);
   Future<void> pressPowerButton();
+  Future<void> rotate();
 }
 
 abstract interface class DeviceClipboard {
@@ -59,11 +60,12 @@ abstract interface class DeviceAudio {
 
 abstract interface class DeviceScreenCapture {
   Future<Uint8List> captureScreenshot();
+  String? get recordingPath;
   Future<void> startRecording(String path, {required bool withAudio});
   Future<bool> stopRecording();
 }
 
 abstract interface class DeviceFileTransfer {
   Future<void> installApk(String filepath);
-  Future<void> pushFile(String filepath);
+  Future<String> pushFile(String filepath);
 }

@@ -10,12 +10,13 @@ sealed class DeviceFrameState with _$DeviceFrameState {
   }) = _DeviceFrameState;
 
   factory DeviceFrameState.initial({
+    required bool isRecording,
     required bool isAudioMuted,
     required double audioVolume,
   }) {
     return .new(
       isTransferringFiles: false,
-      isRecording: false,
+      isRecording: isRecording,
       isAudioMuted: isAudioMuted,
       audioVolume: audioVolume,
     );

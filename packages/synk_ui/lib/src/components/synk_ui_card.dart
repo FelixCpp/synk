@@ -24,7 +24,14 @@ class const SynkUiCard({
       decoration: BoxDecoration(
         color: color ?? colors.surface,
         borderRadius: borderRadius,
-        boxShadow: elevation,
+        boxShadow: [
+          if (focused)
+            BoxShadow(
+              color: colors.accent.withValues(alpha: 0.45),
+              spreadRadius: SynkUiSize.focusRing,
+            ),
+          ...elevation,
+        ],
       ),
       foregroundDecoration: BoxDecoration(
         color: overlayColor,

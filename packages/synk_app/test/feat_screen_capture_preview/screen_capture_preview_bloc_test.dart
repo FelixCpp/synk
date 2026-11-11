@@ -23,6 +23,8 @@ ScreenCaptureEvent _capture(String device) {
 class _RecordingFeature implements ScreenCapturePreviewFeature {
   final captures = StreamController<ScreenCaptureEvent>.broadcast();
   final handedToTheSystem = <ScreenCaptureEvent>[];
+  final revealed = <ScreenCaptureEvent>[];
+  final trashed = <ScreenCaptureEvent>[];
 
   @override
   Stream<ScreenCaptureEvent> observeCaptures() => captures.stream;
@@ -30,6 +32,16 @@ class _RecordingFeature implements ScreenCapturePreviewFeature {
   @override
   Future<void> openInSystemViewer(ScreenCaptureEvent event) async {
     handedToTheSystem.add(event);
+  }
+
+  @override
+  Future<void> revealInFileManager(ScreenCaptureEvent event) async {
+    revealed.add(event);
+  }
+
+  @override
+  Future<void> moveToTrash(ScreenCaptureEvent event) async {
+    trashed.add(event);
   }
 }
 
@@ -86,6 +98,30 @@ void main() {
 
     await press(bloc.state.topmost!);
 
+    expect(bloc.state.captures.map((c) => c.modelName), ['Model a']);
+  });
+
+  test('reveals a capture in the Finder and lets go of it', () async {
+    await capture('a');
+    await capture('b');
+
+    bloc.add(.onRevealPressed(bloc.state.topmost!));
+    await pumpEventQueue();
+
+    expect(repository.revealed.single.modelName, 'Model b');
+    expect(repository.handedToTheSystem, isEmpty);
+    expect(bloc.state.captures.map((c) => c.modelName), ['Model a']);
+  });
+
+  test('moves a capture to the trash and lets go of it', () async {
+    await capture('a');
+    await capture('b');
+
+    bloc.add(.onTrashPressed(bloc.state.topmost!));
+    await pumpEventQueue();
+
+    expect(repository.trashed.single.modelName, 'Model b');
+    expect(repository.handedToTheSystem, isEmpty);
     expect(bloc.state.captures.map((c) => c.modelName), ['Model a']);
   });
 
