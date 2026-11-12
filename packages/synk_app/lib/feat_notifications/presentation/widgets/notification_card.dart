@@ -88,14 +88,14 @@ class const _Toast({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final timeLeft = entry.timeLeft;
+    final progress = entry.timeLeft ?? entry.notification.progress;
 
-    if (timeLeft == null) {
+    if (progress == null) {
       return _toastWith(context, null);
     }
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(end: timeLeft),
+      tween: Tween(end: progress),
       duration: NotificationPolicy.tick,
       curve: Curves.linear,
       builder: (context, value, _) => _toastWith(context, value),
@@ -112,6 +112,7 @@ class const _Toast({
       message: entry.notification.message,
       accent: _accentFor(severity, colors),
       count: entry.count,
+      isBusy: entry.notification.isBusy,
       progress: progress,
       dismissIcon: CupertinoIcons.clear,
       onDismiss: onDismiss,

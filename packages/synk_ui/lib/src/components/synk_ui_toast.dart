@@ -1,6 +1,7 @@
 import 'package:synk_ui/src/synk_ui_theme.dart';
 import 'package:synk_ui/src/components/synk_ui_button.dart';
 import 'package:synk_ui/src/components/synk_ui_icon_button.dart';
+import 'package:synk_ui/src/components/synk_ui_spinner.dart';
 import 'package:synk_ui/src/components/synk_ui_tag.dart';
 import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
 import 'package:flutter/widgets.dart';
@@ -11,6 +12,7 @@ class const SynkUiToast({
   required final String message,
   required final Color accent,
   final int count = 1,
+  final bool isBusy = false,
   final double? progress,
   final VoidCallback? onDismiss,
   final IconData? dismissIcon,
@@ -53,7 +55,9 @@ class const SynkUiToast({
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(top: SynkUiSpace.s2),
-                      child: Icon(icon, size: SynkUiSize.icon, color: accent),
+                      child: isBusy
+                          ? SynkUiSpinner(size: SynkUiSize.icon, color: accent)
+                          : Icon(icon, size: SynkUiSize.icon, color: accent),
                     ),
                     Expanded(
                       child: Column(

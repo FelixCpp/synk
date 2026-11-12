@@ -17,5 +17,7 @@ sealed class AppNotification with _$AppNotification {
     required String message,
     @Default(NotificationSeverity.error) NotificationSeverity severity,
     NotificationAction? action,
+    @Default(false) bool isBusy,
+    double? progress,
   }) = _AppNotification;
 }

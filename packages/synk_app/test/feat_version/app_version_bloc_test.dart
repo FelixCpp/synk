@@ -157,7 +157,53 @@ void main() {
     await bloc.stream.firstWhere((state) => !state.isUpdating);
     await pumpEventQueue();
 
-    expect(received, hasLength(1));
+    expect(
+      received.where((notification) => !notification.isBusy),
+      hasLength(1),
+    );
+  });
+
+  test('shows the update running on the stack until it is done', () async {
+    final notifications = NotificationFeatureImpl();
+    final seen = <String>[];
+    notifications.observeStack().listen(
+      (stack) => seen.addAll(
+        stack.entries
+            .map((entry) => entry.notification)
+            .where((notification) => notification.isBusy)
+            .map((notification) => notification.message),
+      ),
+    );
+    final bloc = AppVersionBloc(
+      _currentAppVersion,
+      _Repository(
+        newerAppVersion: () async => const .upToDate(),
+        update: (onProgress) async {
+          onProgress(0.5);
+          await pumpEventQueue();
+          onProgress(1);
+          await pumpEventQueue();
+        },
+        outcome: .installed,
+      ),
+      notifications,
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const .onUpdate());
+    await bloc.stream.firstWhere((state) => state.isReadyToRestart);
+    await pumpEventQueue();
+
+    expect(
+      seen.toSet(),
+      containsAllInOrder([
+        'Update wird geladen …',
+        'Update wird geladen … 50 %',
+        'Update wird installiert …',
+      ]),
+    );
+    final stack = await notifications.observeStack().first;
+    expect(stack.entries.map((entry) => entry.notification.isBusy), [false]);
   });
 
   test('announces a newer version once with an update action', () async {
@@ -218,9 +264,10 @@ void main() {
     await bloc.stream.firstWhere((state) => state.isReadyToRestart);
     await pumpEventQueue();
 
-    expect(received.single.action?.label, 'Neu starten');
+    final restart = received.lastWhere((notification) => !notification.isBusy);
+    expect(restart.action?.label, 'Neu starten');
 
-    received.single.action!.onPressed();
+    restart.action!.onPressed();
     await pumpEventQueue();
     expect(repository.restarts, 1);
   });

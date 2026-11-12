@@ -4,6 +4,7 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_version/domain/models/app_version.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
@@ -79,11 +80,14 @@ class AppVersionBloc(
       return;
     }
 
+    final progressId = notifications.notify(_updateProgress(null));
+
     final outcome = await updateToNewestAppVersion
         .receiveProgress((progress) {
           if (!emit.isDone) {
             emit(state.copyWith(downloadProgress: progress));
           }
+          notifications.replace(progressId, _updateProgress(progress));
         })
         .logger(tag: 'UpdateToNewestAppVersionInteractor')
         .busyStateChange((isBusy) {
@@ -93,6 +97,8 @@ class AppVersionBloc(
           notifications.notify(.new(message: 'Update fehlgeschlagen: $e'));
         })
         .getOrNull();
+
+    notifications.dismiss(progressId);
 
     if (outcome != UpdateOutcome.installed) {
       return;
@@ -116,4 +122,18 @@ class AppVersionBloc(
       notifications.notify(.new(message: 'Neustart fehlgeschlagen: $e'));
     }).run();
   }
+}
+
+AppNotification _updateProgress(double? progress) {
+  return AppNotification(
+    message: switch (progress) {
+      null => 'Update wird geladen …',
+      final progress when progress < 1 =>
+        'Update wird geladen … ${(progress * 100).round()} %',
+      _ => 'Update wird installiert …',
+    },
+    severity: .info,
+    isBusy: true,
+    progress: progress,
+  );
 }

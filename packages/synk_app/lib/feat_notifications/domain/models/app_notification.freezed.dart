@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppNotification {
 
- String get message; NotificationSeverity get severity; NotificationAction? get action;
+ String get message; NotificationSeverity get severity; NotificationAction? get action; bool get isBusy; double? get progress;
 /// Create a copy of AppNotification
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AppNotificationCopyWith<AppNotification> get copyWith => _$AppNotificationCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as AppNotification;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppNotification&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.severity, _this.severity) || other.severity == _this.severity)&&(identical(other.action, _this.action) || other.action == _this.action));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppNotification&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.severity, _this.severity) || other.severity == _this.severity)&&(identical(other.action, _this.action) || other.action == _this.action)&&(identical(other.isBusy, _this.isBusy) || other.isBusy == _this.isBusy)&&(identical(other.progress, _this.progress) || other.progress == _this.progress));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppNotification;
-  return Object.hash(runtimeType,_this.message,_this.severity,_this.action);
+  return Object.hash(runtimeType,_this.message,_this.severity,_this.action,_this.isBusy,_this.progress);
 }
 
 @override
 String toString() {
   final _this = this as AppNotification;
-  return 'AppNotification(message: ${_this.message}, severity: ${_this.severity}, action: ${_this.action})';
+  return 'AppNotification(message: ${_this.message}, severity: ${_this.severity}, action: ${_this.action}, isBusy: ${_this.isBusy}, progress: ${_this.progress})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AppNotificationCopyWith<$Res>  {
   factory $AppNotificationCopyWith(AppNotification value, $Res Function(AppNotification) _then) = _$AppNotificationCopyWithImpl;
 @useResult
 $Res call({
- String message, NotificationSeverity severity, NotificationAction? action
+ String message, NotificationSeverity severity, NotificationAction? action, bool isBusy, double? progress
 });
 
 
@@ -68,12 +68,14 @@ class _$AppNotificationCopyWithImpl<$Res>
 
 /// Create a copy of AppNotification
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? message = null,Object? severity = null,Object? action = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? message = null,Object? severity = null,Object? action = freezed,Object? isBusy = null,Object? progress = freezed,}) {
   return _then(AppNotification(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,severity: null == severity ? _self.severity : severity // ignore: cast_nullable_to_non_nullable
 as NotificationSeverity,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
-as NotificationAction?,
+as NotificationAction?,isBusy: null == isBusy ? _self.isBusy : isBusy // ignore: cast_nullable_to_non_nullable
+as bool,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String message,  NotificationSeverity severity,  NotificationAction? action)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String message,  NotificationSeverity severity,  NotificationAction? action,  bool isBusy,  double? progress)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppNotification() when $default != null:
-return $default(_that.message,_that.severity,_that.action);case _:
+return $default(_that.message,_that.severity,_that.action,_that.isBusy,_that.progress);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.message,_that.severity,_that.action);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String message,  NotificationSeverity severity,  NotificationAction? action)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String message,  NotificationSeverity severity,  NotificationAction? action,  bool isBusy,  double? progress)  $default,) {final _that = this;
 switch (_that) {
 case _AppNotification():
-return $default(_that.message,_that.severity,_that.action);}
+return $default(_that.message,_that.severity,_that.action,_that.isBusy,_that.progress);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -193,10 +195,10 @@ return $default(_that.message,_that.severity,_that.action);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String message,  NotificationSeverity severity,  NotificationAction? action)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String message,  NotificationSeverity severity,  NotificationAction? action,  bool isBusy,  double? progress)?  $default,) {final _that = this;
 switch (_that) {
 case _AppNotification() when $default != null:
-return $default(_that.message,_that.severity,_that.action);case _:
+return $default(_that.message,_that.severity,_that.action,_that.isBusy,_that.progress);case _:
   return null;
 
 }
@@ -208,12 +210,14 @@ return $default(_that.message,_that.severity,_that.action);case _:
 
 
 class _AppNotification implements AppNotification {
-  const _AppNotification({required this.message, this.severity = NotificationSeverity.error, this.action});
+  const _AppNotification({required this.message, this.severity = NotificationSeverity.error, this.action, this.isBusy = false, this.progress});
   
 
 @override final  String message;
 @override@JsonKey() final  NotificationSeverity severity;
 @override final  NotificationAction? action;
+@override@JsonKey() final  bool isBusy;
+@override final  double? progress;
 
 /// Create a copy of AppNotification
 /// with the given fields replaced by the non-null parameter values.
@@ -225,18 +229,18 @@ _$AppNotificationCopyWith<_AppNotification> get copyWith => __$AppNotificationCo
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppNotification&&(identical(other.message, message) || other.message == message)&&(identical(other.severity, severity) || other.severity == severity)&&(identical(other.action, action) || other.action == action));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppNotification&&(identical(other.message, message) || other.message == message)&&(identical(other.severity, severity) || other.severity == severity)&&(identical(other.action, action) || other.action == action)&&(identical(other.isBusy, isBusy) || other.isBusy == isBusy)&&(identical(other.progress, progress) || other.progress == progress));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,message,severity,action);
+    return Object.hash(runtimeType,message,severity,action,isBusy,progress);
 }
 
 @override
 String toString() {
-    return 'AppNotification(message: $message, severity: $severity, action: $action)';
+    return 'AppNotification(message: $message, severity: $severity, action: $action, isBusy: $isBusy, progress: $progress)';
 }
 
 
@@ -247,7 +251,7 @@ abstract mixin class _$AppNotificationCopyWith<$Res> implements $AppNotification
   factory _$AppNotificationCopyWith(_AppNotification value, $Res Function(_AppNotification) _then) = __$AppNotificationCopyWithImpl;
 @override @useResult
 $Res call({
- String message, NotificationSeverity severity, NotificationAction? action
+ String message, NotificationSeverity severity, NotificationAction? action, bool isBusy, double? progress
 });
 
 
@@ -264,12 +268,14 @@ class __$AppNotificationCopyWithImpl<$Res>
 
 /// Create a copy of AppNotification
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? severity = null,Object? action = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? message = null,Object? severity = null,Object? action = freezed,Object? isBusy = null,Object? progress = freezed,}) {
   return _then(_AppNotification(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,severity: null == severity ? _self.severity : severity // ignore: cast_nullable_to_non_nullable
 as NotificationSeverity,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
-as NotificationAction?,
+as NotificationAction?,isBusy: null == isBusy ? _self.isBusy : isBusy // ignore: cast_nullable_to_non_nullable
+as bool,progress: freezed == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

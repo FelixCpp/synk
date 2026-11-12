@@ -16,9 +16,7 @@ void main() {
   Future<List<String>> messagesOnStack() async {
     final stack = await stackNow();
 
-    return stack.entries
-        .map((entry) => entry.notification.message)
-        .toList();
+    return stack.entries.map((entry) => entry.notification.message).toList();
   }
 
   void notify(String message, {NotificationSeverity severity = .error}) {
@@ -156,5 +154,31 @@ void main() {
 
     expect(again.count, 1);
     expect(again.id, isNot(first.id));
+  });
+
+  test('replaces an entry in place and keeps its id', () async {
+    notify('Erster');
+    final id = notifications.notify(
+      const AppNotification(message: 'Lädt …', severity: .info),
+    );
+    notify('Dritter');
+
+    notifications.replace(
+      id,
+      const AppNotification(message: 'Lädt … 50 %', severity: .info),
+    );
+
+    final entries = (await stackNow()).entries;
+    expect(await messagesOnStack(), ['Erster', 'Lädt … 50 %', 'Dritter']);
+    expect(entries[1].id, id);
+  });
+
+  test('ignores a replacement for a dismissed entry', () async {
+    final id = notifications.notify(const AppNotification(message: 'Lädt …'));
+    notifications.dismiss(id);
+
+    notifications.replace(id, const AppNotification(message: 'Lädt … 50 %'));
+
+    expect(await messagesOnStack(), isEmpty);
   });
 }

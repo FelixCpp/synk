@@ -26,7 +26,7 @@ class NotificationFeatureImpl({
   Stream<NotificationStack> observeStack() => _stack.stream;
 
   @override
-  void notify(AppNotification notification) {
+  int notify(AppNotification notification) {
     _reported.add(notification);
 
     final entries = [..._stack.value.entries];
@@ -36,25 +36,47 @@ class NotificationFeatureImpl({
     );
 
     if (repeated < 0) {
+      final id = _nextId++;
       entries.add(
         NotificationEntry(
-          id: _nextId++,
+          id: id,
           notification: notification,
           lifetime: lifetime,
           remaining: lifetime,
         ),
       );
-    } else {
-      final entry = entries[repeated];
-      entries[repeated] = NotificationEntry(
-        id: entry.id,
-        notification: entry.notification,
-        count: entry.count + 1,
-        lifetime: lifetime,
-        remaining: lifetime,
-      );
+      _emit(entries);
+      return id;
     }
 
+    final entry = entries[repeated];
+    entries[repeated] = NotificationEntry(
+      id: entry.id,
+      notification: entry.notification,
+      count: entry.count + 1,
+      lifetime: lifetime,
+      remaining: lifetime,
+    );
+    _emit(entries);
+    return entry.id;
+  }
+
+  @override
+  void replace(int id, AppNotification notification) {
+    final entries = [..._stack.value.entries];
+    final index = entries.indexWhere((entry) => entry.id == id);
+
+    if (index < 0) {
+      return;
+    }
+
+    final lifetime = NotificationPolicy.lifetimeOf(notification.severity);
+    entries[index] = NotificationEntry(
+      id: id,
+      notification: notification,
+      lifetime: lifetime,
+      remaining: lifetime,
+    );
     _emit(entries);
   }
 

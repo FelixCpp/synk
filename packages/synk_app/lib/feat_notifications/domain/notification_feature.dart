@@ -3,7 +3,9 @@ import 'package:synk/feat_notifications/domain/models/notification_stack.dart';
 
 /// What Synk can do with the pile of messages in the canvas corner.
 abstract interface class NotificationFeature {
-  void notify(AppNotification notification);
+  int notify(AppNotification notification);
+
+  void replace(int id, AppNotification notification);
 
   /// Every message as it is reported, whether or not it reaches the stack.
   Stream<AppNotification> observeNotifications();
