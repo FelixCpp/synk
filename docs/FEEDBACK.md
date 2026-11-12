@@ -13,9 +13,10 @@
 
 ### 2. Gerätegröße verändern
 
-- **Status:** offen – Detailbesprechung steht aus
+- **Status:** erledigt
 - **Feedback:** Die Größe des gespiegelten Geräts soll sich verändern lassen.
-- **Notizen:** Große Änderung. Berührt `SynkTheme.deviceFrameSizeFor`, das `ReflowGrid` und die vertagte Idee „Freier Drag-Space / eigenes Fenster pro Gerät“ aus der [ROADMAP](ROADMAP.md#vertagte-ideen).
+- **Umsetzung:** Die Geräte skalieren jetzt mit dem Fenster. Das `ReflowGrid` rechnet alle Kacheln mit einem gemeinsamen Faktor, dem größten zwischen `DeviceFrameMetrics.minScale` (0,75) und `maxScale` (2,0), bei dem alle Geräte ins Fenster passen. Die Zeilen werden zentriert. Erst unterhalb von `minScale` scrollt das Raster. Wer die Geräte größer will, zieht das Fenster größer.
+  - Nicht umgesetzt: eine Größe pro Gerät von Hand einstellen. Die Idee „Freier Drag-Space / eigenes Fenster pro Gerät“ bleibt in der [ROADMAP](ROADMAP.md#vertagte-ideen) vertagt.
 
 ### 3. Tastatursymbol auf dem DeviceFrame entfernen
 
@@ -32,14 +33,14 @@
 
 ### 5. Bug: Mirroring eingefroren nach erneutem Anstecken
 
-- **Status:** vermutlich behoben – Test am echten Gerät steht aus
+- **Status:** erledigt – am echten Gerät bestätigt
 - **Feedback:** Nach dem Ziehen des Kabels und erneutem Anschließen funktionieren die Interaktionen nicht mehr und das Mirroring ist eingefroren.
 - **Ursache:** `DeviceConnectionsFeatureImpl` hat die Sitzung eines abgezogenen Geräts nie beendet. Beim Wiedereinstecken galt das Gerät weiter als verbunden, und der Frame hing wieder an der alten, toten Sitzung (scrcpy-Sockets bzw. Capture-Session weg).
 - **Umsetzung:** siehe Punkt 6.
 
 ### 6. Bug: Aufnahme lässt sich nach beendeter Übertragung nicht mehr beenden
 
-- **Status:** behoben – Test am echten Gerät steht aus
+- **Status:** erledigt – am echten Gerät bestätigt
 - **Feedback:** Wird die Übertragung während einer Bildschirmaufnahme beendet, lässt sich nach dem Wiederverbinden zwar eine Aufnahme starten, aber nicht mehr beenden („Die Aufnahme ließ sich nicht beenden“).
 - **Ursachen:**
   - Abgezogene Geräte behielten ihre Sitzung (Punkt 5), samt der darin laufenden Aufnahme.
@@ -77,7 +78,7 @@
 
 ### 2. Neustart nach dem Update
 
-- **Status:** erledigt – Test mit einem echten Release steht aus
+- **Status:** erledigt – mit einem echten Release bestätigt
 - **Feedback:** Beim Update einen Button anzeigen, der die App nach dem Update neu startet.
 - **Umsetzung:** Synk installiert das Update jetzt selbst (`AppBundleInstaller`): DMG per `hdiutil` einhängen, `synk.app` per `ditto` neben das laufende Bundle kopieren und dann austauschen. Danach zeigen Benachrichtigung, Einstellungsfenster und Zahnrad-Popover den Button „Neu starten“. Ein abgekoppeltes Shell-Skript wartet, bis der Prozess beendet ist, und öffnet das Bundle neu. Synk selbst beendet sich über `exitApplication`.
   - Rückfall: Liegt das Bundle in einem Ordner ohne Schreibrecht, auf einem eingehängten Image (`/Volumes`) oder in einer AppTranslocation-Kopie, öffnet Synk wie bisher die DMG.
