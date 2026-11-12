@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AppVersionState {
 
- AppVersion get currentAppVersion; NewerAppVersion? get newerAppVersion; bool get isUpdating; double? get downloadProgress;
+ AppVersion get currentAppVersion; NewerAppVersion? get newerAppVersion; bool get isUpdating; double? get downloadProgress; bool get isReadyToRestart;
 /// Create a copy of AppVersionState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AppVersionStateCopyWith<AppVersionState> get copyWith => _$AppVersionStateCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as AppVersionState;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppVersionState&&(identical(other.currentAppVersion, _this.currentAppVersion) || other.currentAppVersion == _this.currentAppVersion)&&(identical(other.newerAppVersion, _this.newerAppVersion) || other.newerAppVersion == _this.newerAppVersion)&&(identical(other.isUpdating, _this.isUpdating) || other.isUpdating == _this.isUpdating)&&(identical(other.downloadProgress, _this.downloadProgress) || other.downloadProgress == _this.downloadProgress));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppVersionState&&(identical(other.currentAppVersion, _this.currentAppVersion) || other.currentAppVersion == _this.currentAppVersion)&&(identical(other.newerAppVersion, _this.newerAppVersion) || other.newerAppVersion == _this.newerAppVersion)&&(identical(other.isUpdating, _this.isUpdating) || other.isUpdating == _this.isUpdating)&&(identical(other.downloadProgress, _this.downloadProgress) || other.downloadProgress == _this.downloadProgress)&&(identical(other.isReadyToRestart, _this.isReadyToRestart) || other.isReadyToRestart == _this.isReadyToRestart));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppVersionState;
-  return Object.hash(runtimeType,_this.currentAppVersion,_this.newerAppVersion,_this.isUpdating,_this.downloadProgress);
+  return Object.hash(runtimeType,_this.currentAppVersion,_this.newerAppVersion,_this.isUpdating,_this.downloadProgress,_this.isReadyToRestart);
 }
 
 @override
 String toString() {
   final _this = this as AppVersionState;
-  return 'AppVersionState(currentAppVersion: ${_this.currentAppVersion}, newerAppVersion: ${_this.newerAppVersion}, isUpdating: ${_this.isUpdating}, downloadProgress: ${_this.downloadProgress})';
+  return 'AppVersionState(currentAppVersion: ${_this.currentAppVersion}, newerAppVersion: ${_this.newerAppVersion}, isUpdating: ${_this.isUpdating}, downloadProgress: ${_this.downloadProgress}, isReadyToRestart: ${_this.isReadyToRestart})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AppVersionStateCopyWith<$Res>  {
   factory $AppVersionStateCopyWith(AppVersionState value, $Res Function(AppVersionState) _then) = _$AppVersionStateCopyWithImpl;
 @useResult
 $Res call({
- AppVersion currentAppVersion, NewerAppVersion? newerAppVersion, bool isUpdating, double? downloadProgress
+ AppVersion currentAppVersion, NewerAppVersion? newerAppVersion, bool isUpdating, double? downloadProgress, bool isReadyToRestart
 });
 
 
@@ -68,13 +68,14 @@ class _$AppVersionStateCopyWithImpl<$Res>
 
 /// Create a copy of AppVersionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currentAppVersion = null,Object? newerAppVersion = freezed,Object? isUpdating = null,Object? downloadProgress = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currentAppVersion = null,Object? newerAppVersion = freezed,Object? isUpdating = null,Object? downloadProgress = freezed,Object? isReadyToRestart = null,}) {
   return _then(AppVersionState(
 currentAppVersion: null == currentAppVersion ? _self.currentAppVersion : currentAppVersion // ignore: cast_nullable_to_non_nullable
 as AppVersion,newerAppVersion: freezed == newerAppVersion ? _self.newerAppVersion : newerAppVersion // ignore: cast_nullable_to_non_nullable
 as NewerAppVersion?,isUpdating: null == isUpdating ? _self.isUpdating : isUpdating // ignore: cast_nullable_to_non_nullable
 as bool,downloadProgress: freezed == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isReadyToRestart: null == isReadyToRestart ? _self.isReadyToRestart : isReadyToRestart // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of AppVersionState
@@ -177,10 +178,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress,  bool isReadyToRestart)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppVersionState() when $default != null:
-return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress);case _:
+return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress,_that.isReadyToRestart);case _:
   return orElse();
 
 }
@@ -198,10 +199,10 @@ return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress,  bool isReadyToRestart)  $default,) {final _that = this;
 switch (_that) {
 case _AppVersionState():
-return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress);}
+return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress,_that.isReadyToRestart);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -215,10 +216,10 @@ return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( AppVersion currentAppVersion,  NewerAppVersion? newerAppVersion,  bool isUpdating,  double? downloadProgress,  bool isReadyToRestart)?  $default,) {final _that = this;
 switch (_that) {
 case _AppVersionState() when $default != null:
-return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress);case _:
+return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_that.downloadProgress,_that.isReadyToRestart);case _:
   return null;
 
 }
@@ -230,13 +231,14 @@ return $default(_that.currentAppVersion,_that.newerAppVersion,_that.isUpdating,_
 
 
 class _AppVersionState implements AppVersionState {
-  const _AppVersionState({required this.currentAppVersion, required this.newerAppVersion, required this.isUpdating, required this.downloadProgress});
+  const _AppVersionState({required this.currentAppVersion, required this.newerAppVersion, required this.isUpdating, required this.downloadProgress, required this.isReadyToRestart});
   
 
 @override final  AppVersion currentAppVersion;
 @override final  NewerAppVersion? newerAppVersion;
 @override final  bool isUpdating;
 @override final  double? downloadProgress;
+@override final  bool isReadyToRestart;
 
 /// Create a copy of AppVersionState
 /// with the given fields replaced by the non-null parameter values.
@@ -248,18 +250,18 @@ _$AppVersionStateCopyWith<_AppVersionState> get copyWith => __$AppVersionStateCo
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppVersionState&&(identical(other.currentAppVersion, currentAppVersion) || other.currentAppVersion == currentAppVersion)&&(identical(other.newerAppVersion, newerAppVersion) || other.newerAppVersion == newerAppVersion)&&(identical(other.isUpdating, isUpdating) || other.isUpdating == isUpdating)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppVersionState&&(identical(other.currentAppVersion, currentAppVersion) || other.currentAppVersion == currentAppVersion)&&(identical(other.newerAppVersion, newerAppVersion) || other.newerAppVersion == newerAppVersion)&&(identical(other.isUpdating, isUpdating) || other.isUpdating == isUpdating)&&(identical(other.downloadProgress, downloadProgress) || other.downloadProgress == downloadProgress)&&(identical(other.isReadyToRestart, isReadyToRestart) || other.isReadyToRestart == isReadyToRestart));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,currentAppVersion,newerAppVersion,isUpdating,downloadProgress);
+    return Object.hash(runtimeType,currentAppVersion,newerAppVersion,isUpdating,downloadProgress,isReadyToRestart);
 }
 
 @override
 String toString() {
-    return 'AppVersionState(currentAppVersion: $currentAppVersion, newerAppVersion: $newerAppVersion, isUpdating: $isUpdating, downloadProgress: $downloadProgress)';
+    return 'AppVersionState(currentAppVersion: $currentAppVersion, newerAppVersion: $newerAppVersion, isUpdating: $isUpdating, downloadProgress: $downloadProgress, isReadyToRestart: $isReadyToRestart)';
 }
 
 
@@ -270,7 +272,7 @@ abstract mixin class _$AppVersionStateCopyWith<$Res> implements $AppVersionState
   factory _$AppVersionStateCopyWith(_AppVersionState value, $Res Function(_AppVersionState) _then) = __$AppVersionStateCopyWithImpl;
 @override @useResult
 $Res call({
- AppVersion currentAppVersion, NewerAppVersion? newerAppVersion, bool isUpdating, double? downloadProgress
+ AppVersion currentAppVersion, NewerAppVersion? newerAppVersion, bool isUpdating, double? downloadProgress, bool isReadyToRestart
 });
 
 
@@ -287,13 +289,14 @@ class __$AppVersionStateCopyWithImpl<$Res>
 
 /// Create a copy of AppVersionState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currentAppVersion = null,Object? newerAppVersion = freezed,Object? isUpdating = null,Object? downloadProgress = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currentAppVersion = null,Object? newerAppVersion = freezed,Object? isUpdating = null,Object? downloadProgress = freezed,Object? isReadyToRestart = null,}) {
   return _then(_AppVersionState(
 currentAppVersion: null == currentAppVersion ? _self.currentAppVersion : currentAppVersion // ignore: cast_nullable_to_non_nullable
 as AppVersion,newerAppVersion: freezed == newerAppVersion ? _self.newerAppVersion : newerAppVersion // ignore: cast_nullable_to_non_nullable
 as NewerAppVersion?,isUpdating: null == isUpdating ? _self.isUpdating : isUpdating // ignore: cast_nullable_to_non_nullable
 as bool,downloadProgress: freezed == downloadProgress ? _self.downloadProgress : downloadProgress // ignore: cast_nullable_to_non_nullable
-as double?,
+as double?,isReadyToRestart: null == isReadyToRestart ? _self.isReadyToRestart : isReadyToRestart // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -365,12 +368,13 @@ extension AppVersionEventPatterns on AppVersionEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnCheckForUpdates value)?  onCheckForUpdates,TResult Function( _OnUpdate value)?  onUpdate,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnCheckForUpdates value)?  onCheckForUpdates,TResult Function( _OnUpdate value)?  onUpdate,TResult Function( _OnRestart value)?  onRestart,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnCheckForUpdates() when onCheckForUpdates != null:
 return onCheckForUpdates(_that);case _OnUpdate() when onUpdate != null:
-return onUpdate(_that);case _:
+return onUpdate(_that);case _OnRestart() when onRestart != null:
+return onRestart(_that);case _:
   return orElse();
 
 }
@@ -388,12 +392,13 @@ return onUpdate(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnCheckForUpdates value)  onCheckForUpdates,required TResult Function( _OnUpdate value)  onUpdate,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnCheckForUpdates value)  onCheckForUpdates,required TResult Function( _OnUpdate value)  onUpdate,required TResult Function( _OnRestart value)  onRestart,}){
 final _that = this;
 switch (_that) {
 case _OnCheckForUpdates():
 return onCheckForUpdates(_that);case _OnUpdate():
-return onUpdate(_that);}
+return onUpdate(_that);case _OnRestart():
+return onRestart(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -407,12 +412,13 @@ return onUpdate(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnCheckForUpdates value)?  onCheckForUpdates,TResult? Function( _OnUpdate value)?  onUpdate,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnCheckForUpdates value)?  onCheckForUpdates,TResult? Function( _OnUpdate value)?  onUpdate,TResult? Function( _OnRestart value)?  onRestart,}){
 final _that = this;
 switch (_that) {
 case _OnCheckForUpdates() when onCheckForUpdates != null:
 return onCheckForUpdates(_that);case _OnUpdate() when onUpdate != null:
-return onUpdate(_that);case _:
+return onUpdate(_that);case _OnRestart() when onRestart != null:
+return onRestart(_that);case _:
   return null;
 
 }
@@ -429,11 +435,12 @@ return onUpdate(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCheckForUpdates,TResult Function()?  onUpdate,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCheckForUpdates,TResult Function()?  onUpdate,TResult Function()?  onRestart,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnCheckForUpdates() when onCheckForUpdates != null:
 return onCheckForUpdates();case _OnUpdate() when onUpdate != null:
-return onUpdate();case _:
+return onUpdate();case _OnRestart() when onRestart != null:
+return onRestart();case _:
   return orElse();
 
 }
@@ -451,11 +458,12 @@ return onUpdate();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCheckForUpdates,required TResult Function()  onUpdate,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCheckForUpdates,required TResult Function()  onUpdate,required TResult Function()  onRestart,}) {final _that = this;
 switch (_that) {
 case _OnCheckForUpdates():
 return onCheckForUpdates();case _OnUpdate():
-return onUpdate();}
+return onUpdate();case _OnRestart():
+return onRestart();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -469,11 +477,12 @@ return onUpdate();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCheckForUpdates,TResult? Function()?  onUpdate,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCheckForUpdates,TResult? Function()?  onUpdate,TResult? Function()?  onRestart,}) {final _that = this;
 switch (_that) {
 case _OnCheckForUpdates() when onCheckForUpdates != null:
 return onCheckForUpdates();case _OnUpdate() when onUpdate != null:
-return onUpdate();case _:
+return onUpdate();case _OnRestart() when onRestart != null:
+return onRestart();case _:
   return null;
 
 }
@@ -537,6 +546,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
     return 'AppVersionEvent.onUpdate()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _OnRestart implements AppVersionEvent {
+  const _OnRestart();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnRestart);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'AppVersionEvent.onRestart()';
 }
 
 

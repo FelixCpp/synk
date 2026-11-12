@@ -162,7 +162,7 @@ return onShareFile(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( double volume)?  onAudioVolumeChanged,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult Function()?  onKeyboardLeft,TResult Function()?  onTypeHostClipboard,TResult Function( String text)?  onTextComposed,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function()?  onRotate,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onCaptureScreenshot,TResult Function()?  onToggleRecording,TResult Function()?  onToggleAudioMute,TResult Function( double volume)?  onAudioVolumeChanged,TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult Function()?  onKeyboardLeft,TResult Function()?  onTypeHostClipboard,TResult Function( String text)?  onTextComposed,TResult Function( List<String> filepaths)?  onFilesDropped,TResult Function( DeviceNavigation navigation)?  onNavigate,TResult Function()?  onPowerButtonPressed,TResult Function( DeviceRotationDirection direction)?  onRotate,TResult Function()?  onInstallApk,TResult Function()?  onShareFile,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
@@ -178,7 +178,7 @@ return onTextComposed(_that.text);case _OnFilesDropped() when onFilesDropped != 
 return onFilesDropped(_that.filepaths);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that.navigation);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed();case _OnRotate() when onRotate != null:
-return onRotate();case _OnInstallApk() when onInstallApk != null:
+return onRotate(_that.direction);case _OnInstallApk() when onInstallApk != null:
 return onInstallApk();case _OnShareFile() when onShareFile != null:
 return onShareFile();case _:
   return orElse();
@@ -198,7 +198,7 @@ return onShareFile();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( double volume)  onAudioVolumeChanged,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( DeviceKeyEvent keyEvent)  onKeyEvent,required TResult Function()  onKeyboardLeft,required TResult Function()  onTypeHostClipboard,required TResult Function( String text)  onTextComposed,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function()  onRotate,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onCaptureScreenshot,required TResult Function()  onToggleRecording,required TResult Function()  onToggleAudioMute,required TResult Function( double volume)  onAudioVolumeChanged,required TResult Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)  onPointerEvent,required TResult Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)  onPinchEvent,required TResult Function( DeviceKeyEvent keyEvent)  onKeyEvent,required TResult Function()  onKeyboardLeft,required TResult Function()  onTypeHostClipboard,required TResult Function( String text)  onTextComposed,required TResult Function( List<String> filepaths)  onFilesDropped,required TResult Function( DeviceNavigation navigation)  onNavigate,required TResult Function()  onPowerButtonPressed,required TResult Function( DeviceRotationDirection direction)  onRotate,required TResult Function()  onInstallApk,required TResult Function()  onShareFile,}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot():
 return onCaptureScreenshot();case _OnToggleRecording():
@@ -214,7 +214,7 @@ return onTextComposed(_that.text);case _OnFilesDropped():
 return onFilesDropped(_that.filepaths);case _OnNavigate():
 return onNavigate(_that.navigation);case _OnPowerButtonPressed():
 return onPowerButtonPressed();case _OnRotate():
-return onRotate();case _OnInstallApk():
+return onRotate(_that.direction);case _OnInstallApk():
 return onInstallApk();case _OnShareFile():
 return onShareFile();}
 }
@@ -230,7 +230,7 @@ return onShareFile();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( double volume)?  onAudioVolumeChanged,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult? Function()?  onKeyboardLeft,TResult? Function()?  onTypeHostClipboard,TResult? Function( String text)?  onTextComposed,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function()?  onRotate,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onCaptureScreenshot,TResult? Function()?  onToggleRecording,TResult? Function()?  onToggleAudioMute,TResult? Function( double volume)?  onAudioVolumeChanged,TResult? Function( DevicePointerEventType type,  double normalizedPointerX,  double normalizedPointerY)?  onPointerEvent,TResult? Function( DevicePointerEventType type,  double centerX,  double centerY,  double spread)?  onPinchEvent,TResult? Function( DeviceKeyEvent keyEvent)?  onKeyEvent,TResult? Function()?  onKeyboardLeft,TResult? Function()?  onTypeHostClipboard,TResult? Function( String text)?  onTextComposed,TResult? Function( List<String> filepaths)?  onFilesDropped,TResult? Function( DeviceNavigation navigation)?  onNavigate,TResult? Function()?  onPowerButtonPressed,TResult? Function( DeviceRotationDirection direction)?  onRotate,TResult? Function()?  onInstallApk,TResult? Function()?  onShareFile,}) {final _that = this;
 switch (_that) {
 case _OnCaptureScreenshot() when onCaptureScreenshot != null:
 return onCaptureScreenshot();case _OnToggleRecording() when onToggleRecording != null:
@@ -246,7 +246,7 @@ return onTextComposed(_that.text);case _OnFilesDropped() when onFilesDropped != 
 return onFilesDropped(_that.filepaths);case _OnNavigate() when onNavigate != null:
 return onNavigate(_that.navigation);case _OnPowerButtonPressed() when onPowerButtonPressed != null:
 return onPowerButtonPressed();case _OnRotate() when onRotate != null:
-return onRotate();case _OnInstallApk() when onInstallApk != null:
+return onRotate(_that.direction);case _OnInstallApk() when onInstallApk != null:
 return onInstallApk();case _OnShareFile() when onShareFile != null:
 return onShareFile();case _:
   return null;
@@ -953,33 +953,69 @@ String toString() {
 
 
 class _OnRotate implements DeviceFrameEvent {
-  const _OnRotate();
+  const _OnRotate(this.direction);
   
 
+ final  DeviceRotationDirection direction;
 
-
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnRotateCopyWith<_OnRotate> get copyWith => __$OnRotateCopyWithImpl<_OnRotate>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnRotate);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnRotate&&(identical(other.direction, direction) || other.direction == direction));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode {
+    return Object.hash(runtimeType,direction);
+}
 
 @override
 String toString() {
-    return 'DeviceFrameEvent.onRotate()';
+    return 'DeviceFrameEvent.onRotate(direction: $direction)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$OnRotateCopyWith<$Res> implements $DeviceFrameEventCopyWith<$Res> {
+  factory _$OnRotateCopyWith(_OnRotate value, $Res Function(_OnRotate) _then) = __$OnRotateCopyWithImpl;
+@useResult
+$Res call({
+ DeviceRotationDirection direction
+});
 
 
+
+
+}
+/// @nodoc
+class __$OnRotateCopyWithImpl<$Res>
+    implements _$OnRotateCopyWith<$Res> {
+  __$OnRotateCopyWithImpl(this._self, this._then);
+
+  final _OnRotate _self;
+  final $Res Function(_OnRotate) _then;
+
+/// Create a copy of DeviceFrameEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? direction = null,}) {
+  return _then(_OnRotate(
+null == direction ? _self.direction : direction // ignore: cast_nullable_to_non_nullable
+as DeviceRotationDirection,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

@@ -66,3 +66,41 @@
   - Android: `AdbRotation` schaltet per `settings put system accelerometer_rotation 0` die automatische Drehung aus und setzt `user_rotation` auf 0 bzw. 1. Den alten Wert von `accelerometer_rotation` stellt die Sitzung beim Beenden wieder her. Läuft auf allen Android-Versionen.
   - Grenzen: Apps, die nur Hochformat können, drehen nicht mit, so wie beim echten Drehen. Auf dem iPhone-Homescreen bleibt das Bild deshalb hochkant. Es gibt nur Hoch-/Querformat-Umschalten, keine 180°-Drehung.
 - **Nachtrag – erster Android-Versuch verworfen:** Zuerst lief die Drehung über scrcpys `ROTATE_DEVICE` (Control-Message 11). Der Server fixiert die Rotation, gibt sie aber gleich wieder frei (`thawRotation`), wenn die automatische Drehung an war. Dann übernimmt sofort der Lagesensor: Das Gerät drehte und sprang nach unter einer Sekunde zurück. Meldete der Sensor gerade Querformat, passierte gar nichts. Am Pixel 6 (Android 16) nachgestellt.
+
+## Rückmeldungen 2026-11-12 (nach v0.1.4)
+
+### 1. „Update verfügbar“-Hinweis
+
+- **Status:** erledigt
+- **Feedback:** Ein Popup, das auf ein verfügbares Update hinweist.
+- **Umsetzung:** Findet die Update-Prüfung beim Start eine neuere Version, erscheint einmal pro Sitzung eine Karte im Benachrichtigungsstapel: „Synk <version> ist verfügbar.“ mit dem Button „Aktualisieren“. Die Karte bleibt stehen, bis man sie schließt. Dafür können Benachrichtigungen jetzt eine Aktion tragen (`AppNotification.action`), und es gibt die neue Stufe `info`.
+
+### 2. Neustart nach dem Update
+
+- **Status:** erledigt – Test mit einem echten Release steht aus
+- **Feedback:** Beim Update einen Button anzeigen, der die App nach dem Update neu startet.
+- **Umsetzung:** Synk installiert das Update jetzt selbst (`AppBundleInstaller`): DMG per `hdiutil` einhängen, `synk.app` per `ditto` neben das laufende Bundle kopieren und dann austauschen. Danach zeigen Benachrichtigung, Einstellungsfenster und Zahnrad-Popover den Button „Neu starten“. Ein abgekoppeltes Shell-Skript wartet, bis der Prozess beendet ist, und öffnet das Bundle neu. Synk selbst beendet sich über `exitApplication`.
+  - Rückfall: Liegt das Bundle in einem Ordner ohne Schreibrecht, auf einem eingehängten Image (`/Volumes`) oder in einer AppTranslocation-Kopie, öffnet Synk wie bisher die DMG.
+  - Funktioniert, weil Synk ohne Sandbox läuft und die mit Dio geladene DMG kein Quarantäne-Attribut trägt.
+
+### 3. Rotation in beide Richtungen
+
+- **Status:** erledigt
+- **Feedback:** Nach links und nach rechts drehen können.
+- **Umsetzung:** Statt eines Buttons hat die Toolbar jetzt „Nach links drehen“ und „Nach rechts drehen“. Jeder Klick dreht um 90°, Kopfüber eingeschlossen (`ScreenOrientation`). Den Ausgangspunkt der ersten Drehung schätzt Synk aus dem Bild (Querformat → `landscapeLeft`), danach merkt sich die Sitzung die zuletzt gesetzte Ausrichtung.
+  - Android: `user_rotation` 0–3. iOS: `devicectl … orientation set` mit allen vier Ausrichtungen.
+  - Grenze: iPhones mit Face ID und viele Android-Geräte zeigen Kopfüber nicht an. Bei diesem Schritt ändert sich das Bild dann nicht.
+
+### 4. Erster Klick in ein inaktives Fenster geht verloren
+
+- **Status:** erledigt
+- **Feedback:** Ist ein anderes Fenster aktiv (z. B. VS Code), holt der erste Klick auf einen Button in Synk nur das Fenster nach vorn. Erst der zweite Klick löst die Aktion aus.
+- **Ursache:** macOS fragt bei einem Klick in ein inaktives Fenster die getroffene View per `acceptsFirstMouse(for:)`, ob der Klick auch durchgereicht werden soll. Sagt sie nein, wird das Fenster nur aktiviert. Die `FlutterView` sagt ja, wird aber gar nicht getroffen: `desktop_drop` legt für Drag & Drop eine unsichtbare `DropTarget`-View über das ganze Fenster. Bei aktivem Fenster reicht sie Klicks an Flutter weiter, beim ersten Klick sagt sie nein. Per Logging nachgewiesen: Der Klick ins inaktive Fenster traf `DropTarget`, Flutter bekam kein `PointerDown`, nur das spätere Loslassen.
+  - Erster Versuch, nur die Titelleisten-Views von `macos_window_utils` (`ForwardingView`, `PassthroughView`) umzustellen, reichte deshalb nicht.
+- **Umsetzung:** `MainFlutterWindow` ersetzt beim Start für `DropTarget`, `ForwardingView` und `PassthroughView` die Methode `acceptsFirstMouse(for:)` per Objective-C-Runtime durch eine Variante, die `true` liefert. Fehlt eine Klasse nach einem Paket-Update, wird sie übersprungen.
+
+### 5. Update im Zahnrad-Popover anzeigen
+
+- **Status:** erledigt
+- **Feedback:** Das verfügbare Update schon im Popover hinter dem Zahnrad anzeigen.
+- **Umsetzung:** Gibt es eine neuere Version, zeigt das Popover oben einen Hinweis „Synk <version> ist verfügbar“ mit demselben Button wie das Einstellungsfenster (`AppUpdateButton`): „Aktualisieren“, während des Ladens der Fortschritt, danach „Neu starten“.

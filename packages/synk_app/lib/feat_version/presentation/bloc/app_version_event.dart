@@ -4,4 +4,5 @@ part of 'app_version_bloc.dart';
 sealed class AppVersionEvent with _$AppVersionEvent {
   const factory AppVersionEvent.onCheckForUpdates() = _OnCheckForUpdates;
   const factory AppVersionEvent.onUpdate() = _OnUpdate;
+  const factory AppVersionEvent.onRestart() = _OnRestart;
 }

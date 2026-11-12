@@ -1,11 +1,14 @@
 import 'package:api_github/api_github.dart';
 import 'package:dio/dio.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:platform/testing.dart';
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+import 'package:synk/feat_version/data/app_bundle_installer.dart';
 import 'package:synk/feat_version/data/repositories/app_version_repository_impl.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
+import 'package:synk/feat_version/domain/models/update_outcome.dart';
 
 import '../support/fake_process_manager.dart';
 
@@ -63,6 +66,9 @@ GitHubReleaseDto _release({
 
 void main() {
   late FakeProcessManager processManager;
+  late MemoryFileSystem fileSystem;
+  late bool isBundleWritable;
+  late int quits;
 
   setUp(() {
     PackageInfo.setMockInitialValues(
@@ -72,7 +78,28 @@ void main() {
       buildNumber: '5',
       buildSignature: '',
     );
-    processManager = FakeProcessManager();
+    isBundleWritable = false;
+    quits = 0;
+    fileSystem = MemoryFileSystem();
+    fileSystem.directory('/Applications/synk.app').createSync(recursive: true);
+    fileSystem.systemTempDirectory.createSync(recursive: true);
+    processManager = FakeProcessManager(
+      respond: (command) {
+        switch (command) {
+          case ['test', '-w', ...]:
+            return (exitCode: isBundleWritable ? 0 : 1, stdout: '', stderr: '');
+          case ['hdiutil', 'attach', ...]:
+            final mountPoint = command[command.indexOf('-mountpoint') + 1];
+            fileSystem
+                .directory('$mountPoint/synk.app')
+                .createSync(recursive: true);
+          case ['ditto', _, final to]:
+            fileSystem.directory(to).createSync(recursive: true);
+        }
+
+        return fakeSuccess;
+      },
+    );
   });
 
   AppVersionRepositoryImpl repository(GitHubReleasesApi releasesApi) {
@@ -82,6 +109,12 @@ void main() {
         processManager: processManager,
         platform: TestNativePlatform(operatingSystem: NativePlatform.macOS),
       ),
+      installer: AppBundleInstaller(
+        processManager: processManager,
+        fileSystem: fileSystem,
+        bundlePath: '/Applications/synk.app',
+      ),
+      quit: () async => quits++,
       downloadDirectory: '/downloads',
     );
   }
@@ -102,15 +135,55 @@ void main() {
     expect(result, const NewerAppVersion.upToDate());
   });
 
-  test('downloads the dmg into the download directory and opens it', () async {
-    final releasesApi = _ReleasesApi(release: _release());
+  test(
+    'downloads the dmg and opens it when Synk cannot replace itself',
+    () async {
+      final releasesApi = _ReleasesApi(release: _release());
 
-    await repository(releasesApi).updateToNewestRelease(onProgress: (_) {});
+      final outcome = await repository(
+        releasesApi,
+      ).updateToNewestRelease(onProgress: (_) {});
 
-    expect(releasesApi.downloads, [(_dmg, '/downloads/synk-macos-v0.2.0.dmg')]);
-    expect(processManager.commands, [
-      ['open', '/downloads/synk-macos-v0.2.0.dmg'],
-    ]);
+      expect(outcome, UpdateOutcome.installerOpened);
+      expect(releasesApi.downloads, [
+        (_dmg, '/downloads/synk-macos-v0.2.0.dmg'),
+      ]);
+      expect(processManager.commands.last, [
+        'open',
+        '/downloads/synk-macos-v0.2.0.dmg',
+      ]);
+    },
+  );
+
+  test('installs the dmg over the running app when it can', () async {
+    isBundleWritable = true;
+
+    final outcome = await repository(
+      _ReleasesApi(release: _release()),
+    ).updateToNewestRelease(onProgress: (_) {});
+
+    expect(outcome, UpdateOutcome.installed);
+    expect(
+      processManager.commands.where((command) => command.first == 'open'),
+      isEmpty,
+    );
+    expect(
+      processManager.commands,
+      contains(
+        containsAllInOrder([
+          'hdiutil',
+          'attach',
+          '/downloads/synk-macos-v0.2.0.dmg',
+        ]),
+      ),
+    );
+  });
+
+  test('relaunches before it quits', () async {
+    await repository(_ReleasesApi(release: _release())).restart();
+
+    expect(processManager.commands.single.first, '/bin/sh');
+    expect(quits, 1);
   });
 
   test('reports each whole percent of the download once', () async {
@@ -137,10 +210,11 @@ void main() {
   });
 
   test('opens the release page when the release has no dmg', () async {
-    await repository(
+    final outcome = await repository(
       _ReleasesApi(release: _release(assets: const [])),
     ).updateToNewestRelease(onProgress: (_) {});
 
+    expect(outcome, UpdateOutcome.installerOpened);
     expect(processManager.commands, [
       ['open', _pageUrl.toString()],
     ]);

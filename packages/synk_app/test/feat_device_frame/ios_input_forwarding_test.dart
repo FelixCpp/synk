@@ -1,3 +1,4 @@
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,5 +79,5 @@ class _RecordingInteraction implements DeviceInteraction {
   }
 
   @override
-  Future<void> rotate() async {}
+  Future<void> rotate(DeviceRotationDirection direction) async {}
 }

@@ -3,6 +3,9 @@ import 'package:synk/feat_settings/domain/models/settings.dart';
 import 'package:synk/feat_settings/domain/models/theme_mode.dart';
 import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/settings_window.dart';
+import 'package:synk/feat_version/domain/models/newer_app_version.dart';
+import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
+import 'package:synk/feat_version/presentation/widgets/app_update_button.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -58,6 +61,7 @@ class const _Content({
                 ),
               ),
             ),
+            const _UpdateBanner(),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 _rowGutter,
@@ -119,6 +123,63 @@ class const _Content({
             ),
             _Footer(controller: controller),
           ],
+        );
+      },
+    );
+  }
+}
+
+class const _UpdateBanner() extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AppVersionBloc, AppVersionState>(
+      builder: (context, state) {
+        final version = state.newerAppVersion?.whenOrNull(
+          updateAvailable: (version) => version,
+        );
+
+        if (version == null) {
+          return const SizedBox.shrink();
+        }
+
+        final theme = context.synkUi;
+
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(
+            _rowGutter,
+            SynkUiSpace.s4,
+            _rowGutter,
+            SynkUiSpace.s4,
+          ),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: theme.colors.inset,
+              borderRadius: BorderRadius.circular(SynkUiRadius.control),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(SynkUiSpace.s8),
+              child: Row(
+                spacing: SynkUiSpace.s8,
+                children: [
+                  Icon(
+                    CupertinoIcons.arrow_down_circle,
+                    size: SynkUiSize.icon,
+                    color: theme.colors.accent,
+                  ),
+                  Expanded(
+                    child: Text(
+                      state.isReadyToRestart
+                          ? 'Synk $version ist installiert'
+                          : 'Synk $version ist verfügbar',
+                      style: theme.typography.label,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  AppUpdateButton(state: state),
+                ],
+              ),
+            ),
+          ),
         );
       },
     );

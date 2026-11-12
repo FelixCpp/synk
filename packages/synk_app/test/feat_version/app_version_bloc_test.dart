@@ -3,6 +3,7 @@ import 'package:synk/feat_notifications/application/notification_feature_impl.da
 import 'package:synk/feat_notifications/domain/models/app_notification.dart';
 import 'package:synk/feat_version/domain/models/app_version.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
+import 'package:synk/feat_version/domain/models/update_outcome.dart';
 import 'package:synk/feat_version/domain/repositories/app_version_repository.dart';
 import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
 
@@ -17,8 +18,10 @@ class _Repository({
   required final Future<NewerAppVersion> Function() newerAppVersion,
   final Future<void> Function(void Function(double progress) onProgress)?
   update,
+  final UpdateOutcome outcome = .installerOpened,
 }) implements AppVersionRepository {
   var updates = 0;
+  var restarts = 0;
 
   @override
   Future<AppVersion> getCurrentAppVersion() async => _currentAppVersion;
@@ -27,12 +30,16 @@ class _Repository({
   Future<NewerAppVersion> getNewerAppVersion() => newerAppVersion();
 
   @override
-  Future<void> updateToNewestRelease({
+  Future<UpdateOutcome> updateToNewestRelease({
     required void Function(double progress) onProgress,
   }) async {
     updates++;
     await update?.call(onProgress);
+    return outcome;
   }
+
+  @override
+  Future<void> restart() async => restarts++;
 }
 
 void main() {
@@ -151,5 +158,88 @@ void main() {
     await pumpEventQueue();
 
     expect(received, hasLength(1));
+  });
+
+  test('announces a newer version once with an update action', () async {
+    final notifications = NotificationFeatureImpl();
+    final received = <AppNotification>[];
+    notifications.observeNotifications().listen(received.add);
+    final repository = _Repository(
+      newerAppVersion: () async => const .updateAvailable('0.2.0'),
+    );
+    final bloc = AppVersionBloc(_currentAppVersion, repository, notifications);
+    addTearDown(bloc.close);
+
+    await bloc.stream.firstWhere((state) => state.newerAppVersion != null);
+    bloc.add(const .onCheckForUpdates());
+    await bloc.stream.firstWhere((state) => state.newerAppVersion == null);
+    await bloc.stream.firstWhere((state) => state.newerAppVersion != null);
+    await pumpEventQueue();
+
+    expect(received, hasLength(1));
+    expect(received.single.severity, NotificationSeverity.info);
+    expect(received.single.action?.label, 'Aktualisieren');
+
+    received.single.action!.onPressed();
+    await bloc.stream.firstWhere((state) => !state.isUpdating);
+    expect(repository.updates, 1);
+  });
+
+  test('announces nothing when Synk is up to date', () async {
+    final notifications = NotificationFeatureImpl();
+    final received = <AppNotification>[];
+    notifications.observeNotifications().listen(received.add);
+    final bloc = AppVersionBloc(
+      _currentAppVersion,
+      _Repository(newerAppVersion: () async => const .upToDate()),
+      notifications,
+    );
+    addTearDown(bloc.close);
+
+    await bloc.stream.firstWhere((state) => state.newerAppVersion != null);
+    await pumpEventQueue();
+
+    expect(received, isEmpty);
+  });
+
+  test('offers a restart once the update is installed', () async {
+    final notifications = NotificationFeatureImpl();
+    final received = <AppNotification>[];
+    final repository = _Repository(
+      newerAppVersion: () async => const .upToDate(),
+      outcome: .installed,
+    );
+    final bloc = AppVersionBloc(_currentAppVersion, repository, notifications);
+    addTearDown(bloc.close);
+    await bloc.stream.firstWhere((state) => state.newerAppVersion != null);
+    notifications.observeNotifications().listen(received.add);
+
+    bloc.add(const .onUpdate());
+    await bloc.stream.firstWhere((state) => state.isReadyToRestart);
+    await pumpEventQueue();
+
+    expect(received.single.action?.label, 'Neu starten');
+
+    received.single.action!.onPressed();
+    await pumpEventQueue();
+    expect(repository.restarts, 1);
+  });
+
+  test('stays ready to update when the installer was only opened', () async {
+    final repository = _Repository(
+      newerAppVersion: () async => const .upToDate(),
+    );
+    final bloc = AppVersionBloc(
+      _currentAppVersion,
+      repository,
+      NotificationFeatureImpl(),
+    );
+    addTearDown(bloc.close);
+
+    bloc.add(const .onUpdate());
+    await bloc.stream.firstWhere((state) => state.isUpdating);
+    await bloc.stream.firstWhere((state) => !state.isUpdating);
+
+    expect(bloc.state.isReadyToRestart, isFalse);
   });
 }

@@ -105,6 +105,7 @@ class const _Toast({
   Widget _toastWith(BuildContext context, double? progress) {
     final colors = context.synkUi.colors;
     final severity = entry.notification.severity;
+    final action = entry.notification.action;
 
     return SynkUiToast(
       icon: _iconFor(severity),
@@ -114,12 +115,20 @@ class const _Toast({
       progress: progress,
       dismissIcon: CupertinoIcons.clear,
       onDismiss: onDismiss,
+      actionLabel: action?.label,
+      onAction: action == null
+          ? null
+          : () {
+              onDismiss();
+              action.onPressed();
+            },
     );
   }
 }
 
 IconData _iconFor(NotificationSeverity severity) {
   return switch (severity) {
+    .info => CupertinoIcons.info_circle,
     .success => CupertinoIcons.checkmark_circle,
     .warning => CupertinoIcons.exclamationmark_triangle,
     .error => CupertinoIcons.exclamationmark_circle,
@@ -128,6 +137,7 @@ IconData _iconFor(NotificationSeverity severity) {
 
 Color _accentFor(NotificationSeverity severity, SynkUiColors colors) {
   return switch (severity) {
+    .info => colors.accent,
     .success => colors.live,
     .warning => colors.warn,
     .error => colors.error,

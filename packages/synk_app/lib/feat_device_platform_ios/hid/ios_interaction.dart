@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hardware_button.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_key_input.dart';
@@ -22,6 +23,7 @@ class IosInteraction({
   late final Timer _orientationPoll;
 
   var _activeEdge = IosTouchEdge.none;
+  ScreenOrientation? _orientation;
 
   this {
     _screenSizeSubscription = screenSize
@@ -126,13 +128,20 @@ class IosInteraction({
   }
 
   @override
-  Future<void> rotate() async {
-    final isLandscape = screenSize.value.width > screenSize.value.height;
+  Future<void> rotate(DeviceRotationDirection direction) async {
+    final orientation = (_orientation ?? .guessedFrom(screenSize.value))
+        .turned(direction);
 
     await devicectl.setOrientation(
       deviceId: deviceId,
-      orientation: isLandscape ? .portrait : .landscapeLeft,
+      orientation: switch (orientation) {
+        .portrait => .portrait,
+        .landscapeLeft => .landscapeLeft,
+        .portraitUpsideDown => .portraitUpsideDown,
+        .landscapeRight => .landscapeRight,
+      },
     );
+    _orientation = orientation;
   }
 
   void _fireAndForget(Future<void> send) {

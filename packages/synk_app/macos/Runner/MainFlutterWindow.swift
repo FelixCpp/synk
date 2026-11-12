@@ -27,6 +27,28 @@ class MainFlutterWindow: NSWindow {
       with: flutterViewController.registrar(forPlugin: "IosDeviceDiscoveryPlugin")
     )
 
+    acceptFirstMouseInOverlays()
+
     super.awakeFromNib()
+  }
+
+  private func acceptFirstMouseInOverlays() {
+    let selector = #selector(NSView.acceptsFirstMouse(for:))
+    let acceptsFirstMouse: @convention(block) (NSView, NSEvent?) -> Bool = { _, _ in true }
+    let implementation = imp_implementationWithBlock(acceptsFirstMouse)
+
+    for className in [
+      "desktop_drop.DropTarget",
+      "macos_window_utils.ForwardingView",
+      "macos_window_utils.PassthroughView",
+    ] {
+      guard let viewClass = NSClassFromString(className),
+        let method = class_getInstanceMethod(NSView.self, selector)
+      else {
+        continue
+      }
+
+      class_replaceMethod(viewClass, selector, implementation, method_getTypeEncoding(method))
+    }
   }
 }

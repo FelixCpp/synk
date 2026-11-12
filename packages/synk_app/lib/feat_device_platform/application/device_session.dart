@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 
 extension type const NativeTextureId(int value) implements int {}
 
@@ -38,7 +39,7 @@ abstract interface class DeviceInteraction {
   Set<DeviceNavigation> get supportedNavigations;
   Future<void> navigate(DeviceNavigation navigation);
   Future<void> pressPowerButton();
-  Future<void> rotate();
+  Future<void> rotate(DeviceRotationDirection direction);
 }
 
 abstract interface class DeviceClipboard {

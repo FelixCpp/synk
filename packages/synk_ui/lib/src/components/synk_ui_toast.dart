@@ -1,4 +1,5 @@
 import 'package:synk_ui/src/synk_ui_theme.dart';
+import 'package:synk_ui/src/components/synk_ui_button.dart';
 import 'package:synk_ui/src/components/synk_ui_icon_button.dart';
 import 'package:synk_ui/src/components/synk_ui_tag.dart';
 import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
@@ -13,6 +14,8 @@ class const SynkUiToast({
   final double? progress,
   final VoidCallback? onDismiss,
   final IconData? dismissIcon,
+  final String? actionLabel,
+  final VoidCallback? onAction,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,18 @@ class const SynkUiToast({
                       child: Icon(icon, size: SynkUiSize.icon, color: accent),
                     ),
                     Expanded(
-                      child: Text(message, style: theme.typography.body),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: SynkUiSpace.s8,
+                        children: [
+                          Text(message, style: theme.typography.body),
+                          if (actionLabel case final actionLabel?)
+                            SynkUiButton(
+                              label: actionLabel,
+                              onPressed: onAction,
+                            ),
+                        ],
+                      ),
                     ),
                     if (count > 1)
                       Padding(

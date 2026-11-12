@@ -10,7 +10,7 @@ class NotificationPolicy {
   static Duration? lifetimeOf(NotificationSeverity severity) {
     return switch (severity) {
       .success => const Duration(seconds: 4),
-      .warning || .error => null,
+      .info || .warning || .error => null,
     };
   }
 }

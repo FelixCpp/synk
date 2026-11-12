@@ -127,16 +127,26 @@ class const _Actions({
             onPressed: onCaptureScreenshot,
           ),
         ),
-        if (connection.supportsInteraction)
+        if (connection.supportsInteraction) ...[
           SynkUiTooltip(
-            message: 'Gerät drehen',
+            message: 'Nach links drehen',
             child: SynkUiIconButton(
               icon: CupertinoIcons.rotate_left,
               onPressed: () => BlocProvider.of<DeviceFrameBloc>(context).add(
-                const .onRotate(),
+                const .onRotate(.left),
               ),
             ),
           ),
+          SynkUiTooltip(
+            message: 'Nach rechts drehen',
+            child: SynkUiIconButton(
+              icon: CupertinoIcons.rotate_right,
+              onPressed: () => BlocProvider.of<DeviceFrameBloc>(context).add(
+                const .onRotate(.right),
+              ),
+            ),
+          ),
+        ],
         SynkUiTooltip(
           message: isMaximized ? 'Vollbild verlassen' : 'Gerät maximieren',
           child: SynkUiIconButton(

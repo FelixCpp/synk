@@ -4,6 +4,7 @@ import 'package:synk/feat_settings/presentation/bloc/settings_bloc.dart';
 import 'package:synk/feat_settings/presentation/widgets/settings_layout.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
 import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
+import 'package:synk/feat_version/presentation/widgets/app_update_button.dart';
 import 'package:synk_ui/synk_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -106,18 +107,10 @@ class const _VersionSection() extends StatelessWidget {
       },
       updateAvailable: (version) {
         return (
-          subtitle: 'Version $version ist verfügbar.',
-          action: SynkUiButton(
-            label: switch ((state.isUpdating, state.downloadProgress)) {
-              (false, _) => 'Herunterladen',
-              (true, null) => 'Wird geladen …',
-              (true, final progress?) =>
-                'Wird geladen … ${(progress * 100).round()} %',
-            },
-            onPressed: state.isUpdating
-                ? null
-                : () => bloc.add(const .onUpdate()),
-          ),
+          subtitle: state.isReadyToRestart
+              ? 'Version $version ist installiert.'
+              : 'Version $version ist verfügbar.',
+          action: AppUpdateButton(state: state),
         );
       },
       failedToFetch: () {

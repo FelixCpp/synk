@@ -32,8 +32,13 @@ void main() {
     connect();
   });
 
-  test('locks a portrait screen to landscape', () async {
-    await rotation.rotate();
+  List<String> userRotations() => [
+    for (final write in writes())
+      if (write.contains('user_rotation')) write.last,
+  ];
+
+  test('locks a portrait screen to landscape when turned left', () async {
+    await rotation.rotate(.left);
 
     expect(writes(), [
       ['settings', 'put', 'system', 'accelerometer_rotation', '0'],
@@ -41,17 +46,33 @@ void main() {
     ]);
   });
 
-  test('locks a landscape screen back to portrait', () async {
+  test('turns a portrait screen the other way when turned right', () async {
+    await rotation.rotate(.right);
+
+    expect(userRotations(), ['3']);
+  });
+
+  test('locks a landscape screen back to portrait when turned right', () async {
     screenSize.add(_landscape);
 
-    await rotation.rotate();
+    await rotation.rotate(.right);
 
-    expect(writes().last, ['settings', 'put', 'system', 'user_rotation', '0']);
+    expect(userRotations(), ['0']);
+  });
+
+  test('keeps turning from where the last turn left off', () async {
+    await rotation.rotate(.left);
+    await rotation.rotate(.left);
+    await rotation.rotate(.left);
+    await rotation.rotate(.left);
+    await rotation.rotate(.right);
+
+    expect(userRotations(), ['1', '2', '3', '0', '3']);
   });
 
   test('turns auto-rotation back on once the session ends', () async {
-    await rotation.rotate();
-    await rotation.rotate();
+    await rotation.rotate(.left);
+    await rotation.rotate(.left);
     communicator.shells.clear();
 
     await rotation.restoreAutoRotation();
@@ -63,7 +84,7 @@ void main() {
 
   test('leaves auto-rotation off if it was off before', () async {
     connect(autoRotation: '0');
-    await rotation.rotate();
+    await rotation.rotate(.left);
     communicator.shells.clear();
 
     await rotation.restoreAutoRotation();

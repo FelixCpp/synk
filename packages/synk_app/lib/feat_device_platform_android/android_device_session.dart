@@ -52,7 +52,7 @@ class AndroidDeviceSession({
     _interaction = ScrcpyInteraction(
       interactionSocket: server.controlSocket,
       screenSize: _screenSize,
-      rotateDevice: () => _rotation.rotate(),
+      rotateDevice: _rotation.rotate,
       keepDisplayOff: options.turnDeviceScreenOff,
     );
     _videoSubscription = server.videoStream.listen(

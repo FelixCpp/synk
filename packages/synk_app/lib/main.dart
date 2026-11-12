@@ -59,6 +59,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
+import 'package:synk/feat_version/data/app_bundle_installer.dart';
 import 'package:synk/feat_version/data/repositories/app_version_repository_impl.dart';
 import 'package:synk/feat_version/domain/repositories/app_version_repository.dart';
 import 'package:synk/feat_version/presentation/bloc/app_version_bloc.dart';
@@ -110,6 +111,14 @@ Future<void> main() async {
       ),
     ),
     fileOpener: fileOpener,
+    installer: AppBundleInstaller(
+      processManager: processManager,
+      fileSystem: fileSystem,
+      bundlePath: _appBundlePath(platform),
+    ),
+    quit: () async {
+      await ServicesBinding.instance.exitApplication(.required);
+    },
     downloadDirectory: downloadsDirectory,
   );
   final currentAppVersion = await appVersionRepository.getCurrentAppVersion();
@@ -209,6 +218,12 @@ Future<void> _configureWindow() async {
   await WindowManipulator.addToolbar();
   await WindowManipulator.setToolbarStyle(
     toolbarStyle: NSWindowToolbarStyle.unified,
+  );
+}
+
+String _appBundlePath(NativePlatform platform) {
+  return path.normalize(
+    path.join(path.dirname(platform.resolvedExecutable), '..', '..'),
   );
 }
 

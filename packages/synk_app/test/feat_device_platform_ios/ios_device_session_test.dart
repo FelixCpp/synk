@@ -235,26 +235,50 @@ void main() {
   });
 
   group('rotating an iOS session', () {
-    List<String> orientationCommand() => processManager.commands.singleWhere(
-      (command) => command.contains('orientation'),
-    );
+    List<String> orientations() => [
+      for (final command in processManager.commands)
+        if (command.contains('orientation'))
+          command[command.indexOf('--device') + 2],
+    ];
 
-    test('turns a portrait screen to landscape', () async {
+    test('turns a portrait screen to landscape when turned left', () async {
       final session = await buildSession();
 
-      await session.interaction!.rotate();
+      await session.interaction!.rotate(.left);
 
-      expect(orientationCommand(), contains('landscapeLeft'));
+      expect(orientations(), ['landscapeLeft']);
     });
 
-    test('turns a landscape screen back to portrait', () async {
+    test('turns a portrait screen the other way when turned right', () async {
+      final session = await buildSession();
+
+      await session.interaction!.rotate(.right);
+
+      expect(orientations(), ['landscapeRight']);
+    });
+
+    test('turns a landscape screen back to portrait when turned right', () async {
       final session = await buildSession(
         screenSize: const DeviceScreenSize(width: 2556, height: 1179),
       );
 
-      await session.interaction!.rotate();
+      await session.interaction!.rotate(.right);
 
-      expect(orientationCommand(), contains('portrait'));
+      expect(orientations(), ['portrait']);
+    });
+
+    test('keeps turning from where the last turn left off', () async {
+      final session = await buildSession();
+
+      await session.interaction!.rotate(.left);
+      await session.interaction!.rotate(.left);
+      await session.interaction!.rotate(.right);
+
+      expect(orientations(), [
+        'landscapeLeft',
+        'portraitUpsideDown',
+        'landscapeLeft',
+      ]);
     });
   });
 

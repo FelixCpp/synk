@@ -7,6 +7,7 @@ sealed class AppVersionState with _$AppVersionState {
     required NewerAppVersion? newerAppVersion,
     required bool isUpdating,
     required double? downloadProgress,
+    required bool isReadyToRestart,
   }) = _AppVersionState;
 
   factory AppVersionState.initial(AppVersion currentAppVersion) {
@@ -15,6 +16,7 @@ sealed class AppVersionState with _$AppVersionState {
       newerAppVersion: null,
       isUpdating: false,
       downloadProgress: null,
+      isReadyToRestart: false,
     );
   }
 }

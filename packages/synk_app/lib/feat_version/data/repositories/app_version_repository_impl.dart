@@ -2,13 +2,17 @@ import 'package:api_github/api_github.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:synk/feat_screen_capture_preview/application/system_file_opener.dart';
+import 'package:synk/feat_version/data/app_bundle_installer.dart';
 import 'package:synk/feat_version/domain/models/app_version.dart';
 import 'package:synk/feat_version/domain/models/newer_app_version.dart';
+import 'package:synk/feat_version/domain/models/update_outcome.dart';
 import 'package:synk/feat_version/domain/repositories/app_version_repository.dart';
 
 class const AppVersionRepositoryImpl({
   required final GitHubReleasesApi releasesApi,
   required final SystemFileOpener fileOpener,
+  required final AppBundleInstaller installer,
+  required final Future<void> Function() quit,
   required final String downloadDirectory,
 }) implements AppVersionRepository {
   @override
@@ -37,7 +41,7 @@ class const AppVersionRepositoryImpl({
   }
 
   @override
-  Future<void> updateToNewestRelease({
+  Future<UpdateOutcome> updateToNewestRelease({
     required void Function(double progress) onProgress,
   }) async {
     final release = await releasesApi.fetchLatestRelease();
@@ -46,7 +50,8 @@ class const AppVersionRepositoryImpl({
         .firstOrNull;
 
     if (dmg == null) {
-      return fileOpener.open(release.htmlUrl.toString());
+      await fileOpener.open(release.htmlUrl.toString());
+      return .installerOpened;
     }
 
     final savePath = path.join(downloadDirectory, dmg.name);
@@ -67,7 +72,20 @@ class const AppVersionRepositoryImpl({
         }
       },
     );
+
+    if (await installer.canReplaceBundle()) {
+      await installer.install(savePath);
+      return .installed;
+    }
+
     await fileOpener.open(savePath);
+    return .installerOpened;
+  }
+
+  @override
+  Future<void> restart() async {
+    await installer.relaunchAfterExit();
+    await quit();
   }
 }
 

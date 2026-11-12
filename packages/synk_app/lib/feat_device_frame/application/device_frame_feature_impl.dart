@@ -12,6 +12,7 @@ import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart'
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_screen_capture_event/domain/models/screen_capture_kind.dart';
 import 'package:synk/feat_settings/domain/repositories/settings_repository.dart';
 
@@ -149,8 +150,8 @@ class DeviceFrameFeatureImpl({
   }
 
   @override
-  Future<void> rotate() async {
-    await session.interaction?.rotate();
+  Future<void> rotate(DeviceRotationDirection direction) async {
+    await session.interaction?.rotate(direction);
   }
 
   @override

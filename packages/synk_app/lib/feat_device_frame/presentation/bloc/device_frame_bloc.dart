@@ -5,6 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_interactors.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/application/notified_interactor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -299,6 +300,7 @@ class DeviceFrameBloc({
     Emitter<DeviceFrameState> emit,
   ) {
     return device.rotate.logger().runReporting(
+      event.direction,
       to: notifications,
       whenItFails: 'Das Gerät ließ sich nicht drehen.',
     );

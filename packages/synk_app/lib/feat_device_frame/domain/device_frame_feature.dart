@@ -1,5 +1,6 @@
 import 'package:synk/feat_device_frame/domain/models/file_transfer_outcome.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 
 /// Everything Synk can do with one mirrored device.
 abstract interface class DeviceFrameFeature {
@@ -17,7 +18,7 @@ abstract interface class DeviceFrameFeature {
   Future<void> simulatePinchEvent(PinchEvent event);
   Future<void> navigate(DeviceNavigation navigation);
   Future<void> pressPowerButton();
-  Future<void> rotate();
+  Future<void> rotate(DeviceRotationDirection direction);
 
   Future<void> captureScreenshot();
   Future<void> startRecording();

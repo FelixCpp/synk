@@ -3,22 +3,31 @@ import 'dart:convert';
 import 'package:api_adb/api_adb.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 
 class AdbRotation(
   final AdbDeviceCommunicator communicator, {
   required final ValueStream<DeviceScreenSize> screenSize,
 }) {
   String? _autoRotationBeforeLock;
+  ScreenOrientation? _orientation;
 
-  Future<void> rotate() async {
+  Future<void> rotate(DeviceRotationDirection direction) async {
     _autoRotationBeforeLock ??= await _readSystemSetting(
       'accelerometer_rotation',
     );
 
-    final isLandscape = screenSize.value.width > screenSize.value.height;
+    final orientation = (_orientation ?? .guessedFrom(screenSize.value))
+        .turned(direction);
 
     await _writeSystemSetting('accelerometer_rotation', '0');
-    await _writeSystemSetting('user_rotation', isLandscape ? '0' : '1');
+    await _writeSystemSetting('user_rotation', switch (orientation) {
+      .portrait => '0',
+      .landscapeLeft => '1',
+      .portraitUpsideDown => '2',
+      .landscapeRight => '3',
+    });
+    _orientation = orientation;
   }
 
   Future<void> restoreAutoRotation() async {

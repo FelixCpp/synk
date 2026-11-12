@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/clipboard_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/display_power_interaction_layer.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/interaction/key_event_interaction_layer.dart';
@@ -19,7 +20,8 @@ import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_pointer_input.da
 class ScrcpyInteraction({
   required final Socket interactionSocket,
   required final ValueStream<DeviceScreenSize> screenSize,
-  required final Future<void> Function() rotateDevice,
+  required final Future<void> Function(DeviceRotationDirection direction)
+  rotateDevice,
 
   /// Keeps the device's own display dark for the whole session.
   final bool keepDisplayOff = false,
@@ -116,8 +118,8 @@ class ScrcpyInteraction({
   }
 
   @override
-  Future<void> rotate() {
-    return rotateDevice();
+  Future<void> rotate(DeviceRotationDirection direction) {
+    return rotateDevice(direction);
   }
 
   void _pressKey(ScrcpyKeyCode key) {
