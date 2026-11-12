@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:api_adb/adb/adb_api.dart';
 import 'package:api_devicectl/api_devicectl.dart';
@@ -352,6 +353,8 @@ class const _ToolProviders({
         RepositoryProvider.of<AdbApi>(context),
         bundledFiles: RepositoryProvider.of<BundledFiles>(context),
         clock: RepositoryProvider.of<Clock>(context),
+        fileSystem: RepositoryProvider.of<FileSystem>(context),
+        environment: io.Platform.environment,
       ),
       IosDevicePlatform(
         discoveryChannel: IosDeviceDiscoveryChannel(),

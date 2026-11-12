@@ -5,10 +5,10 @@ import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 
 extension AdbDeviceDtoToModel on AdbDeviceDto {
-  AndroidDevice toDomain() {
+  AndroidDevice toDomain({required String name}) {
     return AndroidDevice(
       id: DeviceId(serialNumber),
-      modelName: model ?? "Unbekanntes Gerät",
+      modelName: name,
       state: state.toDomain(),
       connection: connectionType.toDomain(serialNumber),
     );

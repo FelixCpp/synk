@@ -11,7 +11,9 @@ import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_device_platform_android/discovery/android_device.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/fake_adb_device_communicator.dart';
 import '../support/fake_asset_bundle.dart';
+import '../support/fake_process_manager.dart';
 
 void main() {
   group('AndroidDevicePlatform.observeDevices', () {
@@ -29,6 +31,8 @@ void main() {
             directory: '/cache',
           ),
           clock: const Clock(),
+          fileSystem: MemoryFileSystem(),
+          environment: const {},
         );
 
         final seenByFirst = <List<PluggedDevice>>[];
@@ -50,6 +54,7 @@ void main() {
 
         expect(seenByLate.single, isA<AndroidDevice>());
         expect(seenByLate.single.id, _pluggedDevice.serialNumber);
+        expect(seenByLate.single.modelName, 'Google Pixel 6');
       },
     );
   });
@@ -69,6 +74,16 @@ class _FakeAdbApi implements AdbApi {
 
   @override
   Stream<List<AdbDeviceDto>> observeDevices() => _frames;
+
+  @override
+  AdbDeviceCommunicator connect(String serialNumber) {
+    return FakeAdbDeviceCommunicator(
+      process: FakeProcess(),
+      shellOutput: (_) =>
+          '[ro.product.manufacturer]: [Google]\n'
+          '[ro.product.model]: [Pixel 6]\n',
+    );
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

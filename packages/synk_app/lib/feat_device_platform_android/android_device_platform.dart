@@ -4,9 +4,11 @@ import 'dart:developer' as developer;
 
 import 'package:api_adb/api_adb.dart';
 import 'package:clock/clock.dart';
+import 'package:file/file.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:synk/feat_device_platform_android/discovery/adb_device_dto_conversions.dart';
+import 'package:synk/feat_device_platform_android/discovery/android_device_names.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_agent_client.dart';
 import 'package:synk/feat_device_platform_android/device_agent/device_agent_launcher.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_server_launcher.dart';
@@ -24,20 +26,39 @@ class AndroidDevicePlatform(
   final AdbApi api, {
   required BundledFiles bundledFiles,
   required Clock clock,
+  required FileSystem fileSystem,
+  required Map<String, String> environment,
 }) implements DevicePlatform {
   final Stream<List<PluggedDevice>> _devices;
   final DeviceAgentLauncher _deviceAgentLauncher;
   final ScrcpyServerLauncher _scrcpyServerLauncher;
 
   this
-    : _devices = api.observeDevices().map<List<PluggedDevice>>((dtos) {
-        return dtos.map((dto) => dto.toDomain()).toList();
-      }).shareValue(),
+    : _devices = _observeNamedDevices(
+        api,
+        AndroidDeviceNames(
+          api,
+          fileSystem: fileSystem,
+          environment: environment,
+        ),
+      ).shareValue(),
       _deviceAgentLauncher = DeviceAgentLauncher(bundledFiles: bundledFiles),
       _scrcpyServerLauncher = ScrcpyServerLauncher(
         bundledFiles: bundledFiles,
         clock: clock,
       );
+
+  static Stream<List<PluggedDevice>> _observeNamedDevices(
+    AdbApi api,
+    AndroidDeviceNames names,
+  ) {
+    return api.observeDevices().asyncMap((dtos) async {
+      final resolved = await names.namesOf(dtos);
+      return [
+        for (final dto in dtos) dto.toDomain(name: resolved[dto.serialNumber]!),
+      ];
+    });
+  }
 
   @override
   Set<ExternalTool> getRequiredTools() {
