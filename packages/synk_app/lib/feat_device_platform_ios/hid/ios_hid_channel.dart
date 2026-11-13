@@ -1,3 +1,4 @@
+import 'package:synk/feat_device_platform/domain/models/screen_orientation.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hardware_button.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_touch_gesture.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
@@ -73,18 +74,18 @@ class IosHidChannel {
     });
   }
 
-  Future<void> sendSwipe({
+  Future<void> setOrientation({
     required DeviceId deviceId,
-    required IosSwipe swipe,
+    required ScreenOrientation orientation,
   }) {
-    return _channel.invokeMethod('sendSwipe', {
+    return _channel.invokeMethod('setOrientation', {
       'deviceId': deviceId.value,
-      'fromX': swipe.from.x,
-      'fromY': swipe.from.y,
-      'toX': swipe.to.x,
-      'toY': swipe.to.y,
-      'edge': swipe.edge.name,
-      'holdMs': swipe.hold.inMilliseconds,
+      'orientation': switch (orientation) {
+        .portrait => 'portrait',
+        .landscapeLeft => 'landscapeLeft',
+        .portraitUpsideDown => 'portraitUpsideDown',
+        .landscapeRight => 'landscapeRight',
+      },
     });
   }
 }

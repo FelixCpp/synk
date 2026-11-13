@@ -15,12 +15,20 @@ message GetInfoResponse {
 message CaptureScreenshotRequest {}
 message CaptureScreenshotResponse { bytes png = 1; }
 
+message LockRotationRequest { int32 rotation = 1; }
+message LockRotationResponse {}
+
+message RestoreRotationRequest {}
+message RestoreRotationResponse {}
+
 message AgentError { string message = 1; }
 
 message AgentRequest {
   oneof payload {
     GetInfoRequest get_info = 1;
     CaptureScreenshotRequest capture_screenshot = 2;
+    LockRotationRequest lock_rotation = 3;
+    RestoreRotationRequest restore_rotation = 4;
   }
 }
 
@@ -29,5 +37,7 @@ message AgentResponse {
     GetInfoResponse get_info = 1;
     CaptureScreenshotResponse capture_screenshot = 2;
     AgentError error = 3;
+    LockRotationResponse lock_rotation = 4;
+    RestoreRotationResponse restore_rotation = 5;
   }
 }

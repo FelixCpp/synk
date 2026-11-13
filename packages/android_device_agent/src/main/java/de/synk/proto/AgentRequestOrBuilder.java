@@ -32,5 +32,27 @@ public interface AgentRequestOrBuilder extends
    */
   de.synk.proto.CaptureScreenshotRequest getCaptureScreenshot();
 
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   * @return Whether the lockRotation field is set.
+   */
+  boolean hasLockRotation();
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   * @return The lockRotation.
+   */
+  de.synk.proto.LockRotationRequest getLockRotation();
+
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   * @return Whether the restoreRotation field is set.
+   */
+  boolean hasRestoreRotation();
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   * @return The restoreRotation.
+   */
+  de.synk.proto.RestoreRotationRequest getRestoreRotation();
+
   public de.synk.proto.AgentRequest.PayloadCase getPayloadCase();
 }

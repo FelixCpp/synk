@@ -26,30 +26,4 @@ void main() {
       expect(iosTouchEdgeAtPointerDown(1.0, 1.0), IosTouchEdge.bottom);
     });
   });
-
-  group('the gesture behind a navigation', () {
-    test('leaves the bottom edge for home', () {
-      final swipe = iosSwipeForNavigation(.home);
-
-      expect(swipe.edge, IosTouchEdge.bottom);
-      expect(swipe.from.y, 1.0);
-      expect(swipe.to.y, lessThan(swipe.from.y));
-      expect(swipe.hold, Duration.zero);
-    });
-
-    test('holds at the top for the app switcher', () {
-      final swipe = iosSwipeForNavigation(.appSwitch);
-
-      expect(swipe.edge, IosTouchEdge.bottom);
-      expect(swipe.hold, greaterThan(Duration.zero));
-    });
-
-    test('comes in from the left edge for back', () {
-      final swipe = iosSwipeForNavigation(.back);
-
-      expect(swipe.edge, IosTouchEdge.left);
-      expect(swipe.from.x, 0.0);
-      expect(swipe.to.x, greaterThan(swipe.from.x));
-    });
-  });
 }

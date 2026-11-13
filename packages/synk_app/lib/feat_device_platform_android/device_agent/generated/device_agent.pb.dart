@@ -256,6 +256,192 @@ class CaptureScreenshotResponse extends $pb.GeneratedMessage {
   void clearPng() => $_clearField(1);
 }
 
+class LockRotationRequest extends $pb.GeneratedMessage {
+  factory LockRotationRequest({
+    $core.int? rotation,
+  }) {
+    final result = LockRotationRequest._();
+    if (rotation != null) result.rotation = rotation;
+    return result;
+  }
+
+  LockRotationRequest._();
+
+  factory LockRotationRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      LockRotationRequest()..mergeFromBuffer(data, registry);
+  factory LockRotationRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      LockRotationRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LockRotationRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
+      createEmptyInstance: LockRotationRequest.$_createMessage)
+    ..aI(1, _omitFieldNames ? '' : 'rotation')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LockRotationRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LockRotationRequest copyWith(void Function(LockRotationRequest) updates) =>
+      super.copyWith((message) => updates(message as LockRotationRequest))
+          as LockRotationRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use LockRotationRequest() / LockRotationRequest.new instead')
+  static LockRotationRequest create() => LockRotationRequest._();
+  static $pb.GeneratedMessage $_createMessage() => LockRotationRequest._();
+  @$core.override
+  LockRotationRequest createEmptyInstance() => LockRotationRequest._();
+  @$core.pragma('dart2js:noInline')
+  static LockRotationRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LockRotationRequest>(
+          LockRotationRequest.$_createMessage);
+  static LockRotationRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get rotation => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set rotation($core.int value) => $_setSignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasRotation() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearRotation() => $_clearField(1);
+}
+
+class LockRotationResponse extends $pb.GeneratedMessage {
+  factory LockRotationResponse() => LockRotationResponse._();
+
+  LockRotationResponse._();
+
+  factory LockRotationResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      LockRotationResponse()..mergeFromBuffer(data, registry);
+  factory LockRotationResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      LockRotationResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'LockRotationResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
+      createEmptyInstance: LockRotationResponse.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LockRotationResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  LockRotationResponse copyWith(void Function(LockRotationResponse) updates) =>
+      super.copyWith((message) => updates(message as LockRotationResponse))
+          as LockRotationResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use LockRotationResponse() / LockRotationResponse.new instead')
+  static LockRotationResponse create() => LockRotationResponse._();
+  static $pb.GeneratedMessage $_createMessage() => LockRotationResponse._();
+  @$core.override
+  LockRotationResponse createEmptyInstance() => LockRotationResponse._();
+  @$core.pragma('dart2js:noInline')
+  static LockRotationResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<LockRotationResponse>(
+          LockRotationResponse.$_createMessage);
+  static LockRotationResponse? _defaultInstance;
+}
+
+class RestoreRotationRequest extends $pb.GeneratedMessage {
+  factory RestoreRotationRequest() => RestoreRotationRequest._();
+
+  RestoreRotationRequest._();
+
+  factory RestoreRotationRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RestoreRotationRequest()..mergeFromBuffer(data, registry);
+  factory RestoreRotationRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RestoreRotationRequest()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreRotationRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
+      createEmptyInstance: RestoreRotationRequest.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreRotationRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreRotationRequest copyWith(
+          void Function(RestoreRotationRequest) updates) =>
+      super.copyWith((message) => updates(message as RestoreRotationRequest))
+          as RestoreRotationRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use RestoreRotationRequest() / RestoreRotationRequest.new instead')
+  static RestoreRotationRequest create() => RestoreRotationRequest._();
+  static $pb.GeneratedMessage $_createMessage() => RestoreRotationRequest._();
+  @$core.override
+  RestoreRotationRequest createEmptyInstance() => RestoreRotationRequest._();
+  @$core.pragma('dart2js:noInline')
+  static RestoreRotationRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreRotationRequest>(
+          RestoreRotationRequest.$_createMessage);
+  static RestoreRotationRequest? _defaultInstance;
+}
+
+class RestoreRotationResponse extends $pb.GeneratedMessage {
+  factory RestoreRotationResponse() => RestoreRotationResponse._();
+
+  RestoreRotationResponse._();
+
+  factory RestoreRotationResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RestoreRotationResponse()..mergeFromBuffer(data, registry);
+  factory RestoreRotationResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      RestoreRotationResponse()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'RestoreRotationResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
+      createEmptyInstance: RestoreRotationResponse.$_createMessage)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreRotationResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  RestoreRotationResponse copyWith(
+          void Function(RestoreRotationResponse) updates) =>
+      super.copyWith((message) => updates(message as RestoreRotationResponse))
+          as RestoreRotationResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use RestoreRotationResponse() / RestoreRotationResponse.new instead')
+  static RestoreRotationResponse create() => RestoreRotationResponse._();
+  static $pb.GeneratedMessage $_createMessage() => RestoreRotationResponse._();
+  @$core.override
+  RestoreRotationResponse createEmptyInstance() => RestoreRotationResponse._();
+  @$core.pragma('dart2js:noInline')
+  static RestoreRotationResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<RestoreRotationResponse>(
+          RestoreRotationResponse.$_createMessage);
+  static RestoreRotationResponse? _defaultInstance;
+}
+
 class AgentError extends $pb.GeneratedMessage {
   factory AgentError({
     $core.String? message,
@@ -311,16 +497,26 @@ class AgentError extends $pb.GeneratedMessage {
   void clearMessage() => $_clearField(1);
 }
 
-enum AgentRequest_Payload { getInfo, captureScreenshot, notSet }
+enum AgentRequest_Payload {
+  getInfo,
+  captureScreenshot,
+  lockRotation,
+  restoreRotation,
+  notSet
+}
 
 class AgentRequest extends $pb.GeneratedMessage {
   factory AgentRequest({
     GetInfoRequest? getInfo,
     CaptureScreenshotRequest? captureScreenshot,
+    LockRotationRequest? lockRotation,
+    RestoreRotationRequest? restoreRotation,
   }) {
     final result = AgentRequest._();
     if (getInfo != null) result.getInfo = getInfo;
     if (captureScreenshot != null) result.captureScreenshot = captureScreenshot;
+    if (lockRotation != null) result.lockRotation = lockRotation;
+    if (restoreRotation != null) result.restoreRotation = restoreRotation;
     return result;
   }
 
@@ -337,18 +533,24 @@ class AgentRequest extends $pb.GeneratedMessage {
       _AgentRequest_PayloadByTag = {
     1: AgentRequest_Payload.getInfo,
     2: AgentRequest_Payload.captureScreenshot,
+    3: AgentRequest_Payload.lockRotation,
+    4: AgentRequest_Payload.restoreRotation,
     0: AgentRequest_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'AgentRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
       createEmptyInstance: AgentRequest.$_createMessage)
-    ..oo(0, [1, 2])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<GetInfoRequest>(1, _omitFieldNames ? '' : 'getInfo',
         subBuilder: GetInfoRequest.$_createMessage)
     ..aOM<CaptureScreenshotRequest>(
         2, _omitFieldNames ? '' : 'captureScreenshot',
         subBuilder: CaptureScreenshotRequest.$_createMessage)
+    ..aOM<LockRotationRequest>(3, _omitFieldNames ? '' : 'lockRotation',
+        subBuilder: LockRotationRequest.$_createMessage)
+    ..aOM<RestoreRotationRequest>(4, _omitFieldNames ? '' : 'restoreRotation',
+        subBuilder: RestoreRotationRequest.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -375,10 +577,14 @@ class AgentRequest extends $pb.GeneratedMessage {
 
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   AgentRequest_Payload whichPayload() =>
       _AgentRequest_PayloadByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   void clearPayload() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -402,20 +608,53 @@ class AgentRequest extends $pb.GeneratedMessage {
   void clearCaptureScreenshot() => $_clearField(2);
   @$pb.TagNumber(2)
   CaptureScreenshotRequest ensureCaptureScreenshot() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  LockRotationRequest get lockRotation => $_getN(2);
+  @$pb.TagNumber(3)
+  set lockRotation(LockRotationRequest value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasLockRotation() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearLockRotation() => $_clearField(3);
+  @$pb.TagNumber(3)
+  LockRotationRequest ensureLockRotation() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  RestoreRotationRequest get restoreRotation => $_getN(3);
+  @$pb.TagNumber(4)
+  set restoreRotation(RestoreRotationRequest value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasRestoreRotation() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearRestoreRotation() => $_clearField(4);
+  @$pb.TagNumber(4)
+  RestoreRotationRequest ensureRestoreRotation() => $_ensure(3);
 }
 
-enum AgentResponse_Payload { getInfo, captureScreenshot, error, notSet }
+enum AgentResponse_Payload {
+  getInfo,
+  captureScreenshot,
+  error,
+  lockRotation,
+  restoreRotation,
+  notSet
+}
 
 class AgentResponse extends $pb.GeneratedMessage {
   factory AgentResponse({
     GetInfoResponse? getInfo,
     CaptureScreenshotResponse? captureScreenshot,
     AgentError? error,
+    LockRotationResponse? lockRotation,
+    RestoreRotationResponse? restoreRotation,
   }) {
     final result = AgentResponse._();
     if (getInfo != null) result.getInfo = getInfo;
     if (captureScreenshot != null) result.captureScreenshot = captureScreenshot;
     if (error != null) result.error = error;
+    if (lockRotation != null) result.lockRotation = lockRotation;
+    if (restoreRotation != null) result.restoreRotation = restoreRotation;
     return result;
   }
 
@@ -433,13 +672,15 @@ class AgentResponse extends $pb.GeneratedMessage {
     1: AgentResponse_Payload.getInfo,
     2: AgentResponse_Payload.captureScreenshot,
     3: AgentResponse_Payload.error,
+    4: AgentResponse_Payload.lockRotation,
+    5: AgentResponse_Payload.restoreRotation,
     0: AgentResponse_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'AgentResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'device_agent'),
       createEmptyInstance: AgentResponse.$_createMessage)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4, 5])
     ..aOM<GetInfoResponse>(1, _omitFieldNames ? '' : 'getInfo',
         subBuilder: GetInfoResponse.$_createMessage)
     ..aOM<CaptureScreenshotResponse>(
@@ -447,6 +688,10 @@ class AgentResponse extends $pb.GeneratedMessage {
         subBuilder: CaptureScreenshotResponse.$_createMessage)
     ..aOM<AgentError>(3, _omitFieldNames ? '' : 'error',
         subBuilder: AgentError.$_createMessage)
+    ..aOM<LockRotationResponse>(4, _omitFieldNames ? '' : 'lockRotation',
+        subBuilder: LockRotationResponse.$_createMessage)
+    ..aOM<RestoreRotationResponse>(5, _omitFieldNames ? '' : 'restoreRotation',
+        subBuilder: RestoreRotationResponse.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -474,11 +719,15 @@ class AgentResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   AgentResponse_Payload whichPayload() =>
       _AgentResponse_PayloadByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   void clearPayload() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -514,6 +763,28 @@ class AgentResponse extends $pb.GeneratedMessage {
   void clearError() => $_clearField(3);
   @$pb.TagNumber(3)
   AgentError ensureError() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  LockRotationResponse get lockRotation => $_getN(3);
+  @$pb.TagNumber(4)
+  set lockRotation(LockRotationResponse value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasLockRotation() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearLockRotation() => $_clearField(4);
+  @$pb.TagNumber(4)
+  LockRotationResponse ensureLockRotation() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  RestoreRotationResponse get restoreRotation => $_getN(4);
+  @$pb.TagNumber(5)
+  set restoreRotation(RestoreRotationResponse value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasRestoreRotation() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearRestoreRotation() => $_clearField(5);
+  @$pb.TagNumber(5)
+  RestoreRotationResponse ensureRestoreRotation() => $_ensure(4);
 }
 
 const $core.bool _omitFieldNames =

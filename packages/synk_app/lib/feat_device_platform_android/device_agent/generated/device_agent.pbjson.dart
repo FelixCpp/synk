@@ -63,6 +63,46 @@ final $typed_data.Uint8List captureScreenshotResponseDescriptor =
     $convert.base64Decode(
         'ChlDYXB0dXJlU2NyZWVuc2hvdFJlc3BvbnNlEhAKA3BuZxgBIAEoDFIDcG5n');
 
+@$core.Deprecated('Use lockRotationRequestDescriptor instead')
+const LockRotationRequest$json = {
+  '1': 'LockRotationRequest',
+  '2': [
+    {'1': 'rotation', '3': 1, '4': 1, '5': 5, '10': 'rotation'},
+  ],
+};
+
+/// Descriptor for `LockRotationRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List lockRotationRequestDescriptor =
+    $convert.base64Decode(
+        'ChNMb2NrUm90YXRpb25SZXF1ZXN0EhoKCHJvdGF0aW9uGAEgASgFUghyb3RhdGlvbg==');
+
+@$core.Deprecated('Use lockRotationResponseDescriptor instead')
+const LockRotationResponse$json = {
+  '1': 'LockRotationResponse',
+};
+
+/// Descriptor for `LockRotationResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List lockRotationResponseDescriptor =
+    $convert.base64Decode('ChRMb2NrUm90YXRpb25SZXNwb25zZQ==');
+
+@$core.Deprecated('Use restoreRotationRequestDescriptor instead')
+const RestoreRotationRequest$json = {
+  '1': 'RestoreRotationRequest',
+};
+
+/// Descriptor for `RestoreRotationRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreRotationRequestDescriptor =
+    $convert.base64Decode('ChZSZXN0b3JlUm90YXRpb25SZXF1ZXN0');
+
+@$core.Deprecated('Use restoreRotationResponseDescriptor instead')
+const RestoreRotationResponse$json = {
+  '1': 'RestoreRotationResponse',
+};
+
+/// Descriptor for `RestoreRotationResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List restoreRotationResponseDescriptor =
+    $convert.base64Decode('ChdSZXN0b3JlUm90YXRpb25SZXNwb25zZQ==');
+
 @$core.Deprecated('Use agentErrorDescriptor instead')
 const AgentError$json = {
   '1': 'AgentError',
@@ -97,6 +137,24 @@ const AgentRequest$json = {
       '9': 0,
       '10': 'captureScreenshot'
     },
+    {
+      '1': 'lock_rotation',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.device_agent.LockRotationRequest',
+      '9': 0,
+      '10': 'lockRotation'
+    },
+    {
+      '1': 'restore_rotation',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.device_agent.RestoreRotationRequest',
+      '9': 0,
+      '10': 'restoreRotation'
+    },
   ],
   '8': [
     {'1': 'payload'},
@@ -107,8 +165,10 @@ const AgentRequest$json = {
 final $typed_data.Uint8List agentRequestDescriptor = $convert.base64Decode(
     'CgxBZ2VudFJlcXVlc3QSOQoIZ2V0X2luZm8YASABKAsyHC5kZXZpY2VfYWdlbnQuR2V0SW5mb1'
     'JlcXVlc3RIAFIHZ2V0SW5mbxJXChJjYXB0dXJlX3NjcmVlbnNob3QYAiABKAsyJi5kZXZpY2Vf'
-    'YWdlbnQuQ2FwdHVyZVNjcmVlbnNob3RSZXF1ZXN0SABSEWNhcHR1cmVTY3JlZW5zaG90QgkKB3'
-    'BheWxvYWQ=');
+    'YWdlbnQuQ2FwdHVyZVNjcmVlbnNob3RSZXF1ZXN0SABSEWNhcHR1cmVTY3JlZW5zaG90EkgKDW'
+    'xvY2tfcm90YXRpb24YAyABKAsyIS5kZXZpY2VfYWdlbnQuTG9ja1JvdGF0aW9uUmVxdWVzdEgA'
+    'Ugxsb2NrUm90YXRpb24SUQoQcmVzdG9yZV9yb3RhdGlvbhgEIAEoCzIkLmRldmljZV9hZ2VudC'
+    '5SZXN0b3JlUm90YXRpb25SZXF1ZXN0SABSD3Jlc3RvcmVSb3RhdGlvbkIJCgdwYXlsb2Fk');
 
 @$core.Deprecated('Use agentResponseDescriptor instead')
 const AgentResponse$json = {
@@ -141,6 +201,24 @@ const AgentResponse$json = {
       '9': 0,
       '10': 'error'
     },
+    {
+      '1': 'lock_rotation',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.device_agent.LockRotationResponse',
+      '9': 0,
+      '10': 'lockRotation'
+    },
+    {
+      '1': 'restore_rotation',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.device_agent.RestoreRotationResponse',
+      '9': 0,
+      '10': 'restoreRotation'
+    },
   ],
   '8': [
     {'1': 'payload'},
@@ -152,5 +230,7 @@ final $typed_data.Uint8List agentResponseDescriptor = $convert.base64Decode(
     'Cg1BZ2VudFJlc3BvbnNlEjoKCGdldF9pbmZvGAEgASgLMh0uZGV2aWNlX2FnZW50LkdldEluZm'
     '9SZXNwb25zZUgAUgdnZXRJbmZvElgKEmNhcHR1cmVfc2NyZWVuc2hvdBgCIAEoCzInLmRldmlj'
     'ZV9hZ2VudC5DYXB0dXJlU2NyZWVuc2hvdFJlc3BvbnNlSABSEWNhcHR1cmVTY3JlZW5zaG90Ej'
-    'AKBWVycm9yGAMgASgLMhguZGV2aWNlX2FnZW50LkFnZW50RXJyb3JIAFIFZXJyb3JCCQoHcGF5'
-    'bG9hZA==');
+    'AKBWVycm9yGAMgASgLMhguZGV2aWNlX2FnZW50LkFnZW50RXJyb3JIAFIFZXJyb3ISSQoNbG9j'
+    'a19yb3RhdGlvbhgEIAEoCzIiLmRldmljZV9hZ2VudC5Mb2NrUm90YXRpb25SZXNwb25zZUgAUg'
+    'xsb2NrUm90YXRpb24SUgoQcmVzdG9yZV9yb3RhdGlvbhgFIAEoCzIlLmRldmljZV9hZ2VudC5S'
+    'ZXN0b3JlUm90YXRpb25SZXNwb25zZUgAUg9yZXN0b3JlUm90YXRpb25CCQoHcGF5bG9hZA==');

@@ -77,6 +77,39 @@ class AndroidDeviceAgentCommunicator({
     return response.captureScreenshot;
   }
 
+  Future<void> lockRotation(int rotation) async {
+    final response = await _sendToSocket(
+      AgentRequest(lockRotation: LockRotationRequest(rotation: rotation)),
+    );
+
+    if (response.whichPayload() == .error) {
+      assert(response.hasError(), 'Received Error object without being set.');
+      throw AdbAgentClientException(message: response.error.message);
+    }
+
+    assert(
+      (response.whichPayload() == .lockRotation) && response.hasLockRotation(),
+      'Received unexpected response from agent.',
+    );
+  }
+
+  Future<void> restoreRotation() async {
+    final response = await _sendToSocket(
+      AgentRequest(restoreRotation: RestoreRotationRequest()),
+    );
+
+    if (response.whichPayload() == .error) {
+      assert(response.hasError(), 'Received Error object without being set.');
+      throw AdbAgentClientException(message: response.error.message);
+    }
+
+    assert(
+      (response.whichPayload() == .restoreRotation) &&
+          response.hasRestoreRotation(),
+      'Received unexpected response from agent.',
+    );
+  }
+
   Future<AgentResponse> _sendToSocket(AgentRequest request) async {
     final requestPayload = request.writeToBuffer();
     final header = ByteData(4)..setUint32(0, requestPayload.length, Endian.big);

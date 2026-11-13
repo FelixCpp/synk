@@ -48,7 +48,6 @@ class IosDeviceSession({
     _interaction = interactionUnavailableReason == null
         ? IosInteraction(
             hidChannel: hidChannel,
-            devicectl: devicectl,
             deviceId: deviceId,
             screenSize: _screenSize,
           )

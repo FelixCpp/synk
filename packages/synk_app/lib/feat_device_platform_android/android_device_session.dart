@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:api_adb/api_adb.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:synk/feat_device_platform_android/device_agent/agent_rotation.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_agent_client.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_server_launcher.dart';
 import 'package:synk/feat_device_platform_android/device_agent/android_device_info.dart';
@@ -11,7 +12,6 @@ import 'package:synk/feat_device_platform/application/teardown.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform_android/adb/adb_file_transfer.dart';
-import 'package:synk/feat_device_platform_android/adb/adb_rotation.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_audio.dart';
 import 'package:synk/feat_device_platform_android/scrcpy/scrcpy_interaction.dart';
 import 'package:synk/feat_device_platform_android/android_screen_capture.dart';
@@ -43,7 +43,7 @@ class AndroidDeviceSession({
   );
 
   final _screenSize = BehaviorSubject.seeded(initialScreenSize);
-  late final _rotation = AdbRotation(adbCommunicator, screenSize: _screenSize);
+  late final _rotation = AgentRotation(communicator, screenSize: _screenSize);
   late final ScrcpyInteraction _interaction;
   late final StreamSubscription<Uint8List> _videoSubscription;
   late final StreamSubscription<DeviceScreenSize> _screenSizeSubscription;

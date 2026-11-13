@@ -43,5 +43,27 @@ public interface AgentResponseOrBuilder extends
    */
   de.synk.proto.AgentError getError();
 
+  /**
+   * <code>.device_agent.LockRotationResponse lock_rotation = 4;</code>
+   * @return Whether the lockRotation field is set.
+   */
+  boolean hasLockRotation();
+  /**
+   * <code>.device_agent.LockRotationResponse lock_rotation = 4;</code>
+   * @return The lockRotation.
+   */
+  de.synk.proto.LockRotationResponse getLockRotation();
+
+  /**
+   * <code>.device_agent.RestoreRotationResponse restore_rotation = 5;</code>
+   * @return Whether the restoreRotation field is set.
+   */
+  boolean hasRestoreRotation();
+  /**
+   * <code>.device_agent.RestoreRotationResponse restore_rotation = 5;</code>
+   * @return The restoreRotation.
+   */
+  de.synk.proto.RestoreRotationResponse getRestoreRotation();
+
   public de.synk.proto.AgentResponse.PayloadCase getPayloadCase();
 }

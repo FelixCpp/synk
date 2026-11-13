@@ -191,17 +191,18 @@ void main() {
       });
     });
 
-    test('swipes up from the bottom edge for home', () async {
+    test('presses the consumer home usage for home', () async {
       final session = await buildSession();
       callsOn('dev.synk/ios_hid').clear();
 
       await session.interaction!.navigate(.home);
 
-      final swipe = callsOn(
+      final press = callsOn(
         'dev.synk/ios_hid',
-      ).singleWhere((call) => call.method == 'sendSwipe');
+      ).singleWhere((call) => call.method == 'pressButton');
 
-      expect(swipe.arguments['edge'], 'bottom');
+      expect(press.arguments['usagePage'], 0x0c);
+      expect(press.arguments['usageCode'], 0x40);
     });
 
     test('ignores a navigation it does not offer', () async {
@@ -212,7 +213,8 @@ void main() {
       await session.interaction!.navigate(.appSwitch);
 
       expect(
-        callsOn('dev.synk/ios_hid').where((call) => call.method == 'sendSwipe'),
+        callsOn('dev.synk/ios_hid')
+            .where((call) => call.method == 'pressButton'),
         isEmpty,
       );
     });
@@ -236,9 +238,8 @@ void main() {
 
   group('rotating an iOS session', () {
     List<String> orientations() => [
-      for (final command in processManager.commands)
-        if (command.contains('orientation'))
-          command[command.indexOf('--device') + 2],
+      for (final call in callsOn('dev.synk/ios_hid'))
+        if (call.method == 'setOrientation') call.arguments['orientation'],
     ];
 
     test('turns a portrait screen to landscape when turned left', () async {
@@ -257,15 +258,18 @@ void main() {
       expect(orientations(), ['landscapeRight']);
     });
 
-    test('turns a landscape screen back to portrait when turned right', () async {
-      final session = await buildSession(
-        screenSize: const DeviceScreenSize(width: 2556, height: 1179),
-      );
+    test(
+      'turns a landscape screen back to portrait when turned right',
+      () async {
+        final session = await buildSession(
+          screenSize: const DeviceScreenSize(width: 2556, height: 1179),
+        );
 
-      await session.interaction!.rotate(.right);
+        await session.interaction!.rotate(.right);
 
-      expect(orientations(), ['portrait']);
-    });
+        expect(orientations(), ['portrait']);
+      },
+    );
 
     test('keeps turning from where the last turn left off', () async {
       final session = await buildSession();

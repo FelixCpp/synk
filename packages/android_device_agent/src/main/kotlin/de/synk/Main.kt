@@ -9,6 +9,10 @@ import de.synk.proto.CaptureScreenshotRequest
 import de.synk.proto.CaptureScreenshotResponse
 import de.synk.proto.GetInfoRequest
 import de.synk.proto.GetInfoResponse
+import de.synk.proto.LockRotationRequest
+import de.synk.proto.LockRotationResponse
+import de.synk.proto.RestoreRotationRequest
+import de.synk.proto.RestoreRotationResponse
 import java.io.DataInputStream
 import java.io.DataOutputStream
 import java.io.EOFException
@@ -68,6 +72,20 @@ fun dispatch(request: AgentRequest): AgentResponse {
                     .build()
             }
 
+            AgentRequest.PayloadCase.LOCK_ROTATION -> {
+                AgentResponse
+                    .newBuilder()
+                    .setLockRotation(handleLockRotation(request.lockRotation))
+                    .build()
+            }
+
+            AgentRequest.PayloadCase.RESTORE_ROTATION -> {
+                AgentResponse
+                    .newBuilder()
+                    .setRestoreRotation(handleRestoreRotation(request.restoreRotation))
+                    .build()
+            }
+
             AgentRequest.PayloadCase.PAYLOAD_NOT_SET -> {
                 error("Received request without payload")
             }
@@ -106,4 +124,16 @@ private fun handleCaptureScreenshot(request: CaptureScreenshotRequest): CaptureS
         .newBuilder()
         .setPng(ByteString.copyFrom(pngBytes))
         .build()
+}
+
+private fun handleLockRotation(request: LockRotationRequest): LockRotationResponse {
+    Rotation.lock(request.rotation)
+
+    return LockRotationResponse.getDefaultInstance()
+}
+
+private fun handleRestoreRotation(request: RestoreRotationRequest): RestoreRotationResponse {
+    Rotation.restore()
+
+    return RestoreRotationResponse.getDefaultInstance()
 }

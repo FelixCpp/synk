@@ -139,16 +139,13 @@ void main() {
       expect(calls.single.arguments['edge'], 'none');
     });
 
-    test(
-      'scripts a navigation as one swipe, not as single events',
-      () async {
-        await interaction.navigate(.home);
+    test('presses home as one button, not as a swipe', () async {
+      await interaction.navigate(.home);
 
-        expect(calls.single.method, 'sendSwipe');
-        expect(calls.single.arguments['edge'], 'bottom');
-        expect(calls.single.arguments['fromY'], 1.0);
-      },
-    );
+      expect(calls.single.method, 'pressButton');
+      expect(calls.single.arguments['usagePage'], 0x0c);
+      expect(calls.single.arguments['usageCode'], 0x40);
+    });
 
     test('spreads a pinch into two fingers around its center', () async {
       await interaction.simulatePinchEvent((

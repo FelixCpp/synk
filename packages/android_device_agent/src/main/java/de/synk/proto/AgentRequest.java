@@ -22,6 +22,8 @@ public  final class AgentRequest extends
       implements com.google.protobuf.AbstractMessageLite.InternalOneOfEnum {
     GET_INFO(1),
     CAPTURE_SCREENSHOT(2),
+    LOCK_ROTATION(3),
+    RESTORE_ROTATION(4),
     PAYLOAD_NOT_SET(0);
     private final int value;
     private PayloadCase(int value) {
@@ -39,6 +41,8 @@ public  final class AgentRequest extends
       switch (value) {
         case 1: return GET_INFO;
         case 2: return CAPTURE_SCREENSHOT;
+        case 3: return LOCK_ROTATION;
+        case 4: return RESTORE_ROTATION;
         case 0: return PAYLOAD_NOT_SET;
         default: return null;
       }
@@ -155,6 +159,106 @@ public  final class AgentRequest extends
    */
   private void clearCaptureScreenshot() {
     if (payloadCase_ == 2) {
+      payloadCase_ = 0;
+      payload_ = null;
+    }
+  }
+
+  public static final int LOCK_ROTATION_FIELD_NUMBER = 3;
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   */
+  @java.lang.Override
+  public boolean hasLockRotation() {
+    return payloadCase_ == 3;
+  }
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   */
+  @java.lang.Override
+  public de.synk.proto.LockRotationRequest getLockRotation() {
+    if (payloadCase_ == 3) {
+       return (de.synk.proto.LockRotationRequest) payload_;
+    }
+    return de.synk.proto.LockRotationRequest.getDefaultInstance();
+  }
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   */
+  private void setLockRotation(de.synk.proto.LockRotationRequest value) {
+    java.util.Objects.requireNonNull(value);
+    payload_ = value;
+    payloadCase_ = 3;
+  }
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   */
+  private void mergeLockRotation(de.synk.proto.LockRotationRequest value) {
+    java.util.Objects.requireNonNull(value);
+    if (payloadCase_ == 3 &&
+        payload_ != de.synk.proto.LockRotationRequest.getDefaultInstance()) {
+      payload_ = de.synk.proto.LockRotationRequest.newBuilder((de.synk.proto.LockRotationRequest) payload_)
+          .mergeFrom(value).buildPartial();
+    } else {
+      payload_ = value;
+    }
+    payloadCase_ = 3;
+  }
+  /**
+   * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+   */
+  private void clearLockRotation() {
+    if (payloadCase_ == 3) {
+      payloadCase_ = 0;
+      payload_ = null;
+    }
+  }
+
+  public static final int RESTORE_ROTATION_FIELD_NUMBER = 4;
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   */
+  @java.lang.Override
+  public boolean hasRestoreRotation() {
+    return payloadCase_ == 4;
+  }
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   */
+  @java.lang.Override
+  public de.synk.proto.RestoreRotationRequest getRestoreRotation() {
+    if (payloadCase_ == 4) {
+       return (de.synk.proto.RestoreRotationRequest) payload_;
+    }
+    return de.synk.proto.RestoreRotationRequest.getDefaultInstance();
+  }
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   */
+  private void setRestoreRotation(de.synk.proto.RestoreRotationRequest value) {
+    java.util.Objects.requireNonNull(value);
+    payload_ = value;
+    payloadCase_ = 4;
+  }
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   */
+  private void mergeRestoreRotation(de.synk.proto.RestoreRotationRequest value) {
+    java.util.Objects.requireNonNull(value);
+    if (payloadCase_ == 4 &&
+        payload_ != de.synk.proto.RestoreRotationRequest.getDefaultInstance()) {
+      payload_ = de.synk.proto.RestoreRotationRequest.newBuilder((de.synk.proto.RestoreRotationRequest) payload_)
+          .mergeFrom(value).buildPartial();
+    } else {
+      payload_ = value;
+    }
+    payloadCase_ = 4;
+  }
+  /**
+   * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+   */
+  private void clearRestoreRotation() {
+    if (payloadCase_ == 4) {
       payloadCase_ = 0;
       payload_ = null;
     }
@@ -365,6 +469,102 @@ public  final class AgentRequest extends
       return this;
     }
 
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    @java.lang.Override
+    public boolean hasLockRotation() {
+      return instance.hasLockRotation();
+    }
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    @java.lang.Override
+    public de.synk.proto.LockRotationRequest getLockRotation() {
+      return instance.getLockRotation();
+    }
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    public Builder setLockRotation(de.synk.proto.LockRotationRequest value) {
+      copyOnWrite();
+      instance.setLockRotation(value);
+      return this;
+    }
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    public Builder setLockRotation(
+        de.synk.proto.LockRotationRequest.Builder builderForValue) {
+      copyOnWrite();
+      instance.setLockRotation(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    public Builder mergeLockRotation(de.synk.proto.LockRotationRequest value) {
+      copyOnWrite();
+      instance.mergeLockRotation(value);
+      return this;
+    }
+    /**
+     * <code>.device_agent.LockRotationRequest lock_rotation = 3;</code>
+     */
+    public Builder clearLockRotation() {
+      copyOnWrite();
+      instance.clearLockRotation();
+      return this;
+    }
+
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    @java.lang.Override
+    public boolean hasRestoreRotation() {
+      return instance.hasRestoreRotation();
+    }
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    @java.lang.Override
+    public de.synk.proto.RestoreRotationRequest getRestoreRotation() {
+      return instance.getRestoreRotation();
+    }
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    public Builder setRestoreRotation(de.synk.proto.RestoreRotationRequest value) {
+      copyOnWrite();
+      instance.setRestoreRotation(value);
+      return this;
+    }
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    public Builder setRestoreRotation(
+        de.synk.proto.RestoreRotationRequest.Builder builderForValue) {
+      copyOnWrite();
+      instance.setRestoreRotation(builderForValue.build());
+      return this;
+    }
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    public Builder mergeRestoreRotation(de.synk.proto.RestoreRotationRequest value) {
+      copyOnWrite();
+      instance.mergeRestoreRotation(value);
+      return this;
+    }
+    /**
+     * <code>.device_agent.RestoreRotationRequest restore_rotation = 4;</code>
+     */
+    public Builder clearRestoreRotation() {
+      copyOnWrite();
+      instance.clearRestoreRotation();
+      return this;
+    }
+
     // @@protoc_insertion_point(builder_scope:device_agent.AgentRequest)
   }
   @java.lang.Override
@@ -385,10 +585,12 @@ public  final class AgentRequest extends
             "payloadCase_",
             de.synk.proto.GetInfoRequest.class,
             de.synk.proto.CaptureScreenshotRequest.class,
+            de.synk.proto.LockRotationRequest.class,
+            de.synk.proto.RestoreRotationRequest.class,
           };
           java.lang.String info =
-              "\u0000\u0002\u0001\u0000\u0001\u0002\u0002\u0000\u0000\u0000\u0001<\u0000\u0002<" +
-              "\u0000";
+              "\u0000\u0004\u0001\u0000\u0001\u0004\u0004\u0000\u0000\u0000\u0001<\u0000\u0002<" +
+              "\u0000\u0003<\u0000\u0004<\u0000";
           return newMessageInfo(DEFAULT_INSTANCE, info, objects);
       }
       case GET_DEFAULT_INSTANCE: {

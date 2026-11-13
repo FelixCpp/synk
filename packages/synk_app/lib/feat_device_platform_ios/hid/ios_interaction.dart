@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:api_devicectl/api_devicectl.dart';
 import 'package:app_logger/app_logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/domain/models/device_input.dart';
@@ -15,7 +14,6 @@ import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 
 class IosInteraction({
   required final IosHidChannel hidChannel,
-  required final DevicectlApi devicectl,
   required final DeviceId deviceId,
   required final ValueStream<DeviceScreenSize> screenSize,
 }) implements DeviceInteraction {
@@ -116,10 +114,7 @@ class IosInteraction({
       return;
     }
 
-    await hidChannel.sendSwipe(
-      deviceId: deviceId,
-      swipe: iosSwipeForNavigation(navigation),
-    );
+    await hidChannel.pressButton(deviceId: deviceId, button: iosHomeButton);
   }
 
   @override
@@ -129,17 +124,13 @@ class IosInteraction({
 
   @override
   Future<void> rotate(DeviceRotationDirection direction) async {
-    final orientation = (_orientation ?? .guessedFrom(screenSize.value))
-        .turned(direction);
+    final orientation = (_orientation ?? .guessedFrom(screenSize.value)).turned(
+      direction,
+    );
 
-    await devicectl.setOrientation(
+    await hidChannel.setOrientation(
       deviceId: deviceId,
-      orientation: switch (orientation) {
-        .portrait => .portrait,
-        .landscapeLeft => .landscapeLeft,
-        .portraitUpsideDown => .portraitUpsideDown,
-        .landscapeRight => .landscapeRight,
-      },
+      orientation: orientation,
     );
     _orientation = orientation;
   }

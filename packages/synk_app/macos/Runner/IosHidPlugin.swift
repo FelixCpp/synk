@@ -30,8 +30,6 @@ private let isCoreDeviceAvailable: Bool = {
 
 #if arch(arm64)
 
-  private let swipeSteps = 24
-  private let swipeStepDuration: TimeInterval = 0.016
 
   @available(macOS 14.0, *)
   private final class IosHidInjector: @unchecked Sendable {
@@ -49,6 +47,7 @@ private let isCoreDeviceAvailable: Bool = {
     private var assertions: [String: DeviceUsageAssertion] = [:]
     private var keyboards: [String: any HIDKeyboard] = [:]
     private var buttons: [String: any HIDButton] = [:]
+    private var orientationControls: [String: any OrientationControl] = [:]
 
     /// The device's last known *compositor* rotation, in degrees (0/90/180/
     /// 270). The digitizer sits below the rotation iOS applies to the
@@ -109,9 +108,15 @@ private let isCoreDeviceAvailable: Bool = {
         logger.info("No hardware buttons for \(udid, privacy: .public)")
       }
 
+      let orientationControl = try? await device.getImplementation(for: .orientationControl)
+      if orientationControl == nil {
+        logger.info("No orientation control for \(udid, privacy: .public)")
+      }
+
       queue.async {
         self.keyboards[udid] = keyboard
         self.buttons[udid] = button
+        self.orientationControls[udid] = orientationControl
         self.digitizers[udid] = digitizer
         self.assertions[udid]?.releaseAssertion()
         self.assertions[udid] = assertion
@@ -132,6 +137,7 @@ private let isCoreDeviceAvailable: Bool = {
         self.digitizers.removeValue(forKey: udid)
         self.keyboards.removeValue(forKey: udid)
         self.buttons.removeValue(forKey: udid)
+        self.orientationControls.removeValue(forKey: udid)
         self.rotations.removeValue(forKey: udid)
         self.screenAwake.removeValue(forKey: udid)
         self.assertions.removeValue(forKey: udid)?.releaseAssertion()
@@ -352,41 +358,6 @@ private let isCoreDeviceAvailable: Bool = {
       )
     }
 
-    func sendSwipe(
-      udid: String,
-      from: DigitizerPoint,
-      to: DigitizerPoint,
-      edge: DigitizerEdge,
-      hold: TimeInterval,
-      completion: @escaping (Error?) -> Void
-    ) {
-      queue.async {
-        completion(
-          self.withDigitizer(udid) { digitizer in
-            try self.emit(
-              digitizer, udid: udid, pointOne: from, pointTwo: nil, eventType: .start, edge: edge)
-
-            for step in 1...swipeSteps {
-              Thread.sleep(forTimeInterval: swipeStepDuration)
-
-              let progress = Double(step) / Double(swipeSteps)
-              try self.emit(
-                digitizer,
-                udid: udid,
-                pointOne: from.interpolated(to: to, at: progress),
-                pointTwo: nil,
-                eventType: .position,
-                edge: edge
-              )
-            }
-
-            if hold > 0 { Thread.sleep(forTimeInterval: hold) }
-            try self.emit(
-              digitizer, udid: udid, pointOne: to, pointTwo: nil, eventType: .end, edge: edge)
-          })
-      }
-    }
-
     func sendKey(
       udid: String,
       usage: Int,
@@ -449,6 +420,28 @@ private let isCoreDeviceAvailable: Bool = {
           completion(nil)
         } catch {
           completion(error)
+        }
+      }
+    }
+
+    func setOrientation(
+      udid: String,
+      orientation: DeviceOrientation,
+      completion: @escaping (Error?) -> Void
+    ) {
+      queue.async {
+        guard let control = self.orientationControls[udid] else {
+          completion(nil)
+          return
+        }
+
+        Task {
+          do {
+            _ = try await control.changeDeviceOrientation(orientation)
+            completion(nil)
+          } catch {
+            completion(error)
+          }
         }
       }
     }
@@ -571,16 +564,6 @@ private let isCoreDeviceAvailable: Bool = {
     let edge: DigitizerEdge
   }
 
-  @available(macOS 14.0, *)
-  extension DigitizerPoint {
-    fileprivate func interpolated(to other: DigitizerPoint, at progress: Double) -> DigitizerPoint {
-      DigitizerPoint(
-        x: x + (other.x - x) * progress,
-        y: y + (other.y - y) * progress
-      )
-    }
-  }
-
 #endif
 
 public class IosHidPlugin: NSObject, FlutterPlugin {
@@ -637,12 +620,12 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
         result(nil)
       case "sendTouch":
         sendTouch(deviceId: deviceId, arguments: arguments, result: result)
-      case "sendSwipe":
-        sendSwipe(deviceId: deviceId, arguments: arguments, result: result)
       case "sendKey":
         sendKey(deviceId: deviceId, arguments: arguments, result: result)
       case "pressButton":
         pressButton(deviceId: deviceId, arguments: arguments, result: result)
+      case "setOrientation":
+        setOrientation(deviceId: deviceId, arguments: arguments, result: result)
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -696,30 +679,6 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
     }
 
     @available(macOS 14.0, *)
-    private func sendSwipe(
-      deviceId: String,
-      arguments: [String: Any],
-      result: @escaping FlutterResult
-    ) {
-      guard let injector = injector as? IosHidInjector,
-        let from = Self.point(from: arguments, prefix: "from"),
-        let to = Self.point(from: arguments, prefix: "to")
-      else {
-        result(FlutterError(code: "invalid_args", message: "Invalid swipe", details: nil))
-        return
-      }
-
-      injector.sendSwipe(
-        udid: deviceId,
-        from: from,
-        to: to,
-        edge: Self.edge(named: arguments["edge"] as? String),
-        hold: Self.seconds(arguments["holdMs"]),
-        completion: Self.completion(result)
-      )
-    }
-
-    @available(macOS 14.0, *)
     private func sendKey(
       deviceId: String,
       arguments: [String: Any],
@@ -757,6 +716,34 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
     }
 
     @available(macOS 14.0, *)
+    private func setOrientation(
+      deviceId: String,
+      arguments: [String: Any],
+      result: @escaping FlutterResult
+    ) {
+      guard let injector = injector as? IosHidInjector,
+        let orientation = Self.orientation(named: arguments["orientation"] as? String)
+      else {
+        result(FlutterError(code: "invalid_args", message: "Invalid orientation", details: nil))
+        return
+      }
+
+      injector.setOrientation(
+        udid: deviceId, orientation: orientation, completion: Self.completion(result))
+    }
+
+    @available(macOS 14.0, *)
+    private static func orientation(named name: String?) -> DeviceOrientation? {
+      switch name {
+      case "portrait": return .portrait
+      case "landscapeLeft": return .landscapeLeft
+      case "portraitUpsideDown": return .portraitUpsideDown
+      case "landscapeRight": return .landscapeRight
+      default: return nil
+      }
+    }
+
+    @available(macOS 14.0, *)
     private static func point(from arguments: [String: Any], prefix: String) -> DigitizerPoint? {
       guard let x = number(arguments[prefix.isEmpty ? "x" : prefix + "X"]),
         let y = number(arguments[prefix.isEmpty ? "y" : prefix + "Y"])
@@ -790,11 +777,6 @@ public class IosHidPlugin: NSObject, FlutterPlugin {
 
     private static func number(_ value: Any?) -> Double? {
       (value as? NSNumber)?.doubleValue
-    }
-
-    private static func seconds(_ milliseconds: Any?) -> TimeInterval {
-      guard let milliseconds = number(milliseconds) else { return 0 }
-      return milliseconds / 1000.0
     }
 
     private static func completion(_ result: @escaping FlutterResult) -> (Error?) -> Void {
