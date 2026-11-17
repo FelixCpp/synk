@@ -56,7 +56,7 @@ void main() {
       );
 
       session = IosDeviceSession(
-        transport: IosMirrorTransport(IosMirrorChannel(), null),
+        transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
         fileSystem: MemoryFileSystem(),
@@ -304,7 +304,7 @@ void main() {
       'device already in landscape is handled from the first touch',
       () async {
         IosDeviceSession(
-          transport: IosMirrorTransport(IosMirrorChannel(), null),
+          transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
           hidChannel: IosHidChannel(),
           devicectl: DevicectlApi(),
           fileSystem: MemoryFileSystem(),
@@ -331,7 +331,7 @@ void main() {
 
     test('is not requested for a device that takes no input', () async {
       IosDeviceSession(
-        transport: IosMirrorTransport(IosMirrorChannel(), null),
+        transport: IosCaptureSessionTransport(IosMirrorChannel(), null),
         hidChannel: IosHidChannel(),
         devicectl: DevicectlApi(),
         fileSystem: MemoryFileSystem(),

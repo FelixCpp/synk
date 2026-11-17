@@ -5,7 +5,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
-import 'package:synk/feat_device_platform/domain/models/wireless_mirroring_unsupported_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
@@ -64,7 +63,7 @@ class IosDevicePlatform({
         ?.where((device) => device.id == deviceId)
         .firstOrNull;
     if (device != null && device.isWireless) {
-      throw const WirelessMirroringUnsupportedException();
+      return _connectOverMediaStream(deviceId);
     }
 
     final IosMirrorStartResult result;
@@ -85,7 +84,37 @@ class IosDevicePlatform({
     );
 
     return IosDeviceSession(
-      transport: IosMirrorTransport(channel, audio),
+      transport: IosCaptureSessionTransport(channel, audio),
+      hidChannel: hidChannel,
+      devicectl: devicectl,
+      fileSystem: fileSystem,
+      deviceId: deviceId,
+      textureId: result.textureId,
+      initialScreenSize: DeviceScreenSize(
+        width: result.width,
+        height: result.height,
+      ),
+      interactionUnavailableReason: await _prepareInput(deviceId),
+    );
+  }
+
+  Future<DeviceSession> _connectOverMediaStream(DeviceId deviceId) async {
+    final IosMediaStreamStartResult result;
+    try {
+      result = await mediaStreamChannel.startMirror(deviceId);
+    } on Object {
+      final problem = await _diagnose(deviceId);
+      if (problem != null) throw DeviceSetupException(problem: problem);
+      rethrow;
+    }
+
+    appLogger.i(
+      'Mirroring $deviceId over the media stream'
+      '${result.hasAudio ? ' with audio' : ' without audio'}',
+    );
+
+    return IosDeviceSession(
+      transport: IosMediaStreamTransport(mediaStreamChannel, result.hasAudio),
       hidChannel: hidChannel,
       devicectl: devicectl,
       fileSystem: fileSystem,

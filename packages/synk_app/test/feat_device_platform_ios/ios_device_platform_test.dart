@@ -16,7 +16,6 @@ import 'package:file/memory.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
-import 'package:synk/feat_device_platform/domain/models/wireless_mirroring_unsupported_exception.dart';
 
 import '../support/fake_process_manager.dart';
 
@@ -103,14 +102,46 @@ void main() {
       expect(devices.single.isWireless, isFalse);
     });
 
-    test('refuses to mirror a device without its cable', () async {
+    test('mirrors a device without its cable over the media stream', () async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      const mediaStream = MethodChannel('dev.synk/ios_media_stream');
+      const captureSession = MethodChannel('dev.synk/ios_mirror');
+      const hid = MethodChannel('dev.synk/ios_hid');
+      final mediaStreamCalls = <String>[];
+      final captureSessionCalls = <String>[];
+      messenger.setMockMethodCallHandler(mediaStream, (call) async {
+        mediaStreamCalls.add(call.method);
+        return call.method == 'startMirror'
+            ? {'textureId': 4, 'width': 1184, 'height': 2576, 'hasAudio': true}
+            : null;
+      });
+      messenger.setMockMethodCallHandler(captureSession, (call) async {
+        captureSessionCalls.add(call.method);
+        return null;
+      });
+      messenger.setMockMethodCallHandler(hid, (call) async => null);
+      addTearDown(() {
+        for (final channel in [mediaStream, captureSession, hid]) {
+          messenger.setMockMethodCallHandler(channel, null);
+        }
+      });
+
       final platform = platformWith(reachable: const [wireless]);
       await platform.observeDevices().first;
 
-      await expectLater(
-        platform.connect(wireless.id, const MirrorOptions.defaults()),
-        throwsA(isA<WirelessMirroringUnsupportedException>()),
+      final session = await platform.connect(
+        wireless.id,
+        const MirrorOptions.defaults(),
       );
+      addTearDown(session.dispose);
+
+      expect(mediaStreamCalls, ['startMirror']);
+      expect(captureSessionCalls, isEmpty);
+      expect(session.textureId, const NativeTextureId(4));
+      expect(session.screenSize.width, 1184);
+      expect(session.audio, isNotNull);
     });
   });
 
