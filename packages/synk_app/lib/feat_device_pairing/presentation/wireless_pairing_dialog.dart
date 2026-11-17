@@ -1,3 +1,4 @@
+import 'package:synk/feat_device_pairing/domain/models/pairable_device.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_device_pairing/presentation/bloc/device_pairing_bloc.dart';
 import 'package:synk_ui/synk_ui.dart';
@@ -11,7 +12,9 @@ Future<bool?> showWirelessPairingDialog(BuildContext context) {
     context: context,
     barrierDismissible: true,
     builder: (context) => BlocProvider(
-      create: (context) => DevicePairingBloc(repository),
+      create: (context) =>
+          DevicePairingBloc(repository)
+            ..add(const DevicePairingEvent.onStarted()),
       child: const WirelessPairingDialog(),
     ),
   );
@@ -26,9 +29,11 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
   final _hostPortController = TextEditingController();
   final _codeController = TextEditingController();
   final _portController = TextEditingController();
+  final _codeFocusNode = FocusNode();
 
   @override
   void dispose() {
+    _codeFocusNode.dispose();
     _hostPortController.dispose();
     _codeController.dispose();
     _portController.dispose();
@@ -44,6 +49,11 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
     );
   }
 
+  void _select(PairableDevice device) {
+    _hostPortController.text = device.hostPort;
+    _codeFocusNode.requestFocus();
+  }
+
   void _submitPort() {
     BlocProvider.of<DevicePairingBloc>(context).add(
       DevicePairingEvent.onConnectPortSubmitted(port: _portController.text),
@@ -53,9 +63,9 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<DevicePairingBloc, DevicePairingState>(
-      listenWhen: (previous, current) => current is DevicePairingConnected,
+      listenWhen: (previous, current) => current.step is DevicePairingConnected,
       listener: (context, state) => Navigator.of(context).pop(true),
-      builder: (context, state) => switch (state) {
+      builder: (context, state) => switch (state.step) {
         DevicePairingConnectPortNeeded(:final host, :final error) =>
           _ConnectPortContent(
             host: host,
@@ -71,10 +81,13 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
           portController: _portController,
           onSubmit: _submitPort,
         ),
-        _ => _Content(
-          state: state,
+        final step => _Content(
+          step: step,
+          pairableDevices: state.pairableDevices,
           hostPortController: _hostPortController,
           codeController: _codeController,
+          codeFocusNode: _codeFocusNode,
+          onSelect: _select,
           onSubmit: _submit,
         ),
       },
@@ -83,16 +96,19 @@ class _WirelessPairingDialogState extends State<WirelessPairingDialog> {
 }
 
 class const _Content({
-  required final DevicePairingState state,
+  required final DevicePairingStep step,
+  required final List<PairableDevice> pairableDevices,
   required final TextEditingController hostPortController,
   required final TextEditingController codeController,
+  required final FocusNode codeFocusNode,
+  required final ValueChanged<PairableDevice> onSelect,
   required final VoidCallback onSubmit,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = context.synkUi;
-    final isPairing = state is DevicePairingPairing;
-    final error = switch (state) {
+    final isPairing = step is DevicePairingPairing;
+    final error = switch (step) {
       DevicePairingEditing(:final error) => error,
       _ => null,
     };
@@ -102,9 +118,14 @@ class const _Content({
         Text('Wireless-Gerät koppeln', style: theme.typography.heading),
         Text(
           'Auf dem Gerät unter „Kabelloses Debugging“ › „Mit '
-          'Pairing-Code koppeln“ öffnen und die angezeigte Adresse '
-          'sowie den Code hier eintragen.',
+          'Pairing-Code koppeln“ öffnen. Das Gerät erscheint dann hier; '
+          'sonst die angezeigte Adresse eintragen.',
           style: theme.typography.secondary,
+        ),
+        _PairableDevices(
+          devices: pairableDevices,
+          hostPortController: hostPortController,
+          onSelect: onSelect,
         ),
         _LabeledField(
           label: 'IP-Adresse & Port',
@@ -116,6 +137,7 @@ class const _Content({
         _LabeledField(
           label: 'Pairing-Code',
           controller: codeController,
+          focusNode: codeFocusNode,
           placeholder: '123456',
           keyboardType: TextInputType.number,
           onSubmitted: (_) => onSubmit(),
@@ -126,6 +148,50 @@ class const _Content({
           isBusy: isPairing,
           onSubmit: onSubmit,
         ),
+      ],
+    );
+  }
+}
+
+class const _PairableDevices({
+  required final List<PairableDevice> devices,
+  required final TextEditingController hostPortController,
+  required final ValueChanged<PairableDevice> onSelect,
+}) extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = context.synkUi;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: SynkUiSpace.s4,
+      children: [
+        Text('Gefundene Geräte', style: theme.typography.label),
+        if (devices.isEmpty)
+          Row(
+            spacing: SynkUiSpace.s8,
+            children: [
+              const SynkUiSpinner(size: 14.0),
+              Text('Suche im WLAN…', style: theme.typography.secondary),
+            ],
+          )
+        else
+          ValueListenableBuilder(
+            valueListenable: hostPortController,
+            builder: (context, value, _) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (final device in devices)
+                  SynkUiListRow(
+                    leading: SynkUiStatusDot(color: theme.colors.accent),
+                    title: device.name,
+                    subtitle: device.hostPort,
+                    selected: value.text.trim() == device.hostPort,
+                    onTap: () => onSelect(device),
+                  ),
+              ],
+            ),
+          ),
       ],
     );
   }
@@ -236,6 +302,7 @@ class const _LabeledField({
   required final String label,
   required final TextEditingController controller,
   required final String placeholder,
+  final FocusNode? focusNode,
   final bool autofocus = false,
   final TextInputType keyboardType = TextInputType.text,
   final ValueChanged<String>? onSubmitted,
@@ -252,6 +319,7 @@ class const _LabeledField({
         SynkUiTextField(
           controller: controller,
           placeholder: placeholder,
+          focusNode: focusNode,
           autofocus: autofocus,
           keyboardType: keyboardType,
           onSubmitted: onSubmitted,

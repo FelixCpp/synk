@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:synk/feat_device_pairing/domain/models/device_pairing_exception.dart';
+import 'package:synk/feat_device_pairing/domain/models/pairable_device.dart';
 import 'package:synk/feat_device_pairing/domain/models/pairing_outcome.dart';
 import 'package:synk/feat_device_pairing/domain/models/wireless_connect_exception.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
@@ -30,6 +31,28 @@ void main() {
     bloc.add(DevicePairingEvent.onConnectPortSubmitted(port: port));
   }
 
+  test('lists the devices that are waiting to be paired', () async {
+    const pixel = (
+      serviceName: 'adb-18131FDF6002UE-Vv70Va',
+      name: 'Pixel 6',
+      hostPort: '192.168.0.79:36479',
+    );
+
+    bloc.add(const DevicePairingEvent.onStarted());
+    await pumpEventQueue();
+    pairing.pairableDevices.add([pixel]);
+    await pumpEventQueue();
+
+    expect(bloc.state.pairableDevices, [pixel]);
+
+    pairing.onPair = (_, _) async => const PairingOutcome.connected();
+    submit(hostPort: pixel.hostPort);
+    await pumpEventQueue();
+
+    expect(bloc.state.step, const DevicePairingStep.connected());
+    expect(bloc.state.pairableDevices, [pixel]);
+  });
+
   test('pairs with what was typed, trimmed', () async {
     submit(hostPort: '  192.168.1.23:41234 ', code: ' 123456 ');
     await pumpEventQueue();
@@ -47,7 +70,7 @@ void main() {
       await pumpEventQueue();
 
       expect(pairing.connections, ['192.168.1.23:37099']);
-      expect(bloc.state, const DevicePairingState.connected());
+      expect(bloc.state.step, const DevicePairingStep.connected());
     },
   );
 
@@ -59,15 +82,15 @@ void main() {
 
     expect(pairing.connections, isEmpty);
     expect(
-      bloc.state,
-      const DevicePairingState.connectPortNeeded(host: '192.168.1.23'),
+      bloc.state.step,
+      const DevicePairingStep.connectPortNeeded(host: '192.168.1.23'),
     );
 
     submitPort(' 37099 ');
     await pumpEventQueue();
 
     expect(pairing.connections, ['192.168.1.23:37099']);
-    expect(bloc.state, const DevicePairingState.connected());
+    expect(bloc.state.step, const DevicePairingStep.connected());
   });
 
   test('rejects a port that is not one, without calling adb', () async {
@@ -80,8 +103,8 @@ void main() {
 
     expect(pairing.connections, isEmpty);
     expect(
-      bloc.state,
-      const DevicePairingState.connectPortNeeded(
+      bloc.state.step,
+      const DevicePairingStep.connectPortNeeded(
         host: '192.168.1.23',
         error: 'Bitte einen gültigen Port angeben.',
       ),
@@ -97,8 +120,8 @@ void main() {
     submit();
     await pumpEventQueue();
 
-    expect(bloc.state, isA<DevicePairingConnectPortNeeded>());
-    final state = bloc.state as DevicePairingConnectPortNeeded;
+    expect(bloc.state.step, isA<DevicePairingConnectPortNeeded>());
+    final state = bloc.state.step as DevicePairingConnectPortNeeded;
     expect(state.host, '192.168.1.23');
     expect(state.error, contains('Connection refused'));
   });
@@ -109,8 +132,8 @@ void main() {
 
     expect(pairing.attempts, isEmpty);
     expect(
-      bloc.state,
-      const DevicePairingState.editing(
+      bloc.state.step,
+      const DevicePairingStep.editing(
         error: 'Bitte IP-Adresse, Port und Code angeben.',
       ),
     );
@@ -123,12 +146,12 @@ void main() {
     submit();
     await pumpEventQueue();
 
-    expect(bloc.state, const DevicePairingState.pairing());
+    expect(bloc.state.step, const DevicePairingStep.pairing());
 
     inFlight.complete(const PairingOutcome.connected());
     await pumpEventQueue();
 
-    expect(bloc.state, const DevicePairingState.connected());
+    expect(bloc.state.step, const DevicePairingStep.connected());
   });
 
   test('shows what adb said when the code was wrong', () async {
@@ -138,9 +161,9 @@ void main() {
     submit();
     await pumpEventQueue();
 
-    expect(bloc.state, isA<DevicePairingEditing>());
+    expect(bloc.state.step, isA<DevicePairingEditing>());
     expect(
-      (bloc.state as DevicePairingEditing).error,
+      (bloc.state.step as DevicePairingEditing).error,
       contains('wrong code'),
     );
   });
@@ -152,7 +175,7 @@ void main() {
     await pumpEventQueue();
 
     expect(
-      (bloc.state as DevicePairingEditing).error,
+      (bloc.state.step as DevicePairingEditing).error,
       'Die Kopplung ist fehlgeschlagen.',
     );
   });
@@ -174,10 +197,15 @@ void main() {
 }
 
 class _FakePairing implements DevicePairingRepository {
+  final pairableDevices = StreamController<List<PairableDevice>>();
   final attempts = <(String, String)>[];
   final connections = <String>[];
   Future<PairingOutcome> Function(String hostPort, String code)? onPair;
   Future<void> Function(String hostPort)? onConnect;
+
+  @override
+  Stream<List<PairableDevice>> observePairableDevices() =>
+      pairableDevices.stream;
 
   @override
   Future<PairingOutcome> pair(String hostPort, String code) {

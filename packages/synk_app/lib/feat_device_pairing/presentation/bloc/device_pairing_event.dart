@@ -2,6 +2,7 @@ part of 'device_pairing_bloc.dart';
 
 @freezed
 sealed class DevicePairingEvent with _$DevicePairingEvent {
+  const factory DevicePairingEvent.onStarted() = _OnStarted;
   const factory DevicePairingEvent.onSubmitted({
     required String hostPort,
     required String pairingCode,

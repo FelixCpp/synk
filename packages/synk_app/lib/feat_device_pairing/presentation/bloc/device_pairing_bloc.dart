@@ -4,6 +4,7 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:synk/feat_device_pairing/domain/models/pairable_device.dart';
 import 'package:synk/feat_device_pairing/domain/models/pairing_outcome.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_device_pairing/domain/usecases/connect_wirelessly_interactor.dart';
@@ -20,7 +21,21 @@ class DevicePairingBloc(final DevicePairingRepository repository)
   final pairDevice = PairDeviceInteractor(repository);
   final connectWirelessly = ConnectWirelesslyInteractor(repository);
 
-  this : super(const DevicePairingState.editing()) {
+  this : super(const DevicePairingState()) {
+    on<_OnStarted>((event, emit) {
+      return emit.forEach(
+        repository.observePairableDevices(),
+        onData: (devices) => state.copyWith(pairableDevices: devices),
+        onError: (error, stackTrace) {
+          appLogger.w(
+            'Looking for pairable devices failed',
+            error: error,
+            stackTrace: stackTrace,
+          );
+          return state;
+        },
+      );
+    }, transformer: droppable());
     on<_OnSubmitted>(_onSubmitted, transformer: droppable());
     on<_OnConnectPortSubmitted>(
       _onConnectPortSubmitted,
@@ -36,15 +51,16 @@ class DevicePairingBloc(final DevicePairingRepository repository)
     final pairingCode = event.pairingCode.trim();
 
     if (hostPort.isEmpty || pairingCode.isEmpty) {
-      emit(
-        const DevicePairingState.editing(
+      _emitStep(
+        emit,
+        const DevicePairingStep.editing(
           error: 'Bitte IP-Adresse, Port und Code angeben.',
         ),
       );
       return;
     }
 
-    emit(const DevicePairingState.pairing());
+    _emitStep(emit, const DevicePairingStep.pairing());
 
     final PairingOutcome outcome;
     try {
@@ -54,8 +70,9 @@ class DevicePairingBloc(final DevicePairingRepository repository)
       ));
     } on Object catch (error, stackTrace) {
       appLogger.e('Pairing failed', error: error, stackTrace: stackTrace);
-      emit(
-        DevicePairingState.editing(
+      _emitStep(
+        emit,
+        DevicePairingStep.editing(
           error: userMessageFor(error, 'Die Kopplung ist fehlgeschlagen.'),
         ),
       );
@@ -65,12 +82,12 @@ class DevicePairingBloc(final DevicePairingRepository repository)
     final host = _hostOf(hostPort);
     switch (outcome) {
       case PairingConnected():
-        emit(const DevicePairingState.connected());
+        _emitStep(emit, const DevicePairingStep.connected());
       case PairingConnectPortResolved(:final port):
         await _connect(host, port, emit);
       case PairingConnectPortUnknown():
         appLogger.w('Paired with $host, but its connect port did not resolve');
-        emit(DevicePairingState.connectPortNeeded(host: host));
+        _emitStep(emit, DevicePairingStep.connectPortNeeded(host: host));
     }
   }
 
@@ -78,15 +95,16 @@ class DevicePairingBloc(final DevicePairingRepository repository)
     _OnConnectPortSubmitted event,
     Emitter<DevicePairingState> emit,
   ) async {
-    final current = state;
+    final current = state.step;
     if (current is! DevicePairingConnectPortNeeded) {
       return;
     }
 
     final port = int.tryParse(event.port.trim());
     if (port == null || port < 1 || port > 65535) {
-      emit(
-        DevicePairingState.connectPortNeeded(
+      _emitStep(
+        emit,
+        DevicePairingStep.connectPortNeeded(
           host: current.host,
           error: 'Bitte einen gültigen Port angeben.',
         ),
@@ -102,20 +120,25 @@ class DevicePairingBloc(final DevicePairingRepository repository)
     int port,
     Emitter<DevicePairingState> emit,
   ) async {
-    emit(DevicePairingState.connecting(host: host));
+    _emitStep(emit, DevicePairingStep.connecting(host: host));
 
     try {
       await connectWirelessly.logger().getOrThrow('$host:$port');
-      emit(const DevicePairingState.connected());
+      _emitStep(emit, const DevicePairingStep.connected());
     } on Object catch (error, stackTrace) {
       appLogger.e('Connecting failed', error: error, stackTrace: stackTrace);
-      emit(
-        DevicePairingState.connectPortNeeded(
+      _emitStep(
+        emit,
+        DevicePairingStep.connectPortNeeded(
           host: host,
           error: userMessageFor(error, 'Die Verbindung ist fehlgeschlagen.'),
         ),
       );
     }
+  }
+
+  void _emitStep(Emitter<DevicePairingState> emit, DevicePairingStep step) {
+    emit(state.copyWith(step: step));
   }
 }
 
