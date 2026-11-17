@@ -6,4 +6,7 @@ sealed class DevicePairingEvent with _$DevicePairingEvent {
     required String hostPort,
     required String pairingCode,
   }) = _OnSubmitted;
+  const factory DevicePairingEvent.onConnectPortSubmitted({
+    required String port,
+  }) = _OnConnectPortSubmitted;
 }

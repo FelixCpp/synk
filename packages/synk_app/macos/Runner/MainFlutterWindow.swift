@@ -26,6 +26,9 @@ class MainFlutterWindow: NSWindow {
     IosDeviceDiscoveryPlugin.register(
       with: flutterViewController.registrar(forPlugin: "IosDeviceDiscoveryPlugin")
     )
+    BonjourResolverPlugin.register(
+      with: flutterViewController.registrar(forPlugin: "BonjourResolverPlugin")
+    )
 
     acceptFirstMouseInOverlays()
 

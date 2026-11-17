@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AdbPairResult {
 
- bool get success; String get message;
+ bool get success; String get message; String? get serviceName;
 /// Create a copy of AdbPairResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $AdbPairResultCopyWith<AdbPairResult> get copyWith => _$AdbPairResultCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as AdbPairResult;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbPairResult&&(identical(other.success, _this.success) || other.success == _this.success)&&(identical(other.message, _this.message) || other.message == _this.message));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AdbPairResult&&(identical(other.success, _this.success) || other.success == _this.success)&&(identical(other.message, _this.message) || other.message == _this.message)&&(identical(other.serviceName, _this.serviceName) || other.serviceName == _this.serviceName));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AdbPairResult;
-  return Object.hash(runtimeType,_this.success,_this.message);
+  return Object.hash(runtimeType,_this.success,_this.message,_this.serviceName);
 }
 
 @override
 String toString() {
   final _this = this as AdbPairResult;
-  return 'AdbPairResult(success: ${_this.success}, message: ${_this.message})';
+  return 'AdbPairResult(success: ${_this.success}, message: ${_this.message}, serviceName: ${_this.serviceName})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $AdbPairResultCopyWith<$Res>  {
   factory $AdbPairResultCopyWith(AdbPairResult value, $Res Function(AdbPairResult) _then) = _$AdbPairResultCopyWithImpl;
 @useResult
 $Res call({
- bool success, String message
+ bool success, String message, String? serviceName
 });
 
 
@@ -68,11 +68,12 @@ class _$AdbPairResultCopyWithImpl<$Res>
 
 /// Create a copy of AdbPairResult
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? success = null,Object? message = null,Object? serviceName = freezed,}) {
   return _then(AdbPairResult(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,
+as String,serviceName: freezed == serviceName ? _self.serviceName : serviceName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool success,  String message,  String? serviceName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AdbPairResult() when $default != null:
-return $default(_that.success,_that.message);case _:
+return $default(_that.success,_that.message,_that.serviceName);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.success,_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool success,  String message,  String? serviceName)  $default,) {final _that = this;
 switch (_that) {
 case _AdbPairResult():
-return $default(_that.success,_that.message);}
+return $default(_that.success,_that.message,_that.serviceName);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +193,10 @@ return $default(_that.success,_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool success,  String message,  String? serviceName)?  $default,) {final _that = this;
 switch (_that) {
 case _AdbPairResult() when $default != null:
-return $default(_that.success,_that.message);case _:
+return $default(_that.success,_that.message,_that.serviceName);case _:
   return null;
 
 }
@@ -207,11 +208,12 @@ return $default(_that.success,_that.message);case _:
 
 
 class _AdbPairResult implements AdbPairResult {
-  const _AdbPairResult({required this.success, required this.message});
+  const _AdbPairResult({required this.success, required this.message, required this.serviceName});
   
 
 @override final  bool success;
 @override final  String message;
+@override final  String? serviceName;
 
 /// Create a copy of AdbPairResult
 /// with the given fields replaced by the non-null parameter values.
@@ -223,18 +225,18 @@ _$AdbPairResultCopyWith<_AdbPairResult> get copyWith => __$AdbPairResultCopyWith
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbPairResult&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AdbPairResult&&(identical(other.success, success) || other.success == success)&&(identical(other.message, message) || other.message == message)&&(identical(other.serviceName, serviceName) || other.serviceName == serviceName));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,success,message);
+    return Object.hash(runtimeType,success,message,serviceName);
 }
 
 @override
 String toString() {
-    return 'AdbPairResult(success: $success, message: $message)';
+    return 'AdbPairResult(success: $success, message: $message, serviceName: $serviceName)';
 }
 
 
@@ -245,7 +247,7 @@ abstract mixin class _$AdbPairResultCopyWith<$Res> implements $AdbPairResultCopy
   factory _$AdbPairResultCopyWith(_AdbPairResult value, $Res Function(_AdbPairResult) _then) = __$AdbPairResultCopyWithImpl;
 @override @useResult
 $Res call({
- bool success, String message
+ bool success, String message, String? serviceName
 });
 
 
@@ -262,11 +264,12 @@ class __$AdbPairResultCopyWithImpl<$Res>
 
 /// Create a copy of AdbPairResult
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? success = null,Object? message = null,Object? serviceName = freezed,}) {
   return _then(_AdbPairResult(
 success: null == success ? _self.success : success // ignore: cast_nullable_to_non_nullable
 as bool,message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,
+as String,serviceName: freezed == serviceName ? _self.serviceName : serviceName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

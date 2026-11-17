@@ -37,6 +37,7 @@ import 'package:synk/feat_settings/domain/settings_feature.dart';
 import 'package:synk/feat_sidebar/presentation/synk_sidebar.dart';
 import 'package:synk/feat_device_frame/application/device_frame_factory_impl.dart';
 import 'package:synk/feat_device_frame/domain/device_frame_factory.dart';
+import 'package:synk/feat_device_pairing/data/bonjour_channel.dart';
 import 'package:synk/feat_device_pairing/data/repositories/device_pairing_repository_impl.dart';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:synk/feat_maximized_device/presentation/maximized_device_watch.dart';
@@ -322,7 +323,8 @@ class const _ToolProviders({
         ),
         RepositoryProvider<DevicePairingRepository>(
           create: (context) => DevicePairingRepositoryImpl(
-            RepositoryProvider.of<AdbApi>(context),
+            api: RepositoryProvider.of<AdbApi>(context),
+            bonjour: BonjourChannel(),
           ),
         ),
         RepositoryProvider<SidebarFeature>(

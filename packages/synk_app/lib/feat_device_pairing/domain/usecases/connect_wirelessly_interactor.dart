@@ -3,15 +3,11 @@ import 'dart:async';
 import 'package:synk/feat_device_pairing/domain/repositories/device_pairing_repository.dart';
 import 'package:use_in_case/use_in_case.dart';
 
-typedef ConnectWirelesslyInput = ({
-  String hostPort,
-  String pairingCode,
-});
-
-class const ConnectWirelesslyInteractor(final DevicePairingRepository repositoy)
-    implements ParameterizedInteractor<ConnectWirelesslyInput> {
+class const ConnectWirelesslyInteractor(
+  final DevicePairingRepository repository,
+) implements ParameterizedInteractor<String> {
   @override
-  FutureOr<void> execute(ConnectWirelesslyInput input) {
-    return repositoy.pair(input.hostPort, input.pairingCode);
+  FutureOr<void> execute(String hostPort) {
+    return repository.connect(hostPort);
   }
 }

@@ -7,5 +7,6 @@ sealed class AdbPairResult with _$AdbPairResult {
   const factory AdbPairResult({
     required bool success,
     required String message,
+    required String? serviceName,
   }) = _AdbPairResult;
 }

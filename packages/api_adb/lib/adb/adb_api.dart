@@ -1,6 +1,7 @@
 import 'package:api_adb/adb/devices/adb_device_dto.dart';
 import 'package:api_adb/adb/devices/adb_frame_reader.dart';
 import 'package:api_adb/adb/devices/device_conversions.dart';
+import 'package:api_adb/adb/pairing/adb_pair_output_parser.dart';
 import 'package:api_adb/adb/pairing/adb_pair_result.dart';
 import 'package:api_adb/adb/process/adb_device_communicator.dart';
 import 'package:api_adb/adb/process/adb_process_runner.dart';
@@ -53,19 +54,17 @@ class AdbApi({
     required String pairingCode,
   }) async {
     final process = await processRunner.run(['pair', hostPort, pairingCode]);
-    final output = '${process.stdout}${process.stderr}';
-
-    return AdbPairResult(
-      success: process.exitCode == 0 && output.contains('Successfully paired'),
-      message: output.trim(),
+    return parseAdbPairResult(
+      exitCode: process.exitCode,
+      output: '${process.stdout}${process.stderr}',
     );
   }
 
   Future<void> connectWirelessly(String hostPort) async {
     final process = await processRunner.run(['connect', hostPort]);
-    final output = process.stdout.toString();
+    final output = '${process.stdout}${process.stderr}';
 
-    if (process.exitCode != 0 || output.contains('failed')) {
+    if (process.exitCode != 0 || !output.contains('connected to')) {
       throw AdbCommandException(message: output.trim());
     }
   }

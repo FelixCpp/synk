@@ -15,67 +15,30 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DevicePairingEvent {
 
- String get hostPort; String get pairingCode;
-/// Create a copy of DevicePairingEvent
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$DevicePairingEventCopyWith<DevicePairingEvent> get copyWith => _$DevicePairingEventCopyWithImpl<DevicePairingEvent>(this as DevicePairingEvent, _$identity);
+
 
 
 
 @override
 bool operator ==(Object other) {
-  final _this = this as DevicePairingEvent;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingEvent&&(identical(other.hostPort, _this.hostPort) || other.hostPort == _this.hostPort)&&(identical(other.pairingCode, _this.pairingCode) || other.pairingCode == _this.pairingCode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingEvent);
 }
 
 
 @override
-int get hashCode {
-  final _this = this as DevicePairingEvent;
-  return Object.hash(runtimeType,_this.hostPort,_this.pairingCode);
-}
+int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  final _this = this as DevicePairingEvent;
-  return 'DevicePairingEvent(hostPort: ${_this.hostPort}, pairingCode: ${_this.pairingCode})';
+    return 'DevicePairingEvent()';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $DevicePairingEventCopyWith<$Res>  {
-  factory $DevicePairingEventCopyWith(DevicePairingEvent value, $Res Function(DevicePairingEvent) _then) = _$DevicePairingEventCopyWithImpl;
-@useResult
-$Res call({
- String hostPort, String pairingCode
-});
-
-
-
-
-}
-/// @nodoc
-class _$DevicePairingEventCopyWithImpl<$Res>
-    implements $DevicePairingEventCopyWith<$Res> {
-  _$DevicePairingEventCopyWithImpl(this._self, this._then);
-
-  final DevicePairingEvent _self;
-  final $Res Function(DevicePairingEvent) _then;
-
-/// Create a copy of DevicePairingEvent
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? hostPort = null,Object? pairingCode = null,}) {
-  return _then(DevicePairingEvent.onSubmitted(
-hostPort: null == hostPort ? _self.hostPort : hostPort // ignore: cast_nullable_to_non_nullable
-as String,pairingCode: null == pairingCode ? _self.pairingCode : pairingCode // ignore: cast_nullable_to_non_nullable
-as String,
-  ));
-}
-
+class $DevicePairingEventCopyWith<$Res>  {
+$DevicePairingEventCopyWith(DevicePairingEvent _, $Res Function(DevicePairingEvent) __);
 }
 
 
@@ -93,11 +56,12 @@ extension DevicePairingEventPatterns on DevicePairingEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSubmitted value)?  onSubmitted,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSubmitted value)?  onSubmitted,TResult Function( _OnConnectPortSubmitted value)?  onConnectPortSubmitted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSubmitted() when onSubmitted != null:
-return onSubmitted(_that);case _:
+return onSubmitted(_that);case _OnConnectPortSubmitted() when onConnectPortSubmitted != null:
+return onConnectPortSubmitted(_that);case _:
   return orElse();
 
 }
@@ -115,11 +79,12 @@ return onSubmitted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSubmitted value)  onSubmitted,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSubmitted value)  onSubmitted,required TResult Function( _OnConnectPortSubmitted value)  onConnectPortSubmitted,}){
 final _that = this;
 switch (_that) {
 case _OnSubmitted():
-return onSubmitted(_that);}
+return onSubmitted(_that);case _OnConnectPortSubmitted():
+return onConnectPortSubmitted(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -133,11 +98,12 @@ return onSubmitted(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSubmitted value)?  onSubmitted,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSubmitted value)?  onSubmitted,TResult? Function( _OnConnectPortSubmitted value)?  onConnectPortSubmitted,}){
 final _that = this;
 switch (_that) {
 case _OnSubmitted() when onSubmitted != null:
-return onSubmitted(_that);case _:
+return onSubmitted(_that);case _OnConnectPortSubmitted() when onConnectPortSubmitted != null:
+return onConnectPortSubmitted(_that);case _:
   return null;
 
 }
@@ -154,10 +120,11 @@ return onSubmitted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String hostPort,  String pairingCode)?  onSubmitted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String hostPort,  String pairingCode)?  onSubmitted,TResult Function( String port)?  onConnectPortSubmitted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSubmitted() when onSubmitted != null:
-return onSubmitted(_that.hostPort,_that.pairingCode);case _:
+return onSubmitted(_that.hostPort,_that.pairingCode);case _OnConnectPortSubmitted() when onConnectPortSubmitted != null:
+return onConnectPortSubmitted(_that.port);case _:
   return orElse();
 
 }
@@ -175,10 +142,11 @@ return onSubmitted(_that.hostPort,_that.pairingCode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String hostPort,  String pairingCode)  onSubmitted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String hostPort,  String pairingCode)  onSubmitted,required TResult Function( String port)  onConnectPortSubmitted,}) {final _that = this;
 switch (_that) {
 case _OnSubmitted():
-return onSubmitted(_that.hostPort,_that.pairingCode);}
+return onSubmitted(_that.hostPort,_that.pairingCode);case _OnConnectPortSubmitted():
+return onConnectPortSubmitted(_that.port);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +160,11 @@ return onSubmitted(_that.hostPort,_that.pairingCode);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String hostPort,  String pairingCode)?  onSubmitted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String hostPort,  String pairingCode)?  onSubmitted,TResult? Function( String port)?  onConnectPortSubmitted,}) {final _that = this;
 switch (_that) {
 case _OnSubmitted() when onSubmitted != null:
-return onSubmitted(_that.hostPort,_that.pairingCode);case _:
+return onSubmitted(_that.hostPort,_that.pairingCode);case _OnConnectPortSubmitted() when onConnectPortSubmitted != null:
+return onConnectPortSubmitted(_that.port);case _:
   return null;
 
 }
@@ -210,12 +179,12 @@ class _OnSubmitted implements DevicePairingEvent {
   const _OnSubmitted({required this.hostPort, required this.pairingCode});
   
 
-@override final  String hostPort;
-@override final  String pairingCode;
+ final  String hostPort;
+ final  String pairingCode;
 
 /// Create a copy of DevicePairingEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 _$OnSubmittedCopyWith<_OnSubmitted> get copyWith => __$OnSubmittedCopyWithImpl<_OnSubmitted>(this, _$identity);
 
@@ -243,7 +212,7 @@ String toString() {
 /// @nodoc
 abstract mixin class _$OnSubmittedCopyWith<$Res> implements $DevicePairingEventCopyWith<$Res> {
   factory _$OnSubmittedCopyWith(_OnSubmitted value, $Res Function(_OnSubmitted) _then) = __$OnSubmittedCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  String hostPort, String pairingCode
 });
@@ -262,10 +231,78 @@ class __$OnSubmittedCopyWithImpl<$Res>
 
 /// Create a copy of DevicePairingEvent
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? hostPort = null,Object? pairingCode = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? hostPort = null,Object? pairingCode = null,}) {
   return _then(_OnSubmitted(
 hostPort: null == hostPort ? _self.hostPort : hostPort // ignore: cast_nullable_to_non_nullable
 as String,pairingCode: null == pairingCode ? _self.pairingCode : pairingCode // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _OnConnectPortSubmitted implements DevicePairingEvent {
+  const _OnConnectPortSubmitted({required this.port});
+  
+
+ final  String port;
+
+/// Create a copy of DevicePairingEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnConnectPortSubmittedCopyWith<_OnConnectPortSubmitted> get copyWith => __$OnConnectPortSubmittedCopyWithImpl<_OnConnectPortSubmitted>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnConnectPortSubmitted&&(identical(other.port, port) || other.port == port));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,port);
+}
+
+@override
+String toString() {
+    return 'DevicePairingEvent.onConnectPortSubmitted(port: $port)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnConnectPortSubmittedCopyWith<$Res> implements $DevicePairingEventCopyWith<$Res> {
+  factory _$OnConnectPortSubmittedCopyWith(_OnConnectPortSubmitted value, $Res Function(_OnConnectPortSubmitted) _then) = __$OnConnectPortSubmittedCopyWithImpl;
+@useResult
+$Res call({
+ String port
+});
+
+
+
+
+}
+/// @nodoc
+class __$OnConnectPortSubmittedCopyWithImpl<$Res>
+    implements _$OnConnectPortSubmittedCopyWith<$Res> {
+  __$OnConnectPortSubmittedCopyWithImpl(this._self, this._then);
+
+  final _OnConnectPortSubmitted _self;
+  final $Res Function(_OnConnectPortSubmitted) _then;
+
+/// Create a copy of DevicePairingEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? port = null,}) {
+  return _then(_OnConnectPortSubmitted(
+port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -317,13 +354,15 @@ extension DevicePairingStatePatterns on DevicePairingState {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DevicePairingEditing value)?  editing,TResult Function( DevicePairingPairing value)?  pairing,TResult Function( DevicePairingPaired value)?  paired,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DevicePairingEditing value)?  editing,TResult Function( DevicePairingPairing value)?  pairing,TResult Function( DevicePairingConnectPortNeeded value)?  connectPortNeeded,TResult Function( DevicePairingConnecting value)?  connecting,TResult Function( DevicePairingConnected value)?  connected,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case DevicePairingEditing() when editing != null:
 return editing(_that);case DevicePairingPairing() when pairing != null:
-return pairing(_that);case DevicePairingPaired() when paired != null:
-return paired(_that);case _:
+return pairing(_that);case DevicePairingConnectPortNeeded() when connectPortNeeded != null:
+return connectPortNeeded(_that);case DevicePairingConnecting() when connecting != null:
+return connecting(_that);case DevicePairingConnected() when connected != null:
+return connected(_that);case _:
   return orElse();
 
 }
@@ -341,13 +380,15 @@ return paired(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DevicePairingEditing value)  editing,required TResult Function( DevicePairingPairing value)  pairing,required TResult Function( DevicePairingPaired value)  paired,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DevicePairingEditing value)  editing,required TResult Function( DevicePairingPairing value)  pairing,required TResult Function( DevicePairingConnectPortNeeded value)  connectPortNeeded,required TResult Function( DevicePairingConnecting value)  connecting,required TResult Function( DevicePairingConnected value)  connected,}){
 final _that = this;
 switch (_that) {
 case DevicePairingEditing():
 return editing(_that);case DevicePairingPairing():
-return pairing(_that);case DevicePairingPaired():
-return paired(_that);}
+return pairing(_that);case DevicePairingConnectPortNeeded():
+return connectPortNeeded(_that);case DevicePairingConnecting():
+return connecting(_that);case DevicePairingConnected():
+return connected(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -361,13 +402,15 @@ return paired(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DevicePairingEditing value)?  editing,TResult? Function( DevicePairingPairing value)?  pairing,TResult? Function( DevicePairingPaired value)?  paired,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DevicePairingEditing value)?  editing,TResult? Function( DevicePairingPairing value)?  pairing,TResult? Function( DevicePairingConnectPortNeeded value)?  connectPortNeeded,TResult? Function( DevicePairingConnecting value)?  connecting,TResult? Function( DevicePairingConnected value)?  connected,}){
 final _that = this;
 switch (_that) {
 case DevicePairingEditing() when editing != null:
 return editing(_that);case DevicePairingPairing() when pairing != null:
-return pairing(_that);case DevicePairingPaired() when paired != null:
-return paired(_that);case _:
+return pairing(_that);case DevicePairingConnectPortNeeded() when connectPortNeeded != null:
+return connectPortNeeded(_that);case DevicePairingConnecting() when connecting != null:
+return connecting(_that);case DevicePairingConnected() when connected != null:
+return connected(_that);case _:
   return null;
 
 }
@@ -384,12 +427,14 @@ return paired(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? error)?  editing,TResult Function()?  pairing,TResult Function()?  paired,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? error)?  editing,TResult Function()?  pairing,TResult Function( String host,  String? error)?  connectPortNeeded,TResult Function( String host)?  connecting,TResult Function()?  connected,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case DevicePairingEditing() when editing != null:
 return editing(_that.error);case DevicePairingPairing() when pairing != null:
-return pairing();case DevicePairingPaired() when paired != null:
-return paired();case _:
+return pairing();case DevicePairingConnectPortNeeded() when connectPortNeeded != null:
+return connectPortNeeded(_that.host,_that.error);case DevicePairingConnecting() when connecting != null:
+return connecting(_that.host);case DevicePairingConnected() when connected != null:
+return connected();case _:
   return orElse();
 
 }
@@ -407,12 +452,14 @@ return paired();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? error)  editing,required TResult Function()  pairing,required TResult Function()  paired,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? error)  editing,required TResult Function()  pairing,required TResult Function( String host,  String? error)  connectPortNeeded,required TResult Function( String host)  connecting,required TResult Function()  connected,}) {final _that = this;
 switch (_that) {
 case DevicePairingEditing():
 return editing(_that.error);case DevicePairingPairing():
-return pairing();case DevicePairingPaired():
-return paired();}
+return pairing();case DevicePairingConnectPortNeeded():
+return connectPortNeeded(_that.host,_that.error);case DevicePairingConnecting():
+return connecting(_that.host);case DevicePairingConnected():
+return connected();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -426,12 +473,14 @@ return paired();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? error)?  editing,TResult? Function()?  pairing,TResult? Function()?  paired,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? error)?  editing,TResult? Function()?  pairing,TResult? Function( String host,  String? error)?  connectPortNeeded,TResult? Function( String host)?  connecting,TResult? Function()?  connected,}) {final _that = this;
 switch (_that) {
 case DevicePairingEditing() when editing != null:
 return editing(_that.error);case DevicePairingPairing() when pairing != null:
-return pairing();case DevicePairingPaired() when paired != null:
-return paired();case _:
+return pairing();case DevicePairingConnectPortNeeded() when connectPortNeeded != null:
+return connectPortNeeded(_that.host,_that.error);case DevicePairingConnecting() when connecting != null:
+return connecting(_that.host);case DevicePairingConnected() when connected != null:
+return connected();case _:
   return null;
 
 }
@@ -542,8 +591,146 @@ String toString() {
 /// @nodoc
 
 
-class DevicePairingPaired implements DevicePairingState {
-  const DevicePairingPaired();
+class DevicePairingConnectPortNeeded implements DevicePairingState {
+  const DevicePairingConnectPortNeeded({required this.host, this.error});
+  
+
+ final  String host;
+ final  String? error;
+
+/// Create a copy of DevicePairingState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DevicePairingConnectPortNeededCopyWith<DevicePairingConnectPortNeeded> get copyWith => _$DevicePairingConnectPortNeededCopyWithImpl<DevicePairingConnectPortNeeded>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingConnectPortNeeded&&(identical(other.host, host) || other.host == host)&&(identical(other.error, error) || other.error == error));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,host,error);
+}
+
+@override
+String toString() {
+    return 'DevicePairingState.connectPortNeeded(host: $host, error: $error)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DevicePairingConnectPortNeededCopyWith<$Res> implements $DevicePairingStateCopyWith<$Res> {
+  factory $DevicePairingConnectPortNeededCopyWith(DevicePairingConnectPortNeeded value, $Res Function(DevicePairingConnectPortNeeded) _then) = _$DevicePairingConnectPortNeededCopyWithImpl;
+@useResult
+$Res call({
+ String host, String? error
+});
+
+
+
+
+}
+/// @nodoc
+class _$DevicePairingConnectPortNeededCopyWithImpl<$Res>
+    implements $DevicePairingConnectPortNeededCopyWith<$Res> {
+  _$DevicePairingConnectPortNeededCopyWithImpl(this._self, this._then);
+
+  final DevicePairingConnectPortNeeded _self;
+  final $Res Function(DevicePairingConnectPortNeeded) _then;
+
+/// Create a copy of DevicePairingState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? host = null,Object? error = freezed,}) {
+  return _then(DevicePairingConnectPortNeeded(
+host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
+as String,error: freezed == error ? _self.error : error // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class DevicePairingConnecting implements DevicePairingState {
+  const DevicePairingConnecting({required this.host});
+  
+
+ final  String host;
+
+/// Create a copy of DevicePairingState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DevicePairingConnectingCopyWith<DevicePairingConnecting> get copyWith => _$DevicePairingConnectingCopyWithImpl<DevicePairingConnecting>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingConnecting&&(identical(other.host, host) || other.host == host));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,host);
+}
+
+@override
+String toString() {
+    return 'DevicePairingState.connecting(host: $host)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DevicePairingConnectingCopyWith<$Res> implements $DevicePairingStateCopyWith<$Res> {
+  factory $DevicePairingConnectingCopyWith(DevicePairingConnecting value, $Res Function(DevicePairingConnecting) _then) = _$DevicePairingConnectingCopyWithImpl;
+@useResult
+$Res call({
+ String host
+});
+
+
+
+
+}
+/// @nodoc
+class _$DevicePairingConnectingCopyWithImpl<$Res>
+    implements $DevicePairingConnectingCopyWith<$Res> {
+  _$DevicePairingConnectingCopyWithImpl(this._self, this._then);
+
+  final DevicePairingConnecting _self;
+  final $Res Function(DevicePairingConnecting) _then;
+
+/// Create a copy of DevicePairingState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? host = null,}) {
+  return _then(DevicePairingConnecting(
+host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class DevicePairingConnected implements DevicePairingState {
+  const DevicePairingConnected();
   
 
 
@@ -553,7 +740,7 @@ class DevicePairingPaired implements DevicePairingState {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingPaired);
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is DevicePairingConnected);
 }
 
 
@@ -562,7 +749,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-    return 'DevicePairingState.paired()';
+    return 'DevicePairingState.connected()';
 }
 
 
