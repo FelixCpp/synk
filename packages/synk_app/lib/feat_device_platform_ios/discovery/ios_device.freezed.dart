@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$IosDevice {
 
- DeviceId get id; String get modelName;
+ DeviceId get id; String get modelName; bool get isWireless;
 /// Create a copy of IosDevice
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $IosDeviceCopyWith<IosDevice> get copyWith => _$IosDeviceCopyWithImpl<IosDevice>
 @override
 bool operator ==(Object other) {
   final _this = this as IosDevice;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is IosDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is IosDevice&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.modelName, _this.modelName) || other.modelName == _this.modelName)&&(identical(other.isWireless, _this.isWireless) || other.isWireless == _this.isWireless));
 }
 
 
 @override
 int get hashCode {
   final _this = this as IosDevice;
-  return Object.hash(runtimeType,_this.id,_this.modelName);
+  return Object.hash(runtimeType,_this.id,_this.modelName,_this.isWireless);
 }
 
 @override
 String toString() {
   final _this = this as IosDevice;
-  return 'IosDevice(id: ${_this.id}, modelName: ${_this.modelName})';
+  return 'IosDevice(id: ${_this.id}, modelName: ${_this.modelName}, isWireless: ${_this.isWireless})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $IosDeviceCopyWith<$Res>  {
   factory $IosDeviceCopyWith(IosDevice value, $Res Function(IosDevice) _then) = _$IosDeviceCopyWithImpl;
 @useResult
 $Res call({
- DeviceId id, String modelName
+ DeviceId id, String modelName, bool isWireless
 });
 
 
@@ -68,11 +68,12 @@ class _$IosDeviceCopyWithImpl<$Res>
 
 /// Create a copy of IosDevice
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? modelName = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? modelName = null,Object? isWireless = null,}) {
   return _then(IosDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isWireless: null == isWireless ? _self.isWireless : isWireless // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -154,10 +155,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId id,  String modelName)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DeviceId id,  String modelName,  bool isWireless)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _IosDevice() when $default != null:
-return $default(_that.id,_that.modelName);case _:
+return $default(_that.id,_that.modelName,_that.isWireless);case _:
   return orElse();
 
 }
@@ -175,10 +176,10 @@ return $default(_that.id,_that.modelName);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId id,  String modelName)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DeviceId id,  String modelName,  bool isWireless)  $default,) {final _that = this;
 switch (_that) {
 case _IosDevice():
-return $default(_that.id,_that.modelName);}
+return $default(_that.id,_that.modelName,_that.isWireless);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -192,10 +193,10 @@ return $default(_that.id,_that.modelName);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId id,  String modelName)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DeviceId id,  String modelName,  bool isWireless)?  $default,) {final _that = this;
 switch (_that) {
 case _IosDevice() when $default != null:
-return $default(_that.id,_that.modelName);case _:
+return $default(_that.id,_that.modelName,_that.isWireless);case _:
   return null;
 
 }
@@ -207,11 +208,12 @@ return $default(_that.id,_that.modelName);case _:
 
 
 class _IosDevice extends IosDevice {
-  const _IosDevice({required this.id, required this.modelName}): super._();
+  const _IosDevice({required this.id, required this.modelName, this.isWireless = false}): super._();
   
 
 @override final  DeviceId id;
 @override final  String modelName;
+@override@JsonKey() final  bool isWireless;
 
 /// Create a copy of IosDevice
 /// with the given fields replaced by the non-null parameter values.
@@ -223,18 +225,18 @@ _$IosDeviceCopyWith<_IosDevice> get copyWith => __$IosDeviceCopyWithImpl<_IosDev
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IosDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.modelName, modelName) || other.modelName == modelName));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _IosDevice&&(identical(other.id, id) || other.id == id)&&(identical(other.modelName, modelName) || other.modelName == modelName)&&(identical(other.isWireless, isWireless) || other.isWireless == isWireless));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,modelName);
+    return Object.hash(runtimeType,id,modelName,isWireless);
 }
 
 @override
 String toString() {
-    return 'IosDevice(id: $id, modelName: $modelName)';
+    return 'IosDevice(id: $id, modelName: $modelName, isWireless: $isWireless)';
 }
 
 
@@ -245,7 +247,7 @@ abstract mixin class _$IosDeviceCopyWith<$Res> implements $IosDeviceCopyWith<$Re
   factory _$IosDeviceCopyWith(_IosDevice value, $Res Function(_IosDevice) _then) = __$IosDeviceCopyWithImpl;
 @override @useResult
 $Res call({
- DeviceId id, String modelName
+ DeviceId id, String modelName, bool isWireless
 });
 
 
@@ -262,11 +264,12 @@ class __$IosDeviceCopyWithImpl<$Res>
 
 /// Create a copy of IosDevice
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? modelName = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? modelName = null,Object? isWireless = null,}) {
   return _then(_IosDevice(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as DeviceId,modelName: null == modelName ? _self.modelName : modelName // ignore: cast_nullable_to_non_nullable
-as String,
+as String,isWireless: null == isWireless ? _self.isWireless : isWireless // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

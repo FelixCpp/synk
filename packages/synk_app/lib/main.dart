@@ -16,6 +16,7 @@ import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform_android/android_device_platform.dart';
 import 'package:synk/feat_device_platform_android/bundled_files.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_network_device_discovery.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/ios_device_platform.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
@@ -360,6 +361,9 @@ class const _ToolProviders({
       ),
       IosDevicePlatform(
         discoveryChannel: IosDeviceDiscoveryChannel(),
+        networkDiscovery: IosNetworkDeviceDiscovery(
+          devicectl: RepositoryProvider.of<DevicectlApi>(context),
+        ),
         channel: IosMirrorChannel(),
         mediaStreamChannel: IosMediaStreamChannel(),
         hidChannel: IosHidChannel(),

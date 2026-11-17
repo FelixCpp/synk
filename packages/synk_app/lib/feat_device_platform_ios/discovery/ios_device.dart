@@ -11,13 +11,14 @@ sealed class IosDevice with _$IosDevice implements PluggedDevice {
   const factory IosDevice({
     required DeviceId id,
     required String modelName,
+    @Default(false) bool isWireless,
   }) = _IosDevice;
 
   @override
   bool get isAuthorized => true;
 
   @override
-  bool get isWireless => false;
+  bool get canDisconnectWirelessly => false;
 }
 
 extension IosDeviceDtoToDomain on IosDeviceDto {

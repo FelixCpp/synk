@@ -169,10 +169,26 @@ Dekodierfehler, Speicher flach bei 47 MiB, und Audio mit echtem Ton
 gegengeprüft (Spitzenamplitude 0,000 bei Stille, 0,825 während VoiceOver
 sprach).
 
-**Offen:** der kabellose Fall selbst. Alle Messungen liefen über einen
-CoreDevice-Tunnel, dessen Unterbau zu diesem Zeitpunkt USB war. Der Code
-unterscheidet das nicht – er nimmt die utun-Adresse, die CoreDevice
-bereitstellt – aber gemessen ist es nicht. Ebenfalls offen: die Bitrate liegt
+**Kabellos gemessen (2026-11-17).** iPhone 15, „Connect via network“ in Xcode,
+Kabel gezogen; `devicectl` meldet `transportType: localNetwork`. Derselbe Spike
+gegen die Dateien aus `e2f3aee`, gegenübergestellt mit einer Messung am Kabel
+direkt davor:
+
+| | Kabel (`wired`) | WLAN (`localNetwork`) |
+| --- | --- | --- |
+| Video | 51–58 fps, 3,8–4,7 Mbit/s | 38–43 fps, 0,5–1,0 Mbit/s |
+| Lücken / Dekodierfehler | 0 / 0 | 0 / 0 über 30 s |
+| Audio | alle Pakete dekodiert | alle Pakete dekodiert, Spitze 0,70 |
+| HID | Digitizer, Tastatur | Digitizer, Tastatur; Scroll-Wisch kam an |
+
+Bild ohne Blockartefakte (letzter Frame geprüft), Inhalt war weitgehend
+statisch. Kabellose Spiegelung ist damit **machbar**: es fehlen die Erkennung
+ohne USB (heute IOKit) und der Videopfad über den Medienstrom (heute
+Capture-Session, USB-only). Zwei Fallen beim Nachmessen: `build.sh` zielt auf
+macOS 27 und läuft auf älteren Systemen nicht, und bei ausgeschaltetem
+Bildschirm sendet das Gerät keine Pakete – 0 Pakete heißt dann nicht „kaputt“.
+
+**Ebenfalls offen:** die Bitrate liegt
 mit 0,7–2,5 Mbit/s deutlich unter der ausgehandelten Obergrenze von 6 Mbit/s.
 Das ist Apples Ratensteuerung, nicht unsere Grenze;
 `-[AVCMediaStreamNegotiator overrideMaxBandwidth:foveationIsSupported:]` wäre

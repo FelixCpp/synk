@@ -124,7 +124,8 @@ _EntryLook _lookOf(BuildContext context, SidebarDevice device) {
     actions: [
       if (look.isUnauthorized) _EntryAction.pairAgain,
       ...look.actions,
-      _EntryAction.disconnectWirelessly,
+      if (device.device.canDisconnectWirelessly)
+        _EntryAction.disconnectWirelessly,
     ],
     isBusy: look.isBusy,
     isUnauthorized: look.isUnauthorized,

@@ -232,6 +232,69 @@ void main() {
     });
   });
 
+  group('listDevices', () {
+    test('reads how each device is reachable', () async {
+      final api = apiAnswering((
+        exitCode: 0,
+        stdout: '''
+{
+  "result": {
+    "devices": [
+      {
+        "hardwareProperties": {
+          "udid": "B90D57C9-9BCA-458E-8B3C-F3293A5457E5",
+          "marketingName": "iPad Pro 13-inch (M5)"
+        },
+        "connectionProperties": {
+          "pairingState": "paired",
+          "transportType": "sameMachine"
+        },
+        "deviceProperties": {"name": "iPad Pro 13-inch (M5)"}
+      },
+      {
+        "hardwareProperties": {
+          "udid": "00008120-0009555001C2601E",
+          "marketingName": "iPhone 15"
+        },
+        "connectionProperties": {
+          "pairingState": "paired",
+          "transportType": "localNetwork"
+        },
+        "deviceProperties": {"name": "iPhone von Felix"}
+      },
+      {
+        "connectionProperties": {"transportType": "wired"}
+      }
+    ]
+  }
+}
+''',
+        stderr: '',
+      ));
+
+      final devices = await api.listDevices();
+
+      expect(devices, hasLength(2));
+      expect(devices.first.transport, isNull);
+      expect(devices.last.udid, '00008120-0009555001C2601E');
+      expect(devices.last.name, 'iPhone von Felix');
+      expect(devices.last.modelName, 'iPhone 15');
+      expect(devices.last.transport, DevicectlTransport.localNetwork);
+      expect(devices.last.isPaired, isTrue);
+    });
+
+    test('fails when devicectl does', () async {
+      final api = apiAnswering(
+        (exitCode: 1, stdout: '', stderr: 'no Xcode'),
+      );
+
+      await expectLater(
+        api.listDevices(),
+        throwsA(isA<DevicectlCommandException>()),
+      );
+    });
+  });
+
   group('deviceStatus', () {
     String devicesJson({
       String udid = '00008120-0009555001C2601E',

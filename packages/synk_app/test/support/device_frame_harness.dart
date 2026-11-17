@@ -114,4 +114,7 @@ class const _TestDevice(
 
   @override
   bool get isWireless => false;
+
+  @override
+  bool get canDisconnectWirelessly => false;
 }

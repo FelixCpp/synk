@@ -5,11 +5,13 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/camera_access_denied_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
+import 'package:synk/feat_device_platform/domain/models/wireless_mirroring_unsupported_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
 import 'package:synk/feat_device_platform/application/device_platform.dart';
 import 'package:synk/feat_device_platform/domain/models/device_screen_size.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_network_device_discovery.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/ios_device_session.dart';
 import 'package:synk/feat_device_platform_ios/mirror/ios_media_stream_channel.dart';
@@ -20,19 +22,29 @@ import 'package:synk/feat_tool_validation/domain/models/tool_issue.dart';
 
 class IosDevicePlatform({
   required IosDeviceDiscoveryChannel discoveryChannel,
+  required IosNetworkDeviceDiscovery networkDiscovery,
   required final IosMirrorChannel channel,
   required final IosMediaStreamChannel mediaStreamChannel,
   required final IosHidChannel hidChannel,
   required final DevicectlApi devicectl,
   required final FileSystem fileSystem,
 }) implements DevicePlatform {
-  final Stream<List<PluggedDevice>> _devices;
+  final ValueStream<List<IosDevice>> _devices;
 
   this
-    : _devices = discoveryChannel
-          .observeDevices()
-          .map((dtos) => dtos.map((dto) => dto.toDomain()).toList())
-          .shareValue();
+    : _devices = Rx.combineLatest2(
+        discoveryChannel.observeDevices().map(
+          (dtos) => dtos.map((dto) => dto.toDomain()).toList(),
+        ),
+        networkDiscovery.observeDevices(),
+        (plugged, reachable) {
+          final pluggedIds = {for (final device in plugged) device.id};
+          return [
+            ...plugged,
+            ...reachable.where((device) => !pluggedIds.contains(device.id)),
+          ];
+        },
+      ).shareValue();
 
   @override
   Set<ExternalTool> getRequiredTools() {
@@ -48,6 +60,13 @@ class IosDevicePlatform({
   // iOS mirroring does not go through scrcpy, so [options] has nothing to
   // act on here.
   Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions _) async {
+    final device = _devices.valueOrNull
+        ?.where((device) => device.id == deviceId)
+        .firstOrNull;
+    if (device != null && device.isWireless) {
+      throw const WirelessMirroringUnsupportedException();
+    }
+
     final IosMirrorStartResult result;
     try {
       result = await channel.startMirror(deviceId);

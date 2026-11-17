@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:api_devicectl/api_devicectl.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_discovery_channel.dart';
+import 'package:synk/feat_device_platform_ios/discovery/ios_network_device_discovery.dart';
 import 'package:synk/feat_device_platform_ios/discovery/ios_device_dto.dart';
 import 'package:synk/feat_device_platform_ios/hid/ios_hid_channel.dart';
 import 'package:synk/feat_device_platform_ios/ios_device_platform.dart';
@@ -15,6 +16,7 @@ import 'package:file/memory.dart';
 import 'package:synk/feat_device_platform/application/device_session.dart';
 import 'package:synk/feat_device_platform/domain/models/device_setup_exception.dart';
 import 'package:synk/feat_device_platform/domain/models/mirror_options.dart';
+import 'package:synk/feat_device_platform/domain/models/wireless_mirroring_unsupported_exception.dart';
 
 import '../support/fake_process_manager.dart';
 
@@ -28,6 +30,7 @@ void main() {
 
         final platform = IosDevicePlatform(
           discoveryChannel: _FakeIosDeviceDiscoveryChannel(frames.stream),
+          networkDiscovery: _FakeNetworkDiscovery(Stream.value(const [])),
           channel: IosMirrorChannel(),
           mediaStreamChannel: IosMediaStreamChannel(),
           hidChannel: IosHidChannel(),
@@ -52,6 +55,63 @@ void main() {
         expect(seenByLate.single.id, _pluggedDevice.serialNumber);
       },
     );
+  });
+
+  group('IosDevicePlatform over the network', () {
+    const wireless = IosDevice(
+      id: DeviceId('000081200009555001C2601E'),
+      modelName: 'iPhone von Felix',
+      isWireless: true,
+    );
+
+    IosDevicePlatform platformWith({
+      List<IosDeviceDto> plugged = const [],
+      List<IosDevice> reachable = const [],
+    }) {
+      return IosDevicePlatform(
+        discoveryChannel: _FakeIosDeviceDiscoveryChannel(Stream.value(plugged)),
+        networkDiscovery: _FakeNetworkDiscovery(Stream.value(reachable)),
+        channel: IosMirrorChannel(),
+        mediaStreamChannel: IosMediaStreamChannel(),
+        hidChannel: IosHidChannel(),
+        devicectl: DevicectlApi(),
+        fileSystem: MemoryFileSystem(),
+      );
+    }
+
+    test('lists a device that is only reachable over the network', () async {
+      final devices = await platformWith(
+        reachable: const [wireless],
+      ).observeDevices().first;
+
+      expect(devices.single.id, wireless.id);
+      expect(devices.single.isWireless, isTrue);
+    });
+
+    test('lists a plugged-in device once, as plugged in', () async {
+      const sameDevice = IosDeviceDto(
+        serialNumber: '000081200009555001C2601E',
+        productName: 'iPhone',
+      );
+
+      final devices = await platformWith(
+        plugged: const [sameDevice],
+        reachable: const [wireless],
+      ).observeDevices().first;
+
+      expect(devices.single.id, sameDevice.serialNumber);
+      expect(devices.single.isWireless, isFalse);
+    });
+
+    test('refuses to mirror a device without its cable', () async {
+      final platform = platformWith(reachable: const [wireless]);
+      await platform.observeDevices().first;
+
+      await expectLater(
+        platform.connect(wireless.id, const MirrorOptions.defaults()),
+        throwsA(isA<WirelessMirroringUnsupportedException>()),
+      );
+    });
   });
 
   group('IosDevicePlatform.connect', () {
@@ -122,6 +182,7 @@ void main() {
     Future<DeviceSession> connectSession() {
       final platform = IosDevicePlatform(
         discoveryChannel: _FakeIosDeviceDiscoveryChannel(const Stream.empty()),
+        networkDiscovery: _FakeNetworkDiscovery(const Stream.empty()),
         channel: IosMirrorChannel(),
         mediaStreamChannel: IosMediaStreamChannel(),
         hidChannel: IosHidChannel(),
@@ -239,4 +300,19 @@ class _FakeIosDeviceDiscoveryChannel implements IosDeviceDiscoveryChannel {
 
   @override
   Stream<List<IosDeviceDto>> observeDevices() => _frames;
+}
+
+class _FakeNetworkDiscovery implements IosNetworkDeviceDiscovery {
+  _FakeNetworkDiscovery(this._devices);
+
+  final Stream<List<IosDevice>> _devices;
+
+  @override
+  DevicectlApi get devicectl => throw UnimplementedError();
+
+  @override
+  Duration get interval => Duration.zero;
+
+  @override
+  Stream<List<IosDevice>> observeDevices() => _devices;
 }

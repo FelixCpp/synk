@@ -5,4 +5,5 @@ abstract interface class PluggedDevice {
   String get modelName;
   bool get isAuthorized;
   bool get isWireless;
+  bool get canDisconnectWirelessly;
 }

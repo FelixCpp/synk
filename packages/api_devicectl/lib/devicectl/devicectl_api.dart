@@ -16,6 +16,25 @@ class const DevicectlDeviceStatus({
   required final bool? isDeveloperDiskImageAvailable,
 });
 
+enum DevicectlTransport {
+  wired('wired'),
+  localNetwork('localNetwork');
+
+  const DevicectlTransport(this.value);
+
+  final String value;
+}
+
+class const DevicectlDevice({
+  required final String udid,
+  required final String? name,
+  required final String? modelName,
+  required final DevicectlTransport? transport,
+  required final bool isPaired,
+  required final bool? isDeveloperModeEnabled,
+  required final bool? isDeveloperDiskImageAvailable,
+});
+
 enum DevicectlOrientation {
   portrait('portrait'),
   portraitUpsideDown('portraitUpsideDown'),
@@ -146,6 +165,22 @@ class DevicectlApi({
   Future<DevicectlDeviceStatus?> deviceStatus({
     required String deviceId,
   }) async {
+    final wanted = _comparableUdid(deviceId);
+
+    for (final device in await listDevices()) {
+      if (_comparableUdid(device.udid) != wanted) continue;
+
+      return DevicectlDeviceStatus(
+        isPaired: device.isPaired,
+        isDeveloperModeEnabled: device.isDeveloperModeEnabled,
+        isDeveloperDiskImageAvailable: device.isDeveloperDiskImageAvailable,
+      );
+    }
+
+    return null;
+  }
+
+  Future<List<DevicectlDevice>> listDevices() async {
     final process = await processRunner.run([
       'list',
       'devices',
@@ -165,30 +200,37 @@ class DevicectlApi({
     final json = jsonDecode(process.stdout as String) as Map<String, Object?>;
     final result = json['result'] as Map<String, Object?>? ?? const {};
     final devices = result['devices'] as List<Object?>? ?? const [];
-    final wanted = _comparableUdid(deviceId);
 
-    for (final device in devices.cast<Map<String, Object?>>()) {
-      final hardware = device['hardwareProperties'] as Map<String, Object?>?;
-      final udid = hardware?['udid'] as String?;
-      if (udid == null || _comparableUdid(udid) != wanted) continue;
-
-      final connection =
-          device['connectionProperties'] as Map<String, Object?>?;
-      final properties = device['deviceProperties'] as Map<String, Object?>?;
-      final developerMode = properties?['developerModeStatus'] as String?;
-      final ddiServices = properties?['ddiServicesAvailable'] as bool?;
-
-      return DevicectlDeviceStatus(
-        isPaired: connection?['pairingState'] == 'paired',
-        isDeveloperModeEnabled: developerMode == null
-            ? null
-            : developerMode == 'enabled',
-        isDeveloperDiskImageAvailable: ddiServices,
-      );
-    }
-
-    return null;
+    return [
+      for (final device in devices.cast<Map<String, Object?>>())
+        ?_deviceFrom(device),
+    ];
   }
+}
+
+DevicectlDevice? _deviceFrom(Map<String, Object?> device) {
+  final hardware = device['hardwareProperties'] as Map<String, Object?>?;
+  final udid = hardware?['udid'] as String?;
+  if (udid == null) return null;
+
+  final connection = device['connectionProperties'] as Map<String, Object?>?;
+  final properties = device['deviceProperties'] as Map<String, Object?>?;
+  final developerMode = properties?['developerModeStatus'] as String?;
+  final transport = connection?['transportType'] as String?;
+
+  return DevicectlDevice(
+    udid: udid,
+    name: properties?['name'] as String?,
+    modelName: hardware?['marketingName'] as String?,
+    transport: DevicectlTransport.values
+        .where((candidate) => candidate.value == transport)
+        .firstOrNull,
+    isPaired: connection?['pairingState'] == 'paired',
+    isDeveloperModeEnabled: developerMode == null
+        ? null
+        : developerMode == 'enabled',
+    isDeveloperDiskImageAvailable: properties?['ddiServicesAvailable'] as bool?,
+  );
 }
 
 String _comparableUdid(String udid) {

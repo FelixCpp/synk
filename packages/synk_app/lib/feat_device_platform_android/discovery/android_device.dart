@@ -19,6 +19,9 @@ sealed class AndroidDevice with _$AndroidDevice implements PluggedDevice {
 
   @override
   bool get isWireless => connection == AndroidDeviceConnection.tcp;
+
+  @override
+  bool get canDisconnectWirelessly => isWireless;
 }
 
 enum AndroidDeviceState {
