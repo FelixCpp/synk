@@ -1,6 +1,7 @@
 import 'package:synk_ui/src/synk_ui_theme.dart';
 import 'package:synk_ui/src/components/synk_ui_button.dart';
 import 'package:synk_ui/src/components/synk_ui_icon_button.dart';
+import 'package:synk_ui/src/components/synk_ui_selectable_text.dart';
 import 'package:synk_ui/src/components/synk_ui_spinner.dart';
 import 'package:synk_ui/src/components/synk_ui_tag.dart';
 import 'package:synk_ui/src/tokens/synk_ui_metrics.dart';
@@ -16,6 +17,7 @@ class const SynkUiToast({
   final double? progress,
   final VoidCallback? onDismiss,
   final IconData? dismissIcon,
+  final IconData? copyIcon,
   final String? actionLabel,
   final VoidCallback? onAction,
 }) extends StatelessWidget {
@@ -64,7 +66,14 @@ class const SynkUiToast({
                         crossAxisAlignment: CrossAxisAlignment.start,
                         spacing: SynkUiSpace.s8,
                         children: [
-                          Text(message, style: theme.typography.body),
+                          if (copyIcon case final copyIcon?)
+                            SynkUiSelectableText(
+                              message,
+                              copyIcon: copyIcon,
+                              style: theme.typography.body,
+                            )
+                          else
+                            Text(message, style: theme.typography.body),
                           if (actionLabel case final actionLabel?)
                             SynkUiButton(
                               label: actionLabel,

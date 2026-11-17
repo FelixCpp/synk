@@ -115,6 +115,7 @@ class const _Toast({
       isBusy: entry.notification.isBusy,
       progress: progress,
       dismissIcon: CupertinoIcons.clear,
+      copyIcon: CupertinoIcons.doc_on_doc,
       onDismiss: onDismiss,
       actionLabel: action?.label,
       onAction: action == null
