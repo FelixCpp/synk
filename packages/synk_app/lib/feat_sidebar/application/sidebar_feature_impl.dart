@@ -59,6 +59,10 @@ class const SidebarFeatureImpl({
       connections.disconnect(device);
 
   @override
+  Future<void> disconnectWirelessly(PluggedDevice device) =>
+      connections.disconnectWirelessly(device);
+
+  @override
   Future<void> openCameraPrivacySettings() =>
       fileOpener.open(_cameraPrivacySettings);
 }

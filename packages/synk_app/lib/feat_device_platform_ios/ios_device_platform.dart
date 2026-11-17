@@ -81,6 +81,9 @@ class IosDevicePlatform({
   }
 
   @override
+  Future<void> disconnectWirelessly(DeviceId deviceId) async {}
+
+  @override
   Future<void> dispose() async {}
 
   Future<IosAudioSideCar?> _startAudio(DeviceId deviceId) async {

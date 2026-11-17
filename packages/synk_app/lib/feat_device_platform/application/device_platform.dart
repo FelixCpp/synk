@@ -7,5 +7,6 @@ abstract interface class DevicePlatform {
   Set<ExternalTool> getRequiredTools();
   Stream<List<PluggedDevice>> observeDevices();
   Future<DeviceSession> connect(DeviceId deviceId, MirrorOptions options);
+  Future<void> disconnectWirelessly(DeviceId deviceId);
   Future<void> dispose();
 }

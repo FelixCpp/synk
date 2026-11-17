@@ -18,6 +18,7 @@ class FakeSidebarFeature implements SidebarFeature {
   Object? errorToThrow;
   PluggedDevice? lastConnected;
   PluggedDevice? lastDisconnected;
+  PluggedDevice? lastDisconnectedWirelessly;
   var cameraSettingsOpened = 0;
 
   @override
@@ -32,6 +33,12 @@ class FakeSidebarFeature implements SidebarFeature {
   @override
   Future<void> disconnect(PluggedDevice device) async {
     lastDisconnected = device;
+    if (errorToThrow case final error?) throw error;
+  }
+
+  @override
+  Future<void> disconnectWirelessly(PluggedDevice device) async {
+    lastDisconnectedWirelessly = device;
     if (errorToThrow case final error?) throw error;
   }
 
@@ -134,6 +141,16 @@ void main() {
 
     expect(feature.lastDisconnected, device);
     expect(feature.lastConnected, isNull);
+  });
+
+  test('disconnecting wirelessly drops the wireless link', () async {
+    final device = buildDevice('serial-5');
+
+    bloc.add(SidebarEvent.onDisconnectWirelesslyRequested(device));
+    await pumpEventQueue();
+
+    expect(feature.lastDisconnectedWirelessly, device);
+    expect(feature.lastDisconnected, isNull);
   });
 
   test('notifies when connecting fails', () async {

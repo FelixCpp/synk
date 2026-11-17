@@ -8,6 +8,7 @@ abstract interface class DeviceConnectionsFeature {
   Future<void> dispose();
   Future<void> connect(PluggedDevice device);
   Future<void> disconnect(PluggedDevice device);
+  Future<void> disconnectWirelessly(PluggedDevice device);
   bool isConnected(DeviceId id);
   Stream<List<PluggedDevice>> observePluggedDevices();
   Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates();

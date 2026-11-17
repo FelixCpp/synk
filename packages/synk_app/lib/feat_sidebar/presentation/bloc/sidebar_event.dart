@@ -7,6 +7,9 @@ sealed class SidebarEvent with _$SidebarEvent {
       _OnConnectRequested;
   const factory SidebarEvent.onDisconnectRequested(PluggedDevice device) =
       _OnDisconnectRequested;
+  const factory SidebarEvent.onDisconnectWirelesslyRequested(
+    PluggedDevice device,
+  ) = _OnDisconnectWirelesslyRequested;
   const factory SidebarEvent.onOpenCameraPrivacySettings() =
       _OnOpenCameraPrivacySettings;
 }

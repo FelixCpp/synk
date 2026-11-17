@@ -1,0 +1,13 @@
+import 'dart:async';
+
+import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
+import 'package:synk/feat_sidebar/domain/sidebar_feature.dart';
+import 'package:use_in_case/use_in_case.dart';
+
+class const DisconnectWirelesslyInteractor(final SidebarFeature feature)
+    implements ParameterizedInteractor<PluggedDevice> {
+  @override
+  FutureOr<void> execute(PluggedDevice input) {
+    return feature.disconnectWirelessly(input);
+  }
+}

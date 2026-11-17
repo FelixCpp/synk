@@ -127,6 +127,11 @@ class AndroidDevicePlatform(
   }
 
   @override
+  Future<void> disconnectWirelessly(DeviceId deviceId) {
+    return api.disconnectWirelessly(deviceId);
+  }
+
+  @override
   Future<void> dispose() async {}
 
   Future<void> _killStaleProcesses(AdbDeviceCommunicator communicator) {

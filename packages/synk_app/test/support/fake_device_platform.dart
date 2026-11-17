@@ -17,6 +17,7 @@ class FakePlatform implements DevicePlatform {
   final devices = BehaviorSubject.seeded(<PluggedDevice>[]);
   final connectCalls = <DeviceId>[];
   final connectOptions = <MirrorOptions>[];
+  final wirelessDisconnectCalls = <DeviceId>[];
   var isDisposed = false;
 
   void plug(List<PluggedDevice> plugged) => devices.add(plugged);
@@ -35,6 +36,11 @@ class FakePlatform implements DevicePlatform {
     connectCalls.add(deviceId);
     connectOptions.add(options);
     return await onConnect?.call(deviceId) ?? FakeDeviceSession();
+  }
+
+  @override
+  Future<void> disconnectWirelessly(DeviceId deviceId) async {
+    wirelessDisconnectCalls.add(deviceId);
   }
 
   @override

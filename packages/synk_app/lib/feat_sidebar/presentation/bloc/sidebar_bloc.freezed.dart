@@ -320,13 +320,14 @@ extension SidebarEventPatterns on SidebarEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnConnectRequested value)?  onConnectRequested,TResult Function( _OnDisconnectRequested value)?  onDisconnectRequested,TResult Function( _OnOpenCameraPrivacySettings value)?  onOpenCameraPrivacySettings,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _OnSetup value)?  onSetup,TResult Function( _OnConnectRequested value)?  onConnectRequested,TResult Function( _OnDisconnectRequested value)?  onDisconnectRequested,TResult Function( _OnDisconnectWirelesslyRequested value)?  onDisconnectWirelesslyRequested,TResult Function( _OnOpenCameraPrivacySettings value)?  onOpenCameraPrivacySettings,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnConnectRequested() when onConnectRequested != null:
 return onConnectRequested(_that);case _OnDisconnectRequested() when onDisconnectRequested != null:
-return onDisconnectRequested(_that);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
+return onDisconnectRequested(_that);case _OnDisconnectWirelesslyRequested() when onDisconnectWirelesslyRequested != null:
+return onDisconnectWirelesslyRequested(_that);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
 return onOpenCameraPrivacySettings(_that);case _:
   return orElse();
 
@@ -345,13 +346,14 @@ return onOpenCameraPrivacySettings(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnConnectRequested value)  onConnectRequested,required TResult Function( _OnDisconnectRequested value)  onDisconnectRequested,required TResult Function( _OnOpenCameraPrivacySettings value)  onOpenCameraPrivacySettings,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _OnSetup value)  onSetup,required TResult Function( _OnConnectRequested value)  onConnectRequested,required TResult Function( _OnDisconnectRequested value)  onDisconnectRequested,required TResult Function( _OnDisconnectWirelesslyRequested value)  onDisconnectWirelesslyRequested,required TResult Function( _OnOpenCameraPrivacySettings value)  onOpenCameraPrivacySettings,}){
 final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup(_that);case _OnConnectRequested():
 return onConnectRequested(_that);case _OnDisconnectRequested():
-return onDisconnectRequested(_that);case _OnOpenCameraPrivacySettings():
+return onDisconnectRequested(_that);case _OnDisconnectWirelesslyRequested():
+return onDisconnectWirelesslyRequested(_that);case _OnOpenCameraPrivacySettings():
 return onOpenCameraPrivacySettings(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -366,13 +368,14 @@ return onOpenCameraPrivacySettings(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnConnectRequested value)?  onConnectRequested,TResult? Function( _OnDisconnectRequested value)?  onDisconnectRequested,TResult? Function( _OnOpenCameraPrivacySettings value)?  onOpenCameraPrivacySettings,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _OnSetup value)?  onSetup,TResult? Function( _OnConnectRequested value)?  onConnectRequested,TResult? Function( _OnDisconnectRequested value)?  onDisconnectRequested,TResult? Function( _OnDisconnectWirelesslyRequested value)?  onDisconnectWirelesslyRequested,TResult? Function( _OnOpenCameraPrivacySettings value)?  onOpenCameraPrivacySettings,}){
 final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup(_that);case _OnConnectRequested() when onConnectRequested != null:
 return onConnectRequested(_that);case _OnDisconnectRequested() when onDisconnectRequested != null:
-return onDisconnectRequested(_that);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
+return onDisconnectRequested(_that);case _OnDisconnectWirelesslyRequested() when onDisconnectWirelesslyRequested != null:
+return onDisconnectWirelesslyRequested(_that);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
 return onOpenCameraPrivacySettings(_that);case _:
   return null;
 
@@ -390,12 +393,13 @@ return onOpenCameraPrivacySettings(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( PluggedDevice device)?  onConnectRequested,TResult Function( PluggedDevice device)?  onDisconnectRequested,TResult Function()?  onOpenCameraPrivacySettings,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  onSetup,TResult Function( PluggedDevice device)?  onConnectRequested,TResult Function( PluggedDevice device)?  onDisconnectRequested,TResult Function( PluggedDevice device)?  onDisconnectWirelesslyRequested,TResult Function()?  onOpenCameraPrivacySettings,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnConnectRequested() when onConnectRequested != null:
 return onConnectRequested(_that.device);case _OnDisconnectRequested() when onDisconnectRequested != null:
-return onDisconnectRequested(_that.device);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
+return onDisconnectRequested(_that.device);case _OnDisconnectWirelesslyRequested() when onDisconnectWirelesslyRequested != null:
+return onDisconnectWirelesslyRequested(_that.device);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
 return onOpenCameraPrivacySettings();case _:
   return orElse();
 
@@ -414,12 +418,13 @@ return onOpenCameraPrivacySettings();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( PluggedDevice device)  onConnectRequested,required TResult Function( PluggedDevice device)  onDisconnectRequested,required TResult Function()  onOpenCameraPrivacySettings,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  onSetup,required TResult Function( PluggedDevice device)  onConnectRequested,required TResult Function( PluggedDevice device)  onDisconnectRequested,required TResult Function( PluggedDevice device)  onDisconnectWirelesslyRequested,required TResult Function()  onOpenCameraPrivacySettings,}) {final _that = this;
 switch (_that) {
 case _OnSetup():
 return onSetup();case _OnConnectRequested():
 return onConnectRequested(_that.device);case _OnDisconnectRequested():
-return onDisconnectRequested(_that.device);case _OnOpenCameraPrivacySettings():
+return onDisconnectRequested(_that.device);case _OnDisconnectWirelesslyRequested():
+return onDisconnectWirelesslyRequested(_that.device);case _OnOpenCameraPrivacySettings():
 return onOpenCameraPrivacySettings();}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -434,12 +439,13 @@ return onOpenCameraPrivacySettings();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( PluggedDevice device)?  onConnectRequested,TResult? Function( PluggedDevice device)?  onDisconnectRequested,TResult? Function()?  onOpenCameraPrivacySettings,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  onSetup,TResult? Function( PluggedDevice device)?  onConnectRequested,TResult? Function( PluggedDevice device)?  onDisconnectRequested,TResult? Function( PluggedDevice device)?  onDisconnectWirelesslyRequested,TResult? Function()?  onOpenCameraPrivacySettings,}) {final _that = this;
 switch (_that) {
 case _OnSetup() when onSetup != null:
 return onSetup();case _OnConnectRequested() when onConnectRequested != null:
 return onConnectRequested(_that.device);case _OnDisconnectRequested() when onDisconnectRequested != null:
-return onDisconnectRequested(_that.device);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
+return onDisconnectRequested(_that.device);case _OnDisconnectWirelesslyRequested() when onDisconnectWirelesslyRequested != null:
+return onDisconnectWirelesslyRequested(_that.device);case _OnOpenCameraPrivacySettings() when onOpenCameraPrivacySettings != null:
 return onOpenCameraPrivacySettings();case _:
   return null;
 
@@ -608,6 +614,74 @@ class __$OnDisconnectRequestedCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
   return _then(_OnDisconnectRequested(
+null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
+as PluggedDevice,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _OnDisconnectWirelesslyRequested implements SidebarEvent {
+  const _OnDisconnectWirelesslyRequested(this.device);
+  
+
+ final  PluggedDevice device;
+
+/// Create a copy of SidebarEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$OnDisconnectWirelesslyRequestedCopyWith<_OnDisconnectWirelesslyRequested> get copyWith => __$OnDisconnectWirelesslyRequestedCopyWithImpl<_OnDisconnectWirelesslyRequested>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _OnDisconnectWirelesslyRequested&&(identical(other.device, device) || other.device == device));
+}
+
+
+@override
+int get hashCode {
+    return Object.hash(runtimeType,device);
+}
+
+@override
+String toString() {
+    return 'SidebarEvent.onDisconnectWirelesslyRequested(device: $device)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$OnDisconnectWirelesslyRequestedCopyWith<$Res> implements $SidebarEventCopyWith<$Res> {
+  factory _$OnDisconnectWirelesslyRequestedCopyWith(_OnDisconnectWirelesslyRequested value, $Res Function(_OnDisconnectWirelesslyRequested) _then) = __$OnDisconnectWirelesslyRequestedCopyWithImpl;
+@useResult
+$Res call({
+ PluggedDevice device
+});
+
+
+
+
+}
+/// @nodoc
+class __$OnDisconnectWirelesslyRequestedCopyWithImpl<$Res>
+    implements _$OnDisconnectWirelesslyRequestedCopyWith<$Res> {
+  __$OnDisconnectWirelesslyRequestedCopyWithImpl(this._self, this._then);
+
+  final _OnDisconnectWirelesslyRequested _self;
+  final $Res Function(_OnDisconnectWirelesslyRequested) _then;
+
+/// Create a copy of SidebarEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? device = null,}) {
+  return _then(_OnDisconnectWirelesslyRequested(
 null == device ? _self.device : device // ignore: cast_nullable_to_non_nullable
 as PluggedDevice,
   ));

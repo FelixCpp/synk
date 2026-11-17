@@ -19,9 +19,10 @@ import 'package:flutter_test/flutter_test.dart';
 import '../support/fake_process_manager.dart';
 
 class FakeDeviceConnectionsFeature implements DeviceConnectionsFeature {
-  FakeDeviceConnectionsFeature(this.devices);
+  FakeDeviceConnectionsFeature(this.devices, {this.states = const {}});
 
   final List<PluggedDevice> devices;
+  final Map<DeviceId, DeviceConnectionState> states;
 
   @override
   Stream<List<PluggedDevice>> observePluggedDevices() {
@@ -35,6 +36,9 @@ class FakeDeviceConnectionsFeature implements DeviceConnectionsFeature {
   Future<void> disconnect(PluggedDevice device) async {}
 
   @override
+  Future<void> disconnectWirelessly(PluggedDevice device) async {}
+
+  @override
   Future<void> dispose() async {}
 
   @override
@@ -42,7 +46,7 @@ class FakeDeviceConnectionsFeature implements DeviceConnectionsFeature {
 
   @override
   Stream<Map<DeviceId, DeviceConnectionState>> observeConnectionStates() {
-    return Stream.value(const {});
+    return Stream.value(states);
   }
 
   @override
@@ -54,19 +58,21 @@ class FakeDeviceConnectionsFeature implements DeviceConnectionsFeature {
 AndroidDevice _buildAndroidDevice(
   String serial, {
   required AndroidDeviceState state,
+  AndroidDeviceConnection connection = AndroidDeviceConnection.usb,
 }) {
   return AndroidDevice(
     id: DeviceId(serial),
     modelName: 'Pixel $serial',
     state: state,
-    connection: AndroidDeviceConnection.usb,
+    connection: connection,
   );
 }
 
 Future<void> _pumpSidebar(
   WidgetTester tester,
-  List<AndroidDevice> devices,
-) async {
+  List<AndroidDevice> devices, {
+  Map<DeviceId, DeviceConnectionState> states = const {},
+}) async {
   await tester.pumpWidget(
     SynkUiTheme(
       data: SynkUiThemeData.forBrightness(Brightness.dark),
@@ -91,7 +97,8 @@ Future<void> _pumpSidebar(
             ),
           ),
           RepositoryProvider<DeviceConnectionsFeature>(
-            create: (context) => FakeDeviceConnectionsFeature(devices),
+            create: (context) =>
+                FakeDeviceConnectionsFeature(devices, states: states),
           ),
           RepositoryProvider<SidebarFeature>(
             create: (context) => SidebarFeatureImpl(
@@ -150,6 +157,72 @@ void main() {
         expect(find.byIcon(CupertinoIcons.bolt_slash_fill), findsNothing);
       },
     );
+
+    testWidgets('marks a wireless device and offers to drop its link', (
+      tester,
+    ) async {
+      await _pumpSidebar(tester, [
+        _buildAndroidDevice(
+          '192.168.0.79:33651',
+          state: AndroidDeviceState.device,
+          connection: AndroidDeviceConnection.tcp,
+        ),
+      ]);
+
+      expect(find.byIcon(CupertinoIcons.wifi), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.bolt_fill), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.wifi_slash), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.link), findsNothing);
+    });
+
+    testWidgets('keeps dropping the link apart from ending a mirror', (
+      tester,
+    ) async {
+      await _pumpSidebar(
+        tester,
+        [
+          _buildAndroidDevice(
+            '192.168.0.79:33651',
+            state: AndroidDeviceState.device,
+            connection: AndroidDeviceConnection.tcp,
+          ),
+        ],
+        states: {
+          DeviceId('192.168.0.79:33651'):
+              const DeviceConnectionState.connected(),
+        },
+      );
+
+      expect(find.byIcon(CupertinoIcons.wifi), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.bolt_slash_fill), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.wifi_slash), findsNothing);
+    });
+
+    testWidgets('offers to pair a rejected wireless device again', (
+      tester,
+    ) async {
+      await _pumpSidebar(tester, [
+        _buildAndroidDevice(
+          '192.168.0.79:33651',
+          state: AndroidDeviceState.unauthorized,
+          connection: AndroidDeviceConnection.tcp,
+        ),
+      ]);
+
+      expect(find.text('NICHT AUTORISIERT'), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.link), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.wifi_slash), findsOneWidget);
+      expect(find.byIcon(CupertinoIcons.bolt_fill), findsNothing);
+    });
+
+    testWidgets('marks no cable-connected device as wireless', (tester) async {
+      await _pumpSidebar(tester, [
+        _buildAndroidDevice('serial-5', state: AndroidDeviceState.device),
+      ]);
+
+      expect(find.byIcon(CupertinoIcons.wifi), findsNothing);
+      expect(find.byIcon(CupertinoIcons.wifi_slash), findsNothing);
+    });
 
     testWidgets('lists authorized and unauthorized devices together', (
       tester,

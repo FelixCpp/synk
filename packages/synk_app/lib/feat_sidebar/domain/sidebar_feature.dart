@@ -6,5 +6,6 @@ abstract interface class SidebarFeature {
   Stream<List<SidebarDevice>> observeDevices();
   Future<void> connect(PluggedDevice device);
   Future<void> disconnect(PluggedDevice device);
+  Future<void> disconnectWirelessly(PluggedDevice device);
   Future<void> openCameraPrivacySettings();
 }

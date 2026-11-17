@@ -186,6 +186,17 @@ class DeviceConnectionsFeatureImpl({
     _setState(device.id, const DeviceConnectionState.disconnected());
   }
 
+  @override
+  Future<void> disconnectWirelessly(PluggedDevice device) async {
+    final platform = _platformsByDeviceId[device.id];
+    if (platform == null) {
+      throw DeviceNotPluggedException(deviceId: device.id);
+    }
+
+    await disconnect(device);
+    await platform.disconnectWirelessly(device.id);
+  }
+
   void _ensureIdle(DeviceId id) {
     if (isConnected(id) ||
         connectionStates.value[id] is ConnectionStateConnecting) {

@@ -111,4 +111,7 @@ class const _TestDevice(
 ) implements PluggedDevice {
   @override
   bool get isAuthorized => true;
+
+  @override
+  bool get isWireless => false;
 }

@@ -192,6 +192,9 @@ class _FakeConnections implements DeviceConnectionsFeature {
   Future<void> disconnect(PluggedDevice device) async {}
 
   @override
+  Future<void> disconnectWirelessly(PluggedDevice device) async {}
+
+  @override
   bool isConnected(DeviceId id) => false;
 
   @override

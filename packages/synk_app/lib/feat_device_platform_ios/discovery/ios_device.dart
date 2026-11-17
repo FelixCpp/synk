@@ -15,6 +15,9 @@ sealed class IosDevice with _$IosDevice implements PluggedDevice {
 
   @override
   bool get isAuthorized => true;
+
+  @override
+  bool get isWireless => false;
 }
 
 extension IosDeviceDtoToDomain on IosDeviceDto {

@@ -73,6 +73,16 @@ enum _EntryAction {
     icon: CupertinoIcons.gear_alt,
     tooltip: 'Kamerazugriff in den Systemeinstellungen erlauben',
     isDestructive: false,
+  ),
+  pairAgain(
+    icon: CupertinoIcons.link,
+    tooltip: 'Erneut koppeln',
+    isDestructive: false,
+  ),
+  disconnectWirelessly(
+    icon: CupertinoIcons.wifi_slash,
+    tooltip: 'Gerät entfernen (WLAN-Verbindung kappen)',
+    isDestructive: true,
   );
 
   const _EntryAction({
@@ -98,7 +108,30 @@ typedef _EntryLook = ({
   bool isUnauthorized,
 });
 
-_EntryLook _lookOf(BuildContext context, SidebarDeviceState state) {
+_EntryLook _lookOf(BuildContext context, SidebarDevice device) {
+  final look = _stateLookOf(context, device.state);
+  final isMirroring = device.state.maybeWhen(
+    connected: () => true,
+    orElse: () => false,
+  );
+  if (!device.device.isWireless || look.isBusy || isMirroring) {
+    return look;
+  }
+
+  return (
+    status: look.status,
+    statusText: look.statusText,
+    actions: [
+      if (look.isUnauthorized) _EntryAction.pairAgain,
+      ...look.actions,
+      _EntryAction.disconnectWirelessly,
+    ],
+    isBusy: look.isBusy,
+    isUnauthorized: look.isUnauthorized,
+  );
+}
+
+_EntryLook _stateLookOf(BuildContext context, SidebarDeviceState state) {
   final colors = context.synkUi.colors;
 
   return state.map(
@@ -161,7 +194,7 @@ class const _DeviceEntry({
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final look = _lookOf(context, device.state);
+    final look = _lookOf(context, device);
     final plugged = device.device;
 
     return _EntryFrame(
@@ -172,6 +205,7 @@ class const _DeviceEntry({
         children: [
           _TitleRow(
             modelName: plugged.modelName,
+            isWireless: plugged.isWireless,
             tagColor: look.isUnauthorized ? look.status : null,
           ),
           _StatusLine(
@@ -189,26 +223,34 @@ class const _DeviceEntry({
 
 class const _TitleRow({
   required final String modelName,
+  required final bool isWireless,
   required final Color? tagColor,
 }) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final name = Text(
-      modelName,
-      style: context.synkUi.typography.label,
-      overflow: .ellipsis,
-    );
-
+    final theme = context.synkUi;
     final color = tagColor;
-    if (color == null) {
-      return name;
-    }
 
     return Row(
       spacing: SynkUiSpace.s4,
       children: [
-        Flexible(child: name),
-        SynkUiTag(label: 'Nicht autorisiert', color: color),
+        Flexible(
+          child: Text(
+            modelName,
+            style: theme.typography.label,
+            overflow: .ellipsis,
+          ),
+        ),
+        if (isWireless)
+          SynkUiTooltip(
+            message: 'Über WLAN verbunden',
+            child: Icon(
+              CupertinoIcons.wifi,
+              size: 12.0,
+              color: theme.colors.textSecondary,
+            ),
+          ),
+        if (color != null) SynkUiTag(label: 'Nicht autorisiert', color: color),
       ],
     );
   }
@@ -277,6 +319,10 @@ void _dispatch(
       bloc.add(.onDisconnectRequested(device));
     case .cameraSettings:
       bloc.add(const .onOpenCameraPrivacySettings());
+    case .pairAgain:
+      showWirelessPairingDialog(context);
+    case .disconnectWirelessly:
+      bloc.add(.onDisconnectWirelesslyRequested(device));
   }
 }
 

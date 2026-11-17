@@ -143,6 +143,28 @@ void main() {
     });
   });
 
+  group('DeviceConnectionsFeatureImpl.disconnectWirelessly', () {
+    test('ends the session before the platform drops the link', () async {
+      final session = FakeDeviceSession();
+      android.onConnect = (_) async => session;
+      final device = await plugInto(android, 'android-1');
+      await repository.connect(device);
+
+      await repository.disconnectWirelessly(device);
+
+      expect(session.isDisposed, isTrue);
+      expect(android.wirelessDisconnectCalls, [device.id]);
+      expect(ios.wirelessDisconnectCalls, isEmpty);
+    });
+
+    test('refuses a device no platform has reported', () async {
+      await expectLater(
+        repository.disconnectWirelessly(_buildDevice('gone')),
+        throwsA(isA<DeviceNotPluggedException>()),
+      );
+    });
+  });
+
   group('DeviceConnectionsFeatureImpl.observeDeviceConnections', () {
     test('offers what the session of a connection can do', () async {
       final session = FakeDeviceSession(interaction: _HomeOnlyInteraction());

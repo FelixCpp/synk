@@ -2,6 +2,7 @@ import 'package:app_logger/app_logger.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:synk/feat_sidebar/domain/usecases/connect_device_interactor.dart';
 import 'package:synk/feat_sidebar/domain/usecases/disconnect_device_interactor.dart';
+import 'package:synk/feat_sidebar/domain/usecases/disconnect_wirelessly_interactor.dart';
 import 'package:synk/feat_device_platform/domain/models/plugged_device.dart';
 import 'package:synk/feat_notifications/domain/notification_feature.dart';
 import 'package:synk/feat_notifications/application/notified_interactor.dart';
@@ -21,6 +22,7 @@ class SidebarBloc(
 ) extends Bloc<SidebarEvent, SidebarState> {
   final connectDevice = ConnectDeviceInteractor(feature);
   final disconnectDevice = DisconnectDeviceInteractor(feature);
+  final disconnectWirelessly = DisconnectWirelesslyInteractor(feature);
   final openCameraPrivacySettings = OpenCameraPrivacySettingsInteractor(
     feature,
   );
@@ -48,6 +50,14 @@ class SidebarBloc(
         event.device,
         to: notifications,
         whenItFails: 'Das Gerät ließ sich nicht trennen.',
+      );
+    }, transformer: droppable());
+
+    on<_OnDisconnectWirelesslyRequested>((event, emit) {
+      return disconnectWirelessly.logger().runReporting(
+        event.device,
+        to: notifications,
+        whenItFails: 'Die WLAN-Verbindung ließ sich nicht trennen.',
       );
     }, transformer: droppable());
 
